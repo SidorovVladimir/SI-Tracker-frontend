@@ -1,0 +1,5 @@
+query GetSities {
+  cities {
+    name
+  }
+}

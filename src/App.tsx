@@ -1,21 +1,14 @@
-import { gql } from "@apollo/client"
 import { useQuery } from "@apollo/client/react";
-
-const GET_СITY = gql`
-  query GetSities {
-    cities {
-      name
-    }
-  }
-`;
+import { GetSitiesDocument } from "./graphql/types/__generated__/graphql.ts";
 
 function App() {
 
-  const { loading, error, data } = useQuery(GET_СITY);
+  const { loading, error, data } = useQuery(GetSitiesDocument);
+  
 
   
   if (!loading) {
-    console.log(data.cities)
+    console.log(data?.cities)
   }
   return (
     <h1>Hello</h1>

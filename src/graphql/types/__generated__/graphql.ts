@@ -1,0 +1,149 @@
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+/** All built-in and custom scalars, mapped to their actual values */
+export type Scalars = {
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
+};
+
+export type City = {
+  __typename: 'City';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type Company = {
+  __typename: 'Company';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type CreateCityInput = {
+  name: Scalars['String']['input'];
+};
+
+export type CreateCompanyInput = {
+  name: Scalars['String']['input'];
+};
+
+export type CreateProductionSiteInput = {
+  cityId: Scalars['ID']['input'];
+  companyId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+};
+
+export type CreateUserInput = {
+  email: Scalars['String']['input'];
+  firstName: Scalars['String']['input'];
+  lastName: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+};
+
+export type Mutation = {
+  __typename: 'Mutation';
+  createCity: City;
+  createCompany: Company;
+  createProductionSite: ProductionSite;
+  createUser: User;
+  updateUser: User;
+};
+
+
+export type MutationCreateCityArgs = {
+  input: CreateCityInput;
+};
+
+
+export type MutationCreateCompanyArgs = {
+  input: CreateCompanyInput;
+};
+
+
+export type MutationCreateProductionSiteArgs = {
+  input: CreateProductionSiteInput;
+};
+
+
+export type MutationCreateUserArgs = {
+  input: CreateUserInput;
+};
+
+
+export type MutationUpdateUserArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateUserInput;
+};
+
+export type ProductionSite = {
+  __typename: 'ProductionSite';
+  cityId: Scalars['ID']['output'];
+  companyId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type Query = {
+  __typename: 'Query';
+  cities: Array<City>;
+  city: City;
+  companies: Array<Company>;
+  company: Company;
+  productionSite: ProductionSite;
+  productionSites: Array<ProductionSite>;
+  user: User;
+  users: Array<User>;
+};
+
+
+export type QueryCityArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryCompanyArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryProductionSiteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryUserArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type UpdateUserInput = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  password?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type User = {
+  __typename: 'User';
+  createdAt: Maybe<Scalars['String']['output']>;
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  lastName: Scalars['String']['output'];
+  updatedAt: Maybe<Scalars['String']['output']>;
+};
+
+export type GetSitiesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSitiesQuery = { cities: Array<{ __typename: 'City', name: string }> };
+
+
+export const GetSitiesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSities"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cities"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<GetSitiesQuery, GetSitiesQueryVariables>;
