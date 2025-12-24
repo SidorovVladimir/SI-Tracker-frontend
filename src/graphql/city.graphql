@@ -3,3 +3,10 @@ query GetSities {
     name
   }
 }
+
+mutation CreateCity($input: CreateCityInput!) {
+  createCity(input: $input) {
+    id
+    name
+  }
+}
