@@ -1,20 +1,15 @@
-import { useQuery } from "@apollo/client/react";
-import { GetSitiesDocument } from "./graphql/types/__generated__/graphql.ts";
+import { Route, Routes } from "react-router";
+import Home from "./pages/Home";
+import Login from "./components/Login";
+import routes from "./utils/routes";
 
 function App() {
-
-  const { loading, error, data } = useQuery(GetSitiesDocument);
-  
-
-  
-  if (!loading) {
-    console.log(data?.cities)
-  }
   return (
-    <h1>Hello</h1>
-  )
-
-
+    <Routes>
+      <Route path={routes.home()} element={<Home />}></Route>
+      <Route path={routes.login()} element={<Login />}></Route>
+    </Routes>
+  );
 }
 
-export default App
+export default App;
