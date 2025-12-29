@@ -1,0 +1,20 @@
+query getMe {
+  me {
+    id
+    firstName
+    lastName
+    email
+  }
+}
+
+mutation Login($input: LoginUserInput!) {
+  login(input: $input) {
+    success
+    user {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}

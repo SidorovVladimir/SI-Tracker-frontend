@@ -15,10 +15,18 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type AuthPayload = {
+  __typename: 'AuthPayload';
+  success: Scalars['Boolean']['output'];
+  user: Maybe<User>;
+};
+
 export type City = {
   __typename: 'City';
+  createdAt: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+  updatedAt: Maybe<Scalars['String']['output']>;
 };
 
 export type Company = {
@@ -48,12 +56,18 @@ export type CreateUserInput = {
   password: Scalars['String']['input'];
 };
 
+export type LoginUserInput = {
+  email: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+};
+
 export type Mutation = {
   __typename: 'Mutation';
   createCity: City;
   createCompany: Company;
   createProductionSite: ProductionSite;
-  createUser: User;
+  login: AuthPayload;
+  register: AuthPayload;
   updateUser: User;
 };
 
@@ -73,7 +87,12 @@ export type MutationCreateProductionSiteArgs = {
 };
 
 
-export type MutationCreateUserArgs = {
+export type MutationLoginArgs = {
+  input: LoginUserInput;
+};
+
+
+export type MutationRegisterArgs = {
   input: CreateUserInput;
 };
 
@@ -97,6 +116,7 @@ export type Query = {
   city: City;
   companies: Array<Company>;
   company: Company;
+  me: Maybe<User>;
   productionSite: ProductionSite;
   productionSites: Array<ProductionSite>;
   user: User;
@@ -140,6 +160,18 @@ export type User = {
   updatedAt: Maybe<Scalars['String']['output']>;
 };
 
+export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetMeQuery = { me: { __typename: 'User', id: string, firstName: string, lastName: string, email: string } | null };
+
+export type LoginMutationVariables = Exact<{
+  input: LoginUserInput;
+}>;
+
+
+export type LoginMutation = { login: { __typename: 'AuthPayload', success: boolean, user: { __typename: 'User', id: string, firstName: string, lastName: string, email: string } | null } };
+
 export type GetSitiesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -153,5 +185,7 @@ export type CreateCityMutationVariables = Exact<{
 export type CreateCityMutation = { createCity: { __typename: 'City', id: string, name: string } };
 
 
+export const GetMeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getMe"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]} as unknown as DocumentNode<GetMeQuery, GetMeQueryVariables>;
+export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"LoginUserInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]}}]} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
 export const GetSitiesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSities"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cities"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<GetSitiesQuery, GetSitiesQueryVariables>;
 export const CreateCityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateCity"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateCityInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createCity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<CreateCityMutation, CreateCityMutationVariables>;
