@@ -18,3 +18,19 @@ mutation Login($input: LoginUserInput!) {
     }
   }
 }
+
+mutation Register($input: CreateUserInput!) {
+  register(input: $input) {
+    success
+    user {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}
+
+mutation Logout {
+  logout
+}
