@@ -7,14 +7,14 @@ import {
   Menu,
   MenuItem,
   Button,
-} from "@mui/material";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { Link, useNavigate } from "react-router";
-import { useApolloClient, useMutation } from "@apollo/client/react";
-import { LogoutDocument } from "../graphql/types/__generated__/graphql";
-import routes from "../utils/routes";
+} from '@mui/material';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { Link, useNavigate } from 'react-router';
+import { useApolloClient, useMutation } from '@apollo/client/react';
+import { LogoutDocument } from '../graphql/types/__generated__/graphql';
+import routes from '../utils/routes';
 
 export default function NavBar() {
   const { isAuthenticated } = useAuth();
@@ -37,7 +37,7 @@ export default function NavBar() {
       await client.resetStore();
       navigate(routes.login());
     } catch (error) {
-      console.warn("Logout faied", error);
+      console.warn('Logout faied', error);
       await client.resetStore();
       navigate(routes.login());
     }
@@ -66,13 +66,13 @@ export default function NavBar() {
                 id="menu-appbar"
                 anchorEl={anchorEl}
                 anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "right",
+                  vertical: 'bottom',
+                  horizontal: 'right',
                 }}
                 keepMounted
                 transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
+                  vertical: 'top',
+                  horizontal: 'right',
                 }}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
@@ -86,7 +86,7 @@ export default function NavBar() {
                 </MenuItem>
                 <MenuItem
                   component={Link}
-                  to={routes.admin()}
+                  to={routes.admin.root()}
                   onClick={handleClose}
                 >
                   Admin panel

@@ -3,5 +3,8 @@ export default {
   register: () => '/register',
   home: () => '/',
   profile: () => '/profile',
-  admin: () => '/admin',
+  admin: {
+    root: () => '/admin',
+    users: () => '/admin/users',
+  },
 };
