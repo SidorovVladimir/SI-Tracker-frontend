@@ -3,4 +3,5 @@ export default {
   register: () => '/register',
   home: () => '/',
   profile: () => '/profile',
+  admin: () => '/admin',
 };

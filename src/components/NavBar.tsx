@@ -84,7 +84,13 @@ export default function NavBar() {
                 >
                   Profile
                 </MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem
+                  component={Link}
+                  to={routes.admin()}
+                  onClick={handleClose}
+                >
+                  Admin panel
+                </MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </div>

@@ -7,6 +7,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import NavBar from "./components/NavBar";
 import { Container } from "@mui/material";
+import AdminPage from "./pages/AdminPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path={routes.home()} element={<HomePage />}></Route>
             <Route path={routes.profile()} element={<ProfilePage />}></Route>
+            <Route path={routes.admin()} element={<AdminPage />}></Route>
           </Route>
           <Route path={routes.login()} element={<LoginPage />}></Route>
           <Route path={routes.register()} element={<RegisterPage />}></Route>
