@@ -14,6 +14,7 @@ import { useAuth } from "../hooks/useAuth";
 import { Link, useNavigate } from "react-router";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import { LogoutDocument } from "../graphql/types/__generated__/graphql";
+import routes from "../utils/routes";
 
 export default function NavBar() {
   const { isAuthenticated } = useAuth();
@@ -33,12 +34,12 @@ export default function NavBar() {
   const handleLogout = async () => {
     try {
       await logout();
-      await client.clearStore();
-      navigate("/login");
+      await client.resetStore();
+      navigate(routes.login());
     } catch (error) {
       console.warn("Logout faied", error);
-      await client.clearStore();
-      navigate("/login");
+      await client.resetStore();
+      navigate(routes.login());
     }
   };
 
@@ -76,14 +77,20 @@ export default function NavBar() {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem
+                  component={Link}
+                  to={routes.profile()}
+                  onClick={handleClose}
+                >
+                  Profile
+                </MenuItem>
                 <MenuItem onClick={handleClose}>My account</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </div>
           ) : (
             <div>
-              <Button component={Link} to="/login" color="inherit">
+              <Button component={Link} to={routes.login()} color="inherit">
                 Login
               </Button>
             </div>

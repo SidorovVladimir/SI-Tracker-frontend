@@ -8,55 +8,40 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { RegisterDocument } from "../graphql/types/__generated__/graphql";
+import { LoginDocument } from "../graphql/types/__generated__/graphql";
 import { Link, useNavigate } from "react-router";
+import routes from "../utils/routes";
 
-export default function Register() {
+export default function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
     password: "",
   });
 
-  const [register] = useMutation(RegisterDocument, {
+  const [login] = useMutation(LoginDocument, {
     onCompleted: () => {
-      navigate("/");
+      navigate(routes.home());
     },
   });
 
   const handleSubmit = async () => {
-    const { firstName, lastName, email, password } = form;
-    if (!firstName || !lastName || !email || !password) {
+    const { email, password } = form;
+    if (!email || !password) {
       return;
     }
 
-    await register({ variables: { input: form } });
+    await login({ variables: { input: form } });
   };
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h5" component="h2" mb={3}>
-        Register
+        Login
       </Typography>
 
       <Paper sx={{ p: 3 }} variant="outlined">
         <Stack spacing={3} maxWidth={500}>
-          <TextField
-            label="First Name"
-            value={form.firstName}
-            size="small"
-            onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-            variant="outlined"
-          />
-          <TextField
-            label="Last Name"
-            value={form.lastName}
-            size="small"
-            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-            variant="outlined"
-          />
           <TextField
             label="Email"
             value={form.email}
@@ -75,17 +60,15 @@ export default function Register() {
           />
         </Stack>
         <h3>
-          Есть аккаунт? <Link to="/login">Войти</Link>
+          Нет аккаунта? <Link to={routes.register()}>Зарегистрироваться</Link>
         </h3>
         <Box sx={{ mt: 4 }}>
           <Button
             variant="contained"
             onClick={handleSubmit}
-            disabled={
-              !form.firstName || !form.lastName || !form.email || !form.password
-            }
+            disabled={!form.email || !form.password}
           >
-            Register
+            Login
           </Button>
         </Box>
       </Paper>
