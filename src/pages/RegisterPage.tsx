@@ -1,4 +1,4 @@
-import { useMutation } from "@apollo/client/react";
+import { useMutation } from '@apollo/client/react';
 import {
   Box,
   Button,
@@ -6,19 +6,19 @@ import {
   Stack,
   TextField,
   Typography,
-} from "@mui/material";
-import { useState } from "react";
-import { RegisterDocument } from "../graphql/types/__generated__/graphql";
-import { Link, useNavigate } from "react-router";
-import routes from "../utils/routes";
+} from '@mui/material';
+import { useState } from 'react';
+import { RegisterDocument } from '../graphql/types/__generated__/graphql';
+import { Link, useNavigate } from 'react-router';
+import routes from '../utils/routes';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
   });
 
   const [register] = useMutation(RegisterDocument, {
@@ -37,13 +37,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h5" component="h2" mb={3}>
-        Register
+    <>
+      <Typography variant="h5" component="h1" gutterBottom>
+        Регистрация
       </Typography>
 
-      <Paper sx={{ p: 3 }} variant="outlined">
-        <Stack spacing={3} maxWidth={500}>
+      <Paper sx={{ p: 3, width: '100%' }} variant="outlined">
+        <Stack spacing={3}>
           <TextField
             label="First Name"
             value={form.firstName}
@@ -75,10 +75,10 @@ export default function RegisterPage() {
             variant="outlined"
           />
         </Stack>
-        <h3>
+        <Typography sx={{ mt: 2 }}>
           Есть аккаунт? <Link to={routes.login()}>Войти</Link>
-        </h3>
-        <Box sx={{ mt: 4 }}>
+        </Typography>
+        <Box sx={{ mt: 3 }}>
           <Button
             variant="contained"
             onClick={handleSubmit}
@@ -86,10 +86,10 @@ export default function RegisterPage() {
               !form.firstName || !form.lastName || !form.email || !form.password
             }
           >
-            Register
+            Зарегистироваться
           </Button>
         </Box>
       </Paper>
-    </Box>
+    </>
   );
 }
