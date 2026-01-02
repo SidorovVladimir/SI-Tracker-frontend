@@ -115,7 +115,7 @@ export default function NavBar() {
               variant="contained"
               size="small"
             >
-              Login
+              Вход
             </Button>
           )}
         </Toolbar>

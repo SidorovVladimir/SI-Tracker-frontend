@@ -8,18 +8,16 @@ export function AuthLayout() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center', // Центр по вертикали
-        alignItems: 'center', // Центр по горизонтали
-        // Используем 100dvh (динамический vh), вычитая примерную высоту навбара
-        minHeight: 'calc(100dvh - 64px)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: 'calc(100dvh - 130px)',
         width: '100%',
         bgcolor: 'background.default',
       }}
     >
       <Container
-        maxWidth="xs" // Для форм логина идеально 444px
+        maxWidth="xs"
         sx={{
-          py: 4,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
