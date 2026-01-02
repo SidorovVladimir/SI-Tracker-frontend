@@ -7,8 +7,9 @@ import {
   MenuItem,
   Button,
   Box,
+  Container,
+  Avatar,
 } from '@mui/material';
-import AccountCircle from '@mui/icons-material/AccountCircle';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Link, useNavigate } from 'react-router';
@@ -43,38 +44,50 @@ export default function NavBar() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        height: '64px',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        bgcolor: 'background.paper',
+        color: 'text.primary',
+        zIndex: (theme) => theme.zIndex.drawer + 1, // Чтобы был поверх сайдбара
+      }}
+    >
+      <Container maxWidth="lg">
+        <Toolbar disableGutters>
+          <Typography
+            variant="h6"
+            component={Link}
+            to={routes.home()}
+            sx={{
+              flexGrow: 1,
+              textDecoration: 'none',
+              color: 'inherit',
+              fontWeight: 700,
+            }}
+          >
             SI-Tracker
           </Typography>
+
           {isAuthenticated ? (
-            <div>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
                 onClick={handleMenu}
-                color="inherit"
+                sx={{ p: 0.5, border: '1px solid', borderColor: 'divider' }}
               >
-                <AccountCircle />
+                <Avatar sx={{ width: 32, height: 32 }} />
               </IconButton>
+
               <Menu
-                id="menu-appbar"
                 anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
+                slotProps={{ paper: { sx: { width: 200, mt: 1.5 } } }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
               >
                 <MenuItem
                   component={Link}
@@ -88,23 +101,25 @@ export default function NavBar() {
                   to={routes.admin.root()}
                   onClick={handleClose}
                 >
-                  Admin panel
+                  Admin Panel
                 </MenuItem>
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                  Logout
+                </MenuItem>
               </Menu>
-            </div>
+            </Box>
           ) : (
             <Button
               component={Link}
               to={routes.login()}
-              color="inherit"
-              aria-label="Login"
+              variant="contained"
+              size="small"
             >
               Login
             </Button>
           )}
         </Toolbar>
-      </AppBar>
-    </Box>
+      </Container>
+    </AppBar>
   );
 }

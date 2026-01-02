@@ -1,18 +1,32 @@
 import { Box, Container } from '@mui/material';
-import { ReactNode } from 'react';
+import { Outlet } from 'react-router';
 
-export function AuthLayout({ children }: { children: ReactNode }) {
+export function AuthLayout() {
   return (
     <Box
+      component="main"
       sx={{
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        p: 10,
+        flexDirection: 'column',
+        justifyContent: 'center', // Центр по вертикали
+        alignItems: 'center', // Центр по горизонтали
+        // Используем 100dvh (динамический vh), вычитая примерную высоту навбара
+        minHeight: 'calc(100dvh - 64px)',
+        width: '100%',
+        bgcolor: 'background.default',
       }}
     >
-      <Container maxWidth="sm">{children}</Container>
+      <Container
+        maxWidth="xs" // Для форм логина идеально 444px
+        sx={{
+          py: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Outlet />
+      </Container>
     </Box>
   );
 }

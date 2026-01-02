@@ -10,50 +10,29 @@ import AdminPage from './pages/AdminPage';
 import UsersPage from './pages/admin/UsersPage';
 import { AuthLayout } from './layouts/AuthLayout';
 import { MainLayout } from './layouts/MainLayout';
+import { CssBaseline } from '@mui/material';
 
 function App() {
   return (
     <>
+      <CssBaseline />
       <NavBar />
-
       <Routes>
         <Route element={<ProtectedRoute />}>
-          <Route
-            path={routes.home()}
-            element={
-              <MainLayout>
-                <HomePage />
-              </MainLayout>
-            }
-          ></Route>
-          <Route
-            path={routes.profile()}
-            element={
-              <MainLayout>
-                <ProfilePage />
-              </MainLayout>
-            }
-          ></Route>
-          <Route path={routes.admin.root()} element={<AdminPage />}>
-            <Route path={routes.admin.users()} element={<UsersPage />}></Route>
+          <Route element={<MainLayout />}>
+            <Route path={routes.home()} element={<HomePage />} />
+            <Route path={routes.profile()} element={<ProfilePage />} />
+
+            <Route path={routes.admin.root()} element={<AdminPage />}>
+              <Route path={routes.admin.users()} element={<UsersPage />} />
+            </Route>
           </Route>
         </Route>
-        <Route
-          path={routes.login()}
-          element={
-            <AuthLayout>
-              <LoginPage />
-            </AuthLayout>
-          }
-        ></Route>
-        <Route
-          path={routes.register()}
-          element={
-            <AuthLayout>
-              <RegisterPage />
-            </AuthLayout>
-          }
-        ></Route>
+
+        <Route element={<AuthLayout />}>
+          <Route path={routes.login()} element={<LoginPage />} />
+          <Route path={routes.register()} element={<RegisterPage />} />
+        </Route>
       </Routes>
     </>
   );

@@ -3,46 +3,77 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { Divider, Typography } from '@mui/material';
-import { Link, Outlet } from 'react-router';
+import { Divider, Paper, Typography } from '@mui/material';
+import { Link, Outlet, useLocation } from 'react-router';
 import routes from '../utils/routes';
 
-const sidebarWidth = 200;
+const SIDEBAR_WIDTH = 240;
 
 export default function AdminPage() {
+  const { pathname } = useLocation();
+
   return (
-    <Box sx={{ display: 'flex', width: '100%' }}>
-      <Box
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: 2,
+        alignItems: 'flex-start',
+      }}
+    >
+      <Paper
+        component="aside"
+        elevation={0}
         sx={{
-          width: sidebarWidth,
+          width: { xs: '100%', md: SIDEBAR_WIDTH },
           flexShrink: 0,
-          backgroundColor: 'background.paper',
-          borderRight: 1,
+          border: '1px solid',
           borderColor: 'divider',
-          height: 'calc(100vh - 80px)',
+          borderRadius: 2,
+          height: { md: 'calc(100dvh - 130px)' },
+          position: { md: 'sticky' },
+          top: { md: '96px' },
           overflowY: 'auto',
-          position: 'sticky',
-          // top: 64,
+          bgcolor: 'background.paper',
         }}
       >
         <Typography
-          variant="h6"
-          component="h2"
-          textAlign="center"
-          sx={{ py: 2 }}
+          variant="subtitle2"
+          sx={{
+            p: 2,
+            fontWeight: 'bold',
+            color: 'text.secondary',
+            display: { xs: 'none', md: 'block' },
+          }}
         >
-          Панель администратора
+          АДМИН-ПАНЕЛЬ
         </Typography>
-        <Divider />
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to={routes.admin.users()}>
+        <Divider sx={{ display: { xs: 'none', md: 'block' } }} />
+
+        <List
+          sx={{
+            display: { xs: 'flex', md: 'block' },
+            p: { xs: 1, md: 0 },
+            overflowX: { xs: 'auto', md: 'hidden' },
+          }}
+        >
+          <ListItem disablePadding sx={{ width: { xs: 'auto', md: '100%' } }}>
+            <ListItemButton
+              component={Link}
+              to={routes.admin.users()}
+              selected={pathname.includes(routes.admin.users())}
+              sx={{ borderRadius: { xs: 1, md: 0 }, whiteSpace: 'nowrap' }}
+            >
               <ListItemText primary="Пользователи" />
             </ListItemButton>
           </ListItem>
         </List>
-      </Box>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      </Paper>
+
+      <Box
+        component="section"
+        sx={{ flexGrow: 1, minWidth: 0, minHeight: '100%' }}
+      >
         <Outlet />
       </Box>
     </Box>

@@ -1,10 +1,21 @@
-import { Container } from '@mui/material';
-import { ReactNode } from 'react';
+import { Box, Container } from '@mui/material';
+import { Outlet } from 'react-router';
 
-export function MainLayout({ children }: { children: ReactNode }) {
+export function MainLayout() {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {children}
-    </Container>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Box
+        component="main"
+        sx={{
+          minHeight: 'calc(100dvh - 64px)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, flexGrow: 1 }}>
+          <Outlet />
+        </Container>
+      </Box>
+    </Box>
   );
 }
