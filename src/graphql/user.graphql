@@ -8,3 +8,12 @@ query GetUsers {
     updatedAt
   }
 }
+
+query GetUser($id: ID!) {
+  user(id: $id) {
+    id
+    firstName
+    lastName
+    email
+  }
+}

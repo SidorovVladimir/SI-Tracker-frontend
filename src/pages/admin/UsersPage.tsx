@@ -20,6 +20,8 @@ import {
   useTheme,
 } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
+import routes from '../../utils/routes';
+import { Link } from 'react-router';
 
 export default function UsersPage() {
   const { data, loading } = useQuery(GetUsersDocument);
@@ -30,7 +32,6 @@ export default function UsersPage() {
     return (
       <Typography sx={{ p: 4, textAlign: 'center' }}>Загрузка...</Typography>
     );
-
   const users = data?.users || [];
 
   return (
@@ -43,7 +44,7 @@ export default function UsersPage() {
         // Мобильная версия: Список карточек
         <Stack spacing={2}>
           {users.map((user) => (
-            <Card key={user.id} variant="outlined">
+            <Card key={user.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
                   {user.firstName} {user.lastName}
@@ -74,10 +75,21 @@ export default function UsersPage() {
         </Stack>
       ) : (
         // Десктопная версия: Таблица
-        <TableContainer component={Paper} variant="outlined">
-          <Table>
-            <TableHead sx={{ bgcolor: 'action.hover' }}>
-              <TableRow>
+        <TableContainer
+          component={Paper}
+          variant="outlined"
+          sx={{ borderRadius: 2, boxShadow: 1 }}
+        >
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow
+                sx={{
+                  '& > th': {
+                    fontWeight: 'bold',
+                    bgcolor: 'background.default',
+                  },
+                }}
+              >
                 <TableCell>Имя</TableCell>
                 <TableCell>Фамилия</TableCell>
                 <TableCell>Почта</TableCell>
@@ -86,7 +98,7 @@ export default function UsersPage() {
             </TableHead>
             <TableBody>
               {users.map((user) => (
-                <TableRow key={user.id} hover>
+                <TableRow key={user.id} hover sx={{ '& > td': { py: 1.5 } }}>
                   <TableCell>{user.firstName}</TableCell>
                   <TableCell>{user.lastName}</TableCell>
                   <TableCell>{user.email}</TableCell>
@@ -96,12 +108,17 @@ export default function UsersPage() {
                       spacing={1}
                       justifyContent="flex-end"
                     >
-                      <Tooltip title="Редактировать">
-                        <IconButton size="small" color="primary">
+                      <Tooltip title="Редактировать" arrow>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          component={Link}
+                          to={routes.admin.editUser(user.id)}
+                        >
                           <Edit fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Удалить">
+                      <Tooltip title="Удалить" arrow>
                         <IconButton size="small" color="error">
                           <Delete fontSize="small" />
                         </IconButton>

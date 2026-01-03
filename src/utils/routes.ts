@@ -6,5 +6,6 @@ export default {
   admin: {
     root: () => '/admin',
     users: () => '/admin/users',
+    editUser: (userID: string | ':userId') => `/admin/users/${userID}/edit`,
   },
 };

@@ -11,6 +11,8 @@ import UsersPage from './pages/admin/UsersPage';
 import { AuthLayout } from './layouts/AuthLayout';
 import { MainLayout } from './layouts/MainLayout';
 import { CssBaseline } from '@mui/material';
+import EditUserPage from './pages/admin/EditUserPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   return (
@@ -25,6 +27,10 @@ function App() {
 
             <Route path={routes.admin.root()} element={<AdminPage />}>
               <Route path={routes.admin.users()} element={<UsersPage />} />
+              <Route
+                path={routes.admin.editUser(':userId')}
+                element={<EditUserPage />}
+              />
             </Route>
           </Route>
         </Route>
@@ -33,6 +39,7 @@ function App() {
           <Route path={routes.login()} element={<LoginPage />} />
           <Route path={routes.register()} element={<RegisterPage />} />
         </Route>
+        <Route path={'*'} element={<NotFoundPage />} />
       </Routes>
     </>
   );

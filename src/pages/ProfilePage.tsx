@@ -120,6 +120,7 @@ export default function ProfilePage() {
                   variant="contained"
                   startIcon={<EditIcon />}
                   sx={{ borderRadius: 2, px: 4 }}
+                  disabled
                 >
                   Редактировать
                 </Button>
