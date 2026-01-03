@@ -21,3 +21,11 @@ query GetUser($id: ID!) {
 mutation DeleteUser($id: ID!) {
   deleteUser(id: $id)
 }
+
+mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
+  updateUser(id: $id, input: $input) {
+    id
+    firstName
+    lastName
+  }
+}
