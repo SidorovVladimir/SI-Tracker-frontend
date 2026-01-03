@@ -1,9 +1,19 @@
-import { useQuery } from '@apollo/client/react';
-import { GetUsersDocument } from '../../graphql/types/__generated__/graphql';
+import { useApolloClient, useMutation, useQuery } from '@apollo/client/react';
+import {
+  DeleteUserDocument,
+  GetUsersDocument,
+  LogoutDocument,
+} from '../../graphql/types/__generated__/graphql';
 import {
   Box,
+  Button,
   Card,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   IconButton,
   Paper,
@@ -19,20 +29,56 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+
 import { Delete, Edit } from '@mui/icons-material';
 import routes from '../../utils/routes';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { formatDate } from '../../utils/date';
+import { useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function UsersPage() {
-  const { data, loading } = useQuery(GetUsersDocument);
+  const { user } = useAuth();
+  const client = useApolloClient();
+  const navigate = useNavigate();
+  const { data, loading, refetch } = useQuery(GetUsersDocument);
+  const [deleteUser] = useMutation(DeleteUserDocument, {
+    onCompleted: () => {
+      refetch();
+    },
+  });
+  const [logout] = useMutation(LogoutDocument);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
 
   if (loading)
     return (
       <Typography sx={{ p: 4, textAlign: 'center' }}>Загрузка...</Typography>
     );
   const users = data?.users || [];
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedUserId(id);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedUserId('');
+  };
+
+  const handleConfirmDelete = async () => {
+    handleCloseDialog();
+    if (user?.id === selectedUserId) {
+      await logout();
+      await client.resetStore();
+      navigate(routes.login());
+      return;
+    }
+    await deleteUser({ variables: { id: selectedUserId } });
+  };
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -43,14 +89,14 @@ export default function UsersPage() {
       {isMobile ? (
         // Мобильная версия: Список карточек
         <Stack spacing={2}>
-          {users.map((user) => (
-            <Card key={user.id} variant="outlined" sx={{ borderRadius: 2 }}>
+          {users.map((u) => (
+            <Card key={u.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {user.firstName} {user.lastName}
+                  {u.firstName} {u.lastName}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {user.email}
+                  {u.email}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -58,6 +104,8 @@ export default function UsersPage() {
                     size="small"
                     color="primary"
                     sx={{ border: '1px solid', borderColor: 'primary.light' }}
+                    component={Link}
+                    to={routes.admin.editUser(u.id)}
                   >
                     <Edit fontSize="small" />
                   </IconButton>
@@ -65,6 +113,8 @@ export default function UsersPage() {
                     size="small"
                     color="error"
                     sx={{ border: '1px solid', borderColor: 'error.light' }}
+                    onClick={() => handleDeleteClick(u.id)}
+                    disabled={user?.id === u.id}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -93,15 +143,19 @@ export default function UsersPage() {
                 <TableCell>Имя</TableCell>
                 <TableCell>Фамилия</TableCell>
                 <TableCell>Почта</TableCell>
+                <TableCell>Дата регистрации</TableCell>
+                <TableCell>Дата обновления</TableCell>
                 <TableCell align="right">Действия</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{user.firstName}</TableCell>
-                  <TableCell>{user.lastName}</TableCell>
-                  <TableCell>{user.email}</TableCell>
+              {users.map((u) => (
+                <TableRow key={u.id} hover sx={{ '& > td': { py: 1.5 } }}>
+                  <TableCell>{u.firstName}</TableCell>
+                  <TableCell>{u.lastName}</TableCell>
+                  <TableCell>{u.email}</TableCell>
+                  <TableCell>{formatDate(u.createdAt)}</TableCell>
+                  <TableCell>{formatDate(u.updatedAt)}</TableCell>
                   <TableCell align="right">
                     <Stack
                       direction="row"
@@ -113,13 +167,18 @@ export default function UsersPage() {
                           size="small"
                           color="primary"
                           component={Link}
-                          to={routes.admin.editUser(user.id)}
+                          to={routes.admin.editUser(u.id)}
                         >
                           <Edit fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
-                        <IconButton size="small" color="error">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDeleteClick(u.id)}
+                          disabled={user?.id === u.id}
+                        >
                           <Delete fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -131,6 +190,28 @@ export default function UsersPage() {
           </Table>
         </TableContainer>
       )}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Подтвердите удаление</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Вы действительно хотите удалить этого пользователя? Это действие
+            нельзя отменить.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Отмена
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Удалить
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

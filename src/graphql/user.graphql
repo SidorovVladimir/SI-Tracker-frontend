@@ -17,3 +17,7 @@ query GetUser($id: ID!) {
     email
   }
 }
+
+mutation DeleteUser($id: ID!) {
+  deleteUser(id: $id)
+}

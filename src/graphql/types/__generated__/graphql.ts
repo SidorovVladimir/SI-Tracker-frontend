@@ -66,6 +66,7 @@ export type Mutation = {
   createCity: City;
   createCompany: Company;
   createProductionSite: ProductionSite;
+  deleteUser: Scalars['Boolean']['output'];
   login: AuthPayload;
   logout: Scalars['Boolean']['output'];
   register: AuthPayload;
@@ -85,6 +86,11 @@ export type MutationCreateCompanyArgs = {
 
 export type MutationCreateProductionSiteArgs = {
   input: CreateProductionSiteInput;
+};
+
+
+export type MutationDeleteUserArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -153,12 +159,12 @@ export type UpdateUserInput = {
 
 export type User = {
   __typename: 'User';
-  createdAt: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
-  updatedAt: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['String']['output'];
 };
 
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
@@ -200,7 +206,7 @@ export type CreateCityMutation = { createCity: { __typename: 'City', id: string,
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetUsersQuery = { users: Array<{ __typename: 'User', id: string, firstName: string, lastName: string, email: string, createdAt: string | null, updatedAt: string | null }> };
+export type GetUsersQuery = { users: Array<{ __typename: 'User', id: string, firstName: string, lastName: string, email: string, createdAt: string, updatedAt: string }> };
 
 export type GetUserQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -208,6 +214,13 @@ export type GetUserQueryVariables = Exact<{
 
 
 export type GetUserQuery = { user: { __typename: 'User', id: string, firstName: string, lastName: string, email: string } };
+
+export type DeleteUserMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteUserMutation = { deleteUser: boolean };
 
 
 export const GetMeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getMe"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]} as unknown as DocumentNode<GetMeQuery, GetMeQueryVariables>;
@@ -218,3 +231,4 @@ export const GetSitiesDocument = {"kind":"Document","definitions":[{"kind":"Oper
 export const CreateCityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateCity"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateCityInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createCity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<CreateCityMutation, CreateCityMutationVariables>;
 export const GetUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUsers"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"users"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<GetUsersQuery, GetUsersQueryVariables>;
 export const GetUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]} as unknown as DocumentNode<GetUserQuery, GetUserQueryVariables>;
+export const DeleteUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteUserMutation, DeleteUserMutationVariables>;

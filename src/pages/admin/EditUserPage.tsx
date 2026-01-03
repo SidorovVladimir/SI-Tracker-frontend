@@ -77,6 +77,7 @@ export default function EditUserPage() {
               disabled
               fullWidth
               variant="outlined"
+              size="small"
             />
 
             <TextField
@@ -86,6 +87,7 @@ export default function EditUserPage() {
               onChange={handleChange}
               fullWidth
               variant="outlined"
+              size="small"
             />
 
             <TextField
@@ -95,6 +97,7 @@ export default function EditUserPage() {
               onChange={handleChange}
               fullWidth
               variant="outlined"
+              size="small"
             />
 
             <Divider sx={{ my: 2 }} />
