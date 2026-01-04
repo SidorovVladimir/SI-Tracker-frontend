@@ -82,7 +82,12 @@ export default function AdminPage() {
 
       <Box
         component="section"
-        sx={{ flexGrow: 1, minWidth: 0, minHeight: '100%' }}
+        sx={{
+          flexGrow: 1,
+          minWidth: 0,
+          minHeight: '100%',
+          width: { xs: '100%' },
+        }}
       >
         <Outlet />
       </Box>

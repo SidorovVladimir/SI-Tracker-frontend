@@ -30,7 +30,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { formatDate } from '../../utils/date';
-import { Delete, Edit } from '@mui/icons-material';
+import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
@@ -80,9 +80,33 @@ export default function CitiesPage() {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
-        Управление городами
-      </Typography>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 3 }}
+      >
+        <Typography variant="h5" fontWeight="bold">
+          Управление городами
+        </Typography>
+        <Button
+          aria-label="Добавить город"
+          variant="contained"
+          startIcon={isMobile ? undefined : <Add />}
+          sx={{
+            borderRadius: isMobile ? '50%' : undefined,
+            minWidth: isMobile ? 40 : undefined,
+            width: isMobile ? 40 : undefined,
+            height: isMobile ? 40 : undefined,
+            px: isMobile ? 0 : undefined,
+            padding: isMobile ? 0 : undefined,
+          }}
+          // component={Link}
+          // to={routes.admin.createCity()}
+        >
+          {isMobile ? <Add /> : 'Добавить'}
+        </Button>
+      </Stack>
 
       {isMobile ? (
         // Мобильная версия: Список карточек
