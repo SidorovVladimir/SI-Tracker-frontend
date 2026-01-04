@@ -8,6 +8,10 @@ import { Link, Outlet, useLocation } from 'react-router';
 import routes from '../utils/routes';
 
 const SIDEBAR_WIDTH = 240;
+const menu = [
+  { item: 'Пользователи', path: routes.admin.users() },
+  { item: 'Города', path: routes.admin.cities() },
+];
 
 export default function AdminPage() {
   const { pathname } = useLocation();
@@ -57,16 +61,22 @@ export default function AdminPage() {
             overflowX: { xs: 'auto', md: 'hidden' },
           }}
         >
-          <ListItem disablePadding sx={{ width: { xs: 'auto', md: '100%' } }}>
-            <ListItemButton
-              component={Link}
-              to={routes.admin.users()}
-              selected={pathname.includes(routes.admin.users())}
-              sx={{ borderRadius: { xs: 1, md: 0 }, whiteSpace: 'nowrap' }}
+          {menu.map(({ item, path }) => (
+            <ListItem
+              key={item}
+              disablePadding
+              sx={{ width: { xs: 'auto', md: '100%' } }}
             >
-              <ListItemText primary="Пользователи" />
-            </ListItemButton>
-          </ListItem>
+              <ListItemButton
+                component={Link}
+                to={path}
+                selected={pathname.includes(path)}
+                sx={{ borderRadius: { xs: 1, md: 0 }, whiteSpace: 'nowrap' }}
+              >
+                <ListItemText primary={item} />
+              </ListItemButton>
+            </ListItem>
+          ))}
         </List>
       </Paper>
 

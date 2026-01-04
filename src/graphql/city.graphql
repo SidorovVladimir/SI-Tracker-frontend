@@ -1,6 +1,17 @@
 query GetSities {
   cities {
+    id
     name
+    createdAt
+    updatedAt
+  }
+}
+query GetCity($id: ID!) {
+  city(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
   }
 }
 
@@ -8,5 +19,18 @@ mutation CreateCity($input: CreateCityInput!) {
   createCity(input: $input) {
     id
     name
+  }
+}
+
+mutation DeleteCity($id: ID!) {
+  deleteCity(id: $id)
+}
+
+mutation UpdateCity($id: ID!, $input: UpdateCityInput!) {
+  updateCity(id: $id, input: $input) {
+    id
+    name
+    createdAt
+    updatedAt
   }
 }

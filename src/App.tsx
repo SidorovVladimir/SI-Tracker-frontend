@@ -13,6 +13,8 @@ import { MainLayout } from './layouts/MainLayout';
 import { CssBaseline } from '@mui/material';
 import EditUserPage from './pages/admin/EditUserPage';
 import NotFoundPage from './pages/NotFoundPage';
+import CitiesPage from './pages/admin/CitiesPage';
+import EditCityPage from './pages/admin/EditCityPage';
 
 function App() {
   return (
@@ -30,6 +32,11 @@ function App() {
               <Route
                 path={routes.admin.editUser(':userId')}
                 element={<EditUserPage />}
+              />
+              <Route path={routes.admin.cities()} element={<CitiesPage />} />
+              <Route
+                path={routes.admin.editCity(':cityId')}
+                element={<EditCityPage />}
               />
             </Route>
           </Route>

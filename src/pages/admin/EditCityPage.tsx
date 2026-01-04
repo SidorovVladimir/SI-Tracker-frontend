@@ -12,25 +12,24 @@ import {
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import {
-  GetUserDocument,
-  GetUserQuery,
-  UpdateUserDocument,
+  GetCityDocument,
+  GetCityQuery,
+  UpdateCityDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { enqueueSnackbar } from 'notistack';
 import routes from '../../utils/routes';
 
 type FieldErrors = {
-  firstName?: string;
-  lastName?: string;
+  name?: string;
 };
 
-export default function EditUserPage() {
-  const { userId } = useParams<{ userId: string }>();
+export default function EditCityPage() {
+  const { cityId } = useParams<{ cityId: string }>();
 
-  const { data, loading, error } = useQuery(GetUserDocument, {
-    variables: { id: userId! },
-    skip: !userId,
+  const { data, loading, error } = useQuery(GetCityDocument, {
+    variables: { id: cityId! },
+    skip: !cityId,
   });
 
   if (loading)
@@ -43,28 +42,27 @@ export default function EditUserPage() {
   if (error)
     return (
       <Alert severity="error" sx={{ m: 3 }}>
-        Ошибка загрузки пользователя: {error.message}
+        Ошибка загрузки города: {error.message}
       </Alert>
     );
-  if (!data?.user) return <Alert>Пользователь не найден</Alert>;
+  if (!data?.city) return <Alert>Город не найден</Alert>;
 
-  return <UserForm key={userId} user={data.user} />;
+  return <UserForm key={cityId} city={data.city} />;
 }
 
-function UserForm({ user }: { user: NonNullable<GetUserQuery['user']> }) {
+function UserForm({ city }: { city: NonNullable<GetCityQuery['city']> }) {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    firstName: user.firstName || '',
-    lastName: user.lastName || '',
+    name: city.name || '',
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  const [updateUser, { loading: updating }] = useMutation(UpdateUserDocument, {
+  const [updateCity, { loading: updating }] = useMutation(UpdateCityDocument, {
     onCompleted: () => {
-      enqueueSnackbar('Пользователь успешно обновлен', {
+      enqueueSnackbar('Город успешно обновлен', {
         variant: 'success',
       });
-      navigate(routes.admin.users());
+      navigate(routes.admin.cities());
     },
     onError: (error) => {
       try {
@@ -72,11 +70,8 @@ function UserForm({ user }: { user: NonNullable<GetUserQuery['user']> }) {
         if (Array.isArray(parsed)) {
           const errors: FieldErrors = {};
           parsed.forEach((err) => {
-            if (err.path.includes('firstName')) {
-              errors.firstName = err.message;
-            }
-            if (err.path.includes('lastName')) {
-              errors.lastName = err.message;
+            if (err.path.includes('name')) {
+              errors.name = err.message;
             }
           });
           setFieldErrors(errors);
@@ -100,15 +95,15 @@ function UserForm({ user }: { user: NonNullable<GetUserQuery['user']> }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFieldErrors({});
-    await updateUser({
-      variables: { id: user.id, input: form },
+    await updateCity({
+      variables: { id: city.id, input: form },
     });
   };
 
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 3, mb: 6 }}>
       <Typography variant="h5" fontWeight="bold" gutterBottom>
-        Редактирование пользователя
+        Редактирование города
       </Typography>
 
       <Paper
@@ -116,41 +111,18 @@ function UserForm({ user }: { user: NonNullable<GetUserQuery['user']> }) {
         sx={{ p: 4, borderRadius: 3, bgcolor: 'background.paper' }}
       >
         <form onSubmit={handleSubmit}>
-          <Stack spacing={3}>
+          <Stack>
             <TextField
-              label="Email"
-              name="email"
-              value={user?.email || ''}
-              disabled
-              fullWidth
-              variant="outlined"
-              size="small"
-            />
-
-            <TextField
-              label="Имя"
-              name="firstName"
-              value={form.firstName}
+              label="Название"
+              name="name"
+              value={form.name}
               onChange={handleChange}
               fullWidth
               variant="outlined"
               size="small"
               required
-              error={!!fieldErrors.firstName}
-              helperText={fieldErrors.firstName}
-            />
-
-            <TextField
-              label="Фамилия"
-              name="lastName"
-              value={form.lastName}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              size="small"
-              required
-              error={!!fieldErrors.lastName}
-              helperText={fieldErrors.lastName}
+              error={!!fieldErrors.name}
+              helperText={fieldErrors.name}
             />
 
             <Divider sx={{ my: 2 }} />

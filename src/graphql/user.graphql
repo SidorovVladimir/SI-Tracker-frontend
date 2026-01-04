@@ -27,5 +27,6 @@ mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
     id
     firstName
     lastName
+    updatedAt
   }
 }
