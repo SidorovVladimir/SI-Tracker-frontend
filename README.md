@@ -1,73 +1,152 @@
-# React + TypeScript + Vite
+# SI-Tracker Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Описание проекта
 
-Currently, two official plugins are available:
+SI-Tracker Frontend - это клиентская часть системы отслеживания средств измерений (SI - средства измерений). Веб-приложение предоставляет пользовательский интерфейс для управления пользователями, устройствами, верификациями, справочниками и локациями в системе метрологического контроля.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Функциональность
 
-## React Compiler
+- **Аутентификация и авторизация**: вход и регистрация пользователей
+- **Админ-панель**: управление пользователями и локациями
+- **Управление пользователями**: просмотр, создание, редактирование и удаление пользователей
+- **Управление локациями**: управление городами, компаниями и производственными площадками
+- **Интуитивный интерфейс**: современный дизайн с использованием Material-UI
+- **GraphQL интеграция**: эффективное взаимодействие с API через Apollo Client
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Технологии
 
-## Expanding the ESLint configuration
+- **React 19** - библиотека для создания пользовательских интерфейсов
+- **TypeScript** - типизированный JavaScript
+- **Vite** - инструмент сборки и разработки
+- **Apollo Client** - клиент для работы с GraphQL API
+- **GraphQL** - язык запросов для API
+- **Material-UI (MUI)** - компонентная библиотека
+- **React Router** - маршрутизация
+- **date-fns** - работа с датами
+- **notistack** - уведомления
+- **RxJS** - реактивное программирование
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Установка и запуск
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Предварительные требования
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js (версия 20+)
+- npm или yarn
+- Запущенный SI-Tracker Backend (по умолчанию на http://localhost:4000)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Установка зависимостей
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Запуск в режиме разработки
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+Приложение будет доступно на http://localhost:5173
+
+### Генерация GraphQL типов
+
+Для генерации TypeScript типов из GraphQL схемы:
+
+```bash
+npm run codegen
+```
+
+### Сборка для продакшн
+
+```bash
+npm run build
+```
+
+### Предпросмотр сборки
+
+```bash
+npm run preview
+```
+
+## Структура проекта
+
+```
+src/
+├── components/          # Переиспользуемые компоненты
+│   ├── LogoutButton.tsx # Кнопка выхода
+│   └── NavBar.tsx      # Панель навигации
+│   └── ProtectedRoute.tsx # Защищенный маршрут
+├── layouts/            # Макеты страниц
+│   ├── AuthLayout.tsx  # Макет для аутентификации
+│   └── MainLayout.tsx  # Основной макет
+├── pages/              # Страницы приложения
+│   ├── LoginPage.tsx   # Страница входа
+│   ├── RegisterPage.tsx # Страница регистрации
+│   ├── ProfilePage.tsx # Профиль пользователя
+│   ├── AdminPage.tsx   # Админ-панель
+│   └── admin/          # Админ-страницы
+│       ├── UsersPage.tsx       # Управление пользователями
+│       ├── CitiesPage.tsx      # Управление городами
+│       ├── CreateUserPage.tsx  # Создание пользователя
+│       ├── EditUserPage.tsx    # Редактирование пользователя
+│       ├── CreateCityPage.tsx  # Создание города
+│       └── EditCityPage.tsx    # Редактирование города
+├── graphql/            # GraphQL запросы и типы
+│   ├── auth.graphql    # Запросы аутентификации
+│   ├── user.graphql    # Запросы пользователей
+│   ├── city.graphql    # Запросы городов
+│   └── types/          # Сгенерированные типы
+├── hooks/              # Пользовательские хуки
+│   └── useAuth.ts      # Хук аутентификации
+├── utils/              # Утилиты
+│   ├── routes.ts       # Конфигурация маршрутов
+│   └── date.ts         # Работа с датами
+├── App.tsx             # Главный компонент приложения
+└── main.tsx            # Точка входа
+```
+
+## GraphQL интеграция
+
+Проект использует Apollo Client для работы с GraphQL API. Запросы находятся в папке `src/graphql/`, а сгенерированные типы - в `src/graphql/types/__generated__`.
+
+### Основные GraphQL операции:
+
+- **Auth**: `LOGIN`, `REGISTER`, `ME`
+- **User**: `GET_USERS`, `CREATE_USER`, `UPDATE_USER`, `DELETE_USER`
+- **City**: `GET_CITIES`, `CREATE_CITY`, `UPDATE_CITY`, `DELETE_CITY`
+
+## Маршрутизация
+
+Приложение использует React Router для навигации:
+
+- `/` - Главная страница
+- `/login` - Вход
+- `/register` - Регистрация
+- `/profile` - Профиль
+- `/admin` - Админ-панель
+- `/admin/users` - Управление пользователями
+- `/admin/cities` - Управление городами
+
+## Стилизация
+
+Проект использует Material-UI (MUI) для стилизации компонентов. Темы и стили настраиваются через Emotion.
+
+## Скрипты
+
+- `npm run dev` - запуск в режиме разработки
+- `npm run build` - сборка для продакшн
+- `npm run preview` - предпросмотр собранного приложения
+- `npm run lint` - проверка кода ESLint
+- `npm run codegen` - генерация GraphQL типов
+
+## Лицензия
+
+MIT License
+
+## Автор
+
+Sidorov Vladimir <v.sidorov29091988@gmail.com>
+
+## Репозиторий
+
+[GitHub](https://github.com/SidorovVladimir/SI-Tracker-frontend)
