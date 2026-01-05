@@ -101,8 +101,8 @@ export default function CitiesPage() {
             px: isMobile ? 0 : undefined,
             padding: isMobile ? 0 : undefined,
           }}
-          // component={Link}
-          // to={routes.admin.createCity()}
+          component={Link}
+          to={routes.admin.createCity()}
         >
           {isMobile ? <Add /> : 'Добавить'}
         </Button>

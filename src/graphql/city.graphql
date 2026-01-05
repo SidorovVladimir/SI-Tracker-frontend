@@ -19,6 +19,8 @@ mutation CreateCity($input: CreateCityInput!) {
   createCity(input: $input) {
     id
     name
+    createdAt
+    updatedAt
   }
 }
 

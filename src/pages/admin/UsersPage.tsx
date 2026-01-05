@@ -103,8 +103,8 @@ export default function UsersPage() {
             px: isMobile ? 0 : undefined,
             padding: isMobile ? 0 : undefined,
           }}
-          // component={Link}
-          // to={routes.admin.createUser()}
+          component={Link}
+          to={routes.admin.createUser()}
         >
           {isMobile ? <Add /> : 'Добавить'}
         </Button>

@@ -30,3 +30,13 @@ mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
     updatedAt
   }
 }
+
+mutation CreateUser($input: CreateUserInput!) {
+  createUser(input: $input) {
+    id
+    firstName
+    lastName
+    createdAt
+    updatedAt
+  }
+}
