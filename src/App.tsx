@@ -17,6 +17,9 @@ import CitiesPage from './pages/admin/CitiesPage';
 import EditCityPage from './pages/admin/EditCityPage';
 import CreateUserPage from './pages/admin/CreateUserPage';
 import CreateCityPage from './pages/admin/CreateCityPage';
+import CompaniesPage from './pages/admin/CompaniesPage';
+import EditCompanyPage from './pages/admin/EditCompanyPage';
+import CreateCompanyPage from './pages/admin/CreateCompanyPage';
 
 function App() {
   return (
@@ -47,6 +50,19 @@ function App() {
               <Route
                 path={routes.admin.createCity()}
                 element={<CreateCityPage />}
+              />
+
+              <Route
+                path={routes.admin.companies()}
+                element={<CompaniesPage />}
+              />
+              <Route
+                path={routes.admin.editCompany(':companyId')}
+                element={<EditCompanyPage />}
+              />
+              <Route
+                path={routes.admin.createCompany()}
+                element={<CreateCompanyPage />}
               />
             </Route>
           </Route>

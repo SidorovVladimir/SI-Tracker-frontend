@@ -1,0 +1,33 @@
+query GetCompanies {
+  companies {
+    id
+    name
+    address
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateCompany($input: CreateCompanyInput!) {
+  createCompany(input: $input) {
+    id
+    name
+    address
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdateCompany($id: ID!, $input: UpdateCompanyInput!) {
+  updateCompany(id: $id, input: $input) {
+    id
+    name
+    address
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteCompany($id: ID!) {
+  deleteCompany(id: $id)
+}
