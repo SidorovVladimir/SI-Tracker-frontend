@@ -117,6 +117,9 @@ export default function CompaniesPage() {
                 <Typography variant="subtitle1" fontWeight="bold">
                   {c.name}
                 </Typography>
+                <Typography variant="subtitle1" fontWeight="normal">
+                  {c.address ?? '-'}
+                </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
                   <IconButton

@@ -8,6 +8,16 @@ query GetCompanies {
   }
 }
 
+query GetCompany($id: ID!) {
+  company(id: $id) {
+    id
+    name
+    address
+    createdAt
+    updatedAt
+  }
+}
+
 mutation CreateCompany($input: CreateCompanyInput!) {
   createCompany(input: $input) {
     id
