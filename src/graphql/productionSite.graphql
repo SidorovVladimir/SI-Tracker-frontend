@@ -1,0 +1,8 @@
+query GetProductionSites {
+  getProductionSites {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}

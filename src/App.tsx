@@ -20,6 +20,7 @@ import CreateCityPage from './pages/admin/CreateCityPage';
 import CompaniesPage from './pages/admin/CompaniesPage';
 import EditCompanyPage from './pages/admin/EditCompanyPage';
 import CreateCompanyPage from './pages/admin/CreateCompanyPage';
+import ProductionSites from './pages/admin/ProductionSites';
 
 function App() {
   return (
@@ -63,6 +64,10 @@ function App() {
               <Route
                 path={routes.admin.createCompany()}
                 element={<CreateCompanyPage />}
+              />
+              <Route
+                path={routes.admin.productionSites()}
+                element={<ProductionSites />}
               />
             </Route>
           </Route>

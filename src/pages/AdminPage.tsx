@@ -12,6 +12,7 @@ const menu = [
   { item: 'Пользователи', path: routes.admin.users() },
   { item: 'Города', path: routes.admin.cities() },
   { item: 'Компании', path: routes.admin.companies() },
+  { item: 'Производственные участки', path: routes.admin.productionSites() },
 ];
 
 export default function AdminPage() {

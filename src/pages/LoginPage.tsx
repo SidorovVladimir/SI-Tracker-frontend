@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { LoginDocument } from '../graphql/types/__generated__/graphql';
 import { Link, useNavigate } from 'react-router';
 import routes from '../utils/routes';
+import { enqueueSnackbar } from 'notistack';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -22,6 +23,11 @@ export default function LoginPage() {
   const [login] = useMutation(LoginDocument, {
     onCompleted: () => {
       navigate(routes.home());
+    },
+    onError: (err) => {
+      enqueueSnackbar(`Ошибка входа: ${err.message}`, {
+        variant: 'error',
+      });
     },
   });
 
