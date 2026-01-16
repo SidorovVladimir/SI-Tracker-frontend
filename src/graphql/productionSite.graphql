@@ -1,5 +1,27 @@
 query GetProductionSites {
-  getProductionSites {
+  productionSites {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateProductionSite($input: CreateProductionSiteInput!) {
+  createProductionSite(input: $input) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteProductionSite($id: ID!) {
+  deleteProductionSite(id: $id)
+}
+
+query GetProductionSitesForSelect {
+  getProductionSitesForSelect {
     id
     name
     createdAt

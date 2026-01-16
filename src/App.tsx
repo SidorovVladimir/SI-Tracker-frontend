@@ -21,6 +21,7 @@ import CompaniesPage from './pages/admin/CompaniesPage';
 import EditCompanyPage from './pages/admin/EditCompanyPage';
 import CreateCompanyPage from './pages/admin/CreateCompanyPage';
 import ProductionSites from './pages/admin/ProductionSites';
+import CreateProductionSite from './pages/admin/CreateProductionSite';
 
 function App() {
   return (
@@ -68,6 +69,10 @@ function App() {
               <Route
                 path={routes.admin.productionSites()}
                 element={<ProductionSites />}
+              />
+              <Route
+                path={routes.admin.createProductionSite()}
+                element={<CreateProductionSite />}
               />
             </Route>
           </Route>
