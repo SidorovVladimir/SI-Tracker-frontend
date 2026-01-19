@@ -13,6 +13,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import EmailIcon from '@mui/icons-material/Email';
 import BadgeIcon from '@mui/icons-material/Badge';
 import { useAuth } from '../hooks/useAuth';
+import { toCapital } from '../utils/capitalize';
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -53,7 +54,8 @@ export default function ProfilePage() {
               {initials.toUpperCase()}
             </Avatar>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {user?.firstName} {user?.lastName}
+              {toCapital(user?.firstName || '')}{' '}
+              {toCapital(user?.lastName || '')}
             </Typography>
             <Chip
               label="Пользователь"
@@ -95,7 +97,8 @@ export default function ProfilePage() {
                       Имя и фамилия
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                      {user?.firstName} {user?.lastName}
+                      {toCapital(user?.firstName || '')}{' '}
+                      {toCapital(user?.lastName || '')}
                     </Typography>
                   </Box>
                 </Stack>

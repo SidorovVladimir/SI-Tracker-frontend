@@ -20,8 +20,9 @@ import CreateCityPage from './pages/admin/CreateCityPage';
 import CompaniesPage from './pages/admin/CompaniesPage';
 import EditCompanyPage from './pages/admin/EditCompanyPage';
 import CreateCompanyPage from './pages/admin/CreateCompanyPage';
-import ProductionSites from './pages/admin/ProductionSites';
-import CreateProductionSite from './pages/admin/CreateProductionSite';
+import ProductionSitesPage from './pages/admin/ProductionSitesPage';
+import CreateProductionSitePage from './pages/admin/CreateProductionSitePage';
+import EditProductionSitePage from './pages/admin/EditProductionSitePage';
 
 function App() {
   return (
@@ -68,11 +69,15 @@ function App() {
               />
               <Route
                 path={routes.admin.productionSites()}
-                element={<ProductionSites />}
+                element={<ProductionSitesPage />}
               />
               <Route
                 path={routes.admin.createProductionSite()}
-                element={<CreateProductionSite />}
+                element={<CreateProductionSitePage />}
+              />
+              <Route
+                path={routes.admin.editProductionSite(':productionSiteId')}
+                element={<EditProductionSitePage />}
               />
             </Route>
           </Route>

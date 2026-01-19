@@ -27,7 +27,7 @@ type FieldErrors = {
   cityId?: string;
 };
 
-export default function CreateProductionSite() {
+export default function CreateProductionSitePage() {
   const { data: citiesData } = useQuery(GetSitiesDocument);
   const { data: companiesData } = useQuery(GetCompaniesDocument);
   const navigate = useNavigate();

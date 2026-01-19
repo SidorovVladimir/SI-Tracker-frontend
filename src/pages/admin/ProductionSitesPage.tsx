@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client/react';
 import {
   DeleteProductionSiteDocument,
-  GetProductionSitesDocument,
   GetProductionSitesForSelectDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { Link } from 'react-router';
@@ -36,7 +35,7 @@ import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
 
-export default function ProductionSites() {
+export default function ProductionSitesPage() {
   const { data, loading, refetch } = useQuery(
     GetProductionSitesForSelectDocument
   );
@@ -128,7 +127,7 @@ export default function ProductionSites() {
                     color="primary"
                     sx={{ border: '1px solid', borderColor: 'primary.light' }}
                     component={Link}
-                    to={routes.admin.editCompany(p.id)}
+                    to={routes.admin.editProductionSite(p.id)}
                   >
                     <Edit fontSize="small" />
                   </IconButton>
@@ -185,7 +184,7 @@ export default function ProductionSites() {
                           size="small"
                           color="primary"
                           component={Link}
-                          to={routes.admin.editCompany(p.id)}
+                          to={routes.admin.editProductionSite(p.id)}
                         >
                           <Edit fontSize="small" />
                         </IconButton>
