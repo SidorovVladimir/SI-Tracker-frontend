@@ -1,0 +1,30 @@
+query GetEquipmentTypesList {
+  equipmentTypes {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+query GetEquipmentType($id: ID!) {
+  equipmentType(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateEquipmentType($input: CreateEquipmentTypeInput!) {
+  createEquipmentType(input: $input) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteEquipmentType($id: ID!) {
+  deleteEquipmentType(id: $id)
+}

@@ -24,6 +24,7 @@ import ProductionSitesPage from './pages/admin/ProductionSitesPage';
 import CreateProductionSitePage from './pages/admin/CreateProductionSitePage';
 import EditProductionSitePage from './pages/admin/EditProductionSitePage';
 import EquipmentTypesPage from './pages/admin/EquipmentTypesPage';
+import CreateEquipmentTypePage from './pages/admin/CreateEquipmentTypePage';
 
 function App() {
   return (
@@ -83,6 +84,10 @@ function App() {
               <Route
                 path={routes.admin.equipmentTypes()}
                 element={<EquipmentTypesPage />}
+              />
+              <Route
+                path={routes.admin.createEquipmentType()}
+                element={<CreateEquipmentTypePage />}
               />
             </Route>
           </Route>

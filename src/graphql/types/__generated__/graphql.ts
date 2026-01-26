@@ -47,6 +47,10 @@ export type CreateCompanyInput = {
   name: Scalars['String']['input'];
 };
 
+export type CreateEquipmentTypeInput = {
+  name: Scalars['String']['input'];
+};
+
 export type CreateProductionSiteInput = {
   cityId: Scalars['ID']['input'];
   companyId: Scalars['ID']['input'];
@@ -60,6 +64,14 @@ export type CreateUserInput = {
   password: Scalars['String']['input'];
 };
 
+export type EquipmentType = {
+  __typename: 'EquipmentType';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export type LoginUserInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -69,10 +81,12 @@ export type Mutation = {
   __typename: 'Mutation';
   createCity: City;
   createCompany: Company;
+  createEquipmentType: EquipmentType;
   createProductionSite: ProductionSite;
   createUser: User;
   deleteCity: Scalars['Boolean']['output'];
   deleteCompany: Scalars['Boolean']['output'];
+  deleteEquipmentType: Scalars['Boolean']['output'];
   deleteProductionSite: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   login: AuthPayload;
@@ -80,6 +94,8 @@ export type Mutation = {
   register: AuthPayload;
   updateCity: City;
   updateCompany: Company;
+  updateEquipmentType: EquipmentType;
+  updateProductionSite: ProductionSite;
   updateUser: User;
 };
 
@@ -91,6 +107,11 @@ export type MutationCreateCityArgs = {
 
 export type MutationCreateCompanyArgs = {
   input: CreateCompanyInput;
+};
+
+
+export type MutationCreateEquipmentTypeArgs = {
+  input: CreateEquipmentTypeInput;
 };
 
 
@@ -110,6 +131,11 @@ export type MutationDeleteCityArgs = {
 
 
 export type MutationDeleteCompanyArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteEquipmentTypeArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -146,6 +172,17 @@ export type MutationUpdateCompanyArgs = {
 };
 
 
+export type MutationUpdateEquipmentTypeArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateEquipmentTypeInput;
+};
+
+
+export type MutationUpdateProductionSiteArgs = {
+  input: UpdateProductionSiteInput;
+};
+
+
 export type MutationUpdateUserArgs = {
   id: Scalars['ID']['input'];
   input: UpdateUserInput;
@@ -165,6 +202,8 @@ export type Query = {
   city: City;
   companies: Array<Company>;
   company: Company;
+  equipmentType: EquipmentType;
+  equipmentTypes: Array<EquipmentType>;
   getProductionSitesForSelect: Array<ProductionSite>;
   me: Maybe<User>;
   productionSite: ProductionSite;
@@ -184,6 +223,11 @@ export type QueryCompanyArgs = {
 };
 
 
+export type QueryEquipmentTypeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type QueryProductionSiteArgs = {
   id: Scalars['ID']['input'];
 };
@@ -199,6 +243,16 @@ export type UpdateCityInput = {
 
 export type UpdateCompanyInput = {
   address?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
+export type UpdateEquipmentTypeInput = {
+  name: Scalars['String']['input'];
+};
+
+export type UpdateProductionSiteInput = {
+  cityId: Scalars['ID']['input'];
+  companyId: Scalars['ID']['input'];
   name: Scalars['String']['input'];
 };
 
@@ -309,6 +363,32 @@ export type DeleteCompanyMutationVariables = Exact<{
 
 export type DeleteCompanyMutation = { deleteCompany: boolean };
 
+export type GetEquipmentTypesListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetEquipmentTypesListQuery = { equipmentTypes: Array<{ __typename: 'EquipmentType', id: string, name: string, createdAt: string, updatedAt: string }> };
+
+export type GetEquipmentTypeQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetEquipmentTypeQuery = { equipmentType: { __typename: 'EquipmentType', id: string, name: string, createdAt: string, updatedAt: string } };
+
+export type CreateEquipmentTypeMutationVariables = Exact<{
+  input: CreateEquipmentTypeInput;
+}>;
+
+
+export type CreateEquipmentTypeMutation = { createEquipmentType: { __typename: 'EquipmentType', id: string, name: string, createdAt: string, updatedAt: string } };
+
+export type DeleteEquipmentTypeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteEquipmentTypeMutation = { deleteEquipmentType: boolean };
+
 export type GetProductionSitesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -382,6 +462,10 @@ export const GetCompanyDocument = {"kind":"Document","definitions":[{"kind":"Ope
 export const CreateCompanyDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateCompany"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateCompanyInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createCompany"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<CreateCompanyMutation, CreateCompanyMutationVariables>;
 export const UpdateCompanyDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateCompany"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateCompanyInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateCompany"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateCompanyMutation, UpdateCompanyMutationVariables>;
 export const DeleteCompanyDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteCompany"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteCompany"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteCompanyMutation, DeleteCompanyMutationVariables>;
+export const GetEquipmentTypesListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetEquipmentTypesList"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"equipmentTypes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<GetEquipmentTypesListQuery, GetEquipmentTypesListQueryVariables>;
+export const GetEquipmentTypeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetEquipmentType"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"equipmentType"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<GetEquipmentTypeQuery, GetEquipmentTypeQueryVariables>;
+export const CreateEquipmentTypeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateEquipmentType"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateEquipmentTypeInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createEquipmentType"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<CreateEquipmentTypeMutation, CreateEquipmentTypeMutationVariables>;
+export const DeleteEquipmentTypeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteEquipmentType"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteEquipmentType"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteEquipmentTypeMutation, DeleteEquipmentTypeMutationVariables>;
 export const GetProductionSitesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProductionSites"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"productionSites"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<GetProductionSitesQuery, GetProductionSitesQueryVariables>;
 export const CreateProductionSiteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateProductionSite"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateProductionSiteInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createProductionSite"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<CreateProductionSiteMutation, CreateProductionSiteMutationVariables>;
 export const DeleteProductionSiteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteProductionSite"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteProductionSite"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteProductionSiteMutation, DeleteProductionSiteMutationVariables>;

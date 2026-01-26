@@ -25,5 +25,7 @@ export default {
     createDevice: () => '/admin/devices/create',
     equipmentTypes: () => '/admin/equipment-types',
     createEquipmentType: () => '/admin/equipment-types/create',
+    editEquipmentType: (equipmentTypeId: string | ':equipmentTypeId') =>
+      `/admin/equipment-types/${equipmentTypeId}/edit`,
   },
 };
