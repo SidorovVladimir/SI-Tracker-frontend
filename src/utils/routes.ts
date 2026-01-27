@@ -27,5 +27,9 @@ export default {
     createEquipmentType: () => '/admin/equipment-types/create',
     editEquipmentType: (equipmentTypeId: string | ':equipmentTypeId') =>
       `/admin/equipment-types/${equipmentTypeId}/edit`,
+    measurementTypes: () => '/admin/measurement-types',
+    createMeasurementType: () => '/admin/measurement-types/create',
+    metrologyControlTypes: () => '/admin/metrology-control-types',
+    createMetrologyControlType: () => '/admin/metrology-control-types/create',
   },
 };

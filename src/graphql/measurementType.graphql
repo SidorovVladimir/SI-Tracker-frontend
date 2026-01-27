@@ -1,0 +1,30 @@
+query GetMeasurementTypesList {
+  measurementTypes {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+query GetMeasurementType($id: ID!) {
+  measurementType(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateMeasurementType($input: CreateMeasurementTypeInput!) {
+  createMeasurementType(input: $input) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteMeasurementType($id: ID!) {
+  deleteMeasurementType(id: $id)
+}

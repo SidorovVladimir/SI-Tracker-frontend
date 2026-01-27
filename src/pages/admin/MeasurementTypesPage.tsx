@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@apollo/client/react';
 import {
-  DeleteEquipmentTypeDocument,
-  GetEquipmentTypesListDocument,
+  DeleteMeasurementTypeDocument,
+  GetMeasurementTypesListDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { Link } from 'react-router';
 import {
@@ -35,13 +35,13 @@ import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
 
-export default function EquipmentTypesPage() {
-  const { data, loading, refetch } = useQuery(GetEquipmentTypesListDocument);
+export default function MeasurementTypesPage() {
+  const { data, loading, refetch } = useQuery(GetMeasurementTypesListDocument);
 
-  const [deleteEquipmentType] = useMutation(DeleteEquipmentTypeDocument, {
+  const [deleteMeasurementType] = useMutation(DeleteMeasurementTypeDocument, {
     onCompleted: () => {
       refetch();
-      enqueueSnackbar('Тип оборудования успешно удален', {
+      enqueueSnackbar('Вид измерения успешно удален', {
         variant: 'success',
       });
     },
@@ -55,28 +55,30 @@ export default function EquipmentTypesPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedEquipmentTypeId, setSelectedEquipmentTypeId] =
+  const [selectedMeasurementTypeId, setSelectedMeasurementTypeId] =
     useState<string>('');
 
   if (loading)
     return (
       <Typography sx={{ p: 4, textAlign: 'center' }}>Загрузка...</Typography>
     );
-  const equipmentTypes = data?.equipmentTypes || [];
+  const measurementTypes = data?.measurementTypes || [];
 
   const handleDeleteClick = (id: string) => {
-    setSelectedEquipmentTypeId(id);
+    setSelectedMeasurementTypeId(id);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setSelectedEquipmentTypeId('');
+    setSelectedMeasurementTypeId('');
   };
 
   const handleConfirmDelete = async () => {
     handleCloseDialog();
-    await deleteEquipmentType({ variables: { id: selectedEquipmentTypeId } });
+    await deleteMeasurementType({
+      variables: { id: selectedMeasurementTypeId },
+    });
   };
 
   return (
@@ -88,10 +90,10 @@ export default function EquipmentTypesPage() {
         sx={{ mb: 3 }}
       >
         <Typography variant="h5" fontWeight="bold">
-          Управление типами оборудования
+          Управление видами измерений
         </Typography>
         <Button
-          aria-label="Добавить тип оборудования"
+          aria-label="Добавить вид измерения"
           variant="contained"
           startIcon={isMobile ? undefined : <Add />}
           sx={{
@@ -103,7 +105,7 @@ export default function EquipmentTypesPage() {
             padding: isMobile ? 0 : undefined,
           }}
           component={Link}
-          to={routes.admin.createEquipmentType()}
+          to={routes.admin.createMeasurementType()}
         >
           {isMobile ? <Add /> : 'Добавить'}
         </Button>
@@ -112,11 +114,11 @@ export default function EquipmentTypesPage() {
       {isMobile ? (
         // Мобильная версия: Список карточек
         <Stack spacing={2}>
-          {equipmentTypes.map((eq) => (
-            <Card key={eq.id} variant="outlined" sx={{ borderRadius: 2 }}>
+          {measurementTypes.map((m) => (
+            <Card key={m.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {eq.name}
+                  {m.name}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -133,7 +135,7 @@ export default function EquipmentTypesPage() {
                     size="small"
                     color="error"
                     sx={{ border: '1px solid', borderColor: 'error.light' }}
-                    onClick={() => handleDeleteClick(eq.id)}
+                    onClick={() => handleDeleteClick(m.id)}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -166,11 +168,11 @@ export default function EquipmentTypesPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {equipmentTypes.map((eq) => (
-                <TableRow key={eq.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{eq.name}</TableCell>
-                  <TableCell>{formatDate(eq.createdAt)}</TableCell>
-                  <TableCell>{formatDate(eq.updatedAt)}</TableCell>
+              {measurementTypes.map((m) => (
+                <TableRow key={m.id} hover sx={{ '& > td': { py: 1.5 } }}>
+                  <TableCell>{m.name}</TableCell>
+                  <TableCell>{formatDate(m.createdAt)}</TableCell>
+                  <TableCell>{formatDate(m.updatedAt)}</TableCell>
                   <TableCell align="right">
                     <Stack
                       direction="row"
@@ -191,7 +193,7 @@ export default function EquipmentTypesPage() {
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleDeleteClick(eq.id)}
+                          onClick={() => handleDeleteClick(m.id)}
                         >
                           <Delete fontSize="small" />
                         </IconButton>
@@ -213,7 +215,7 @@ export default function EquipmentTypesPage() {
         <DialogTitle id="delete-dialog-title">Подтвердите удаление</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Вы действительно хотите удалить этот тип оборудования? Это действие
+            Вы действительно хотите удалить этот вид измерений? Это действие
             нельзя отменить.
           </DialogContentText>
         </DialogContent>

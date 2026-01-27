@@ -25,6 +25,10 @@ import CreateProductionSitePage from './pages/admin/CreateProductionSitePage';
 import EditProductionSitePage from './pages/admin/EditProductionSitePage';
 import EquipmentTypesPage from './pages/admin/EquipmentTypesPage';
 import CreateEquipmentTypePage from './pages/admin/CreateEquipmentTypePage';
+import MeasurementTypesPage from './pages/admin/MeasurementTypesPage';
+import CreateMeasurementTypePage from './pages/admin/CreateMeasurementTypePage';
+import MetrologyControlTypePage from './pages/admin/MetrologyControlTypePage';
+import CreateMetrologyControlTypePage from './pages/admin/CreateMetrologyControlTypePage';
 
 function App() {
   return (
@@ -88,6 +92,22 @@ function App() {
               <Route
                 path={routes.admin.createEquipmentType()}
                 element={<CreateEquipmentTypePage />}
+              />
+              <Route
+                path={routes.admin.measurementTypes()}
+                element={<MeasurementTypesPage />}
+              />
+              <Route
+                path={routes.admin.createMeasurementType()}
+                element={<CreateMeasurementTypePage />}
+              />
+              <Route
+                path={routes.admin.metrologyControlTypes()}
+                element={<MetrologyControlTypePage />}
+              />
+              <Route
+                path={routes.admin.createMetrologyControlType()}
+                element={<CreateMetrologyControlTypePage />}
               />
             </Route>
           </Route>

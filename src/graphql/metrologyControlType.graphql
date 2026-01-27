@@ -1,0 +1,30 @@
+query GetMetrologyControlTypesList {
+  metrologyControlTypes {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+query GetMetrologyControlType($id: ID!) {
+  metrologyControlType(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateMetrologyControlType($input: CreateMetrologyControlTypeInput!) {
+  createMetrologyControlType(input: $input) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteMetrologyControlType($id: ID!) {
+  deleteMetrologyControlType(id: $id)
+}

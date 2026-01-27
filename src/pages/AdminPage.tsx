@@ -14,8 +14,11 @@ const menu = [
   { item: 'Компании', path: routes.admin.companies() },
   { item: 'Производственные участки', path: routes.admin.productionSites() },
   { item: 'Типы оборудования', path: routes.admin.equipmentTypes() },
-  { item: 'Виды измерения', path: '' },
-  { item: 'Виды метрологического контроля', path: '' },
+  { item: 'Виды измерения', path: routes.admin.measurementTypes() },
+  {
+    item: 'Виды метрологического контроля',
+    path: routes.admin.metrologyControlTypes(),
+  },
   { item: 'Сферы применения', path: '' },
   { item: 'Состояния приборов', path: '' },
 ];

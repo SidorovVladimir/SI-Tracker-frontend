@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@apollo/client/react';
 import {
-  DeleteEquipmentTypeDocument,
-  GetEquipmentTypesListDocument,
+  DeleteMetrologyControlTypeDocument,
+  GetMetrologyControlTypesListDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { Link } from 'react-router';
 import {
@@ -35,48 +35,55 @@ import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
 
-export default function EquipmentTypesPage() {
-  const { data, loading, refetch } = useQuery(GetEquipmentTypesListDocument);
+export default function MetrologyControlTypePage() {
+  const { data, loading, refetch } = useQuery(
+    GetMetrologyControlTypesListDocument
+  );
 
-  const [deleteEquipmentType] = useMutation(DeleteEquipmentTypeDocument, {
-    onCompleted: () => {
-      refetch();
-      enqueueSnackbar('Тип оборудования успешно удален', {
-        variant: 'success',
-      });
-    },
-    onError: (error) => {
-      enqueueSnackbar(`Ошибка удаления: ${error.message}`, {
-        variant: 'error',
-      });
-    },
-  });
+  const [deleteMetrologyControlType] = useMutation(
+    DeleteMetrologyControlTypeDocument,
+    {
+      onCompleted: () => {
+        refetch();
+        enqueueSnackbar('Вид метрологического контроля успешно удален', {
+          variant: 'success',
+        });
+      },
+      onError: (error) => {
+        enqueueSnackbar(`Ошибка удаления: ${error.message}`, {
+          variant: 'error',
+        });
+      },
+    }
+  );
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedEquipmentTypeId, setSelectedEquipmentTypeId] =
+  const [selectedMetrologyControlTypeId, setSelectedMetrologyControlTypeId] =
     useState<string>('');
 
   if (loading)
     return (
       <Typography sx={{ p: 4, textAlign: 'center' }}>Загрузка...</Typography>
     );
-  const equipmentTypes = data?.equipmentTypes || [];
+  const metrologyControlTypes = data?.metrologyControlTypes || [];
 
   const handleDeleteClick = (id: string) => {
-    setSelectedEquipmentTypeId(id);
+    setSelectedMetrologyControlTypeId(id);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setSelectedEquipmentTypeId('');
+    setSelectedMetrologyControlTypeId('');
   };
 
   const handleConfirmDelete = async () => {
     handleCloseDialog();
-    await deleteEquipmentType({ variables: { id: selectedEquipmentTypeId } });
+    await deleteMetrologyControlType({
+      variables: { id: selectedMetrologyControlTypeId },
+    });
   };
 
   return (
@@ -88,10 +95,10 @@ export default function EquipmentTypesPage() {
         sx={{ mb: 3 }}
       >
         <Typography variant="h5" fontWeight="bold">
-          Управление типами оборудования
+          Управление видами метрологического контроля
         </Typography>
         <Button
-          aria-label="Добавить тип оборудования"
+          aria-label="Добавить вид метрологического контроля"
           variant="contained"
           startIcon={isMobile ? undefined : <Add />}
           sx={{
@@ -103,7 +110,7 @@ export default function EquipmentTypesPage() {
             padding: isMobile ? 0 : undefined,
           }}
           component={Link}
-          to={routes.admin.createEquipmentType()}
+          to={routes.admin.createMetrologyControlType()}
         >
           {isMobile ? <Add /> : 'Добавить'}
         </Button>
@@ -112,11 +119,11 @@ export default function EquipmentTypesPage() {
       {isMobile ? (
         // Мобильная версия: Список карточек
         <Stack spacing={2}>
-          {equipmentTypes.map((eq) => (
-            <Card key={eq.id} variant="outlined" sx={{ borderRadius: 2 }}>
+          {metrologyControlTypes.map((m) => (
+            <Card key={m.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {eq.name}
+                  {m.name}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -133,7 +140,7 @@ export default function EquipmentTypesPage() {
                     size="small"
                     color="error"
                     sx={{ border: '1px solid', borderColor: 'error.light' }}
-                    onClick={() => handleDeleteClick(eq.id)}
+                    onClick={() => handleDeleteClick(m.id)}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -166,11 +173,11 @@ export default function EquipmentTypesPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {equipmentTypes.map((eq) => (
-                <TableRow key={eq.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{eq.name}</TableCell>
-                  <TableCell>{formatDate(eq.createdAt)}</TableCell>
-                  <TableCell>{formatDate(eq.updatedAt)}</TableCell>
+              {metrologyControlTypes.map((m) => (
+                <TableRow key={m.id} hover sx={{ '& > td': { py: 1.5 } }}>
+                  <TableCell>{m.name}</TableCell>
+                  <TableCell>{formatDate(m.createdAt)}</TableCell>
+                  <TableCell>{formatDate(m.updatedAt)}</TableCell>
                   <TableCell align="right">
                     <Stack
                       direction="row"
@@ -191,7 +198,7 @@ export default function EquipmentTypesPage() {
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleDeleteClick(eq.id)}
+                          onClick={() => handleDeleteClick(m.id)}
                         >
                           <Delete fontSize="small" />
                         </IconButton>
@@ -213,8 +220,8 @@ export default function EquipmentTypesPage() {
         <DialogTitle id="delete-dialog-title">Подтвердите удаление</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Вы действительно хотите удалить этот тип оборудования? Это действие
-            нельзя отменить.
+            Вы действительно хотите удалить этот вид метрологического контроля?
+            Это действие нельзя отменить.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

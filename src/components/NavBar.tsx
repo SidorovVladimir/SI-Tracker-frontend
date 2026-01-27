@@ -94,17 +94,17 @@ export default function NavBar() {
                   to={routes.profile()}
                   onClick={handleClose}
                 >
-                  Profile
+                  Профиль
                 </MenuItem>
                 <MenuItem
                   component={Link}
                   to={routes.admin.root()}
                   onClick={handleClose}
                 >
-                  Admin Panel
+                  Панель администратора
                 </MenuItem>
                 <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-                  Logout
+                  Выход
                 </MenuItem>
               </Menu>
             </Box>
