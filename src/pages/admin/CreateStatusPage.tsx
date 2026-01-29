@@ -2,8 +2,8 @@ import { useMutation } from '@apollo/client/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
-  CreateMetrologyControlTypeDocument,
-  GetMetrologyControlTypesListDocument,
+  CreateStatusDocument,
+  GetStatusListDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
 import routes from '../../utils/routes';
@@ -22,23 +22,23 @@ type FieldErrors = {
   name?: string;
 };
 
-export default function CreateMetrologyControlTypePage() {
+export default function CreateStatusPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '',
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  const [createMetrologyControlType, { loading: creating }] = useMutation(
-    CreateMetrologyControlTypeDocument,
+  const [createStatus, { loading: creating }] = useMutation(
+    CreateStatusDocument,
     {
-      refetchQueries: [{ query: GetMetrologyControlTypesListDocument }],
+      refetchQueries: [{ query: GetStatusListDocument }],
       awaitRefetchQueries: true,
       onCompleted: () => {
-        enqueueSnackbar('Вид метрологического контроля успешно создан', {
+        enqueueSnackbar('Сотстояние успешно создано', {
           variant: 'success',
         });
-        navigate(routes.admin.metrologyControlTypes());
+        navigate(routes.admin.statuses());
       },
       onError: (error) => {
         try {
@@ -72,7 +72,7 @@ export default function CreateMetrologyControlTypePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFieldErrors({});
-    await createMetrologyControlType({
+    await createStatus({
       variables: { input: form },
     });
   };
@@ -80,7 +80,7 @@ export default function CreateMetrologyControlTypePage() {
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 3, mb: 6 }}>
       <Typography variant="h5" fontWeight="bold" gutterBottom>
-        Создание вида метрологического контроля
+        Создание статуса прибора
       </Typography>
 
       <Paper

@@ -1,0 +1,30 @@
+query GetStatusList {
+  statuses {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+query GetStatus($id: ID!) {
+  status(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateStatus($input: CreateStatusInput!) {
+  createStatus(input: $input) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteStatus($id: ID!) {
+  deleteStatus(id: $id)
+}

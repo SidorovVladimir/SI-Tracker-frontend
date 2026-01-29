@@ -19,8 +19,8 @@ const menu = [
     item: 'Виды метрологического контроля',
     path: routes.admin.metrologyControlTypes(),
   },
-  { item: 'Сферы применения', path: '' },
-  { item: 'Состояния приборов', path: '' },
+  { item: 'Сферы применения', path: routes.admin.scopes() },
+  { item: 'Состояния приборов', path: routes.admin.statuses() },
 ];
 
 export default function AdminPage() {

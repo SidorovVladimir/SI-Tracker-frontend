@@ -31,5 +31,9 @@ export default {
     createMeasurementType: () => '/admin/measurement-types/create',
     metrologyControlTypes: () => '/admin/metrology-control-types',
     createMetrologyControlType: () => '/admin/metrology-control-types/create',
+    scopes: () => '/admin/scopes',
+    createScope: () => '/admin/scopes/create',
+    statuses: () => '/admin/statuses',
+    createStatus: () => '/admin/statuses/create',
   },
 };

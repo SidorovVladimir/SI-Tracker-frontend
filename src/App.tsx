@@ -29,6 +29,11 @@ import MeasurementTypesPage from './pages/admin/MeasurementTypesPage';
 import CreateMeasurementTypePage from './pages/admin/CreateMeasurementTypePage';
 import MetrologyControlTypePage from './pages/admin/MetrologyControlTypePage';
 import CreateMetrologyControlTypePage from './pages/admin/CreateMetrologyControlTypePage';
+import ScopesPage from './pages/admin/ScopesPage';
+import CreateScopePage from './pages/admin/CreateScopePage';
+import CreateStatusPage from './pages/admin/CreateStatusPage';
+import StatusesPage from './pages/admin/StatusesPage';
+import CreateDevicePage from './pages/admin/CreateDevicePage';
 
 function App() {
   return (
@@ -108,6 +113,23 @@ function App() {
               <Route
                 path={routes.admin.createMetrologyControlType()}
                 element={<CreateMetrologyControlTypePage />}
+              />
+              <Route path={routes.admin.scopes()} element={<ScopesPage />} />
+              <Route
+                path={routes.admin.createScope()}
+                element={<CreateScopePage />}
+              />
+              <Route
+                path={routes.admin.createStatus()}
+                element={<CreateStatusPage />}
+              />
+              <Route
+                path={routes.admin.statuses()}
+                element={<StatusesPage />}
+              />
+              <Route
+                path={routes.admin.createDevice()}
+                element={<CreateDevicePage />}
               />
             </Route>
           </Route>

@@ -78,6 +78,14 @@ export type CreateProductionSiteInput = {
   name: Scalars['String']['input'];
 };
 
+export type CreateScopeInput = {
+  name: Scalars['String']['input'];
+};
+
+export type CreateStatusInput = {
+  name: Scalars['String']['input'];
+};
+
 export type CreateUserInput = {
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
@@ -122,6 +130,8 @@ export type Mutation = {
   createMeasurementType: MeasurementType;
   createMetrologyControlType: MetrologyControlType;
   createProductionSite: ProductionSite;
+  createScope: Scope;
+  createStatus: Status;
   createUser: User;
   deleteCity: Scalars['Boolean']['output'];
   deleteCompany: Scalars['Boolean']['output'];
@@ -129,6 +139,8 @@ export type Mutation = {
   deleteMeasurementType: Scalars['Boolean']['output'];
   deleteMetrologyControlType: Scalars['Boolean']['output'];
   deleteProductionSite: Scalars['Boolean']['output'];
+  deleteScope: Scalars['Boolean']['output'];
+  deleteStatus: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   login: AuthPayload;
   logout: Scalars['Boolean']['output'];
@@ -139,6 +151,8 @@ export type Mutation = {
   updateMeasurementType: MeasurementType;
   updateMetrologyControlType: MetrologyControlType;
   updateProductionSite: ProductionSite;
+  updateScope: Scope;
+  updateStatus: Status;
   updateUser: User;
 };
 
@@ -166,6 +180,14 @@ export type MutationCreateProductionSiteArgs = {
   input: CreateProductionSiteInput;
 };
 
+export type MutationCreateScopeArgs = {
+  input: CreateScopeInput;
+};
+
+export type MutationCreateStatusArgs = {
+  input: CreateStatusInput;
+};
+
 export type MutationCreateUserArgs = {
   input: CreateUserInput;
 };
@@ -191,6 +213,14 @@ export type MutationDeleteMetrologyControlTypeArgs = {
 };
 
 export type MutationDeleteProductionSiteArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteScopeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteStatusArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -235,6 +265,16 @@ export type MutationUpdateProductionSiteArgs = {
   input: UpdateProductionSiteInput;
 };
 
+export type MutationUpdateScopeArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateScopeInput;
+};
+
+export type MutationUpdateStatusArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateStatusInput;
+};
+
 export type MutationUpdateUserArgs = {
   id: Scalars['ID']['input'];
   input: UpdateUserInput;
@@ -264,6 +304,10 @@ export type Query = {
   metrologyControlTypes: Array<MetrologyControlType>;
   productionSite: ProductionSite;
   productionSites: Array<ProductionSite>;
+  scope: Scope;
+  scopes: Array<Scope>;
+  status: Status;
+  statuses: Array<Status>;
   user: User;
   users: Array<User>;
 };
@@ -292,8 +336,32 @@ export type QueryProductionSiteArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type QueryScopeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type QueryStatusArgs = {
+  id: Scalars['ID']['input'];
+};
+
 export type QueryUserArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type Scope = {
+  __typename: 'Scope';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type Status = {
+  __typename: 'Status';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
 };
 
 export type UpdateCityInput = {
@@ -320,6 +388,14 @@ export type UpdateMetrologyControlTypeInput = {
 export type UpdateProductionSiteInput = {
   cityId: Scalars['ID']['input'];
   companyId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+};
+
+export type UpdateScopeInput = {
+  name: Scalars['String']['input'];
+};
+
+export type UpdateStatusInput = {
   name: Scalars['String']['input'];
 };
 
@@ -707,6 +783,98 @@ export type GetProductionSitesForSelectQuery = {
     updatedAt: string;
   }>;
 };
+
+export type GetScopesListQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetScopesListQuery = {
+  scopes: Array<{
+    __typename: 'Scope';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+};
+
+export type GetScopeQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type GetScopeQuery = {
+  scope: {
+    __typename: 'Scope';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type CreateScopeMutationVariables = Exact<{
+  input: CreateScopeInput;
+}>;
+
+export type CreateScopeMutation = {
+  createScope: {
+    __typename: 'Scope';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type DeleteScopeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type DeleteScopeMutation = { deleteScope: boolean };
+
+export type GetStatusListQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetStatusListQuery = {
+  statuses: Array<{
+    __typename: 'Status';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+};
+
+export type GetStatusQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type GetStatusQuery = {
+  status: {
+    __typename: 'Status';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type CreateStatusMutationVariables = Exact<{
+  input: CreateStatusInput;
+}>;
+
+export type CreateStatusMutation = {
+  createStatus: {
+    __typename: 'Status';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type DeleteStatusMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type DeleteStatusMutation = { deleteStatus: boolean };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -2150,6 +2318,350 @@ export const GetProductionSitesForSelectDocument = {
 } as unknown as DocumentNode<
   GetProductionSitesForSelectQuery,
   GetProductionSitesForSelectQueryVariables
+>;
+export const GetScopesListDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetScopesList' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'scopes' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetScopesListQuery, GetScopesListQueryVariables>;
+export const GetScopeDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetScope' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'scope' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetScopeQuery, GetScopeQueryVariables>;
+export const CreateScopeDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateScope' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'CreateScopeInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createScope' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateScopeMutation, CreateScopeMutationVariables>;
+export const DeleteScopeDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteScope' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteScope' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteScopeMutation, DeleteScopeMutationVariables>;
+export const GetStatusListDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetStatusList' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'statuses' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetStatusListQuery, GetStatusListQueryVariables>;
+export const GetStatusDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetStatus' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'status' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetStatusQuery, GetStatusQueryVariables>;
+export const CreateStatusDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateStatus' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'CreateStatusInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createStatus' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CreateStatusMutation,
+  CreateStatusMutationVariables
+>;
+export const DeleteStatusDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteStatus' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteStatus' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  DeleteStatusMutation,
+  DeleteStatusMutationVariables
 >;
 export const GetUsersDocument = {
   kind: 'Document',

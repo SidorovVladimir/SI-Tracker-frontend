@@ -1,0 +1,30 @@
+query GetScopesList {
+  scopes {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+query GetScope($id: ID!) {
+  scope(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateScope($input: CreateScopeInput!) {
+  createScope(input: $input) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteScope($id: ID!) {
+  deleteScope(id: $id)
+}
