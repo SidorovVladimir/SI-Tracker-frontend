@@ -7,12 +7,14 @@ import {
   GetEquipmentTypesListDocument,
   GetMeasurementTypesListDocument,
   GetProductionSitesForSelectDocument,
+  GetScopesListDocument,
   GetSitiesDocument,
   GetStatusListDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
 import routes from '../../utils/routes';
 import {
+  Autocomplete,
   Box,
   Button,
   CircularProgress,
@@ -33,6 +35,7 @@ export default function CreateDevicePage() {
   const { data: measurementTypesData } = useQuery(
     GetMeasurementTypesListDocument
   );
+  const { data: scopesData } = useQuery(GetScopesListDocument);
 
   // const navigate = useNavigate();
   const [form, setForm] = useState<{
@@ -53,6 +56,7 @@ export default function CreateDevicePage() {
     productionSiteId: string;
     equipmentTypeId: string;
     measurementTypeId: string;
+    scopes: { id: string; name: string }[];
   }>({
     name: '',
     model: '',
@@ -71,12 +75,14 @@ export default function CreateDevicePage() {
     productionSiteId: '',
     equipmentTypeId: '',
     measurementTypeId: '',
+    scopes: [],
   });
   const productionSiteList =
     productionSiteData?.getProductionSitesForSelect || [];
   const equipmentTypesList = equipmentTypesData?.equipmentTypes || [];
   const statusesList = statusesData?.statuses || [];
   const measurementTypesList = measurementTypesData?.measurementTypes || [];
+  const scopesList = scopesData?.scopes || [];
 
   const [createProductionSite, { loading: creating }] = useMutation(
     CreateProductionSiteDocument,
@@ -101,6 +107,17 @@ export default function CreateDevicePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+
+    if (name === 'verificationInterval') {
+      if (/^\d*$/.test(value)) {
+        setForm((prev) => ({ ...prev, [name]: value }));
+      }
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleAutocompleteChange = (name: string, value: any) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -131,6 +148,7 @@ export default function CreateDevicePage() {
               fullWidth
               variant="outlined"
               size="small"
+              required
             />
             <TextField
               label="Модель"
@@ -140,6 +158,7 @@ export default function CreateDevicePage() {
               fullWidth
               variant="outlined"
               size="small"
+              required
             />
             <TextField
               label="Серийный номер"
@@ -149,6 +168,7 @@ export default function CreateDevicePage() {
               fullWidth
               variant="outlined"
               size="small"
+              required
             />
             <TextField
               label="Номер ГРСИ"
@@ -187,6 +207,21 @@ export default function CreateDevicePage() {
               fullWidth
               variant="outlined"
               size="small"
+              required
+            />
+
+            <TextField
+              type="date"
+              label="Дата выпуска"
+              name="releaseDate"
+              value={form.releaseDate}
+              onChange={handleChange}
+              fullWidth
+              variant="outlined"
+              size="small"
+              slotProps={{
+                inputLabel: { shrink: true },
+              }}
             />
 
             <TextField
@@ -214,7 +249,7 @@ export default function CreateDevicePage() {
             />
 
             <TextField
-              type="number"
+              type="text"
               label="МПИ (межповерочный интервал)"
               name="verificationInterval"
               value={form.verificationInterval}
@@ -243,6 +278,7 @@ export default function CreateDevicePage() {
               fullWidth
               onChange={handleChange}
               value={form.statusId}
+              required
             >
               {statusesList.map(({ id, name }) => (
                 <MenuItem key={id} value={id}>
@@ -260,6 +296,7 @@ export default function CreateDevicePage() {
               fullWidth
               onChange={handleChange}
               value={form.productionSiteId}
+              required
             >
               {productionSiteList.map(({ id, name }) => (
                 <MenuItem key={id} value={id}>
@@ -303,6 +340,25 @@ export default function CreateDevicePage() {
                 </MenuItem>
               ))}
             </TextField>
+
+            <Autocomplete
+              multiple
+              options={scopesList}
+              getOptionLabel={(option) => option.name}
+              value={form.scopes}
+              onChange={(_, newValue) => {
+                handleAutocompleteChange('scopes', newValue);
+              }}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Сферы применения"
+                  placeholder="Выберите сферы"
+                  size="small"
+                />
+              )}
+            />
 
             <Divider sx={{ my: 2 }} />
 
