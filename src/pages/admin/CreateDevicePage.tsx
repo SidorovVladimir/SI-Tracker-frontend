@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
+  CreateDeviceDocument,
   CreateProductionSiteDocument,
   GetCompaniesDocument,
   GetEquipmentTypesListDocument,
@@ -84,13 +85,13 @@ export default function CreateDevicePage() {
   const measurementTypesList = measurementTypesData?.measurementTypes || [];
   const scopesList = scopesData?.scopes || [];
 
-  const [createProductionSite, { loading: creating }] = useMutation(
-    CreateProductionSiteDocument,
+  const [createDevice, { loading: creating }] = useMutation(
+    CreateDeviceDocument,
     {
-      refetchQueries: [{ query: GetProductionSitesForSelectDocument }],
-      awaitRefetchQueries: true,
+      // refetchQueries: [{ query: GetProductionSitesForSelectDocument }],
+      // awaitRefetchQueries: true,
       onCompleted: () => {
-        enqueueSnackbar('Производственный участок успешно создан', {
+        enqueueSnackbar('Прибор успешно создан', {
           variant: 'success',
         });
         // navigate(routes.admin.productionSites());
@@ -123,8 +124,23 @@ export default function CreateDevicePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createProductionSite({
-      variables: { input: form },
+    const data = {
+      ...form,
+      grsiNumber: form.grsiNumber || null,
+      releaseDate: form.releaseDate || null,
+      measurementRange: form.measurementRange || null,
+      accuracy: form.accuracy || null,
+      receiptDate: form.receiptDate || null,
+      manufacturer: form.manufacturer || null,
+      verificationInterval:
+        form.verificationInterval !== ''
+          ? Number(form.verificationInterval)
+          : null,
+      nomenclature: form.nomenclature || null,
+      scopes: form.scopes.map((scope) => scope.id),
+    };
+    await createDevice({
+      variables: { input: data },
     });
   };
 
