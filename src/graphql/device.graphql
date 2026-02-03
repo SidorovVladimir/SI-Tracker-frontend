@@ -22,3 +22,28 @@ mutation CreateDevice($input: CreateDeviceInput!) {
     updatedAt
   }
 }
+
+query GetDevicesList {
+  devices {
+    id
+    name
+    model
+    serialNumber
+    releaseDate
+    grsiNumber
+    measurementRange
+    accuracy
+    inventoryNumber
+    receiptDate
+    manufacturer
+    verificationInterval
+    archived
+    nomenclature
+    statusId
+    productionSiteId
+    equipmentTypeId
+    measurementTypeId
+    createdAt
+    updatedAt
+  }
+}
