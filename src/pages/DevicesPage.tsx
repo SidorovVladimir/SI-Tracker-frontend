@@ -1,242 +1,260 @@
 import { useQuery } from '@apollo/client/react';
-import { GetDevicesListDocument } from '../graphql/types/__generated__/graphql';
+import {
+  GetDevicesWithRelationsListDocument,
+  GetDevicesWithRelationsListQuery,
+} from '../graphql/types/__generated__/graphql';
 import {
   Box,
   Button,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
+  Slide,
 } from '@mui/material';
+import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
+import { useState } from 'react';
+
+type Device = GetDevicesWithRelationsListQuery['devicesWithRelations'][0];
 
 export default function DevicesPage() {
-  const { data, loading } = useQuery(GetDevicesListDocument);
+  const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
+  const devices = (data?.devicesWithRelations as Device[]) || [];
 
-  if (loading)
-    return (
-      <Typography sx={{ p: 4, textAlign: 'center' }}>Загрузка...</Typography>
-    );
-  const devices = data?.devices || [];
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
+
+  const columns: GridColDef[] = [
+    { field: 'city', headerName: 'Город', flex: 1, minWidth: 100 },
+    { field: 'company', headerName: 'Организация', flex: 1, minWidth: 160 },
+    {
+      field: 'productionSite',
+      headerName: 'Подразделение',
+      flex: 1,
+      minWidth: 160,
+    },
+    { field: 'name', headerName: 'Наименование', flex: 1, minWidth: 200 },
+    { field: 'model', headerName: 'Тип СИ', flex: 1, minWidth: 120 },
+    {
+      field: 'serialNumber',
+      headerName: 'Заводской номер',
+      flex: 1,
+      minWidth: 130,
+    },
+    {
+      field: 'inventoryNumber',
+      headerName: 'Инвентарный номер',
+      flex: 1,
+      minWidth: 130,
+    },
+    {
+      field: 'verificationDate',
+      headerName: 'Дата поверки',
+      flex: 1,
+      minWidth: 130,
+    },
+    {
+      field: 'verificationNextDate',
+      headerName: 'Дата следующей поверки',
+      flex: 1,
+      minWidth: 150,
+    },
+    {
+      field: 'metrologyControlType',
+      headerName: 'Вид работ',
+      flex: 1,
+      minWidth: 140,
+    },
+    { field: 'status', headerName: 'Состояние', flex: 1, minWidth: 120 },
+    {
+      field: 'grsiNumber',
+      headerName: 'Госреестр',
+      flex: 1,
+      minWidth: 130,
+      valueFormatter: (value) => (value ? value : '-'),
+    },
+    {
+      field: 'certificate',
+      headerName: 'Свидетельство',
+      flex: 1,
+      minWidth: 130,
+    },
+    {
+      field: 'releaseDate',
+      headerName: 'Дата производства',
+      flex: 1,
+      minWidth: 130,
+    },
+    {
+      field: 'manufacturer',
+      headerName: 'Изготовитель',
+      flex: 1,
+      minWidth: 160,
+    },
+  ];
+
+  const handleRowClick = (params: GridRowParams) => {
+    setSelectedDevice(params.row);
+  };
+
+  const closeDetails = () => {
+    setSelectedDevice(null);
+  };
+
   return (
     <Paper
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
         height: 'calc(100dvh - 200px)',
         margin: 2,
-        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
         borderRadius: 2,
-        boxShadow: 3,
+        overflow: 'hidden',
+        bgcolor: 'transparent',
+        boxShadow: 'none',
+        border: 'none',
       }}
     >
       <Box
         sx={{
-          p: 2,
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 2,
-          flexWrap: 'wrap',
-        }}
-      >
-        <Typography variant="h6">Устройства</Typography>
-        <Box sx={{ display: 'flex', gap: 1, flexGrow: 1, maxWidth: 500 }}>
-          <TextField size="small" placeholder="Поиск..." fullWidth />
-          <Button variant="outlined" size="small">
-            Фильтры
-          </Button>
-        </Box>
-        <Button variant="contained">Добавить устройство</Button>
-      </Box>
-
-      {/* Прокручиваемая таблица */}
-      <TableContainer
-        sx={{
           flexGrow: 1,
-          overflowY: 'auto',
-          '&::-webkit-scrollbar': { width: 6 },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: 'rgba(0,0,0,.2)',
+          gap: 2,
+          p: 1,
+        }}
+      >
+        <Box
+          sx={{
+            width: selectedDevice ? '70%' : '100%',
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
             borderRadius: 3,
-          },
-        }}
-      >
-        <Table stickyHeader size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Наименование
-              </TableCell>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Тип
-              </TableCell>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Изготовитель
-              </TableCell>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Заводской номер
-              </TableCell>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Дата выпуска
-              </TableCell>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Диапазон измерений
-              </TableCell>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Точность
-              </TableCell>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                }}
-              >
-                ГРСИ
-              </TableCell>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Дата создания
-              </TableCell>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 12,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Дата обновления
-              </TableCell>
-              <TableCell>test</TableCell>
-              <TableCell>test</TableCell>
-              <TableCell>test</TableCell>
-              <TableCell>test</TableCell>
-              <TableCell>test</TableCell>
-              <TableCell>test</TableCell>
-              <TableCell>test</TableCell>
-              <TableCell>test</TableCell>
-              <TableCell>test</TableCell>
-              <TableCell>test</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {devices.map((device) => (
-              <TableRow
-                key={device.id}
-                sx={{
-                  '&:nth-of-type(odd)': {
-                    backgroundColor: 'background.default',
-                  },
-                  '&:nth-of-type(even)': {
-                    backgroundColor: 'grey.50',
-                  },
-                  '&:hover': {
-                    backgroundColor: 'action.hover',
-                    transition: 'background-color 0.1s ease',
-                  },
-                }}
-              >
-                <TableCell
-                  sx={{
-                    width: '20%',
-                    minWidth: 150,
-                    maxWidth: 250,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    fontSize: 13,
-                    py: 0.7,
-                    px: 1,
-                  }}
-                >
-                  {device.name}
-                </TableCell>
-                <TableCell>{device.model}</TableCell>
-                <TableCell>{device.manufacturer}</TableCell>
-                <TableCell>{device.serialNumber}</TableCell>
-                <TableCell>{device.releaseDate}</TableCell>
-                <TableCell>{device.measurementRange}</TableCell>
-                <TableCell>{device.accuracy}</TableCell>
-                <TableCell>{device.grsiNumber}</TableCell>
-                <TableCell>{formatDate(device.createdAt)}</TableCell>
-                <TableCell>{formatDate(device.updatedAt)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            overflow: 'hidden',
+            boxShadow: 4,
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            transition: 'width 0.4s ease-in-out',
+          }}
+        >
+          <Box
+            sx={{
+              p: 2,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 2,
+              flexWrap: 'wrap',
+              borderBottom: 1,
+              borderColor: 'divider',
+              bgcolor: 'background.default',
+            }}
+          >
+            <Typography variant="h6">Средства измерения</Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexGrow: 1, maxWidth: 500 }}>
+              <TextField size="small" placeholder="Поиск..." fullWidth />
+              <Button variant="outlined" size="small">
+                Фильтры
+              </Button>
+            </Box>
+            <Button variant="contained">Добавить СИ</Button>
+          </Box>
 
-      {/* Пагинация (заглушка) */}
-      <Box
-        sx={{
-          p: 2,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          Показано 1–10 из 100
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button size="small" disabled>
-            Предыдущая
-          </Button>
-          <Button size="small">Следующая</Button>
+          <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+            <DataGrid
+              rows={devices}
+              columns={columns}
+              loading={loading}
+              pagination
+              // pageSizeOptions={[10, 25, 50]}
+              onRowClick={handleRowClick}
+              disableColumnSorting
+              disableColumnFilter
+              hideFooterSelectedRowCount
+              localeText={{
+                columnMenuHideColumn: 'Скрыть столбец',
+                columnMenuManageColumns: 'Управлять колонками',
+                noRowsLabel: 'Нет средств измерения',
+                paginationRowsPerPage: 'Кол-во СИ на странице:',
+              }}
+              getRowId={(row) => row.id}
+              sx={{
+                '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
+                  outline: 'none',
+                },
+                '& .MuiDataGrid-row:hover': {
+                  backgroundColor: 'action.hover',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease',
+                },
+                '& .Mui-selected': {
+                  backgroundColor: 'rgba(25, 100, 255, 0.08)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(25, 100, 255, 0.12)',
+                  },
+                  transition: 'background-color 0.2s ease',
+                },
+              }}
+              getRowClassName={(params: GridRowParams<Device>) =>
+                selectedDevice?.id === params.row.id ? 'Mui-selected' : ''
+              }
+            />
+          </Box>
         </Box>
+
+        <Slide
+          direction="left"
+          in={!!selectedDevice}
+          mountOnEnter
+          unmountOnExit
+        >
+          <Box
+            sx={{
+              width: '30%',
+              minWidth: 300,
+              maxHeight: '100%',
+              overflowY: 'auto',
+              borderRadius: 3,
+              boxShadow: 4,
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Редактировать СИ
+            </Typography>
+            {selectedDevice && (
+              <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
+                {/* {Object.entries(selectedDevice).map(([key, value]) => (
+                  <li key={key}>
+                    <Typography
+                      component="div"
+                      variant="body2"
+                      sx={{ mb: 1.5 }}
+                    >
+                      <strong>{key}:</strong>{' '}
+                      {typeof value === 'string' && value.includes('T')
+                        ? formatDate(new Date(value))
+                        : String(value || '-')}
+                    </Typography>
+                  </li>
+                ))} */}
+              </Box>
+            )}
+            <Button
+              onClick={closeDetails}
+              size="small"
+              variant="outlined"
+              sx={{ mt: 'auto', alignSelf: 'flex-start' }}
+            >
+              Скрыть
+            </Button>
+          </Box>
+        </Slide>
       </Box>
     </Paper>
   );

@@ -47,3 +47,26 @@ query GetDevicesList {
     updatedAt
   }
 }
+
+query GetDevicesWithRelationsList {
+  devicesWithRelations {
+    id
+    name
+    model
+    serialNumber
+    releaseDate
+    grsiNumber
+    measurementRange
+    accuracy
+    inventoryNumber
+    receiptDate
+    manufacturer
+    verificationInterval
+    archived
+    nomenclature
+    status
+    city
+    company
+    productionSite
+  }
+}
