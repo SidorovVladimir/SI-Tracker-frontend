@@ -18,6 +18,15 @@ import { useState } from 'react';
 type Device = GetDevicesWithRelationsListQuery['devicesWithRelations'][0];
 
 export default function DevicesPage() {
+  const [columnVisibilityModel, setColumnVisibilityModel] = useState<
+    Record<string, boolean>
+  >(() => {
+    const saved = localStorage.getItem('devicesColumnVisibility');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  });
+
   const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
   const devices = (data?.devicesWithRelations as Device[]) || [];
 
@@ -83,12 +92,14 @@ export default function DevicesPage() {
       headerName: 'Дата производства',
       flex: 1,
       minWidth: 130,
+      valueFormatter: (value) => (value ? formatDate(value) : '-'),
     },
     {
       field: 'manufacturer',
       headerName: 'Изготовитель',
       flex: 1,
       minWidth: 160,
+      valueFormatter: (value) => (value ? value : '-'),
     },
   ];
 
@@ -98,6 +109,13 @@ export default function DevicesPage() {
 
   const closeDetails = () => {
     setSelectedDevice(null);
+  };
+
+  const handleColumnVisibilityModelChange = (
+    newModel: Record<string, boolean>
+  ) => {
+    setColumnVisibilityModel(newModel);
+    localStorage.setItem('devicesColumnVisibility', JSON.stringify(newModel));
   };
 
   return (
@@ -171,6 +189,8 @@ export default function DevicesPage() {
               disableColumnSorting
               disableColumnFilter
               hideFooterSelectedRowCount
+              columnVisibilityModel={columnVisibilityModel}
+              onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
               localeText={{
                 columnMenuHideColumn: 'Скрыть столбец',
                 columnMenuManageColumns: 'Управлять колонками',
@@ -229,20 +249,17 @@ export default function DevicesPage() {
             </Typography>
             {selectedDevice && (
               <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
-                {/* {Object.entries(selectedDevice).map(([key, value]) => (
+                {Object.entries(selectedDevice).map(([key, value]) => (
                   <li key={key}>
                     <Typography
                       component="div"
                       variant="body2"
                       sx={{ mb: 1.5 }}
                     >
-                      <strong>{key}:</strong>{' '}
-                      {typeof value === 'string' && value.includes('T')
-                        ? formatDate(new Date(value))
-                        : String(value || '-')}
+                      <strong>{key}:</strong> {value}
                     </Typography>
                   </li>
-                ))} */}
+                ))}
               </Box>
             )}
             <Button

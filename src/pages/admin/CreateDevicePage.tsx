@@ -1,19 +1,16 @@
 import { useMutation, useQuery } from '@apollo/client/react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+// import { useNavigate } from 'react-router';
 import {
   CreateDeviceDocument,
-  CreateProductionSiteDocument,
-  GetCompaniesDocument,
   GetEquipmentTypesListDocument,
   GetMeasurementTypesListDocument,
   GetProductionSitesForSelectDocument,
   GetScopesListDocument,
-  GetSitiesDocument,
   GetStatusListDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
-import routes from '../../utils/routes';
+// import routes from '../../utils/routes';
 import {
   Autocomplete,
   Box,
@@ -118,7 +115,10 @@ export default function CreateDevicePage() {
     }
   };
 
-  const handleAutocompleteChange = (name: string, value: any) => {
+  const handleAutocompleteChange = (
+    name: string,
+    value: { id: string; name: string }[]
+  ) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
