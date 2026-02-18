@@ -33,7 +33,6 @@ import ScopesPage from './pages/admin/ScopesPage';
 import CreateScopePage from './pages/admin/CreateScopePage';
 import CreateStatusPage from './pages/admin/CreateStatusPage';
 import StatusesPage from './pages/admin/StatusesPage';
-import CreateDevicePage from './pages/admin/CreateDevicePage';
 
 function App() {
   return (
@@ -126,10 +125,6 @@ function App() {
               <Route
                 path={routes.admin.statuses()}
                 element={<StatusesPage />}
-              />
-              <Route
-                path={routes.admin.createDevice()}
-                element={<CreateDevicePage />}
               />
             </Route>
           </Route>

@@ -19,10 +19,6 @@ export default {
     editProductionSite: (productionSiteId: string | ':productionSiteId') =>
       `/admin/production-sites/${productionSiteId}/edit`,
     createProductionSite: () => '/admin/production-sites/create',
-    devices: () => '/admin/devices',
-    editDevice: (deviceId: string | ':deviceId') =>
-      `/admin/devices/${deviceId}/edit`,
-    createDevice: () => '/admin/devices/create',
     equipmentTypes: () => '/admin/equipment-types',
     createEquipmentType: () => '/admin/equipment-types/create',
     editEquipmentType: (equipmentTypeId: string | ':equipmentTypeId') =>

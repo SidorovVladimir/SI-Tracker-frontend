@@ -10,10 +10,16 @@ import {
   TextField,
   Typography,
   Slide,
+  IconButton,
+  Stack,
+  Tooltip,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
 import { useState } from 'react';
+import CreateDevicePage from './admin/CreateDevicePage';
+import EditDevicePage from './admin/EditDevicePage';
+import { Close } from '@mui/icons-material';
 
 type Device = GetDevicesWithRelationsListQuery['devicesWithRelations'][0];
 
@@ -29,8 +35,8 @@ export default function DevicesPage() {
 
   const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
   const devices = (data?.devicesWithRelations as Device[]) || [];
-
-  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
+  const [viewMode, setViewMode] = useState<'edit' | 'create' | null>(null);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
   const columns: GridColDef[] = [
     { field: 'city', headerName: 'Город', flex: 1, minWidth: 100 },
@@ -104,11 +110,18 @@ export default function DevicesPage() {
   ];
 
   const handleRowClick = (params: GridRowParams) => {
-    setSelectedDevice(params.row);
+    setSelectedDeviceId(params.row.id);
+    setViewMode('edit');
+  };
+
+  const handleAddClick = () => {
+    setSelectedDeviceId(null);
+    setViewMode('create');
   };
 
   const closeDetails = () => {
-    setSelectedDevice(null);
+    setViewMode(null);
+    setSelectedDeviceId(null);
   };
 
   const handleColumnVisibilityModelChange = (
@@ -142,7 +155,7 @@ export default function DevicesPage() {
       >
         <Box
           sx={{
-            width: selectedDevice ? '70%' : '100%',
+            width: viewMode ? '70%' : '100%',
             minWidth: 0,
             display: 'flex',
             flexDirection: 'column',
@@ -175,7 +188,9 @@ export default function DevicesPage() {
                 Фильтры
               </Button>
             </Box>
-            <Button variant="contained">Добавить СИ</Button>
+            <Button variant="contained" onClick={handleAddClick}>
+              Добавить СИ
+            </Button>
           </Box>
 
           <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
@@ -184,6 +199,8 @@ export default function DevicesPage() {
               columns={columns}
               loading={loading}
               pagination
+              // showCellVerticalBorder
+              density="compact"
               // pageSizeOptions={[10, 25, 50]}
               onRowClick={handleRowClick}
               disableColumnSorting
@@ -199,6 +216,11 @@ export default function DevicesPage() {
               }}
               getRowId={(row) => row.id}
               sx={{
+                '& .MuiDataGrid-columnHeaderTitle': {
+                  fontWeight: 700,
+                  color: 'text.primary',
+                  fontSize: '0.9rem',
+                },
                 '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
                   outline: 'none',
                 },
@@ -216,62 +238,60 @@ export default function DevicesPage() {
                 },
               }}
               getRowClassName={(params: GridRowParams<Device>) =>
-                selectedDevice?.id === params.row.id ? 'Mui-selected' : ''
+                selectedDeviceId === params.row.id ? 'Mui-selected' : ''
               }
             />
           </Box>
         </Box>
 
-        <Slide
-          direction="left"
-          in={!!selectedDevice}
-          mountOnEnter
-          unmountOnExit
-        >
-          <Box
-            sx={{
-              width: '30%',
-              minWidth: 300,
-              maxHeight: '100%',
-              overflowY: 'auto',
-              borderRadius: 3,
-              boxShadow: 4,
-              bgcolor: 'background.paper',
-              border: '1px solid',
-              borderColor: 'divider',
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              Редактировать СИ
-            </Typography>
-            {selectedDevice && (
-              <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
-                {Object.entries(selectedDevice).map(([key, value]) => (
-                  <li key={key}>
-                    <Typography
-                      component="div"
-                      variant="body2"
-                      sx={{ mb: 1.5 }}
-                    >
-                      <strong>{key}:</strong> {value}
-                    </Typography>
-                  </li>
-                ))}
+        {viewMode && (
+          <Box sx={{ width: '30%', minWidth: 300, position: 'relative' }}>
+            <Slide direction="left" in={!!viewMode} mountOnEnter unmountOnExit>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: 3,
+                  boxShadow: 4,
+                  bgcolor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  p: 3,
+                  overflowY: 'auto',
+                }}
+              >
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={3}
+                >
+                  <Typography variant="h6" gutterBottom>
+                    {viewMode === 'create'
+                      ? 'Добавить новое СИ'
+                      : 'Редактировать СИ'}
+                  </Typography>
+                  <Tooltip title="Закрыть">
+                    <IconButton onClick={closeDetails}>
+                      <Close />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
+
+                {viewMode === 'create' ? (
+                  <CreateDevicePage />
+                ) : (
+                  <EditDevicePage />
+                )}
               </Box>
-            )}
-            <Button
-              onClick={closeDetails}
-              size="small"
-              variant="outlined"
-              sx={{ mt: 'auto', alignSelf: 'flex-start' }}
-            >
-              Скрыть
-            </Button>
+            </Slide>
           </Box>
-        </Slide>
+        )}
       </Box>
     </Paper>
   );
