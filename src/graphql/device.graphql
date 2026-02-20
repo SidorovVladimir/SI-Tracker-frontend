@@ -64,9 +64,33 @@ query GetDevicesWithRelationsList {
     verificationInterval
     archived
     nomenclature
-    status
-    city
-    company
-    productionSite
+    status {
+      name
+    }
+    productionSite {
+      name
+      city {
+        name
+      }
+      company {
+        name
+      }
+    }
+    verifications {
+      id
+      date
+      validUntil
+      result
+      protocolNumber
+      organization
+      comment
+      documentUrl
+      metrologyControleType {
+        name
+      }
+    }
+    scopes {
+      name
+    }
   }
 }

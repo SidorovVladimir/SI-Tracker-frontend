@@ -39,13 +39,26 @@ export default function DevicesPage() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
   const columns: GridColDef[] = [
-    { field: 'city', headerName: 'Город', flex: 1, minWidth: 100 },
-    { field: 'company', headerName: 'Организация', flex: 1, minWidth: 160 },
+    {
+      field: 'city',
+      headerName: 'Город',
+      flex: 1,
+      minWidth: 100,
+      valueGetter: (_, row) => row.productionSite?.city?.name,
+    },
+    {
+      field: 'company',
+      headerName: 'Организация',
+      flex: 1,
+      minWidth: 160,
+      valueGetter: (_, row) => row.productionSite?.company?.name,
+    },
     {
       field: 'productionSite',
       headerName: 'Подразделение',
       flex: 1,
       minWidth: 160,
+      valueGetter: (_, row) => row.productionSite?.name,
     },
     { field: 'name', headerName: 'Наименование', flex: 1, minWidth: 200 },
     { field: 'model', headerName: 'Тип СИ', flex: 1, minWidth: 120 },
@@ -79,7 +92,13 @@ export default function DevicesPage() {
       flex: 1,
       minWidth: 140,
     },
-    { field: 'status', headerName: 'Состояние', flex: 1, minWidth: 120 },
+    {
+      field: 'status',
+      headerName: 'Состояние',
+      flex: 1,
+      minWidth: 120,
+      valueGetter: (_, row) => row.status?.name,
+    },
     {
       field: 'grsiNumber',
       headerName: 'Госреестр',
