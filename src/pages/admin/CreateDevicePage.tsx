@@ -1,25 +1,33 @@
 import { useMutation, useQuery } from '@apollo/client/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   CreateDeviceDocument,
   GetDevicesWithRelationsListDocument,
   GetEquipmentTypesListDocument,
   GetMeasurementTypesListDocument,
+  GetMetrologyControlTypesListDocument,
   GetProductionSitesForSelectDocument,
   GetScopesListDocument,
   GetStatusListDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Autocomplete,
   Box,
   Button,
   CircularProgress,
   Divider,
+  IconButton,
   MenuItem,
   Stack,
   TextField,
+  Tooltip,
+  Typography,
 } from '@mui/material';
+import { Add, ExpandMore } from '@mui/icons-material';
 
 export default function CreateDevicePage() {
   const { data: productionSiteData } = useQuery(
@@ -31,6 +39,9 @@ export default function CreateDevicePage() {
     GetMeasurementTypesListDocument
   );
   const { data: scopesData } = useQuery(GetScopesListDocument);
+  const { data: metrologyControlTypeData } = useQuery(
+    GetMetrologyControlTypesListDocument
+  );
 
   const [form, setForm] = useState<{
     name: string;
@@ -71,12 +82,72 @@ export default function CreateDevicePage() {
     measurementTypeId: '',
     scopes: [],
   });
+
+  const [verifications, setVerifications] = useState<
+    Array<{
+      id: number;
+      date: string;
+      validUntil: string;
+      result: string;
+      protocolNumber: string;
+      organization: string;
+      comment: string;
+      documentUrl: string;
+      metrologyControleTypeId: string;
+      collapsed: boolean;
+    }>
+  >([]);
+
+  const nextId = useRef<number>(0);
+
+  const addVerification = () => {
+    setVerifications((prev) => [
+      ...prev,
+      {
+        id: nextId.current++,
+        date: '',
+        validUntil: '',
+        result: '',
+        protocolNumber: '',
+        organization: '',
+        comment: '',
+        documentUrl: '',
+        metrologyControleTypeId: '',
+        deviceId: '',
+        collapsed: false,
+      },
+    ]);
+  };
+
+  const removeVerification = (id: number) => {
+    setVerifications((prev) => prev.filter((v) => v.id !== id));
+  };
+
+  const handleVerificationChange = (
+    id: number,
+    field: string,
+    value: string
+  ) => {
+    setVerifications((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, [field]: value } : v))
+    );
+  };
+
+  const toggleCollapse = (id: number) => {
+    setVerifications((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, collapsed: !v.collapsed } : v))
+    );
+  };
+
   const productionSiteList =
     productionSiteData?.getProductionSitesForSelect || [];
   const equipmentTypesList = equipmentTypesData?.equipmentTypes || [];
   const statusesList = statusesData?.statuses || [];
   const measurementTypesList = measurementTypesData?.measurementTypes || [];
   const scopesList = scopesData?.scopes || [];
+
+  const metrologyControlTypeList =
+    metrologyControlTypeData?.metrologyControlTypes || [];
 
   const [createDevice, { loading: creating }] = useMutation(
     CreateDeviceDocument,
@@ -119,6 +190,17 @@ export default function CreateDevicePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const verificationsInput = verifications.map((v) => ({
+      date: v.date || null,
+      validUntil: v.validUntil || null,
+      result: v.result || null,
+      protocolNumber: v.protocolNumber || null,
+      organization: v.organization || null,
+      comment: v.comment || null,
+      documentUrl: v.documentUrl || null,
+      metrologyControleTypeId: v.metrologyControleTypeId,
+    }));
+
     const data = {
       ...form,
       grsiNumber: form.grsiNumber || null,
@@ -133,6 +215,7 @@ export default function CreateDevicePage() {
           : null,
       nomenclature: form.nomenclature || null,
       scopes: form.scopes.map((scope) => scope.id),
+      verifications: verificationsInput,
     };
     await createDevice({
       variables: { input: data },
@@ -364,6 +447,182 @@ export default function CreateDevicePage() {
           />
 
           <Divider sx={{ my: 2 }} />
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={3}
+          >
+            <Typography variant="h6" gutterBottom>
+              Добавить данные поверок
+            </Typography>
+            <Tooltip title="Добавить">
+              <IconButton onClick={addVerification} color="primary">
+                <Add />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+          {verifications.length === 0 ? (
+            <Typography color="textSecondary" sx={{ mb: 2 }}>
+              Поверки не добавлены
+            </Typography>
+          ) : (
+            verifications.map((verification) => {
+              const year = verification.date
+                ? new Date(verification.date).getFullYear()
+                : 'Новая поверка';
+              return (
+                <Accordion
+                  key={verification.id}
+                  expanded={!verification.collapsed}
+                  onChange={() => toggleCollapse(verification.id)}
+                >
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <Typography>Поверка {year}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Stack spacing={2}>
+                      <TextField
+                        type="date"
+                        label="Дата поверки"
+                        value={verification.date}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'date',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                        slotProps={{
+                          inputLabel: { shrink: true },
+                        }}
+                      />
+                      <TextField
+                        type="date"
+                        label="Действует до"
+                        value={verification.validUntil}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'validUntil',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                        slotProps={{
+                          inputLabel: { shrink: true },
+                        }}
+                      />
+                      <TextField
+                        label="Номер свидетельства"
+                        value={verification.protocolNumber}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'protocolNumber',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                      />
+
+                      <TextField
+                        label="Результат"
+                        value={verification.result}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'result',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                      />
+
+                      <TextField
+                        label="Комментарий"
+                        value={verification.comment}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'comment',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                      />
+
+                      <TextField
+                        label="Организация поверитель"
+                        value={verification.organization}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'organization',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                      />
+                      <TextField
+                        label="Ссылка на документ"
+                        value={verification.documentUrl}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'documentUrl',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                      />
+
+                      <TextField
+                        id="outlined-select-currency"
+                        select
+                        label="Вид метрологического контроля"
+                        name="metrologyControleTypeId"
+                        size="small"
+                        fullWidth
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'metrologyControleTypeId',
+                            e.target.value
+                          )
+                        }
+                        value={verification.metrologyControleTypeId}
+                        required
+                      >
+                        {metrologyControlTypeList.map(({ id, name }) => (
+                          <MenuItem key={id} value={id}>
+                            {name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => removeVerification(verification.id)}
+                        sx={{ alignSelf: 'flex-start' }}
+                      >
+                        Удалить
+                      </Button>
+                    </Stack>
+                  </AccordionDetails>
+                </Accordion>
+              );
+            })
+          )}
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button
