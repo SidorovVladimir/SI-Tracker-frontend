@@ -5,7 +5,7 @@ export const formatDate = (
   value: string,
   dateFormat = 'd MMMM yyyy'
 ): string => {
-  if (!value) return '—';
+  if (!value) return '-';
 
   try {
     let date: Date;
@@ -19,6 +19,6 @@ export const formatDate = (
     return format(date, dateFormat, { locale: ru });
   } catch (err) {
     console.error('Invalid date value:', err);
-    return '—';
+    return '-';
   }
 };

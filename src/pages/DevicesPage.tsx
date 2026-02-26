@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import CreateDevicePage from './admin/CreateDevicePage';
 import EditDevicePage from './admin/EditDevicePage';
 import { Close } from '@mui/icons-material';
@@ -34,7 +34,25 @@ export default function DevicesPage() {
   });
 
   const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
-  const devices = (data?.devicesWithRelations as Device[]) || [];
+
+  const rows = useMemo(() => {
+    const rawDevices = (data?.devicesWithRelations as Device[]) || [];
+
+    return rawDevices.map((device) => {
+      const lastVerification =
+        device.verifications?.length > 0
+          ? device.verifications.reduce((prev, curr) =>
+              Number(curr.date) > Number(prev.date) ? curr : prev
+            )
+          : null;
+      return {
+        ...device,
+        latestVerification: lastVerification,
+      };
+    });
+  }, [data]);
+  console.log(rows);
+  // const devices = (data?.devicesWithRelations as Device[]) || [];
   const [viewMode, setViewMode] = useState<'edit' | 'create' | null>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
@@ -79,18 +97,28 @@ export default function DevicesPage() {
       headerName: 'Дата поверки',
       flex: 1,
       minWidth: 130,
+      valueGetter: (_, row) =>
+        row.latestVerification ? formatDate(row.latestVerification.date) : '-',
     },
     {
       field: 'verificationNextDate',
       headerName: 'Дата следующей поверки',
       flex: 1,
       minWidth: 150,
+      valueGetter: (_, row) =>
+        row.latestVerification
+          ? formatDate(row.latestVerification.validUntil)
+          : '-',
     },
     {
       field: 'metrologyControlType',
       headerName: 'Вид работ',
       flex: 1,
       minWidth: 140,
+      valueGetter: (_, row) =>
+        row.latestVerification
+          ? row.latestVerification.metrologyControleType.name
+          : '-',
     },
     {
       field: 'status',
@@ -111,6 +139,8 @@ export default function DevicesPage() {
       headerName: 'Свидетельство',
       flex: 1,
       minWidth: 130,
+      valueGetter: (_, row) =>
+        row.latestVerification ? row.latestVerification.protocolNumber : '-',
     },
     {
       field: 'releaseDate',
@@ -214,7 +244,7 @@ export default function DevicesPage() {
 
           <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
             <DataGrid
-              rows={devices}
+              rows={rows}
               columns={columns}
               loading={loading}
               pagination
