@@ -94,3 +94,50 @@ query GetDevicesWithRelationsList {
     }
   }
 }
+
+query GetDeviceWithRelation($id: ID!) {
+  device(id: $id) {
+    id
+    name
+    model
+    serialNumber
+    releaseDate
+    grsiNumber
+    measurementRange
+    accuracy
+    inventoryNumber
+    receiptDate
+    manufacturer
+    verificationInterval
+    archived
+    nomenclature
+    status {
+      name
+    }
+    productionSite {
+      name
+      city {
+        name
+      }
+      company {
+        name
+      }
+    }
+    verifications {
+      id
+      date
+      validUntil
+      result
+      protocolNumber
+      organization
+      comment
+      documentUrl
+      metrologyControleType {
+        name
+      }
+    }
+    scopes {
+      name
+    }
+  }
+}

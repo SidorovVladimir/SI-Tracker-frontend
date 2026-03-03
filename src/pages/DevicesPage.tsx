@@ -51,7 +51,6 @@ export default function DevicesPage() {
       };
     });
   }, [data]);
-  console.log(rows);
   // const devices = (data?.devicesWithRelations as Device[]) || [];
   const [viewMode, setViewMode] = useState<'edit' | 'create' | null>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
@@ -335,7 +334,7 @@ export default function DevicesPage() {
                 {viewMode === 'create' ? (
                   <CreateDevicePage />
                 ) : (
-                  <EditDevicePage />
+                  <EditDevicePage deviceId={selectedDeviceId!} />
                 )}
               </Box>
             </Slide>

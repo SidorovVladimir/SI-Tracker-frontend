@@ -143,11 +143,13 @@ export type DeviceWithRelations = {
   __typename: 'DeviceWithRelations';
   accuracy: Maybe<Scalars['String']['output']>;
   archived: Scalars['Boolean']['output'];
+  equimentType: Maybe<EquipmentType>;
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inventoryNumber: Scalars['String']['output'];
   manufacturer: Maybe<Scalars['String']['output']>;
   measurementRange: Maybe<Scalars['String']['output']>;
+  measurementType: Maybe<MeasurementType>;
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
   nomenclature: Maybe<Scalars['String']['output']>;
@@ -375,7 +377,7 @@ export type Query = {
   city: City;
   companies: Array<Company>;
   company: Company;
-  device: Device;
+  device: DeviceWithRelations;
   devices: Array<Device>;
   devicesWithRelations: Array<DeviceWithRelations>;
   equipmentType: EquipmentType;
@@ -826,6 +828,53 @@ export type GetDevicesWithRelationsListQuery = {
     }>;
     scopes: Array<{ __typename: 'Scope'; name: string }>;
   }>;
+};
+
+export type GetDeviceWithRelationQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type GetDeviceWithRelationQuery = {
+  device: {
+    __typename: 'DeviceWithRelations';
+    id: string;
+    name: string;
+    model: string;
+    serialNumber: string;
+    releaseDate: string | null;
+    grsiNumber: string | null;
+    measurementRange: string | null;
+    accuracy: string | null;
+    inventoryNumber: string;
+    receiptDate: string | null;
+    manufacturer: string | null;
+    verificationInterval: number | null;
+    archived: boolean;
+    nomenclature: string | null;
+    status: { __typename: 'Status'; name: string };
+    productionSite: {
+      __typename: 'ProductionSiteRelation';
+      name: string;
+      city: { __typename: 'City'; name: string };
+      company: { __typename: 'Company'; name: string };
+    };
+    verifications: Array<{
+      __typename: 'VerificationRelation';
+      id: string;
+      date: string | null;
+      validUntil: string | null;
+      result: string | null;
+      protocolNumber: string | null;
+      organization: string | null;
+      comment: string | null;
+      documentUrl: string | null;
+      metrologyControleType: {
+        __typename: 'MetrologyControlType';
+        name: string;
+      };
+    }>;
+    scopes: Array<{ __typename: 'Scope'; name: string }>;
+  };
 };
 
 export type GetEquipmentTypesListQueryVariables = Exact<{
@@ -2184,6 +2233,189 @@ export const GetDevicesWithRelationsListDocument = {
 } as unknown as DocumentNode<
   GetDevicesWithRelationsListQuery,
   GetDevicesWithRelationsListQueryVariables
+>;
+export const GetDeviceWithRelationDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetDeviceWithRelation' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'device' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'model' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'serialNumber' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'releaseDate' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'grsiNumber' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'measurementRange' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'accuracy' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'inventoryNumber' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'receiptDate' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'manufacturer' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'verificationInterval' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'archived' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'nomenclature' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'status' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'productionSite' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'city' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'company' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'verifications' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'validUntil' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'result' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'protocolNumber' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'organization' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'comment' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'documentUrl' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'metrologyControleType' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'scopes' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetDeviceWithRelationQuery,
+  GetDeviceWithRelationQueryVariables
 >;
 export const GetEquipmentTypesListDocument = {
   kind: 'Document',
