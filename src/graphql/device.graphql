@@ -112,14 +112,18 @@ query GetDeviceWithRelation($id: ID!) {
     archived
     nomenclature
     status {
+      id
       name
     }
     productionSite {
+      id
       name
       city {
+        id
         name
       }
       company {
+        id
         name
       }
     }
@@ -131,12 +135,15 @@ query GetDeviceWithRelation($id: ID!) {
       protocolNumber
       organization
       comment
+      deviceId
       documentUrl
       metrologyControleType {
+        id
         name
       }
     }
     scopes {
+      id
       name
     }
   }

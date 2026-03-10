@@ -851,12 +851,13 @@ export type GetDeviceWithRelationQuery = {
     verificationInterval: number | null;
     archived: boolean;
     nomenclature: string | null;
-    status: { __typename: 'Status'; name: string };
+    status: { __typename: 'Status'; id: string; name: string };
     productionSite: {
       __typename: 'ProductionSiteRelation';
+      id: string;
       name: string;
-      city: { __typename: 'City'; name: string };
-      company: { __typename: 'Company'; name: string };
+      city: { __typename: 'City'; id: string; name: string };
+      company: { __typename: 'Company'; id: string; name: string };
     };
     verifications: Array<{
       __typename: 'VerificationRelation';
@@ -867,13 +868,15 @@ export type GetDeviceWithRelationQuery = {
       protocolNumber: string | null;
       organization: string | null;
       comment: string | null;
+      deviceId: string;
       documentUrl: string | null;
       metrologyControleType: {
         __typename: 'MetrologyControlType';
+        id: string;
         name: string;
       };
     }>;
-    scopes: Array<{ __typename: 'Scope'; name: string }>;
+    scopes: Array<{ __typename: 'Scope'; id: string; name: string }>;
   };
 };
 
@@ -2308,6 +2311,7 @@ export const GetDeviceWithRelationDocument = {
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                     ],
                   },
@@ -2318,6 +2322,7 @@ export const GetDeviceWithRelationDocument = {
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                       {
                         kind: 'Field',
@@ -2325,6 +2330,10 @@ export const GetDeviceWithRelationDocument = {
                         selectionSet: {
                           kind: 'SelectionSet',
                           selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'name' },
@@ -2338,6 +2347,10 @@ export const GetDeviceWithRelationDocument = {
                         selectionSet: {
                           kind: 'SelectionSet',
                           selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'name' },
@@ -2378,6 +2391,10 @@ export const GetDeviceWithRelationDocument = {
                       },
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'deviceId' },
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'documentUrl' },
                       },
                       {
@@ -2386,6 +2403,10 @@ export const GetDeviceWithRelationDocument = {
                         selectionSet: {
                           kind: 'SelectionSet',
                           selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'name' },
@@ -2402,6 +2423,7 @@ export const GetDeviceWithRelationDocument = {
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                     ],
                   },

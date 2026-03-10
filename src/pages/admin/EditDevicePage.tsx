@@ -78,6 +78,7 @@ function UserForm({
   const { data: metrologyControlTypeData } = useQuery(
     GetMetrologyControlTypesListDocument
   );
+
   const [form, setForm] = useState<{
     name: string;
     model: string;
@@ -109,18 +110,33 @@ function UserForm({
     receiptDate: device.receiptDate || '',
     manufacturer: device.manufacturer || '',
     verificationInterval: device.verificationInterval || '',
-    archived: false,
+    archived: device.archived,
     nomenclature: device.nomenclature || '',
-    statusId: '',
-    productionSiteId: '',
+    statusId: device.status.id || '',
+    productionSiteId: device.productionSite.id || '',
     equipmentTypeId: '',
     measurementTypeId: '',
-    scopes: [],
+    scopes: device.scopes,
+  });
+  const verificationsState = device.verifications.map((verification) => {
+    return {
+      id: verification.id,
+      date: verification.date || '',
+      validUntil: verification.validUntil || '',
+      result: verification.result || '',
+      protocolNumber: verification.protocolNumber || '',
+      organization: verification.organization || '',
+      comment: verification.comment || '',
+      documentUrl: verification.documentUrl || '',
+      metrologyControleTypeId: verification.metrologyControleType.id,
+      deviceId: verification.deviceId,
+      collapsed: false,
+    };
   });
 
   const [verifications, setVerifications] = useState<
     Array<{
-      id: number;
+      id: string;
       date: string;
       validUntil: string;
       result: string;
@@ -128,18 +144,19 @@ function UserForm({
       organization: string;
       comment: string;
       documentUrl: string;
+      deviceId: string;
       metrologyControleTypeId: string;
       collapsed: boolean;
     }>
-  >([]);
+  >(verificationsState);
 
-  const nextId = useRef<number>(0);
+  //  const nextId = useRef<number>(0);
 
   const addVerification = () => {
     setVerifications((prev) => [
       ...prev,
       {
-        id: nextId.current++,
+        id: `new-${Date.now()}`,
         date: '',
         validUntil: '',
         result: '',
@@ -154,12 +171,12 @@ function UserForm({
     ]);
   };
 
-  const removeVerification = (id: number) => {
+  const removeVerification = (id: string) => {
     setVerifications((prev) => prev.filter((v) => v.id !== id));
   };
 
   const handleVerificationChange = (
-    id: number,
+    id: string,
     field: string,
     value: string
   ) => {
@@ -168,7 +185,7 @@ function UserForm({
     );
   };
 
-  const toggleCollapse = (id: number) => {
+  const toggleCollapse = (id: string) => {
     setVerifications((prev) =>
       prev.map((v) => (v.id === id ? { ...v, collapsed: !v.collapsed } : v))
     );
