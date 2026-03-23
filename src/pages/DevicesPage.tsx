@@ -334,7 +334,10 @@ export default function DevicesPage() {
                 {viewMode === 'create' ? (
                   <CreateDevicePage />
                 ) : (
-                  <EditDevicePage deviceId={selectedDeviceId!} />
+                  <EditDevicePage
+                    deviceId={selectedDeviceId!}
+                    closeDetails={closeDetails}
+                  />
                 )}
               </Box>
             </Slide>

@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 import {
   CreateDeviceDocument,
+  DeleteDeviceDocument,
   GetDevicesWithRelationsListDocument,
   GetDeviceWithRelationDocument,
   GetDeviceWithRelationQuery,
@@ -11,6 +12,7 @@ import {
   GetProductionSitesForSelectDocument,
   GetScopesListDocument,
   GetStatusListDocument,
+  UpdateDeviceDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
 import {
@@ -31,8 +33,13 @@ import {
   Typography,
 } from '@mui/material';
 import { Add, ExpandMore } from '@mui/icons-material';
+import { id } from 'date-fns/locale';
 
-export default function EditDevicePage({ deviceId }: { deviceId: string }) {
+export default function EditDevicePage(props: {
+  deviceId: string;
+  closeDetails: () => void;
+}) {
+  const { deviceId, closeDetails } = props;
   const {
     data: deviceData,
     loading,
@@ -58,13 +65,21 @@ export default function EditDevicePage({ deviceId }: { deviceId: string }) {
     );
   if (!deviceData?.device) return <Alert>СИ не найдено</Alert>;
 
-  return <UserForm key={deviceId} device={deviceData.device} />;
+  return (
+    <UserForm
+      key={deviceId}
+      device={deviceData.device}
+      closeDetails={closeDetails}
+    />
+  );
 }
 
 function UserForm({
   device,
+  closeDetails,
 }: {
   device: NonNullable<GetDeviceWithRelationQuery['device']>;
+  closeDetails: () => void;
 }) {
   const { data: productionSiteData } = useQuery(
     GetProductionSitesForSelectDocument
@@ -201,15 +216,16 @@ function UserForm({
   const metrologyControlTypeList =
     metrologyControlTypeData?.metrologyControlTypes || [];
 
-  const [createDevice, { loading: creating }] = useMutation(
-    CreateDeviceDocument,
+  const [updateDevice, { loading: updating }] = useMutation(
+    UpdateDeviceDocument,
     {
       refetchQueries: [{ query: GetDevicesWithRelationsListDocument }],
       awaitRefetchQueries: true,
       onCompleted: () => {
-        enqueueSnackbar('Прибор успешно создан', {
+        enqueueSnackbar('Прибор успешно обновлен', {
           variant: 'success',
         });
+        closeDetails();
       },
       onError: (error) => {
         enqueueSnackbar(`Ошибка создания: ${error.message}`, {
@@ -218,6 +234,29 @@ function UserForm({
       },
     }
   );
+
+  const [deleteDevice, { loading: deleting }] = useMutation(
+    DeleteDeviceDocument,
+    {
+      refetchQueries: [{ query: GetDevicesWithRelationsListDocument }],
+      awaitRefetchQueries: true,
+      onCompleted: () => {
+        enqueueSnackbar('Прибор успешно удален', {
+          variant: 'success',
+        });
+        closeDetails();
+      },
+      onError: (error) => {
+        enqueueSnackbar(`Ошибка создания: ${error.message}`, {
+          variant: 'error',
+        });
+      },
+    }
+  );
+
+  const handleDelete = async (deviceId: string) => {
+    await deleteDevice({ variables: { id: deviceId } });
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -269,9 +308,10 @@ function UserForm({
       scopes: form.scopes.map((scope) => scope.id),
       verifications: verificationsInput,
     };
-    await createDevice({
-      variables: { input: data },
+    await updateDevice({
+      variables: { id: device.id, input: data },
     });
+    closeDetails();
   };
 
   return (
@@ -676,15 +716,26 @@ function UserForm({
             })
           )}
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Button
+              type="button"
+              onClick={() => handleDelete(device.id)}
+              color="error"
+              variant="contained"
+              size="large"
+              disabled={deleting}
+              startIcon={deleting && <CircularProgress size={16} />}
+            >
+              {deleting ? 'Удаление...' : 'Удалить СИ'}
+            </Button>
             <Button
               type="submit"
               variant="contained"
               size="large"
-              disabled={creating}
-              startIcon={creating && <CircularProgress size={16} />}
+              disabled={updating}
+              startIcon={updating && <CircularProgress size={16} />}
             >
-              {creating ? 'Сохранение...' : 'Сохранить'}
+              {updating ? 'Сохранение...' : 'Сохранить'}
             </Button>
           </Box>
         </Stack>

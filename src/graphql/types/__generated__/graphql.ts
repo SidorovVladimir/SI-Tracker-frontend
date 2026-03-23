@@ -206,6 +206,7 @@ export type Mutation = {
   createUser: User;
   deleteCity: Scalars['Boolean']['output'];
   deleteCompany: Scalars['Boolean']['output'];
+  deleteDevice: Scalars['Boolean']['output'];
   deleteEquipmentType: Scalars['Boolean']['output'];
   deleteMeasurementType: Scalars['Boolean']['output'];
   deleteMetrologyControlType: Scalars['Boolean']['output'];
@@ -218,6 +219,7 @@ export type Mutation = {
   register: AuthPayload;
   updateCity: City;
   updateCompany: Company;
+  updateDevice: Device;
   updateEquipmentType: EquipmentType;
   updateMeasurementType: MeasurementType;
   updateMetrologyControlType: MetrologyControlType;
@@ -275,6 +277,10 @@ export type MutationDeleteCompanyArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type MutationDeleteDeviceArgs = {
+  id: Scalars['ID']['input'];
+};
+
 export type MutationDeleteEquipmentTypeArgs = {
   id: Scalars['ID']['input'];
 };
@@ -319,6 +325,11 @@ export type MutationUpdateCityArgs = {
 export type MutationUpdateCompanyArgs = {
   id: Scalars['ID']['input'];
   input: UpdateCompanyInput;
+};
+
+export type MutationUpdateDeviceArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateDeviceInput;
 };
 
 export type MutationUpdateEquipmentTypeArgs = {
@@ -461,6 +472,28 @@ export type UpdateCityInput = {
 export type UpdateCompanyInput = {
   address?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+};
+
+export type UpdateDeviceInput = {
+  accuracy?: InputMaybe<Scalars['String']['input']>;
+  archived: Scalars['Boolean']['input'];
+  equipmentTypeId: Scalars['ID']['input'];
+  grsiNumber?: InputMaybe<Scalars['String']['input']>;
+  inventoryNumber: Scalars['String']['input'];
+  manufacturer?: InputMaybe<Scalars['String']['input']>;
+  measurementRange?: InputMaybe<Scalars['String']['input']>;
+  measurementTypeId: Scalars['ID']['input'];
+  model: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  nomenclature?: InputMaybe<Scalars['String']['input']>;
+  productionSiteId: Scalars['ID']['input'];
+  receiptDate?: InputMaybe<Scalars['String']['input']>;
+  releaseDate?: InputMaybe<Scalars['String']['input']>;
+  scopes: Array<Scalars['ID']['input']>;
+  serialNumber: Scalars['String']['input'];
+  statusId: Scalars['ID']['input'];
+  verificationInterval?: InputMaybe<Scalars['Int']['input']>;
+  verifications: Array<VerificationInput>;
 };
 
 export type UpdateEquipmentTypeInput = {
@@ -883,6 +916,43 @@ export type GetDeviceWithRelationQuery = {
       };
     }>;
     scopes: Array<{ __typename: 'Scope'; id: string; name: string }>;
+  };
+};
+
+export type DeleteDeviceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type DeleteDeviceMutation = { deleteDevice: boolean };
+
+export type UpdateDeviceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateDeviceInput;
+}>;
+
+export type UpdateDeviceMutation = {
+  updateDevice: {
+    __typename: 'Device';
+    id: string;
+    name: string;
+    model: string;
+    serialNumber: string;
+    releaseDate: string | null;
+    grsiNumber: string | null;
+    measurementRange: string | null;
+    accuracy: string | null;
+    inventoryNumber: string;
+    receiptDate: string | null;
+    manufacturer: string | null;
+    verificationInterval: number | null;
+    archived: boolean;
+    nomenclature: string | null;
+    statusId: string;
+    productionSiteId: string;
+    equipmentTypeId: string;
+    measurementTypeId: string;
+    createdAt: string;
+    updatedAt: string;
   };
 };
 
@@ -2466,6 +2536,164 @@ export const GetDeviceWithRelationDocument = {
 } as unknown as DocumentNode<
   GetDeviceWithRelationQuery,
   GetDeviceWithRelationQueryVariables
+>;
+export const DeleteDeviceDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteDevice' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteDevice' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  DeleteDeviceMutation,
+  DeleteDeviceMutationVariables
+>;
+export const UpdateDeviceDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateDevice' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'UpdateDeviceInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateDevice' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'model' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'serialNumber' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'releaseDate' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'grsiNumber' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'measurementRange' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'accuracy' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'inventoryNumber' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'receiptDate' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'manufacturer' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'verificationInterval' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'archived' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'nomenclature' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'statusId' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'productionSiteId' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'equipmentTypeId' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'measurementTypeId' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  UpdateDeviceMutation,
+  UpdateDeviceMutationVariables
 >;
 export const GetEquipmentTypesListDocument = {
   kind: 'Document',

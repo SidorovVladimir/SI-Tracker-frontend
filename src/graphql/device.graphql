@@ -156,3 +156,32 @@ query GetDeviceWithRelation($id: ID!) {
     }
   }
 }
+
+mutation DeleteDevice($id: ID!) {
+  deleteDevice(id: $id)
+}
+
+mutation UpdateDevice($id: ID!, $input: UpdateDeviceInput!) {
+  updateDevice(id: $id, input: $input) {
+    id
+    name
+    model
+    serialNumber
+    releaseDate
+    grsiNumber
+    measurementRange
+    accuracy
+    inventoryNumber
+    receiptDate
+    manufacturer
+    verificationInterval
+    archived
+    nomenclature
+    statusId
+    productionSiteId
+    equipmentTypeId
+    measurementTypeId
+    createdAt
+    updatedAt
+  }
+}
