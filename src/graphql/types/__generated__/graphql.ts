@@ -143,13 +143,13 @@ export type DeviceWithRelations = {
   __typename: 'DeviceWithRelations';
   accuracy: Maybe<Scalars['String']['output']>;
   archived: Scalars['Boolean']['output'];
-  equimentType: Maybe<EquipmentType>;
+  equipmentType: EquipmentType;
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inventoryNumber: Scalars['String']['output'];
   manufacturer: Maybe<Scalars['String']['output']>;
   measurementRange: Maybe<Scalars['String']['output']>;
-  measurementType: Maybe<MeasurementType>;
+  measurementType: MeasurementType;
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
   nomenclature: Maybe<Scalars['String']['output']>;
@@ -851,6 +851,12 @@ export type GetDeviceWithRelationQuery = {
     verificationInterval: number | null;
     archived: boolean;
     nomenclature: string | null;
+    equipmentType: { __typename: 'EquipmentType'; id: string; name: string };
+    measurementType: {
+      __typename: 'MeasurementType';
+      id: string;
+      name: string;
+    };
     status: { __typename: 'Status'; id: string; name: string };
     productionSite: {
       __typename: 'ProductionSiteRelation';
@@ -2304,6 +2310,28 @@ export const GetDeviceWithRelationDocument = {
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'nomenclature' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'equipmentType' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'measurementType' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
                 },
                 {
                   kind: 'Field',

@@ -111,6 +111,14 @@ query GetDeviceWithRelation($id: ID!) {
     verificationInterval
     archived
     nomenclature
+    equipmentType {
+      id
+      name
+    }
+    measurementType {
+      id
+      name
+    }
     status {
       id
       name

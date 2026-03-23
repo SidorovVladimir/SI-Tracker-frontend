@@ -114,14 +114,14 @@ function UserForm({
     nomenclature: device.nomenclature || '',
     statusId: device.status.id || '',
     productionSiteId: device.productionSite.id || '',
-    equipmentTypeId: '',
-    measurementTypeId: '',
+    equipmentTypeId: device.equipmentType.id || '',
+    measurementTypeId: device.measurementType.id || '',
     scopes: device.scopes,
   });
   const verificationsState = device.verifications.map((verification) => {
     return {
       id: verification.id,
-      date: verification.date || '',
+      date: new Date(Number(verification.date)).toLocaleString() || '',
       validUntil: verification.validUntil || '',
       result: verification.result || '',
       protocolNumber: verification.protocolNumber || '',
