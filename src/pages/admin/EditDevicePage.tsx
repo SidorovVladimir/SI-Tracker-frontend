@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client/react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import {
-  CreateDeviceDocument,
   DeleteDeviceDocument,
   GetDevicesWithRelationsListDocument,
   GetDeviceWithRelationDocument,
@@ -33,7 +32,6 @@ import {
   Typography,
 } from '@mui/material';
 import { Add, ExpandMore } from '@mui/icons-material';
-import { id } from 'date-fns/locale';
 
 export default function EditDevicePage(props: {
   deviceId: string;
@@ -117,12 +115,12 @@ function UserForm({
     name: device.name || '',
     model: device.model || '',
     serialNumber: device.serialNumber || '',
-    releaseDate: device.releaseDate || '',
+    releaseDate: new Date(Number(device.releaseDate)).toISOString() || '',
     grsiNumber: device.grsiNumber || '',
     measurementRange: device.measurementRange || '',
     accuracy: device.accuracy || '',
     inventoryNumber: device.inventoryNumber || '',
-    receiptDate: device.receiptDate || '',
+    receiptDate: new Date(Number(device.receiptDate)).toISOString() || '',
     manufacturer: device.manufacturer || '',
     verificationInterval: device.verificationInterval || '',
     archived: device.archived,
@@ -136,8 +134,8 @@ function UserForm({
   const verificationsState = device.verifications.map((verification) => {
     return {
       id: verification.id,
-      date: new Date(Number(verification.date)).toLocaleString() || '',
-      validUntil: verification.validUntil || '',
+      date: new Date(Number(verification.date)).toISOString() || '',
+      validUntil: new Date(Number(verification.validUntil)).toISOString() || '',
       result: verification.result || '',
       protocolNumber: verification.protocolNumber || '',
       organization: verification.organization || '',
@@ -145,7 +143,7 @@ function UserForm({
       documentUrl: verification.documentUrl || '',
       metrologyControleTypeId: verification.metrologyControleType.id,
       deviceId: verification.deviceId,
-      collapsed: false,
+      collapsed: true,
     };
   });
 
@@ -164,8 +162,6 @@ function UserForm({
       collapsed: boolean;
     }>
   >(verificationsState);
-
-  //  const nextId = useRef<number>(0);
 
   const addVerification = () => {
     setVerifications((prev) => [
@@ -228,7 +224,7 @@ function UserForm({
         closeDetails();
       },
       onError: (error) => {
-        enqueueSnackbar(`Ошибка создания: ${error.message}`, {
+        enqueueSnackbar(`Ошибка обновления: ${error.message}`, {
           variant: 'error',
         });
       },
@@ -311,7 +307,6 @@ function UserForm({
     await updateDevice({
       variables: { id: device.id, input: data },
     });
-    closeDetails();
   };
 
   return (
@@ -392,7 +387,7 @@ function UserForm({
             type="date"
             label="Дата выпуска"
             name="releaseDate"
-            value={form.releaseDate}
+            value={form.releaseDate.split('T')[0]}
             onChange={handleChange}
             fullWidth
             variant="outlined"
@@ -406,7 +401,7 @@ function UserForm({
             type="date"
             label="Дата получения"
             name="receiptDate"
-            value={form.receiptDate}
+            value={form.receiptDate.split('T')[0]}
             onChange={handleChange}
             fullWidth
             variant="outlined"
@@ -577,7 +572,7 @@ function UserForm({
                       <TextField
                         type="date"
                         label="Дата поверки"
-                        value={verification.date}
+                        value={verification.date.split('T')[0]}
                         onChange={(e) =>
                           handleVerificationChange(
                             verification.id,
@@ -594,7 +589,7 @@ function UserForm({
                       <TextField
                         type="date"
                         label="Действует до"
-                        value={verification.validUntil}
+                        value={verification.validUntil.split('T')[0]}
                         onChange={(e) =>
                           handleVerificationChange(
                             verification.id,
