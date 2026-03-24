@@ -35,10 +35,16 @@ export default function DevicesPage() {
 
   const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
 
+  const [filter, setFilter] = useState('');
+
   const rows = useMemo(() => {
     const rawDevices = (data?.devicesWithRelations as Device[]) || [];
 
-    return rawDevices.map((device) => {
+    const filtered = rawDevices.filter((device) =>
+      device.name.toLowerCase().includes(filter.toLowerCase())
+    );
+
+    return filtered.map((device) => {
       const lastVerification =
         device.verifications?.length > 0
           ? device.verifications.reduce((prev, curr) =>
@@ -50,7 +56,7 @@ export default function DevicesPage() {
         latestVerification: lastVerification,
       };
     });
-  }, [data]);
+  }, [data, filter]);
   // const devices = (data?.devicesWithRelations as Device[]) || [];
   const [viewMode, setViewMode] = useState<'edit' | 'create' | null>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
@@ -179,6 +185,10 @@ export default function DevicesPage() {
     localStorage.setItem('devicesColumnVisibility', JSON.stringify(newModel));
   };
 
+  const handleChange = (e: any) => {
+    setFilter(e.target.value);
+  };
+
   return (
     <Paper
       sx={{
@@ -231,7 +241,12 @@ export default function DevicesPage() {
           >
             <Typography variant="h6">Средства измерения</Typography>
             <Box sx={{ display: 'flex', gap: 1, flexGrow: 1, maxWidth: 500 }}>
-              <TextField size="small" placeholder="Поиск..." fullWidth />
+              <TextField
+                size="small"
+                placeholder="Поиск..."
+                fullWidth
+                onChange={handleChange}
+              />
               <Button variant="outlined" size="small">
                 Фильтры
               </Button>
