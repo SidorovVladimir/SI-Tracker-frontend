@@ -19,7 +19,6 @@ import {
   AccordionDetails,
   AccordionSummary,
   Alert,
-  Autocomplete,
   Box,
   Button,
   CircularProgress,
@@ -32,6 +31,9 @@ import {
   Typography,
 } from '@mui/material';
 import { Add, ExpandMore } from '@mui/icons-material';
+import ScopeAutocomplete from '../../components/ScopeAutocomplete';
+import MeasurementTextField from '../../components/MeasurementTextField';
+import EquipmentTextField from '../../components/EquipmentTextField';
 
 export default function EditDevicePage(props: {
   deviceId: string;
@@ -478,59 +480,24 @@ function UserForm({
             ))}
           </TextField>
 
-          <TextField
-            id="outlined-select-currency"
-            select
-            label="Тип оборудования"
-            name="equipmentTypeId"
-            size="small"
-            fullWidth
-            required
-            onChange={handleChange}
+          <EquipmentTextField
             value={form.equipmentTypeId}
-          >
-            {equipmentTypesList.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            id="outlined-select-currency"
-            select
-            label="Вид измерения"
-            name="measurementTypeId"
-            size="small"
-            fullWidth
-            required
             onChange={handleChange}
-            value={form.measurementTypeId}
-          >
-            {measurementTypesList.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField>
+            equipmentTypesList={equipmentTypesList}
+          />
 
-          <Autocomplete
-            multiple
-            options={scopesList}
-            getOptionLabel={(option) => option.name}
+          <MeasurementTextField
+            value={form.measurementTypeId}
+            onChange={handleChange}
+            measurementList={measurementTypesList}
+          />
+
+          <ScopeAutocomplete
             value={form.scopes}
-            onChange={(_, newValue) => {
-              handleAutocompleteChange('scopes', newValue);
-            }}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Сферы применения"
-                placeholder="Выберите сферы"
-                size="small"
-              />
-            )}
+            onChange={(_: string, val: { id: string; name: string }[]) =>
+              handleAutocompleteChange('scopes', val)
+            }
+            scopesList={scopesList}
           />
 
           <Divider sx={{ my: 2 }} />

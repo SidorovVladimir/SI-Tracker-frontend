@@ -15,7 +15,6 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Autocomplete,
   Box,
   Button,
   CircularProgress,
@@ -28,6 +27,9 @@ import {
   Typography,
 } from '@mui/material';
 import { Add, ExpandMore } from '@mui/icons-material';
+import ScopeAutocomplete from '../../components/ScopeAutocomplete';
+import MeasurementTextField from '../../components/MeasurementTextField';
+import EquipmentTextField from '../../components/EquipmentTextField';
 
 export default function CreateDevicePage() {
   const { data: productionSiteData } = useQuery(
@@ -391,7 +393,7 @@ export default function CreateDevicePage() {
             ))}
           </TextField>
 
-          <TextField
+          {/* <TextField
             id="outlined-select-currency"
             select
             label="Тип оборудования"
@@ -407,9 +409,14 @@ export default function CreateDevicePage() {
                 {name}
               </MenuItem>
             ))}
-          </TextField>
+          </TextField> */}
+          <EquipmentTextField
+            value={form.equipmentTypeId}
+            onChange={handleChange}
+            equipmentTypesList={equipmentTypesList}
+          />
 
-          <TextField
+          {/* <TextField
             id="outlined-select-currency"
             select
             label="Вид измерения"
@@ -425,9 +432,14 @@ export default function CreateDevicePage() {
                 {name}
               </MenuItem>
             ))}
-          </TextField>
+          </TextField> */}
+          <MeasurementTextField
+            value={form.measurementTypeId}
+            onChange={handleChange}
+            measurementList={measurementTypesList}
+          />
 
-          <Autocomplete
+          {/* <Autocomplete
             multiple
             options={scopesList}
             getOptionLabel={(option) => option.name}
@@ -444,6 +456,13 @@ export default function CreateDevicePage() {
                 size="small"
               />
             )}
+          /> */}
+          <ScopeAutocomplete
+            value={form.scopes}
+            onChange={(_: string, val: { id: string; name: string }[]) =>
+              handleAutocompleteChange('scopes', val)
+            }
+            scopesList={scopesList}
           />
 
           <Divider sx={{ my: 2 }} />
