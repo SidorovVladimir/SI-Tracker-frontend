@@ -9,6 +9,7 @@ import {
   Box,
   Container,
   Avatar,
+  ListItemText,
 } from '@mui/material';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
@@ -85,7 +86,7 @@ export default function NavBar() {
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
-                slotProps={{ paper: { sx: { width: 200, mt: 1.5 } } }}
+                slotProps={{ paper: { sx: { width: 220, mt: 1.5 } } }}
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
               >
@@ -94,17 +95,17 @@ export default function NavBar() {
                   to={routes.profile()}
                   onClick={handleClose}
                 >
-                  Профиль
+                  <ListItemText>Профиль</ListItemText>
                 </MenuItem>
                 <MenuItem
                   component={Link}
                   to={routes.admin.root()}
                   onClick={handleClose}
                 >
-                  Панель администратора
+                  <ListItemText>Панель администратора</ListItemText>
                 </MenuItem>
                 <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-                  Выход
+                  <ListItemText>Выход</ListItemText>
                 </MenuItem>
               </Menu>
             </Box>

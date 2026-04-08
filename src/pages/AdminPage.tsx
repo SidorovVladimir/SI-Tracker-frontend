@@ -81,7 +81,7 @@ export default function AdminPage() {
                 component={Link}
                 to={path}
                 selected={pathname.includes(path)}
-                sx={{ borderRadius: { xs: 1, md: 0 }, whiteSpace: 'nowrap' }}
+                sx={{ borderRadius: { xs: 1, md: 0 }, whiteSpace: 'wrap' }}
               >
                 <ListItemText primary={item} />
               </ListItemButton>
