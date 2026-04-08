@@ -35,7 +35,7 @@ export default function CreateStatusPage() {
       refetchQueries: [{ query: GetStatusListDocument }],
       awaitRefetchQueries: true,
       onCompleted: () => {
-        enqueueSnackbar('Сотстояние успешно создано', {
+        enqueueSnackbar('Состояние успешно создано', {
           variant: 'success',
         });
         navigate(routes.admin.statuses());

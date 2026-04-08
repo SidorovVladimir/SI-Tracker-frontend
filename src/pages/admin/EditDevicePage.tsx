@@ -34,6 +34,8 @@ import { Add, ExpandMore } from '@mui/icons-material';
 import ScopeAutocomplete from '../../components/ScopeAutocomplete';
 import MeasurementTextField from '../../components/MeasurementTextField';
 import EquipmentTextField from '../../components/EquipmentTextField';
+import StatusTextField from '../../components/StatusTextField';
+import ProductionSiteTextField from '../../components/ProductionSiteTextField';
 
 export default function EditDevicePage(props: {
   deviceId: string;
@@ -444,41 +446,17 @@ function UserForm({
             size="small"
           />
 
-          <TextField
-            id="outlined-select-currency"
-            select
-            label="Состояние"
-            name="statusId"
-            size="small"
-            fullWidth
-            onChange={handleChange}
+          <StatusTextField
             value={form.statusId}
-            required
-          >
-            {statusesList.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            id="outlined-select-currency"
-            select
-            label="Производственный участок"
-            name="productionSiteId"
-            size="small"
-            fullWidth
             onChange={handleChange}
+            statusesList={statusesList}
+          />
+
+          <ProductionSiteTextField
             value={form.productionSiteId}
-            required
-          >
-            {productionSiteList.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField>
+            onChange={handleChange}
+            productionSiteList={productionSiteList}
+          />
 
           <EquipmentTextField
             value={form.equipmentTypeId}

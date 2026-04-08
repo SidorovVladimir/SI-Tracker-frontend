@@ -77,27 +77,21 @@ export default function EquipmentModal({ open, onClose }: any) {
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Новый тип оборудования</DialogTitle>
       <DialogContent>
-        <Paper
-          variant="outlined"
-          sx={{ p: 4, borderRadius: 3, bgcolor: 'background.paper' }}
-        >
-          <Stack>
-            <TextField
-              label="Название"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              size="small"
-              required
-              error={!!fieldErrors.name}
-              helperText={fieldErrors.name}
-            />
-
-            <Divider sx={{ my: 2 }} />
-          </Stack>
-        </Paper>
+        <Stack sx={{ mt: 2 }}>
+          <TextField
+            label="Название"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            fullWidth
+            variant="outlined"
+            size="small"
+            required
+            error={!!fieldErrors.name}
+            helperText={fieldErrors.name}
+          />
+          <Divider sx={{ my: 2 }} />
+        </Stack>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Отмена</Button>

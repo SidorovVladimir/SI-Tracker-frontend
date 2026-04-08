@@ -7,36 +7,33 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  Paper,
   Stack,
   TextField,
 } from '@mui/material';
 import { useState } from 'react';
 import {
-  CreateScopeDocument,
-  GetScopesListDocument,
+  CreateStatusDocument,
+  GetStatusListDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
 type FieldErrors = {
   name?: string;
 };
-export default function ScopeModal({ open, onClose, onCreated }: any) {
+export default function StatusModal({ open, onClose }: any) {
   const [form, setForm] = useState({
     name: '',
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  const [createScope, { loading: creating }] = useMutation(
-    CreateScopeDocument,
+  const [createStatus, { loading: creating }] = useMutation(
+    CreateStatusDocument,
     {
-      refetchQueries: [{ query: GetScopesListDocument }],
+      refetchQueries: [{ query: GetStatusListDocument }],
       awaitRefetchQueries: true,
-      onCompleted: (data) => {
-        enqueueSnackbar('Сфера успешно создана', {
+      onCompleted: () => {
+        enqueueSnackbar('Состояние успешно создано', {
           variant: 'success',
         });
-
-        onCreated(data.createScope);
         onClose(true);
       },
       onError: (error) => {
@@ -71,13 +68,13 @@ export default function ScopeModal({ open, onClose, onCreated }: any) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFieldErrors({});
-    await createScope({
+    await createStatus({
       variables: { input: form },
     });
   };
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Новая сфера</DialogTitle>
+      <DialogTitle>Новое состояние</DialogTitle>
       <DialogContent>
         <Stack sx={{ mt: 2 }}>
           <TextField

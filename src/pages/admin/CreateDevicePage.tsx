@@ -30,6 +30,8 @@ import { Add, ExpandMore } from '@mui/icons-material';
 import ScopeAutocomplete from '../../components/ScopeAutocomplete';
 import MeasurementTextField from '../../components/MeasurementTextField';
 import EquipmentTextField from '../../components/EquipmentTextField';
+import StatusTextField from '../../components/StatusTextField';
+import ProductionSiteTextField from '../../components/ProductionSiteTextField';
 
 export default function CreateDevicePage() {
   const { data: productionSiteData } = useQuery(
@@ -357,106 +359,30 @@ export default function CreateDevicePage() {
             size="small"
           />
 
-          <TextField
-            id="outlined-select-currency"
-            select
-            label="Состояние"
-            name="statusId"
-            size="small"
-            fullWidth
-            onChange={handleChange}
+          <StatusTextField
             value={form.statusId}
-            required
-          >
-            {statusesList.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            id="outlined-select-currency"
-            select
-            label="Производственный участок"
-            name="productionSiteId"
-            size="small"
-            fullWidth
             onChange={handleChange}
+            statusesList={statusesList}
+          />
+
+          <ProductionSiteTextField
             value={form.productionSiteId}
-            required
-          >
-            {productionSiteList.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          {/* <TextField
-            id="outlined-select-currency"
-            select
-            label="Тип оборудования"
-            name="equipmentTypeId"
-            size="small"
-            fullWidth
-            required
             onChange={handleChange}
-            value={form.equipmentTypeId}
-          >
-            {equipmentTypesList.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField> */}
+            productionSiteList={productionSiteList}
+          />
+
           <EquipmentTextField
             value={form.equipmentTypeId}
             onChange={handleChange}
             equipmentTypesList={equipmentTypesList}
           />
 
-          {/* <TextField
-            id="outlined-select-currency"
-            select
-            label="Вид измерения"
-            name="measurementTypeId"
-            size="small"
-            fullWidth
-            required
-            onChange={handleChange}
-            value={form.measurementTypeId}
-          >
-            {measurementTypesList.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField> */}
           <MeasurementTextField
             value={form.measurementTypeId}
             onChange={handleChange}
             measurementList={measurementTypesList}
           />
 
-          {/* <Autocomplete
-            multiple
-            options={scopesList}
-            getOptionLabel={(option) => option.name}
-            value={form.scopes}
-            onChange={(_, newValue) => {
-              handleAutocompleteChange('scopes', newValue);
-            }}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Сферы применения"
-                placeholder="Выберите сферы"
-                size="small"
-              />
-            )}
-          /> */}
           <ScopeAutocomplete
             value={form.scopes}
             onChange={(_: string, val: { id: string; name: string }[]) =>
