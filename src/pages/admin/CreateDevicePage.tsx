@@ -202,7 +202,7 @@ export default function CreateDevicePage() {
       organization: v.organization || null,
       comment: v.comment || null,
       documentUrl: v.documentUrl || null,
-      metrologyControleTypeId: v.metrologyControleTypeId,
+      metrologyControleTypeId: v.metrologyControleTypeId || null,
     }));
 
     const data = {
@@ -218,9 +218,14 @@ export default function CreateDevicePage() {
           ? Number(form.verificationInterval)
           : null,
       nomenclature: form.nomenclature || null,
+      inventoryNumber: form.inventoryNumber || null,
+      equipmentTypeId: form.equipmentTypeId || null,
+      measurementTypeId: form.measurementTypeId || null,
+
       scopes: form.scopes.map((scope) => scope.id),
       verifications: verificationsInput,
     };
+
     await createDevice({
       variables: { input: data },
     });
@@ -297,7 +302,6 @@ export default function CreateDevicePage() {
             fullWidth
             variant="outlined"
             size="small"
-            required
           />
 
           <TextField
@@ -545,7 +549,6 @@ export default function CreateDevicePage() {
                           )
                         }
                         value={verification.metrologyControleTypeId}
-                        required
                       >
                         {metrologyControlTypeList.map(({ id, name }) => (
                           <MenuItem key={id} value={id}>

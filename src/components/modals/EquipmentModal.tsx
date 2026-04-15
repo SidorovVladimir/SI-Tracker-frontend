@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  Paper,
   Stack,
   TextField,
 } from '@mui/material';

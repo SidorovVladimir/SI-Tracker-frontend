@@ -119,33 +119,61 @@ function UserForm({
     name: device.name || '',
     model: device.model || '',
     serialNumber: device.serialNumber || '',
-    releaseDate: new Date(Number(device.releaseDate)).toISOString() || '',
+    releaseDate: device.releaseDate
+      ? new Date(
+          new Date(Number(device.releaseDate)).getTime() -
+            new Date().getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .split('T')[0]
+      : '',
     grsiNumber: device.grsiNumber || '',
     measurementRange: device.measurementRange || '',
     accuracy: device.accuracy || '',
     inventoryNumber: device.inventoryNumber || '',
-    receiptDate: new Date(Number(device.receiptDate)).toISOString() || '',
+    receiptDate: device.receiptDate
+      ? new Date(
+          new Date(Number(device.receiptDate)).getTime() -
+            new Date().getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .split('T')[0]
+      : '',
     manufacturer: device.manufacturer || '',
     verificationInterval: device.verificationInterval || '',
     archived: device.archived,
     nomenclature: device.nomenclature || '',
     statusId: device.status.id || '',
     productionSiteId: device.productionSite.id || '',
-    equipmentTypeId: device.equipmentType.id || '',
-    measurementTypeId: device.measurementType.id || '',
+    equipmentTypeId: device.equipmentType?.id || '',
+    measurementTypeId: device.measurementType?.id || '',
     scopes: device.scopes,
   });
   const verificationsState = device.verifications.map((verification) => {
     return {
       id: verification.id,
-      date: new Date(Number(verification.date)).toISOString() || '',
-      validUntil: new Date(Number(verification.validUntil)).toISOString() || '',
+      date: verification.date
+        ? new Date(
+            new Date(Number(verification.date)).getTime() -
+              new Date().getTimezoneOffset() * 60000
+          )
+            .toISOString()
+            .split('T')[0]
+        : '',
+      validUntil: verification.validUntil
+        ? new Date(
+            new Date(Number(verification.validUntil)).getTime() -
+              new Date().getTimezoneOffset() * 60000
+          )
+            .toISOString()
+            .split('T')[0]
+        : '',
       result: verification.result || '',
       protocolNumber: verification.protocolNumber || '',
       organization: verification.organization || '',
       comment: verification.comment || '',
       documentUrl: verification.documentUrl || '',
-      metrologyControleTypeId: verification.metrologyControleType.id,
+      metrologyControleTypeId: verification.metrologyControleType?.id || '',
       deviceId: verification.deviceId,
       collapsed: true,
     };
@@ -289,7 +317,7 @@ function UserForm({
       organization: v.organization || null,
       comment: v.comment || null,
       documentUrl: v.documentUrl || null,
-      metrologyControleTypeId: v.metrologyControleTypeId,
+      metrologyControleTypeId: v.metrologyControleTypeId || null,
     }));
 
     const data = {
@@ -307,6 +335,9 @@ function UserForm({
       nomenclature: form.nomenclature || null,
       scopes: form.scopes.map((scope) => scope.id),
       verifications: verificationsInput,
+      inventoryNumber: form.inventoryNumber || null,
+      equipmentTypeId: form.equipmentTypeId || null,
+      measurementTypeId: form.measurementTypeId || null,
     };
     await updateDevice({
       variables: { id: device.id, input: data },
@@ -384,7 +415,6 @@ function UserForm({
             fullWidth
             variant="outlined"
             size="small"
-            required
           />
 
           <TextField
@@ -632,7 +662,6 @@ function UserForm({
                           )
                         }
                         value={verification.metrologyControleTypeId}
-                        required
                       >
                         {metrologyControlTypeList.map(({ id, name }) => (
                           <MenuItem key={id} value={id}>

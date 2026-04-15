@@ -18,7 +18,6 @@ export default function EquipmentTextField({
         name="equipmentTypeId"
         size="small"
         fullWidth
-        required
         onChange={onChange}
         value={value}
       >

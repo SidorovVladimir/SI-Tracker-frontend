@@ -18,7 +18,6 @@ export default function MeasurementTextField({
         name="measurementTypeId"
         size="small"
         fullWidth
-        required
         onChange={onChange}
         value={value}
       >

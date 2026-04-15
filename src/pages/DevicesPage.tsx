@@ -121,7 +121,7 @@ export default function DevicesPage() {
       flex: 1,
       minWidth: 140,
       valueGetter: (_, row) =>
-        row.latestVerification
+        row.latestVerification && row.latestVerification.metrologyControleType
           ? row.latestVerification.metrologyControleType.name
           : '-',
     },
@@ -209,6 +209,7 @@ export default function DevicesPage() {
           flexGrow: 1,
           gap: 2,
           p: 1,
+          minHeight: 0,
         }}
       >
         <Box
@@ -256,7 +257,14 @@ export default function DevicesPage() {
             </Button>
           </Box>
 
-          <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              overflow: 'hidden',
+              // display: 'flex',
+              // flexDirection: 'column',
+            }}
+          >
             <DataGrid
               rows={rows}
               columns={columns}
@@ -279,6 +287,8 @@ export default function DevicesPage() {
               }}
               getRowId={(row) => row.id}
               sx={{
+                // height: '100%',
+                // border: 'none',
                 '& .MuiDataGrid-columnHeaderTitle': {
                   fontWeight: 700,
                   color: 'text.primary',
@@ -308,7 +318,14 @@ export default function DevicesPage() {
         </Box>
 
         {viewMode && (
-          <Box sx={{ width: '30%', minWidth: 300, position: 'relative' }}>
+          <Box
+            sx={{
+              width: '30%',
+              minWidth: 300,
+              position: 'relative',
+              // height: '100%',
+            }}
+          >
             <Slide direction="left" in={!!viewMode} mountOnEnter unmountOnExit>
               <Box
                 sx={{

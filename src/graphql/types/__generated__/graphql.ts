@@ -63,23 +63,23 @@ export type CreateCompanyInput = {
 export type CreateDeviceInput = {
   accuracy?: InputMaybe<Scalars['String']['input']>;
   archived: Scalars['Boolean']['input'];
-  equipmentTypeId: Scalars['ID']['input'];
+  equipmentTypeId?: InputMaybe<Scalars['ID']['input']>;
   grsiNumber?: InputMaybe<Scalars['String']['input']>;
-  inventoryNumber: Scalars['String']['input'];
+  inventoryNumber?: InputMaybe<Scalars['String']['input']>;
   manufacturer?: InputMaybe<Scalars['String']['input']>;
   measurementRange?: InputMaybe<Scalars['String']['input']>;
-  measurementTypeId: Scalars['ID']['input'];
+  measurementTypeId?: InputMaybe<Scalars['ID']['input']>;
   model: Scalars['String']['input'];
   name: Scalars['String']['input'];
   nomenclature?: InputMaybe<Scalars['String']['input']>;
   productionSiteId: Scalars['ID']['input'];
   receiptDate?: InputMaybe<Scalars['String']['input']>;
   releaseDate?: InputMaybe<Scalars['String']['input']>;
-  scopes: Array<Scalars['ID']['input']>;
+  scopes?: InputMaybe<Array<Scalars['ID']['input']>>;
   serialNumber: Scalars['String']['input'];
   statusId: Scalars['ID']['input'];
   verificationInterval?: InputMaybe<Scalars['Int']['input']>;
-  verifications: Array<VerificationInput>;
+  verifications?: InputMaybe<Array<VerificationInput>>;
 };
 
 export type CreateEquipmentTypeInput = {
@@ -120,13 +120,13 @@ export type Device = {
   accuracy: Maybe<Scalars['String']['output']>;
   archived: Scalars['Boolean']['output'];
   createdAt: Scalars['String']['output'];
-  equipmentTypeId: Scalars['ID']['output'];
+  equipmentTypeId: Maybe<Scalars['ID']['output']>;
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  inventoryNumber: Scalars['String']['output'];
+  inventoryNumber: Maybe<Scalars['String']['output']>;
   manufacturer: Maybe<Scalars['String']['output']>;
   measurementRange: Maybe<Scalars['String']['output']>;
-  measurementTypeId: Scalars['ID']['output'];
+  measurementTypeId: Maybe<Scalars['ID']['output']>;
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
   nomenclature: Maybe<Scalars['String']['output']>;
@@ -143,13 +143,13 @@ export type DeviceWithRelations = {
   __typename: 'DeviceWithRelations';
   accuracy: Maybe<Scalars['String']['output']>;
   archived: Scalars['Boolean']['output'];
-  equipmentType: EquipmentType;
+  equipmentType: Maybe<EquipmentType>;
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  inventoryNumber: Scalars['String']['output'];
+  inventoryNumber: Maybe<Scalars['String']['output']>;
   manufacturer: Maybe<Scalars['String']['output']>;
   measurementRange: Maybe<Scalars['String']['output']>;
-  measurementType: MeasurementType;
+  measurementType: Maybe<MeasurementType>;
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
   nomenclature: Maybe<Scalars['String']['output']>;
@@ -477,23 +477,23 @@ export type UpdateCompanyInput = {
 export type UpdateDeviceInput = {
   accuracy?: InputMaybe<Scalars['String']['input']>;
   archived: Scalars['Boolean']['input'];
-  equipmentTypeId: Scalars['ID']['input'];
+  equipmentTypeId?: InputMaybe<Scalars['ID']['input']>;
   grsiNumber?: InputMaybe<Scalars['String']['input']>;
-  inventoryNumber: Scalars['String']['input'];
+  inventoryNumber?: InputMaybe<Scalars['String']['input']>;
   manufacturer?: InputMaybe<Scalars['String']['input']>;
   measurementRange?: InputMaybe<Scalars['String']['input']>;
-  measurementTypeId: Scalars['ID']['input'];
+  measurementTypeId?: InputMaybe<Scalars['ID']['input']>;
   model: Scalars['String']['input'];
   name: Scalars['String']['input'];
   nomenclature?: InputMaybe<Scalars['String']['input']>;
   productionSiteId: Scalars['ID']['input'];
   receiptDate?: InputMaybe<Scalars['String']['input']>;
   releaseDate?: InputMaybe<Scalars['String']['input']>;
-  scopes: Array<Scalars['ID']['input']>;
+  scopes?: InputMaybe<Array<Scalars['ID']['input']>>;
   serialNumber: Scalars['String']['input'];
   statusId: Scalars['ID']['input'];
   verificationInterval?: InputMaybe<Scalars['Int']['input']>;
-  verifications: Array<VerificationInput>;
+  verifications?: InputMaybe<Array<VerificationInput>>;
 };
 
 export type UpdateEquipmentTypeInput = {
@@ -545,7 +545,7 @@ export type Verification = {
   deviceId: Scalars['ID']['output'];
   documentUrl: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  metrologyControleTypeId: Scalars['ID']['output'];
+  metrologyControleTypeId: Maybe<Scalars['ID']['output']>;
   organization: Maybe<Scalars['String']['output']>;
   protocolNumber: Maybe<Scalars['String']['output']>;
   result: Maybe<Scalars['String']['output']>;
@@ -557,7 +557,7 @@ export type VerificationInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   date?: InputMaybe<Scalars['String']['input']>;
   documentUrl?: InputMaybe<Scalars['String']['input']>;
-  metrologyControleTypeId: Scalars['ID']['input'];
+  metrologyControleTypeId?: InputMaybe<Scalars['ID']['input']>;
   organization?: InputMaybe<Scalars['String']['input']>;
   protocolNumber?: InputMaybe<Scalars['String']['input']>;
   result?: InputMaybe<Scalars['String']['input']>;
@@ -572,7 +572,7 @@ export type VerificationRelation = {
   deviceId: Scalars['ID']['output'];
   documentUrl: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  metrologyControleType: MetrologyControlType;
+  metrologyControleType: Maybe<MetrologyControlType>;
   organization: Maybe<Scalars['String']['output']>;
   protocolNumber: Maybe<Scalars['String']['output']>;
   result: Maybe<Scalars['String']['output']>;
@@ -773,7 +773,7 @@ export type CreateDeviceMutation = {
     grsiNumber: string | null;
     measurementRange: string | null;
     accuracy: string | null;
-    inventoryNumber: string;
+    inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
     verificationInterval: number | null;
@@ -781,8 +781,8 @@ export type CreateDeviceMutation = {
     nomenclature: string | null;
     statusId: string;
     productionSiteId: string;
-    equipmentTypeId: string;
-    measurementTypeId: string;
+    equipmentTypeId: string | null;
+    measurementTypeId: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -801,7 +801,7 @@ export type GetDevicesListQuery = {
     grsiNumber: string | null;
     measurementRange: string | null;
     accuracy: string | null;
-    inventoryNumber: string;
+    inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
     verificationInterval: number | null;
@@ -809,8 +809,8 @@ export type GetDevicesListQuery = {
     nomenclature: string | null;
     statusId: string;
     productionSiteId: string;
-    equipmentTypeId: string;
-    measurementTypeId: string;
+    equipmentTypeId: string | null;
+    measurementTypeId: string | null;
     createdAt: string;
     updatedAt: string;
   }>;
@@ -831,7 +831,7 @@ export type GetDevicesWithRelationsListQuery = {
     grsiNumber: string | null;
     measurementRange: string | null;
     accuracy: string | null;
-    inventoryNumber: string;
+    inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
     verificationInterval: number | null;
@@ -857,7 +857,7 @@ export type GetDevicesWithRelationsListQuery = {
       metrologyControleType: {
         __typename: 'MetrologyControlType';
         name: string;
-      };
+      } | null;
     }>;
     scopes: Array<{ __typename: 'Scope'; name: string }>;
   }>;
@@ -878,18 +878,22 @@ export type GetDeviceWithRelationQuery = {
     grsiNumber: string | null;
     measurementRange: string | null;
     accuracy: string | null;
-    inventoryNumber: string;
+    inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
     verificationInterval: number | null;
     archived: boolean;
     nomenclature: string | null;
-    equipmentType: { __typename: 'EquipmentType'; id: string; name: string };
+    equipmentType: {
+      __typename: 'EquipmentType';
+      id: string;
+      name: string;
+    } | null;
     measurementType: {
       __typename: 'MeasurementType';
       id: string;
       name: string;
-    };
+    } | null;
     status: { __typename: 'Status'; id: string; name: string };
     productionSite: {
       __typename: 'ProductionSiteRelation';
@@ -913,7 +917,7 @@ export type GetDeviceWithRelationQuery = {
         __typename: 'MetrologyControlType';
         id: string;
         name: string;
-      };
+      } | null;
     }>;
     scopes: Array<{ __typename: 'Scope'; id: string; name: string }>;
   };
@@ -941,7 +945,7 @@ export type UpdateDeviceMutation = {
     grsiNumber: string | null;
     measurementRange: string | null;
     accuracy: string | null;
-    inventoryNumber: string;
+    inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
     verificationInterval: number | null;
@@ -949,8 +953,8 @@ export type UpdateDeviceMutation = {
     nomenclature: string | null;
     statusId: string;
     productionSiteId: string;
-    equipmentTypeId: string;
-    measurementTypeId: string;
+    equipmentTypeId: string | null;
+    measurementTypeId: string | null;
     createdAt: string;
     updatedAt: string;
   };
