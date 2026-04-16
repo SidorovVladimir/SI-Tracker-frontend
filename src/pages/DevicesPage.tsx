@@ -16,12 +16,37 @@ import {
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import CreateDevicePage from './admin/CreateDevicePage';
 import EditDevicePage from './admin/EditDevicePage';
 import { Close } from '@mui/icons-material';
 
 type Device = GetDevicesWithRelationsListQuery['devicesWithRelations'][0];
+const FILTERS_STORAGE_KEY = 'devices_filters_v1';
+interface FilterState {
+  city: string;
+  company: string;
+  productionSite: string;
+  deviceName: string;
+  status: string;
+  dateStart: string | null;
+  dateEnd: string | null;
+}
+
+const initialFilters: FilterState = {
+  city: '',
+  company: '',
+  productionSite: '',
+  deviceName: '',
+  status: '',
+  dateStart: null,
+  dateEnd: null,
+};
+
+const loadFilters = (): FilterState => {
+  const saved = localStorage.getItem(FILTERS_STORAGE_KEY);
+  return saved ? JSON.parse(saved) : initialFilters;
+};
 
 export default function DevicesPage() {
   const [columnVisibilityModel, setColumnVisibilityModel] = useState<
@@ -33,31 +58,114 @@ export default function DevicesPage() {
     }
   });
 
-  const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
+  const [filters, setFilters] = useState<FilterState>(loadFilters);
 
-  const [filter, setFilter] = useState('');
+  useEffect(() => {
+    localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
+  }, [filters]);
+
+  const resetFilters = () => {
+    setFilters(initialFilters);
+    localStorage.removeItem(FILTERS_STORAGE_KEY);
+  };
+
+  const handleFilterChange = (field: keyof FilterState, value: any) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
 
   const rows = useMemo(() => {
     const rawDevices = (data?.devicesWithRelations as Device[]) || [];
 
-    const filtered = rawDevices.filter((device) =>
-      device.name.toLowerCase().includes(filter.toLowerCase())
-    );
+    // const filtered = rawDevices.filter((device) =>
+    //   device.name.toLowerCase().includes(filter.toLowerCase())
+    // );
 
-    return filtered.map((device) => {
-      const lastVerification =
-        device.verifications?.length > 0
-          ? device.verifications.reduce((prev, curr) =>
-              Number(curr.date) > Number(prev.date) ? curr : prev
-            )
+    return rawDevices
+      .map((device) => {
+        const lastVerification =
+          device.verifications?.length > 0
+            ? device.verifications.reduce((prev, curr) =>
+                Number(curr.date) > Number(prev.date) ? curr : prev
+              )
+            : null;
+        return {
+          ...device,
+          latestVerification: lastVerification,
+        };
+      })
+      .filter((row) => {
+        const matchesCity =
+          !filters.city || row.productionSite?.city?.name === filters.city;
+
+        const matchesCompany =
+          !filters.company ||
+          row.productionSite?.company?.name
+            ?.toLowerCase()
+            .includes(filters.company.toLowerCase());
+
+        const matchesSub =
+          !filters.productionSite ||
+          row.productionSite?.name
+            .toLowerCase()
+            .includes(filters.productionSite.toLowerCase());
+
+        const matchesName =
+          !filters.deviceName ||
+          row.name.toLowerCase().includes(filters.deviceName.toLowerCase());
+
+        const matchesStatus =
+          !filters.status || row.status?.name === filters.status;
+
+        const vDate = row.latestVerification?.validUntil
+          ? new Date(Number(row.latestVerification.validUntil))
           : null;
-      return {
-        ...device,
-        latestVerification: lastVerification,
-      };
-    });
-  }, [data, filter]);
-  // const devices = (data?.devicesWithRelations as Device[]) || [];
+        const matchesDateStart =
+          !filters.dateStart || (vDate && vDate >= new Date(filters.dateStart));
+        const matchesDateEnd =
+          !filters.dateEnd || (vDate && vDate <= new Date(filters.dateEnd));
+
+        return (
+          matchesName &&
+          matchesCity &&
+          matchesCompany &&
+          matchesSub &&
+          matchesStatus &&
+          matchesDateStart &&
+          matchesDateEnd
+        );
+      });
+  }, [data, filters]);
+
+  const cities = useMemo(() => {
+    const raw = (data?.devicesWithRelations as Device[]) || [];
+    return Array.from(
+      new Set(raw.map((d) => d.productionSite?.city?.name).filter(Boolean))
+    ).sort();
+  }, [data]);
+
+  const companies = useMemo(() => {
+    const raw = (data?.devicesWithRelations as Device[]) || [];
+    return Array.from(
+      new Set(raw.map((d) => d.productionSite?.company?.name).filter(Boolean))
+    ).sort();
+  }, [data]);
+
+  const statuses = useMemo(() => {
+    const raw = (data?.devicesWithRelations as Device[]) || [];
+    return Array.from(
+      new Set(raw.map((d) => d.status?.name).filter(Boolean))
+    ).sort();
+  }, [data]);
+
+  const productionSite = useMemo(() => {
+    const raw = (data?.devicesWithRelations as Device[]) || [];
+    return Array.from(
+      new Set(raw.map((d) => d.productionSite?.name).filter(Boolean))
+    ).sort();
+  }, [data]);
+
   const [viewMode, setViewMode] = useState<'edit' | 'create' | null>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
@@ -185,14 +293,10 @@ export default function DevicesPage() {
     localStorage.setItem('devicesColumnVisibility', JSON.stringify(newModel));
   };
 
-  const handleChange = (e: any) => {
-    setFilter(e.target.value);
-  };
-
   return (
     <Paper
       sx={{
-        height: 'calc(100dvh - 200px)',
+        height: 'calc(100dvh - 150px)',
         margin: 2,
         display: 'flex',
         flexDirection: 'column',
@@ -241,7 +345,7 @@ export default function DevicesPage() {
             }}
           >
             <Typography variant="h6">Средства измерения</Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexGrow: 1, maxWidth: 500 }}>
+            {/* <Box sx={{ display: 'flex', gap: 1, flexGrow: 1, maxWidth: 500 }}>
               <TextField
                 size="small"
                 placeholder="Поиск..."
@@ -251,11 +355,135 @@ export default function DevicesPage() {
               <Button variant="outlined" size="small">
                 Фильтры
               </Button>
-            </Box>
+            </Box> */}
             <Button variant="contained" onClick={handleAddClick}>
               Добавить СИ
             </Button>
           </Box>
+
+          <Paper
+            sx={{
+              p: 2,
+              mb: 1,
+            }}
+          >
+            <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+              <TextField
+                label="Город"
+                size="small"
+                select
+                slotProps={{
+                  select: { native: true },
+                }}
+                value={filters.city}
+                onChange={(e) => handleFilterChange('city', e.target.value)}
+                sx={{ minWidth: 150 }}
+              >
+                <option value=""></option>
+                {cities.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </TextField>
+
+              <TextField
+                label="Организация"
+                size="small"
+                select
+                slotProps={{
+                  select: { native: true },
+                }}
+                value={filters.company}
+                onChange={(e) => handleFilterChange('company', e.target.value)}
+                sx={{ minWidth: 150 }}
+              >
+                <option value=""></option>
+                {companies.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </TextField>
+
+              <TextField
+                label="Подразделение"
+                size="small"
+                select
+                slotProps={{
+                  select: { native: true },
+                }}
+                value={filters.productionSite}
+                onChange={(e) =>
+                  handleFilterChange('productionSite', e.target.value)
+                }
+                sx={{ minWidth: 150, maxWidth: 200 }}
+              >
+                <option value=""></option>
+                {productionSite.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </TextField>
+
+              <TextField
+                label="Наименование"
+                size="small"
+                value={filters.deviceName}
+                onChange={(e) =>
+                  handleFilterChange('deviceName', e.target.value)
+                }
+              />
+
+              <TextField
+                label="Статус"
+                size="small"
+                select
+                slotProps={{
+                  select: { native: true },
+                }}
+                value={filters.status}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+                sx={{ minWidth: 130, maxWidth: 150 }}
+              >
+                <option value=""></option>
+                {statuses.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </TextField>
+
+              <TextField
+                label="Срок действия с..."
+                type="date"
+                size="small"
+                slotProps={{
+                  inputLabel: { shrink: true },
+                }}
+                value={filters.dateStart || ''}
+                onChange={(e) =>
+                  handleFilterChange('dateStart', e.target.value)
+                }
+              />
+
+              <TextField
+                label="Срок действия до..."
+                type="date"
+                size="small"
+                slotProps={{
+                  inputLabel: { shrink: true },
+                }}
+                value={filters.dateEnd || ''}
+                onChange={(e) => handleFilterChange('dateEnd', e.target.value)}
+              />
+
+              <Button color="error" onClick={resetFilters}>
+                Сброс
+              </Button>
+            </Stack>
+          </Paper>
 
           <Box
             sx={{
