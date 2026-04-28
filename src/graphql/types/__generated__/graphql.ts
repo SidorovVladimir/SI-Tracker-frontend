@@ -113,6 +113,7 @@ export type CreateUserInput = {
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   password: Scalars['String']['input'];
+  role: Scalars['String']['input'];
 };
 
 export type Device = {
@@ -525,6 +526,7 @@ export type UpdateStatusInput = {
 export type UpdateUserInput = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
+  role?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {
@@ -534,6 +536,7 @@ export type User = {
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
+  role: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
 };
 
@@ -589,6 +592,7 @@ export type GetMeQuery = {
     firstName: string;
     lastName: string;
     email: string;
+    role: string;
   } | null;
 };
 
@@ -606,6 +610,7 @@ export type LoginMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      role: string;
     } | null;
   };
 };
@@ -624,6 +629,7 @@ export type RegisterMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      role: string;
     } | null;
   };
 };
@@ -1253,6 +1259,7 @@ export type GetUsersQuery = {
     firstName: string;
     lastName: string;
     email: string;
+    role: string;
     createdAt: string;
     updatedAt: string;
   }>;
@@ -1269,6 +1276,7 @@ export type GetUserQuery = {
     firstName: string;
     lastName: string;
     email: string;
+    role: string;
   };
 };
 
@@ -1289,6 +1297,7 @@ export type UpdateUserMutation = {
     id: string;
     firstName: string;
     lastName: string;
+    role: string;
     updatedAt: string;
   };
 };
@@ -1303,6 +1312,7 @@ export type CreateUserMutation = {
     id: string;
     firstName: string;
     lastName: string;
+    role: string;
     createdAt: string;
     updatedAt: string;
   };
@@ -1328,6 +1338,7 @@ export const GetMeDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'role' } },
               ],
             },
           },
@@ -1395,6 +1406,7 @@ export const LoginDocument = {
                         name: { kind: 'Name', value: 'lastName' },
                       },
                       { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'role' } },
                     ],
                   },
                 },
@@ -1465,6 +1477,7 @@ export const RegisterDocument = {
                         name: { kind: 'Name', value: 'lastName' },
                       },
                       { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'role' } },
                     ],
                   },
                 },
@@ -3767,6 +3780,7 @@ export const GetUsersDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'role' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
               ],
@@ -3817,6 +3831,7 @@ export const GetUserDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'role' } },
               ],
             },
           },
@@ -3925,6 +3940,7 @@ export const UpdateUserDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'role' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
               ],
             },
@@ -3979,6 +3995,7 @@ export const CreateUserDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'role' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
               ],

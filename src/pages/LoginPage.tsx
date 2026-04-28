@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { LoginDocument } from '../graphql/types/__generated__/graphql';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import routes from '../utils/routes';
 import { enqueueSnackbar } from 'notistack';
 
@@ -65,9 +65,9 @@ export default function LoginPage() {
             variant="outlined"
           />
         </Stack>
-        <Typography sx={{ mt: 2 }}>
+        {/* <Typography sx={{ mt: 2 }}>
           Нет аккаунта? <Link to={routes.register()}>Зарегистрироваться</Link>
-        </Typography>
+        </Typography> */}
         <Box sx={{ mt: 3 }}>
           <Button
             variant="contained"

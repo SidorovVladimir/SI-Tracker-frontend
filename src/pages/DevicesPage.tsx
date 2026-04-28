@@ -20,6 +20,7 @@ import { useEffect, useMemo, useState } from 'react';
 import CreateDevicePage from './admin/CreateDevicePage';
 import EditDevicePage from './admin/EditDevicePage';
 import { Close } from '@mui/icons-material';
+import { useAuth } from '../hooks/useAuth';
 
 type Device = GetDevicesWithRelationsListQuery['devicesWithRelations'][0];
 const FILTERS_STORAGE_KEY = 'devices_filters_v1';
@@ -49,6 +50,7 @@ const loadFilters = (): FilterState => {
 };
 
 export default function DevicesPage() {
+  const { user } = useAuth();
   const [columnVisibilityModel, setColumnVisibilityModel] = useState<
     Record<string, boolean>
   >(() => {
@@ -272,8 +274,10 @@ export default function DevicesPage() {
   ];
 
   const handleRowClick = (params: GridRowParams) => {
-    setSelectedDeviceId(params.row.id);
-    setViewMode('edit');
+    if (user?.role === 'admin') {
+      setSelectedDeviceId(params.row.id);
+      setViewMode('edit');
+    }
   };
 
   const handleAddClick = () => {
@@ -356,9 +360,11 @@ export default function DevicesPage() {
                 Фильтры
               </Button>
             </Box> */}
-            <Button variant="contained" onClick={handleAddClick}>
-              Добавить СИ
-            </Button>
+            {user?.role === 'admin' && (
+              <Button variant="contained" onClick={handleAddClick}>
+                Добавить СИ
+              </Button>
+            )}
           </Box>
 
           <Paper

@@ -4,6 +4,7 @@ query getMe {
     firstName
     lastName
     email
+    role
   }
 }
 
@@ -15,6 +16,7 @@ mutation Login($input: LoginUserInput!) {
       firstName
       lastName
       email
+      role
     }
   }
 }
@@ -27,6 +29,7 @@ mutation Register($input: CreateUserInput!) {
       firstName
       lastName
       email
+      role
     }
   }
 }

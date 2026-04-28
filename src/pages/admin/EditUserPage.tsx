@@ -8,6 +8,7 @@ import {
   Divider,
   CircularProgress,
   Alert,
+  MenuItem,
 } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
@@ -19,6 +20,7 @@ import {
 import { useMutation, useQuery } from '@apollo/client/react';
 import { enqueueSnackbar } from 'notistack';
 import routes from '../../utils/routes';
+import { useAuth } from '../../hooks/useAuth';
 
 type FieldErrors = {
   firstName?: string;
@@ -27,6 +29,7 @@ type FieldErrors = {
 
 export default function EditUserPage() {
   const { userId } = useParams<{ userId: string }>();
+  const { user } = useAuth();
 
   const { data, loading, error } = useQuery(GetUserDocument, {
     variables: { id: userId! },
@@ -48,14 +51,21 @@ export default function EditUserPage() {
     );
   if (!data?.user) return <Alert>Пользователь не найден</Alert>;
 
-  return <UserForm key={userId} user={data.user} />;
+  return <UserForm key={userId} user={data.user} userContext={user} />;
 }
 
-function UserForm({ user }: { user: NonNullable<GetUserQuery['user']> }) {
+function UserForm({
+  user,
+  userContext,
+}: {
+  user: NonNullable<GetUserQuery['user']>;
+  userContext: any;
+}) {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     firstName: user.firstName || '',
     lastName: user.lastName || '',
+    role: user.role || '',
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
@@ -152,6 +162,24 @@ function UserForm({ user }: { user: NonNullable<GetUserQuery['user']> }) {
               error={!!fieldErrors.lastName}
               helperText={fieldErrors.lastName}
             />
+
+            <TextField
+              id="outlined-select-currency"
+              select
+              label="Роль"
+              name="role"
+              size="small"
+              fullWidth
+              disabled={userContext.id === user.id}
+              onChange={handleChange}
+              value={form.role}
+            >
+              {['admin', 'user'].map((name) => (
+                <MenuItem key={name} value={name}>
+                  {name === 'admin' ? 'Администратор' : 'Пользователь'}
+                </MenuItem>
+              ))}
+            </TextField>
 
             <Divider sx={{ my: 2 }} />
 

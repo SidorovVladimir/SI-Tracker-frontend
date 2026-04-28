@@ -19,7 +19,7 @@ import { LogoutDocument } from '../graphql/types/__generated__/graphql';
 import routes from '../utils/routes';
 
 export default function NavBar() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [logout] = useMutation(LogoutDocument);
   const client = useApolloClient();
@@ -102,7 +102,10 @@ export default function NavBar() {
                   to={routes.admin.root()}
                   onClick={handleClose}
                 >
-                  <ListItemText>Панель администратора</ListItemText>
+                  {user?.role === 'admin' && (
+                    <ListItemText>Панель администратора</ListItemText>
+                  )}
+                  {/* <ListItemText>Панель администратора</ListItemText> */}
                 </MenuItem>
                 <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
                   <ListItemText>Выход</ListItemText>

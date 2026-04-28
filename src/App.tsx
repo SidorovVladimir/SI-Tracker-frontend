@@ -3,7 +3,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import routes from './utils/routes';
 import ProtectedRoute from './components/ProtectedRoute';
-import RegisterPage from './pages/RegisterPage';
+// import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import NavBar from './components/NavBar';
 import AdminPage from './pages/AdminPage';
@@ -45,94 +45,96 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path={routes.profile()} element={<ProfilePage />} />
 
-            <Route path={routes.admin.root()} element={<AdminPage />}>
-              <Route path={routes.admin.users()} element={<UsersPage />} />
-              <Route
-                path={routes.admin.editUser(':userId')}
-                element={<EditUserPage />}
-              />
-              <Route path={routes.admin.cities()} element={<CitiesPage />} />
-              <Route
-                path={routes.admin.editCity(':cityId')}
-                element={<EditCityPage />}
-              />
-              <Route
-                path={routes.admin.createUser()}
-                element={<CreateUserPage />}
-              />
-              <Route
-                path={routes.admin.createCity()}
-                element={<CreateCityPage />}
-              />
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+              <Route path={routes.admin.root()} element={<AdminPage />}>
+                <Route path={routes.admin.users()} element={<UsersPage />} />
+                <Route
+                  path={routes.admin.editUser(':userId')}
+                  element={<EditUserPage />}
+                />
+                <Route path={routes.admin.cities()} element={<CitiesPage />} />
+                <Route
+                  path={routes.admin.editCity(':cityId')}
+                  element={<EditCityPage />}
+                />
+                <Route
+                  path={routes.admin.createUser()}
+                  element={<CreateUserPage />}
+                />
+                <Route
+                  path={routes.admin.createCity()}
+                  element={<CreateCityPage />}
+                />
 
-              <Route
-                path={routes.admin.companies()}
-                element={<CompaniesPage />}
-              />
-              <Route
-                path={routes.admin.editCompany(':companyId')}
-                element={<EditCompanyPage />}
-              />
-              <Route
-                path={routes.admin.createCompany()}
-                element={<CreateCompanyPage />}
-              />
-              <Route
-                path={routes.admin.productionSites()}
-                element={<ProductionSitesPage />}
-              />
-              <Route
-                path={routes.admin.createProductionSite()}
-                element={<CreateProductionSitePage />}
-              />
-              <Route
-                path={routes.admin.editProductionSite(':productionSiteId')}
-                element={<EditProductionSitePage />}
-              />
-              <Route
-                path={routes.admin.equipmentTypes()}
-                element={<EquipmentTypesPage />}
-              />
-              <Route
-                path={routes.admin.createEquipmentType()}
-                element={<CreateEquipmentTypePage />}
-              />
-              <Route
-                path={routes.admin.measurementTypes()}
-                element={<MeasurementTypesPage />}
-              />
-              <Route
-                path={routes.admin.createMeasurementType()}
-                element={<CreateMeasurementTypePage />}
-              />
-              <Route
-                path={routes.admin.metrologyControlTypes()}
-                element={<MetrologyControlTypePage />}
-              />
-              <Route
-                path={routes.admin.createMetrologyControlType()}
-                element={<CreateMetrologyControlTypePage />}
-              />
-              <Route path={routes.admin.scopes()} element={<ScopesPage />} />
-              <Route
-                path={routes.admin.createScope()}
-                element={<CreateScopePage />}
-              />
-              <Route
-                path={routes.admin.createStatus()}
-                element={<CreateStatusPage />}
-              />
-              <Route
-                path={routes.admin.statuses()}
-                element={<StatusesPage />}
-              />
+                <Route
+                  path={routes.admin.companies()}
+                  element={<CompaniesPage />}
+                />
+                <Route
+                  path={routes.admin.editCompany(':companyId')}
+                  element={<EditCompanyPage />}
+                />
+                <Route
+                  path={routes.admin.createCompany()}
+                  element={<CreateCompanyPage />}
+                />
+                <Route
+                  path={routes.admin.productionSites()}
+                  element={<ProductionSitesPage />}
+                />
+                <Route
+                  path={routes.admin.createProductionSite()}
+                  element={<CreateProductionSitePage />}
+                />
+                <Route
+                  path={routes.admin.editProductionSite(':productionSiteId')}
+                  element={<EditProductionSitePage />}
+                />
+                <Route
+                  path={routes.admin.equipmentTypes()}
+                  element={<EquipmentTypesPage />}
+                />
+                <Route
+                  path={routes.admin.createEquipmentType()}
+                  element={<CreateEquipmentTypePage />}
+                />
+                <Route
+                  path={routes.admin.measurementTypes()}
+                  element={<MeasurementTypesPage />}
+                />
+                <Route
+                  path={routes.admin.createMeasurementType()}
+                  element={<CreateMeasurementTypePage />}
+                />
+                <Route
+                  path={routes.admin.metrologyControlTypes()}
+                  element={<MetrologyControlTypePage />}
+                />
+                <Route
+                  path={routes.admin.createMetrologyControlType()}
+                  element={<CreateMetrologyControlTypePage />}
+                />
+                <Route path={routes.admin.scopes()} element={<ScopesPage />} />
+                <Route
+                  path={routes.admin.createScope()}
+                  element={<CreateScopePage />}
+                />
+                <Route
+                  path={routes.admin.createStatus()}
+                  element={<CreateStatusPage />}
+                />
+                <Route
+                  path={routes.admin.statuses()}
+                  element={<StatusesPage />}
+                />
+              </Route>
             </Route>
           </Route>
         </Route>
 
         <Route element={<AuthLayout />}>
           <Route path={routes.login()} element={<LoginPage />} />
-          <Route path={routes.register()} element={<RegisterPage />} />
+          {/* <Route path={routes.register()} element={<RegisterPage />} /> */}
         </Route>
         <Route path={'*'} element={<NotFoundPage />} />
       </Routes>

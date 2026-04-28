@@ -12,6 +12,7 @@ import {
   Button,
   CircularProgress,
   Divider,
+  MenuItem,
   Paper,
   Stack,
   TextField,
@@ -32,6 +33,7 @@ export default function CreateUserPage() {
     lastName: '',
     email: '',
     password: '',
+    role: '',
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
@@ -151,6 +153,23 @@ export default function CreateUserPage() {
               error={!!fieldErrors.password}
               helperText={fieldErrors.password}
             />
+
+            <TextField
+              id="outlined-select-currency"
+              select
+              label="Роль"
+              name="role"
+              size="small"
+              fullWidth
+              onChange={handleChange}
+              value={form.role}
+            >
+              {['admin', 'user'].map((name) => (
+                <MenuItem key={name} value={name}>
+                  {name === 'admin' ? 'Администратор' : 'Пользователь'}
+                </MenuItem>
+              ))}
+            </TextField>
 
             <Divider sx={{ my: 2 }} />
 

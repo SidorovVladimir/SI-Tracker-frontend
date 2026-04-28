@@ -122,6 +122,9 @@ export default function UsersPage() {
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   {u.email}
                 </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {u.role === 'admin' ? 'Администратор' : 'Пользователь'}
+                </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
                   <IconButton
@@ -167,6 +170,7 @@ export default function UsersPage() {
                 <TableCell>Имя</TableCell>
                 <TableCell>Фамилия</TableCell>
                 <TableCell>Почта</TableCell>
+                <TableCell>Роль</TableCell>
                 <TableCell>Дата регистрации</TableCell>
                 <TableCell>Дата обновления</TableCell>
                 <TableCell align="right">Действия</TableCell>
@@ -178,6 +182,9 @@ export default function UsersPage() {
                   <TableCell>{u.firstName}</TableCell>
                   <TableCell>{u.lastName}</TableCell>
                   <TableCell>{u.email}</TableCell>
+                  <TableCell>
+                    {u.role === 'admin' ? 'Администратор' : 'Пользователь'}
+                  </TableCell>
                   <TableCell>{formatDate(u.createdAt)}</TableCell>
                   <TableCell>{formatDate(u.updatedAt)}</TableCell>
                   <TableCell align="right">

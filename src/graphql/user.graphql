@@ -4,6 +4,7 @@ query GetUsers {
     firstName
     lastName
     email
+    role
     createdAt
     updatedAt
   }
@@ -15,6 +16,7 @@ query GetUser($id: ID!) {
     firstName
     lastName
     email
+    role
   }
 }
 
@@ -27,6 +29,7 @@ mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
     id
     firstName
     lastName
+    role
     updatedAt
   }
 }
@@ -36,6 +39,7 @@ mutation CreateUser($input: CreateUserInput!) {
     id
     firstName
     lastName
+    role
     createdAt
     updatedAt
   }
