@@ -256,7 +256,7 @@ export default function CreateDevicePage() {
             required
           />
           <TextField
-            label="Серийный номер"
+            label="Заводской номер"
             name="serialNumber"
             value={form.serialNumber}
             onChange={handleChange}

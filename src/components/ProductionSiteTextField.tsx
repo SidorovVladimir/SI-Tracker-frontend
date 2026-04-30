@@ -25,7 +25,7 @@ export default function ProductionSiteTextField({
         {productionSiteList.map(
           ({ id, name }: { id: string; name: string }) => (
             <MenuItem key={id} value={id}>
-              {name}
+              {name.toUpperCase()}
             </MenuItem>
           )
         )}

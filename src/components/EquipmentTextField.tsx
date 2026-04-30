@@ -24,7 +24,7 @@ export default function EquipmentTextField({
         {equipmentTypesList.map(
           ({ id, name }: { id: string; name: string }) => (
             <MenuItem key={id} value={id}>
-              {name}
+              {name.toUpperCase()}
             </MenuItem>
           )
         )}

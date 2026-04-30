@@ -10,6 +10,7 @@ import { SnackbarProvider } from 'notistack';
 const getClient = () => {
   return new ApolloClient({
     link: new HttpLink({
+      // uri: '/graphql',
       uri: 'http://localhost:4000/graphql',
       credentials: 'include',
     }),

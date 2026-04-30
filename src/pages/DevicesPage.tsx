@@ -29,6 +29,7 @@ interface FilterState {
   company: string;
   productionSite: string;
   deviceName: string;
+  serialNumber: string;
   status: string;
   dateStart: string | null;
   dateEnd: string | null;
@@ -39,6 +40,7 @@ const initialFilters: FilterState = {
   company: '',
   productionSite: '',
   deviceName: '',
+  serialNumber: '',
   status: '',
   dateStart: null,
   dateEnd: null,
@@ -117,6 +119,12 @@ export default function DevicesPage() {
           !filters.deviceName ||
           row.name.toLowerCase().includes(filters.deviceName.toLowerCase());
 
+        const matchesSerialNumber =
+          !filters.serialNumber ||
+          row.serialNumber
+            .toLowerCase()
+            .includes(filters.serialNumber.toLowerCase());
+
         const matchesStatus =
           !filters.status || row.status?.name === filters.status;
 
@@ -130,6 +138,7 @@ export default function DevicesPage() {
 
         return (
           matchesName &&
+          matchesSerialNumber &&
           matchesCity &&
           matchesCompany &&
           matchesSub &&
@@ -177,35 +186,49 @@ export default function DevicesPage() {
       headerName: 'Город',
       flex: 1,
       minWidth: 100,
-      valueGetter: (_, row) => row.productionSite?.city?.name,
+      valueGetter: (_, row) => row.productionSite?.city?.name.toUpperCase(),
     },
     {
       field: 'company',
       headerName: 'Организация',
       flex: 1,
       minWidth: 160,
-      valueGetter: (_, row) => row.productionSite?.company?.name,
+      valueGetter: (_, row) => row.productionSite?.company?.name.toUpperCase(),
     },
     {
       field: 'productionSite',
       headerName: 'Подразделение',
       flex: 1,
       minWidth: 160,
-      valueGetter: (_, row) => row.productionSite?.name,
+      valueGetter: (_, row) => row.productionSite?.name.toUpperCase(),
     },
-    { field: 'name', headerName: 'Наименование', flex: 1, minWidth: 200 },
-    { field: 'model', headerName: 'Тип СИ', flex: 1, minWidth: 120 },
+    {
+      field: 'name',
+      headerName: 'Наименование',
+      flex: 1,
+      minWidth: 200,
+      valueFormatter: (_, value) => value.name.toUpperCase(),
+    },
+    {
+      field: 'model',
+      headerName: 'Тип СИ',
+      flex: 1,
+      minWidth: 120,
+      valueFormatter: (_, value) => value.model.toUpperCase(),
+    },
     {
       field: 'serialNumber',
       headerName: 'Заводской номер',
       flex: 1,
       minWidth: 130,
+      valueFormatter: (_, value) => value.serialNumber.toUpperCase(),
     },
     {
       field: 'inventoryNumber',
       headerName: 'Инвентарный номер',
       flex: 1,
       minWidth: 130,
+      valueFormatter: (_, value) => value.inventoryNumber.toUpperCase(),
     },
     {
       field: 'verificationDate',
@@ -240,7 +263,7 @@ export default function DevicesPage() {
       headerName: 'Состояние',
       flex: 1,
       minWidth: 120,
-      valueGetter: (_, row) => row.status?.name,
+      valueGetter: (_, row) => row.status?.name.toUpperCase(),
     },
     {
       field: 'grsiNumber',
@@ -255,7 +278,9 @@ export default function DevicesPage() {
       flex: 1,
       minWidth: 130,
       valueGetter: (_, row) =>
-        row.latestVerification ? row.latestVerification.protocolNumber : '-',
+        row.latestVerification
+          ? row.latestVerification.protocolNumber.toUpperCase()
+          : '-',
     },
     {
       field: 'releaseDate',
@@ -269,7 +294,8 @@ export default function DevicesPage() {
       headerName: 'Изготовитель',
       flex: 1,
       minWidth: 160,
-      valueFormatter: (value) => (value ? value : '-'),
+      valueFormatter: (_, value) =>
+        value ? value.manufacturer.toUpperCase() : '-',
     },
   ];
 
@@ -440,6 +466,15 @@ export default function DevicesPage() {
                 onChange={(e) =>
                   handleFilterChange('deviceName', e.target.value)
                 }
+              />
+              <TextField
+                label="Заводской номер"
+                size="small"
+                value={filters.serialNumber}
+                onChange={(e) =>
+                  handleFilterChange('serialNumber', e.target.value)
+                }
+                sx={{ minWidth: 130, maxWidth: 150 }}
               />
 
               <TextField

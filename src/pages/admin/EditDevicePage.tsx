@@ -116,9 +116,9 @@ function UserForm({
     measurementTypeId: string;
     scopes: { id: string; name: string }[];
   }>({
-    name: device.name || '',
-    model: device.model || '',
-    serialNumber: device.serialNumber || '',
+    name: device.name.toUpperCase() || '',
+    model: device.model.toUpperCase() || '',
+    serialNumber: device.serialNumber.toUpperCase() || '',
     releaseDate: device.releaseDate
       ? new Date(
           new Date(Number(device.releaseDate)).getTime() -
@@ -128,9 +128,9 @@ function UserForm({
           .split('T')[0]
       : '',
     grsiNumber: device.grsiNumber || '',
-    measurementRange: device.measurementRange || '',
-    accuracy: device.accuracy || '',
-    inventoryNumber: device.inventoryNumber || '',
+    measurementRange: device.measurementRange?.toUpperCase() || '',
+    accuracy: device.accuracy?.toUpperCase() || '',
+    inventoryNumber: device.inventoryNumber?.toUpperCase() || '',
     receiptDate: device.receiptDate
       ? new Date(
           new Date(Number(device.receiptDate)).getTime() -
@@ -139,10 +139,10 @@ function UserForm({
           .toISOString()
           .split('T')[0]
       : '',
-    manufacturer: device.manufacturer || '',
+    manufacturer: device.manufacturer?.toUpperCase() || '',
     verificationInterval: device.verificationInterval || '',
     archived: device.archived,
-    nomenclature: device.nomenclature || '',
+    nomenclature: device.nomenclature?.toUpperCase() || '',
     statusId: device.status.id || '',
     productionSiteId: device.productionSite.id || '',
     equipmentTypeId: device.equipmentType?.id || '',
@@ -369,7 +369,7 @@ function UserForm({
             required
           />
           <TextField
-            label="Серийный номер"
+            label="Заводской номер"
             name="serialNumber"
             value={form.serialNumber}
             onChange={handleChange}
