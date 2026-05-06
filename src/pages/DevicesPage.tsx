@@ -186,49 +186,52 @@ export default function DevicesPage() {
       headerName: 'Город',
       flex: 1,
       minWidth: 100,
-      valueGetter: (_, row) => row.productionSite?.city?.name.toUpperCase(),
+      valueGetter: (_, row) =>
+        row?.productionSite?.city?.name?.toUpperCase() ?? '-',
     },
     {
       field: 'company',
       headerName: 'Организация',
       flex: 1,
       minWidth: 160,
-      valueGetter: (_, row) => row.productionSite?.company?.name.toUpperCase(),
+      valueGetter: (_, row) =>
+        row?.productionSite?.company?.name.toUpperCase() ?? '-',
     },
     {
       field: 'productionSite',
       headerName: 'Подразделение',
       flex: 1,
       minWidth: 160,
-      valueGetter: (_, row) => row.productionSite?.name.toUpperCase(),
+      valueGetter: (_, row) => row?.productionSite?.name?.toUpperCase() ?? '-',
     },
     {
       field: 'name',
       headerName: 'Наименование',
       flex: 1,
       minWidth: 200,
-      valueFormatter: (_, value) => value.name.toUpperCase(),
+      valueFormatter: (_, value) => value?.name?.toUpperCase() ?? '-',
     },
     {
       field: 'model',
       headerName: 'Тип СИ',
       flex: 1,
       minWidth: 120,
-      valueFormatter: (_, value) => value.model.toUpperCase(),
+      valueFormatter: (_, value) => value?.model?.toUpperCase() ?? '-',
     },
     {
       field: 'serialNumber',
       headerName: 'Заводской номер',
       flex: 1,
       minWidth: 130,
-      valueFormatter: (_, value) => value.serialNumber.toUpperCase(),
+      valueFormatter: (_, value) => value?.serialNumber?.toUpperCase() ?? '-',
     },
     {
       field: 'inventoryNumber',
       headerName: 'Инвентарный номер',
       flex: 1,
       minWidth: 130,
-      valueFormatter: (_, value) => value.inventoryNumber.toUpperCase(),
+      valueFormatter: (_, value) =>
+        value?.inventoryNumber?.toUpperCase() ?? '-',
     },
     {
       field: 'verificationDate',
@@ -263,7 +266,7 @@ export default function DevicesPage() {
       headerName: 'Состояние',
       flex: 1,
       minWidth: 120,
-      valueGetter: (_, row) => row.status?.name.toUpperCase(),
+      valueGetter: (_, row) => row?.status?.name?.toUpperCase() ?? '-',
     },
     {
       field: 'grsiNumber',
