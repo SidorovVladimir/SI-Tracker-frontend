@@ -281,9 +281,7 @@ export default function DevicesPage() {
       flex: 1,
       minWidth: 130,
       valueGetter: (_, row) =>
-        row.latestVerification
-          ? row.latestVerification.protocolNumber.toUpperCase()
-          : '-',
+        row?.latestVerification?.protocolNumber?.toUpperCase() ?? '-',
     },
     {
       field: 'releaseDate',
@@ -297,8 +295,7 @@ export default function DevicesPage() {
       headerName: 'Изготовитель',
       flex: 1,
       minWidth: 160,
-      valueFormatter: (_, value) =>
-        value ? value.manufacturer.toUpperCase() : '-',
+      valueFormatter: (_, value) => value?.manufacturer?.toUpperCase() || '-',
     },
   ];
 

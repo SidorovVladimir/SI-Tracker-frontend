@@ -130,6 +130,7 @@ export default function MetrologyControlTypePage() {
                   <IconButton
                     size="small"
                     color="primary"
+                    disabled={true}
                     sx={{ border: '1px solid', borderColor: 'primary.light' }}
                     // component={Link}
                     // to={routes.admin.editProductionSite(p.id)}
@@ -188,6 +189,7 @@ export default function MetrologyControlTypePage() {
                         <IconButton
                           size="small"
                           color="primary"
+                          disabled={true}
                           // component={Link}
                           // to={routes.admin.editProductionSite(eq.id)}
                         >

@@ -10,6 +10,7 @@ import {
   Container,
   Avatar,
   ListItemText,
+  Tooltip,
 } from '@mui/material';
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
@@ -17,6 +18,12 @@ import { Link, useNavigate } from 'react-router';
 import { useApolloClient, useMutation } from '@apollo/client/react';
 import { LogoutDocument } from '../graphql/types/__generated__/graphql';
 import routes from '../utils/routes';
+
+const pulseKeyframes = {
+  '0%': { transform: 'scale(1)' },
+  '50%': { transform: 'scale(1.05)' },
+  '100%': { transform: 'scale(1)' },
+};
 
 export default function NavBar() {
   const { isAuthenticated, user } = useAuth();
@@ -59,19 +66,35 @@ export default function NavBar() {
     >
       <Container maxWidth="lg">
         <Toolbar disableGutters>
-          <Typography
-            variant="h6"
-            component={Link}
-            to={routes.home()}
-            sx={{
-              flexGrow: 1,
-              textDecoration: 'none',
-              color: 'inherit',
-              fontWeight: 700,
-            }}
+          <Tooltip
+            title="На главную"
+            arrow
+            placement="bottom-start"
+            enterDelay={500} // Появится не сразу, чтобы не раздражать при случайном наведении
           >
-            SI-Tracker
-          </Typography>
+            <Typography
+              variant="h6"
+              component={Link}
+              to={routes.home()}
+              sx={{
+                flexGrow: 1,
+                textDecoration: 'none',
+                color: 'inherit',
+                fontWeight: 700,
+                display: 'inline-block',
+                width: 'fit-content',
+                cursor: 'pointer',
+                animation: 'pulse-once 0.8s ease-in-out',
+                '@keyframes pulse-once': pulseKeyframes,
+                '&:hover': {
+                  color: 'primary.main',
+                  transition: 'opacity 0.2s',
+                },
+              }}
+            >
+              SI-Tracker
+            </Typography>
+          </Tooltip>
 
           {isAuthenticated ? (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>

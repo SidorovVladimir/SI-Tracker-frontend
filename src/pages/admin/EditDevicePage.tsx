@@ -446,7 +446,7 @@ function UserForm({
           />
 
           <TextField
-            label="Производитель"
+            label="Изготовитель"
             name="manufacturer"
             value={form.manufacturer}
             onChange={handleChange}

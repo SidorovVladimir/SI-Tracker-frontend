@@ -114,6 +114,8 @@ export default function CreateUserPage() {
               required
               error={!!fieldErrors.firstName}
               helperText={fieldErrors.firstName}
+              // focused={true}
+              autoFocus={true}
             />
 
             <TextField

@@ -100,6 +100,7 @@ export default function CreateEquipmentTypePage() {
               required
               error={!!fieldErrors.name}
               helperText={fieldErrors.name}
+              autoFocus={true}
             />
 
             <Divider sx={{ my: 2 }} />

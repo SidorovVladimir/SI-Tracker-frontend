@@ -124,6 +124,7 @@ export default function CreateProductionSitePage() {
               required
               error={!!fieldErrors.name}
               helperText={fieldErrors.name}
+              autoFocus={true}
             />
             <TextField
               id="outlined-select-currency"

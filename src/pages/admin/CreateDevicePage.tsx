@@ -244,6 +244,7 @@ export default function CreateDevicePage() {
             variant="outlined"
             size="small"
             required
+            autoFocus={true}
           />
           <TextField
             label="Модель"
@@ -333,7 +334,7 @@ export default function CreateDevicePage() {
           />
 
           <TextField
-            label="Производитель"
+            label="Изготовитель"
             name="manufacturer"
             value={form.manufacturer}
             onChange={handleChange}

@@ -105,6 +105,7 @@ export default function CreateCompanyPage() {
               required
               error={!!fieldErrors.name}
               helperText={fieldErrors.name}
+              autoFocus={true}
             />
             <TextField
               label="Адрес"
