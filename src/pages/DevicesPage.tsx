@@ -10,17 +10,16 @@ import {
   TextField,
   Typography,
   Slide,
-  IconButton,
   Stack,
-  Tooltip,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
 import { useEffect, useMemo, useState } from 'react';
 import CreateDevicePage from './admin/CreateDevicePage';
-import EditDevicePage from './admin/EditDevicePage';
-import { Close } from '@mui/icons-material';
+// import EditDevicePage from './admin/EditDevicePage';
 import { useAuth } from '../hooks/useAuth';
+import DeviceCard from './DeviceCard';
+import EditDevicePage from './admin/EditDevicePage';
 
 type Device = GetDevicesWithRelationsListQuery['devicesWithRelations'][0];
 const FILTERS_STORAGE_KEY = 'devices_filters_v1';
@@ -31,6 +30,7 @@ interface FilterState {
   deviceName: string;
   serialNumber: string;
   status: string;
+  // metrologyControle: string;
   dateStart: string | null;
   dateEnd: string | null;
 }
@@ -42,6 +42,7 @@ const initialFilters: FilterState = {
   deviceName: '',
   serialNumber: '',
   status: '',
+  // metrologyControle: '',
   dateStart: null,
   dateEnd: null,
 };
@@ -136,6 +137,8 @@ export default function DevicesPage() {
         const matchesDateEnd =
           !filters.dateEnd || (vDate && vDate <= new Date(filters.dateEnd));
 
+        //         const matchesMetrologyControle = !filters.metrologyControle || row.latestVerification?.metrologyControleType?.name
+        //  ?
         return (
           matchesName &&
           matchesSerialNumber &&
@@ -177,7 +180,9 @@ export default function DevicesPage() {
     ).sort();
   }, [data]);
 
-  const [viewMode, setViewMode] = useState<'edit' | 'create' | null>(null);
+  const [viewMode, setViewMode] = useState<'info' | 'create' | 'edit' | null>(
+    null
+  );
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
   const columns: GridColDef[] = [
@@ -253,7 +258,7 @@ export default function DevicesPage() {
     },
     {
       field: 'metrologyControlType',
-      headerName: 'Вид работ',
+      headerName: 'Вид контроля',
       flex: 1,
       minWidth: 140,
       valueGetter: (_, row) =>
@@ -300,10 +305,8 @@ export default function DevicesPage() {
   ];
 
   const handleRowClick = (params: GridRowParams) => {
-    if (user?.role === 'admin') {
-      setSelectedDeviceId(params.row.id);
-      setViewMode('edit');
-    }
+    setSelectedDeviceId(params.row.id);
+    setViewMode('info');
   };
 
   const handleAddClick = () => {
@@ -614,30 +617,18 @@ export default function DevicesPage() {
                   overflowY: 'auto',
                 }}
               >
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  mb={3}
-                >
-                  <Typography variant="h6" gutterBottom>
-                    {viewMode === 'create'
-                      ? 'Добавить новое СИ'
-                      : 'Редактировать СИ'}
-                  </Typography>
-                  <Tooltip title="Закрыть">
-                    <IconButton onClick={closeDetails}>
-                      <Close />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
-
                 {viewMode === 'create' ? (
-                  <CreateDevicePage />
-                ) : (
+                  <CreateDevicePage closeDetails={closeDetails} />
+                ) : viewMode === 'edit' ? (
                   <EditDevicePage
                     deviceId={selectedDeviceId!}
+                    closeDetails={() => setViewMode('info')}
+                  />
+                ) : (
+                  <DeviceCard
+                    deviceId={selectedDeviceId!}
                     closeDetails={closeDetails}
+                    onEdit={() => setViewMode('edit')}
                   />
                 )}
               </Box>

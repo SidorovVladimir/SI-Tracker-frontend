@@ -30,7 +30,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Add, ExpandMore } from '@mui/icons-material';
+import { Add, Close, ExpandMore } from '@mui/icons-material';
 import ScopeAutocomplete from '../../components/ScopeAutocomplete';
 import MeasurementTextField from '../../components/MeasurementTextField';
 import EquipmentTextField from '../../components/EquipmentTextField';
@@ -110,6 +110,7 @@ function UserForm({
     verificationInterval: number | string;
     archived: boolean;
     nomenclature: string;
+    comment: string;
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string;
@@ -143,6 +144,7 @@ function UserForm({
     verificationInterval: device.verificationInterval || '',
     archived: device.archived,
     nomenclature: device?.nomenclature?.toUpperCase() ?? '',
+    comment: device.comment || '',
     statusId: device.status.id || '',
     productionSiteId: device.productionSite.id || '',
     equipmentTypeId: device.equipmentType?.id || '',
@@ -346,6 +348,21 @@ function UserForm({
 
   return (
     <Box>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography variant="h6" gutterBottom color="primary">
+          Редактировать СИ
+        </Typography>
+        <Tooltip title="Закрыть">
+          <IconButton onClick={closeDetails}>
+            <Close />
+          </IconButton>
+        </Tooltip>
+      </Stack>
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>
           <TextField
@@ -433,7 +450,7 @@ function UserForm({
 
           <TextField
             type="date"
-            label="Дата получения"
+            label="Дата ввода"
             name="receiptDate"
             value={form.receiptDate.split('T')[0]}
             onChange={handleChange}
@@ -474,6 +491,24 @@ function UserForm({
             fullWidth
             variant="outlined"
             size="small"
+          />
+          <TextField
+            label="Комментарий"
+            name="comment"
+            value={form.comment}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            multiline
+            minRows={2}
+            maxRows={5}
+            variant="outlined"
+            sx={{
+              '& .MuiInputBase-root': {
+                fontSize: '0.875rem',
+              },
+              mt: 1,
+            }}
           />
 
           <StatusTextField
@@ -606,6 +641,19 @@ function UserForm({
                         size="small"
                       />
 
+                      {/* <TextField
+                        label="Комментарий"
+                        value={verification.comment}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'comment',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                      /> */}
                       <TextField
                         label="Комментарий"
                         value={verification.comment}
@@ -618,6 +666,16 @@ function UserForm({
                         }
                         fullWidth
                         size="small"
+                        multiline
+                        minRows={2}
+                        maxRows={5}
+                        variant="outlined"
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            fontSize: '0.875rem',
+                          },
+                          mt: 1,
+                        }}
                       />
 
                       <TextField

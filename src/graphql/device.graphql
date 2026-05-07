@@ -14,6 +14,7 @@ mutation CreateDevice($input: CreateDeviceInput!) {
     verificationInterval
     archived
     nomenclature
+    comment
     statusId
     productionSiteId
     equipmentTypeId
@@ -39,6 +40,7 @@ query GetDevicesList {
     verificationInterval
     archived
     nomenclature
+    comment
     statusId
     productionSiteId
     equipmentTypeId
@@ -64,6 +66,7 @@ query GetDevicesWithRelationsList {
     verificationInterval
     archived
     nomenclature
+    comment
     status {
       name
     }
@@ -111,6 +114,7 @@ query GetDeviceWithRelation($id: ID!) {
     verificationInterval
     archived
     nomenclature
+    comment
     equipmentType {
       id
       name
@@ -177,6 +181,7 @@ mutation UpdateDevice($id: ID!, $input: UpdateDeviceInput!) {
     verificationInterval
     archived
     nomenclature
+    comment
     statusId
     productionSiteId
     equipmentTypeId

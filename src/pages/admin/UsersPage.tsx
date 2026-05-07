@@ -141,7 +141,10 @@ export default function UsersPage() {
                     color="error"
                     sx={{ border: '1px solid', borderColor: 'error.light' }}
                     onClick={() => handleDeleteClick(u.id)}
-                    disabled={user?.id === u.id}
+                    disabled={
+                      user?.id === u.id ||
+                      u.email === 'v.sidorov29091988@gmail.com'
+                    }
                   >
                     <Delete fontSize="small" />
                   </IconButton>

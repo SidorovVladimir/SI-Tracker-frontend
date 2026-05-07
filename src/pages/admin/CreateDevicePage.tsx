@@ -26,14 +26,15 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Add, ExpandMore } from '@mui/icons-material';
+import { Add, Close, ExpandMore } from '@mui/icons-material';
 import ScopeAutocomplete from '../../components/ScopeAutocomplete';
 import MeasurementTextField from '../../components/MeasurementTextField';
 import EquipmentTextField from '../../components/EquipmentTextField';
 import StatusTextField from '../../components/StatusTextField';
 import ProductionSiteTextField from '../../components/ProductionSiteTextField';
 
-export default function CreateDevicePage() {
+export default function CreateDevicePage(props: { closeDetails: () => void }) {
+  const { closeDetails } = props;
   const { data: productionSiteData } = useQuery(
     GetProductionSitesForSelectDocument
   );
@@ -61,6 +62,7 @@ export default function CreateDevicePage() {
     verificationInterval: number | string;
     archived: boolean;
     nomenclature: string;
+    comment: string;
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string;
@@ -80,6 +82,7 @@ export default function CreateDevicePage() {
     verificationInterval: '',
     archived: false,
     nomenclature: '',
+    comment: '',
     statusId: '',
     productionSiteId: '',
     equipmentTypeId: '',
@@ -233,6 +236,21 @@ export default function CreateDevicePage() {
 
   return (
     <Box>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography variant="h6" gutterBottom color="primary">
+          Добавить новое СИ
+        </Typography>
+        <Tooltip title="Закрыть">
+          <IconButton onClick={closeDetails}>
+            <Close />
+          </IconButton>
+        </Tooltip>
+      </Stack>
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>
           <TextField
@@ -321,7 +339,7 @@ export default function CreateDevicePage() {
 
           <TextField
             type="date"
-            label="Дата получения"
+            label="Дата ввода"
             name="receiptDate"
             value={form.receiptDate}
             onChange={handleChange}
@@ -362,6 +380,25 @@ export default function CreateDevicePage() {
             fullWidth
             variant="outlined"
             size="small"
+          />
+
+          <TextField
+            label="Комментарий"
+            name="comment"
+            value={form.comment}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            multiline
+            minRows={2}
+            maxRows={5}
+            variant="outlined"
+            sx={{
+              '& .MuiInputBase-root': {
+                fontSize: '0.875rem',
+              },
+              mt: 1,
+            }}
           />
 
           <StatusTextField
@@ -482,6 +519,8 @@ export default function CreateDevicePage() {
 
                       <TextField
                         label="Результат"
+                        select
+                        name="result"
                         value={verification.result}
                         onChange={(e) =>
                           handleVerificationChange(
@@ -492,8 +531,27 @@ export default function CreateDevicePage() {
                         }
                         fullWidth
                         size="small"
-                      />
+                      >
+                        {['Годен', 'Не годен'].map((name) => (
+                          <MenuItem key={name} value={name}>
+                            {name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
 
+                      {/* <TextField
+                        label="Комментарий"
+                        value={verification.comment}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'comment',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                      /> */}
                       <TextField
                         label="Комментарий"
                         value={verification.comment}
@@ -506,6 +564,16 @@ export default function CreateDevicePage() {
                         }
                         fullWidth
                         size="small"
+                        multiline
+                        minRows={2}
+                        maxRows={5}
+                        variant="outlined"
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            fontSize: '0.875rem',
+                          },
+                          mt: 1,
+                        }}
                       />
 
                       <TextField

@@ -63,6 +63,7 @@ export type CreateCompanyInput = {
 export type CreateDeviceInput = {
   accuracy?: InputMaybe<Scalars['String']['input']>;
   archived: Scalars['Boolean']['input'];
+  comment?: InputMaybe<Scalars['String']['input']>;
   equipmentTypeId?: InputMaybe<Scalars['ID']['input']>;
   grsiNumber?: InputMaybe<Scalars['String']['input']>;
   inventoryNumber?: InputMaybe<Scalars['String']['input']>;
@@ -120,6 +121,7 @@ export type Device = {
   __typename: 'Device';
   accuracy: Maybe<Scalars['String']['output']>;
   archived: Scalars['Boolean']['output'];
+  comment: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
   equipmentTypeId: Maybe<Scalars['ID']['output']>;
   grsiNumber: Maybe<Scalars['String']['output']>;
@@ -144,6 +146,7 @@ export type DeviceWithRelations = {
   __typename: 'DeviceWithRelations';
   accuracy: Maybe<Scalars['String']['output']>;
   archived: Scalars['Boolean']['output'];
+  comment: Maybe<Scalars['String']['output']>;
   equipmentType: Maybe<EquipmentType>;
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -478,6 +481,7 @@ export type UpdateCompanyInput = {
 export type UpdateDeviceInput = {
   accuracy?: InputMaybe<Scalars['String']['input']>;
   archived: Scalars['Boolean']['input'];
+  comment?: InputMaybe<Scalars['String']['input']>;
   equipmentTypeId?: InputMaybe<Scalars['ID']['input']>;
   grsiNumber?: InputMaybe<Scalars['String']['input']>;
   inventoryNumber?: InputMaybe<Scalars['String']['input']>;
@@ -785,6 +789,7 @@ export type CreateDeviceMutation = {
     verificationInterval: number | null;
     archived: boolean;
     nomenclature: string | null;
+    comment: string | null;
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string | null;
@@ -813,6 +818,7 @@ export type GetDevicesListQuery = {
     verificationInterval: number | null;
     archived: boolean;
     nomenclature: string | null;
+    comment: string | null;
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string | null;
@@ -843,6 +849,7 @@ export type GetDevicesWithRelationsListQuery = {
     verificationInterval: number | null;
     archived: boolean;
     nomenclature: string | null;
+    comment: string | null;
     status: { __typename: 'Status'; name: string };
     productionSite: {
       __typename: 'ProductionSiteRelation';
@@ -890,6 +897,7 @@ export type GetDeviceWithRelationQuery = {
     verificationInterval: number | null;
     archived: boolean;
     nomenclature: string | null;
+    comment: string | null;
     equipmentType: {
       __typename: 'EquipmentType';
       id: string;
@@ -957,6 +965,7 @@ export type UpdateDeviceMutation = {
     verificationInterval: number | null;
     archived: boolean;
     nomenclature: string | null;
+    comment: string | null;
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string | null;
@@ -2070,6 +2079,7 @@ export const CreateDeviceDocument = {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'nomenclature' },
                 },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'statusId' } },
                 {
                   kind: 'Field',
@@ -2144,6 +2154,7 @@ export const GetDevicesListDocument = {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'nomenclature' },
                 },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'statusId' } },
                 {
                   kind: 'Field',
@@ -2215,6 +2226,7 @@ export const GetDevicesWithRelationsListDocument = {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'nomenclature' },
                 },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'status' },
@@ -2398,6 +2410,7 @@ export const GetDeviceWithRelationDocument = {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'nomenclature' },
                 },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'equipmentType' },
@@ -2686,6 +2699,7 @@ export const UpdateDeviceDocument = {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'nomenclature' },
                 },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'statusId' } },
                 {
                   kind: 'Field',
