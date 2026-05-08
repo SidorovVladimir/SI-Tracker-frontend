@@ -1,0 +1,57 @@
+import { AddCircleOutline } from '@mui/icons-material';
+import {
+  Box,
+  Autocomplete,
+  TextField,
+  Tooltip,
+  IconButton,
+} from '@mui/material';
+import { useState } from 'react';
+import PrimaryStandartModal from './modals/PrimaryStandartModal';
+
+export default function PrimaryStandartAutocomplete({
+  value,
+  onChange,
+  primaryStandartsList,
+}: any) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Autocomplete
+        fullWidth // Чтобы поле занимало всё доступное место в Box
+        multiple
+        options={primaryStandartsList}
+        getOptionLabel={(option) => option.name}
+        value={value}
+        onChange={onChange}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Первичные эталоны"
+            placeholder="Выберите первичные эталоны"
+            size="small"
+          />
+        )}
+      />
+
+      <Tooltip title="Добавить первичный эталон">
+        <IconButton
+          color="primary"
+          onClick={() => setIsModalOpen(true)}
+          sx={{ p: '8px' }}
+        >
+          <AddCircleOutline />
+        </IconButton>
+      </Tooltip>
+
+      <PrimaryStandartModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreated={(newPrimaryStandart: string) => {
+          onChange(null, [...value, newPrimaryStandart]);
+        }}
+      />
+    </Box>
+  );
+}

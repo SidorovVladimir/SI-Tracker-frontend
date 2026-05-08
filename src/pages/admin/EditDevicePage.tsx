@@ -8,6 +8,7 @@ import {
   GetEquipmentTypesListDocument,
   GetMeasurementTypesListDocument,
   GetMetrologyControlTypesListDocument,
+  GetPrimaryStandartsListDocument,
   GetProductionSitesForSelectDocument,
   GetScopesListDocument,
   GetStatusListDocument,
@@ -22,6 +23,11 @@ import {
   Box,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   IconButton,
   MenuItem,
@@ -36,12 +42,14 @@ import MeasurementTextField from '../../components/MeasurementTextField';
 import EquipmentTextField from '../../components/EquipmentTextField';
 import StatusTextField from '../../components/StatusTextField';
 import ProductionSiteTextField from '../../components/ProductionSiteTextField';
+import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocomplete';
 
 export default function EditDevicePage(props: {
   deviceId: string;
   closeDetails: () => void;
+  close: () => void;
 }) {
-  const { deviceId, closeDetails } = props;
+  const { deviceId, closeDetails, close } = props;
   const {
     data: deviceData,
     loading,
@@ -72,6 +80,7 @@ export default function EditDevicePage(props: {
       key={deviceId}
       device={deviceData.device}
       closeDetails={closeDetails}
+      close={close}
     />
   );
 }
@@ -79,10 +88,14 @@ export default function EditDevicePage(props: {
 function UserForm({
   device,
   closeDetails,
+  close,
 }: {
   device: NonNullable<GetDeviceWithRelationQuery['device']>;
   closeDetails: () => void;
+  close: () => void;
 }) {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const { data: productionSiteData } = useQuery(
     GetProductionSitesForSelectDocument
   );
@@ -92,6 +105,9 @@ function UserForm({
     GetMeasurementTypesListDocument
   );
   const { data: scopesData } = useQuery(GetScopesListDocument);
+  const { data: primaryStandartsData } = useQuery(
+    GetPrimaryStandartsListDocument
+  );
   const { data: metrologyControlTypeData } = useQuery(
     GetMetrologyControlTypesListDocument
   );
@@ -116,6 +132,7 @@ function UserForm({
     equipmentTypeId: string;
     measurementTypeId: string;
     scopes: { id: string; name: string }[];
+    primaryStandarts: { id: string; name: string }[];
   }>({
     name: device?.name?.toUpperCase() ?? '',
     model: device?.model?.toUpperCase() ?? '',
@@ -150,6 +167,7 @@ function UserForm({
     equipmentTypeId: device.equipmentType?.id || '',
     measurementTypeId: device.measurementType?.id || '',
     scopes: device.scopes,
+    primaryStandarts: device.primaryStandarts,
   });
   const verificationsState = device.verifications.map((verification) => {
     return {
@@ -242,6 +260,7 @@ function UserForm({
   const statusesList = statusesData?.statuses || [];
   const measurementTypesList = measurementTypesData?.measurementTypes || [];
   const scopesList = scopesData?.scopes || [];
+  const primaryStandartsList = primaryStandartsData?.primaryStandarts || [];
 
   const metrologyControlTypeList =
     metrologyControlTypeData?.metrologyControlTypes || [];
@@ -274,7 +293,7 @@ function UserForm({
         enqueueSnackbar('Прибор успешно удален', {
           variant: 'success',
         });
-        closeDetails();
+        close();
       },
       onError: (error) => {
         enqueueSnackbar(`Ошибка создания: ${error.message}`, {
@@ -283,10 +302,6 @@ function UserForm({
       },
     }
   );
-
-  const handleDelete = async (deviceId: string) => {
-    await deleteDevice({ variables: { id: deviceId } });
-  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -336,6 +351,9 @@ function UserForm({
           : null,
       nomenclature: form.nomenclature || null,
       scopes: form.scopes.map((scope) => scope.id),
+      primaryStandarts: form.primaryStandarts.map(
+        (primaryStandart) => primaryStandart.id
+      ),
       verifications: verificationsInput,
       inventoryNumber: form.inventoryNumber || null,
       equipmentTypeId: form.equipmentTypeId || null,
@@ -344,6 +362,21 @@ function UserForm({
     await updateDevice({
       variables: { id: device.id, input: data },
     });
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedDeviceId(id);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedDeviceId('');
+  };
+
+  const handleConfirmDelete = async () => {
+    handleCloseDialog();
+    await deleteDevice({ variables: { id: selectedDeviceId } });
   };
 
   return (
@@ -541,6 +574,14 @@ function UserForm({
               handleAutocompleteChange('scopes', val)
             }
             scopesList={scopesList}
+          />
+
+          <PrimaryStandartAutocomplete
+            value={form.primaryStandarts}
+            onChange={(_: string, val: { id: string; name: string }[]) =>
+              handleAutocompleteChange('primaryStandarts', val)
+            }
+            primaryStandartsList={primaryStandartsList}
           />
 
           <Divider sx={{ my: 2 }} />
@@ -746,7 +787,7 @@ function UserForm({
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Button
               type="button"
-              onClick={() => handleDelete(device.id)}
+              onClick={() => handleDeleteClick(device.id)}
               color="error"
               variant="contained"
               size="large"
@@ -767,6 +808,28 @@ function UserForm({
           </Box>
         </Stack>
       </form>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Подтвердите удаление</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Вы действительно хотите удалить это средство измерения? Это действие
+            нельзя отменить.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Отмена
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Удалить
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

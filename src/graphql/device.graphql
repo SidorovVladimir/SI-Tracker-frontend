@@ -95,6 +95,9 @@ query GetDevicesWithRelationsList {
     scopes {
       name
     }
+    primaryStandarts {
+      name
+    }
   }
 }
 
@@ -155,6 +158,10 @@ query GetDeviceWithRelation($id: ID!) {
       }
     }
     scopes {
+      id
+      name
+    }
+    primaryStandarts {
       id
       name
     }

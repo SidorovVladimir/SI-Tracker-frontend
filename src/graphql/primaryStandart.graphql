@@ -1,0 +1,30 @@
+query GetPrimaryStandartsList {
+  primaryStandarts {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+query GetPrimaryStandart($id: ID!) {
+  primaryStandart(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreatePrimaryStandart($input: CreatePrimaryStandartInput!) {
+  createPrimaryStandart(input: $input) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeletePrimaryStandart($id: ID!) {
+  deletePrimaryStandart(id: $id)
+}

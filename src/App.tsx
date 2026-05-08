@@ -33,6 +33,8 @@ import ScopesPage from './pages/admin/ScopesPage';
 import CreateScopePage from './pages/admin/CreateScopePage';
 import CreateStatusPage from './pages/admin/CreateStatusPage';
 import StatusesPage from './pages/admin/StatusesPage';
+import PrimaryStandartsPage from './pages/admin/PrimaryStandartsPage';
+import CreatePrimaryStandartPage from './pages/admin/CreatePrimaryStandartPage';
 
 function App() {
   return (
@@ -115,6 +117,14 @@ function App() {
                   element={<CreateMetrologyControlTypePage />}
                 />
                 <Route path={routes.admin.scopes()} element={<ScopesPage />} />
+                <Route
+                  path={routes.admin.primaryStandarts()}
+                  element={<PrimaryStandartsPage />}
+                />
+                <Route
+                  path={routes.admin.createPrimaryStandart()}
+                  element={<CreatePrimaryStandartPage />}
+                />
                 <Route
                   path={routes.admin.createScope()}
                   element={<CreateScopePage />}

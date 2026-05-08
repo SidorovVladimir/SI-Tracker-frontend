@@ -6,6 +6,7 @@ import {
   GetEquipmentTypesListDocument,
   GetMeasurementTypesListDocument,
   GetMetrologyControlTypesListDocument,
+  GetPrimaryStandartsListDocument,
   GetProductionSitesForSelectDocument,
   GetScopesListDocument,
   GetStatusListDocument,
@@ -32,6 +33,7 @@ import MeasurementTextField from '../../components/MeasurementTextField';
 import EquipmentTextField from '../../components/EquipmentTextField';
 import StatusTextField from '../../components/StatusTextField';
 import ProductionSiteTextField from '../../components/ProductionSiteTextField';
+import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocomplete';
 
 export default function CreateDevicePage(props: { closeDetails: () => void }) {
   const { closeDetails } = props;
@@ -44,6 +46,9 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
     GetMeasurementTypesListDocument
   );
   const { data: scopesData } = useQuery(GetScopesListDocument);
+  const { data: primaryStandartsData } = useQuery(
+    GetPrimaryStandartsListDocument
+  );
   const { data: metrologyControlTypeData } = useQuery(
     GetMetrologyControlTypesListDocument
   );
@@ -68,6 +73,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
     equipmentTypeId: string;
     measurementTypeId: string;
     scopes: { id: string; name: string }[];
+    primaryStandarts: { id: string; name: string }[];
   }>({
     name: '',
     model: '',
@@ -88,6 +94,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
     equipmentTypeId: '',
     measurementTypeId: '',
     scopes: [],
+    primaryStandarts: [],
   });
 
   const [verifications, setVerifications] = useState<
@@ -153,6 +160,8 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
   const measurementTypesList = measurementTypesData?.measurementTypes || [];
   const scopesList = scopesData?.scopes || [];
 
+  const primaryStandartsList = primaryStandartsData?.primaryStandarts || [];
+
   const metrologyControlTypeList =
     metrologyControlTypeData?.metrologyControlTypes || [];
 
@@ -165,6 +174,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
         enqueueSnackbar('Прибор успешно создан', {
           variant: 'success',
         });
+        closeDetails();
       },
       onError: (error) => {
         enqueueSnackbar(`Ошибка создания: ${error.message}`, {
@@ -226,6 +236,9 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
       measurementTypeId: form.measurementTypeId || null,
 
       scopes: form.scopes.map((scope) => scope.id),
+      primaryStandarts: form.primaryStandarts.map(
+        (primaryStandart) => primaryStandart.id
+      ),
       verifications: verificationsInput,
     };
 
@@ -431,6 +444,14 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
               handleAutocompleteChange('scopes', val)
             }
             scopesList={scopesList}
+          />
+
+          <PrimaryStandartAutocomplete
+            value={form.primaryStandarts}
+            onChange={(_: string, val: { id: string; name: string }[]) =>
+              handleAutocompleteChange('primaryStandarts', val)
+            }
+            primaryStandartsList={primaryStandartsList}
           />
 
           <Divider sx={{ my: 2 }} />

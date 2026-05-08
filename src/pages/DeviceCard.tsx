@@ -185,6 +185,40 @@ export default function DeviceCard(props: {
             </Typography>
           )}
         </Stack>
+        <Divider sx={{ my: 1.5, borderStyle: 'dashed' }} />
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          display="block"
+          sx={{ mb: 1 }}
+        >
+          Государственные первичные эталоны (ГПЭ)
+        </Typography>
+        <Stack direction="row" flexWrap="wrap" gap={0.5}>
+          {device.primaryStandarts?.length > 0 ? (
+            device.primaryStandarts.map((primaryStandart) => (
+              <Chip
+                key={primaryStandart.id}
+                label={primaryStandart.name}
+                size="small"
+                variant="outlined"
+                sx={{
+                  height: 'auto',
+                  '& .MuiChip-label': {
+                    display: 'block',
+                    whiteSpace: 'normal',
+                    py: 0.5,
+                    fontSize: '0.75rem',
+                  },
+                }}
+              />
+            ))
+          ) : (
+            <Typography variant="body2" color="text.disabled">
+              Не указаны
+            </Typography>
+          )}
+        </Stack>
       </Box>
 
       <Stack direction="row" spacing={1} mb={1}>

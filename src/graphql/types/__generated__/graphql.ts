@@ -73,6 +73,7 @@ export type CreateDeviceInput = {
   model: Scalars['String']['input'];
   name: Scalars['String']['input'];
   nomenclature?: InputMaybe<Scalars['String']['input']>;
+  primaryStandarts?: InputMaybe<Array<Scalars['ID']['input']>>;
   productionSiteId: Scalars['ID']['input'];
   receiptDate?: InputMaybe<Scalars['String']['input']>;
   releaseDate?: InputMaybe<Scalars['String']['input']>;
@@ -92,6 +93,10 @@ export type CreateMeasurementTypeInput = {
 };
 
 export type CreateMetrologyControlTypeInput = {
+  name: Scalars['String']['input'];
+};
+
+export type CreatePrimaryStandartInput = {
   name: Scalars['String']['input'];
 };
 
@@ -157,6 +162,7 @@ export type DeviceWithRelations = {
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
   nomenclature: Maybe<Scalars['String']['output']>;
+  primaryStandarts: Array<PrimaryStandart>;
   productionSite: ProductionSiteRelation;
   receiptDate: Maybe<Scalars['String']['output']>;
   releaseDate: Maybe<Scalars['String']['output']>;
@@ -204,6 +210,7 @@ export type Mutation = {
   createEquipmentType: EquipmentType;
   createMeasurementType: MeasurementType;
   createMetrologyControlType: MetrologyControlType;
+  createPrimaryStandart: PrimaryStandart;
   createProductionSite: ProductionSite;
   createScope: Scope;
   createStatus: Status;
@@ -214,6 +221,7 @@ export type Mutation = {
   deleteEquipmentType: Scalars['Boolean']['output'];
   deleteMeasurementType: Scalars['Boolean']['output'];
   deleteMetrologyControlType: Scalars['Boolean']['output'];
+  deletePrimaryStandart: Scalars['Boolean']['output'];
   deleteProductionSite: Scalars['Boolean']['output'];
   deleteScope: Scalars['Boolean']['output'];
   deleteStatus: Scalars['Boolean']['output'];
@@ -227,6 +235,7 @@ export type Mutation = {
   updateEquipmentType: EquipmentType;
   updateMeasurementType: MeasurementType;
   updateMetrologyControlType: MetrologyControlType;
+  updatePrimaryStandart: PrimaryStandart;
   updateProductionSite: ProductionSite;
   updateScope: Scope;
   updateStatus: Status;
@@ -255,6 +264,10 @@ export type MutationCreateMeasurementTypeArgs = {
 
 export type MutationCreateMetrologyControlTypeArgs = {
   input: CreateMetrologyControlTypeInput;
+};
+
+export type MutationCreatePrimaryStandartArgs = {
+  input: CreatePrimaryStandartInput;
 };
 
 export type MutationCreateProductionSiteArgs = {
@@ -294,6 +307,10 @@ export type MutationDeleteMeasurementTypeArgs = {
 };
 
 export type MutationDeleteMetrologyControlTypeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type MutationDeletePrimaryStandartArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -351,6 +368,11 @@ export type MutationUpdateMetrologyControlTypeArgs = {
   input: UpdateMetrologyControlTypeInput;
 };
 
+export type MutationUpdatePrimaryStandartArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdatePrimaryStandartInput;
+};
+
 export type MutationUpdateProductionSiteArgs = {
   input: UpdateProductionSiteInput;
 };
@@ -368,6 +390,14 @@ export type MutationUpdateStatusArgs = {
 export type MutationUpdateUserArgs = {
   id: Scalars['ID']['input'];
   input: UpdateUserInput;
+};
+
+export type PrimaryStandart = {
+  __typename: 'PrimaryStandart';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
 };
 
 export type ProductionSite = {
@@ -403,6 +433,8 @@ export type Query = {
   measurementTypes: Array<MeasurementType>;
   metrologyControlType: MetrologyControlType;
   metrologyControlTypes: Array<MetrologyControlType>;
+  primaryStandart: PrimaryStandart;
+  primaryStandarts: Array<PrimaryStandart>;
   productionSite: ProductionSite;
   productionSites: Array<ProductionSite>;
   scope: Scope;
@@ -434,6 +466,10 @@ export type QueryMeasurementTypeArgs = {
 };
 
 export type QueryMetrologyControlTypeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type QueryPrimaryStandartArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -491,6 +527,7 @@ export type UpdateDeviceInput = {
   model: Scalars['String']['input'];
   name: Scalars['String']['input'];
   nomenclature?: InputMaybe<Scalars['String']['input']>;
+  primaryStandarts?: InputMaybe<Array<Scalars['ID']['input']>>;
   productionSiteId: Scalars['ID']['input'];
   receiptDate?: InputMaybe<Scalars['String']['input']>;
   releaseDate?: InputMaybe<Scalars['String']['input']>;
@@ -510,6 +547,10 @@ export type UpdateMeasurementTypeInput = {
 };
 
 export type UpdateMetrologyControlTypeInput = {
+  name: Scalars['String']['input'];
+};
+
+export type UpdatePrimaryStandartInput = {
   name: Scalars['String']['input'];
 };
 
@@ -873,6 +914,7 @@ export type GetDevicesWithRelationsListQuery = {
       } | null;
     }>;
     scopes: Array<{ __typename: 'Scope'; name: string }>;
+    primaryStandarts: Array<{ __typename: 'PrimaryStandart'; name: string }>;
   }>;
 };
 
@@ -934,6 +976,11 @@ export type GetDeviceWithRelationQuery = {
       } | null;
     }>;
     scopes: Array<{ __typename: 'Scope'; id: string; name: string }>;
+    primaryStandarts: Array<{
+      __typename: 'PrimaryStandart';
+      id: string;
+      name: string;
+    }>;
   };
 };
 
@@ -1120,6 +1167,54 @@ export type DeleteMetrologyControlTypeMutationVariables = Exact<{
 export type DeleteMetrologyControlTypeMutation = {
   deleteMetrologyControlType: boolean;
 };
+
+export type GetPrimaryStandartsListQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type GetPrimaryStandartsListQuery = {
+  primaryStandarts: Array<{
+    __typename: 'PrimaryStandart';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+};
+
+export type GetPrimaryStandartQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type GetPrimaryStandartQuery = {
+  primaryStandart: {
+    __typename: 'PrimaryStandart';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type CreatePrimaryStandartMutationVariables = Exact<{
+  input: CreatePrimaryStandartInput;
+}>;
+
+export type CreatePrimaryStandartMutation = {
+  createPrimaryStandart: {
+    __typename: 'PrimaryStandart';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type DeletePrimaryStandartMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type DeletePrimaryStandartMutation = { deletePrimaryStandart: boolean };
 
 export type GetProductionSitesQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -2331,6 +2426,16 @@ export const GetDevicesWithRelationsListDocument = {
                     ],
                   },
                 },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'primaryStandarts' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
               ],
             },
           },
@@ -2548,6 +2653,17 @@ export const GetDeviceWithRelationDocument = {
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'scopes' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'primaryStandarts' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -3268,6 +3384,187 @@ export const DeleteMetrologyControlTypeDocument = {
 } as unknown as DocumentNode<
   DeleteMetrologyControlTypeMutation,
   DeleteMetrologyControlTypeMutationVariables
+>;
+export const GetPrimaryStandartsListDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetPrimaryStandartsList' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'primaryStandarts' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetPrimaryStandartsListQuery,
+  GetPrimaryStandartsListQueryVariables
+>;
+export const GetPrimaryStandartDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetPrimaryStandart' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'primaryStandart' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetPrimaryStandartQuery,
+  GetPrimaryStandartQueryVariables
+>;
+export const CreatePrimaryStandartDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreatePrimaryStandart' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'CreatePrimaryStandartInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createPrimaryStandart' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CreatePrimaryStandartMutation,
+  CreatePrimaryStandartMutationVariables
+>;
+export const DeletePrimaryStandartDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeletePrimaryStandart' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deletePrimaryStandart' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  DeletePrimaryStandartMutation,
+  DeletePrimaryStandartMutationVariables
 >;
 export const GetProductionSitesDocument = {
   kind: 'Document',

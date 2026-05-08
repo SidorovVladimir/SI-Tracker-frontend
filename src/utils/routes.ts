@@ -29,6 +29,8 @@ export default {
     createMetrologyControlType: () => '/admin/metrology-control-types/create',
     scopes: () => '/admin/scopes',
     createScope: () => '/admin/scopes/create',
+    primaryStandarts: () => '/admin/primary-standarts',
+    createPrimaryStandart: () => '/admin/primary-standarts/create',
     statuses: () => '/admin/statuses',
     createStatus: () => '/admin/statuses/create',
   },

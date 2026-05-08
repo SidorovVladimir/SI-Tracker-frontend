@@ -623,6 +623,7 @@ export default function DevicesPage() {
                   <EditDevicePage
                     deviceId={selectedDeviceId!}
                     closeDetails={() => setViewMode('info')}
+                    close={closeDetails}
                   />
                 ) : (
                   <DeviceCard
