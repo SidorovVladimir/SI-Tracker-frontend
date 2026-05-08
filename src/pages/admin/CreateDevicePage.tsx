@@ -29,11 +29,11 @@ import {
 } from '@mui/material';
 import { Add, Close, ExpandMore } from '@mui/icons-material';
 import ScopeAutocomplete from '../../components/ScopeAutocomplete';
-import MeasurementTextField from '../../components/MeasurementTextField';
 import EquipmentTextField from '../../components/EquipmentTextField';
 import StatusTextField from '../../components/StatusTextField';
 import ProductionSiteTextField from '../../components/ProductionSiteTextField';
 import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocomplete';
+import MeasurementAutocomplete from '../../components/MeasurementAutocomplete';
 
 export default function CreateDevicePage(props: { closeDetails: () => void }) {
   const { closeDetails } = props;
@@ -71,9 +71,9 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string;
-    measurementTypeId: string;
     scopes: { id: string; name: string }[];
     primaryStandarts: { id: string; name: string }[];
+    measurementTypes: { id: string; name: string }[];
   }>({
     name: '',
     model: '',
@@ -92,7 +92,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
     statusId: '',
     productionSiteId: '',
     equipmentTypeId: '',
-    measurementTypeId: '',
+    measurementTypes: [],
     scopes: [],
     primaryStandarts: [],
   });
@@ -233,11 +233,13 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
       nomenclature: form.nomenclature || null,
       inventoryNumber: form.inventoryNumber || null,
       equipmentTypeId: form.equipmentTypeId || null,
-      measurementTypeId: form.measurementTypeId || null,
 
       scopes: form.scopes.map((scope) => scope.id),
       primaryStandarts: form.primaryStandarts.map(
         (primaryStandart) => primaryStandart.id
+      ),
+      measurementTypes: form.measurementTypes.map(
+        (measurementType) => measurementType.id
       ),
       verifications: verificationsInput,
     };
@@ -432,10 +434,12 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
             equipmentTypesList={equipmentTypesList}
           />
 
-          <MeasurementTextField
-            value={form.measurementTypeId}
-            onChange={handleChange}
-            measurementList={measurementTypesList}
+          <MeasurementAutocomplete
+            value={form.measurementTypes}
+            onChange={(_: string, val: { id: string; name: string }[]) =>
+              handleAutocompleteChange('measurementTypes', val)
+            }
+            measurementTypesList={measurementTypesList}
           />
 
           <ScopeAutocomplete
@@ -553,6 +557,9 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
                         fullWidth
                         size="small"
                       >
+                        <MenuItem value="">
+                          <em>Не выбрано</em>
+                        </MenuItem>
                         {['Годен', 'Не годен'].map((name) => (
                           <MenuItem key={name} value={name}>
                             {name}
@@ -560,19 +567,6 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
                         ))}
                       </TextField>
 
-                      {/* <TextField
-                        label="Комментарий"
-                        value={verification.comment}
-                        onChange={(e) =>
-                          handleVerificationChange(
-                            verification.id,
-                            'comment',
-                            e.target.value
-                          )
-                        }
-                        fullWidth
-                        size="small"
-                      /> */}
                       <TextField
                         label="Комментарий"
                         value={verification.comment}
@@ -622,6 +616,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
                         }
                         fullWidth
                         size="small"
+                        disabled={true}
                       />
 
                       <TextField
@@ -640,6 +635,10 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
                         }
                         value={verification.metrologyControleTypeId}
                       >
+                        <MenuItem value="">
+                          <em>Не выбрано</em>
+                        </MenuItem>
+
                         {metrologyControlTypeList.map(({ id, name }) => (
                           <MenuItem key={id} value={id}>
                             {name}

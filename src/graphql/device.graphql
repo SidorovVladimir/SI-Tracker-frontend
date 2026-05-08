@@ -18,7 +18,6 @@ mutation CreateDevice($input: CreateDeviceInput!) {
     statusId
     productionSiteId
     equipmentTypeId
-    measurementTypeId
     createdAt
     updatedAt
   }
@@ -44,7 +43,6 @@ query GetDevicesList {
     statusId
     productionSiteId
     equipmentTypeId
-    measurementTypeId
     createdAt
     updatedAt
   }
@@ -98,6 +96,9 @@ query GetDevicesWithRelationsList {
     primaryStandarts {
       name
     }
+    measurementTypes {
+      name
+    }
   }
 }
 
@@ -119,10 +120,6 @@ query GetDeviceWithRelation($id: ID!) {
     nomenclature
     comment
     equipmentType {
-      id
-      name
-    }
-    measurementType {
       id
       name
     }
@@ -165,6 +162,10 @@ query GetDeviceWithRelation($id: ID!) {
       id
       name
     }
+    measurementTypes {
+      id
+      name
+    }
   }
 }
 
@@ -192,7 +193,6 @@ mutation UpdateDevice($id: ID!, $input: UpdateDeviceInput!) {
     statusId
     productionSiteId
     equipmentTypeId
-    measurementTypeId
     createdAt
     updatedAt
   }

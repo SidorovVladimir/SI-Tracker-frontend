@@ -19,7 +19,7 @@ import { enqueueSnackbar } from 'notistack';
 type FieldErrors = {
   name?: string;
 };
-export default function MeasurementModal({ open, onClose }: any) {
+export default function MeasurementModal({ open, onClose, onCreated }: any) {
   const [form, setForm] = useState({
     name: '',
   });
@@ -30,10 +30,11 @@ export default function MeasurementModal({ open, onClose }: any) {
     {
       refetchQueries: [{ query: GetMeasurementTypesListDocument }],
       awaitRefetchQueries: true,
-      onCompleted: () => {
+      onCompleted: (data) => {
         enqueueSnackbar('Вид измерения успешно создан', {
           variant: 'success',
         });
+        onCreated(data.createMeasurementType);
         onClose(true);
       },
       onError: (error) => {

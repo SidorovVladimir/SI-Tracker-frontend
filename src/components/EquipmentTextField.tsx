@@ -21,6 +21,9 @@ export default function EquipmentTextField({
         onChange={onChange}
         value={value}
       >
+        <MenuItem value="">
+          <em>Не выбрано</em>
+        </MenuItem>
         {equipmentTypesList.map(
           ({ id, name }: { id: string; name: string }) => (
             <MenuItem key={id} value={id}>

@@ -69,7 +69,7 @@ export type CreateDeviceInput = {
   inventoryNumber?: InputMaybe<Scalars['String']['input']>;
   manufacturer?: InputMaybe<Scalars['String']['input']>;
   measurementRange?: InputMaybe<Scalars['String']['input']>;
-  measurementTypeId?: InputMaybe<Scalars['ID']['input']>;
+  measurementTypes?: InputMaybe<Array<Scalars['ID']['input']>>;
   model: Scalars['String']['input'];
   name: Scalars['String']['input'];
   nomenclature?: InputMaybe<Scalars['String']['input']>;
@@ -134,7 +134,6 @@ export type Device = {
   inventoryNumber: Maybe<Scalars['String']['output']>;
   manufacturer: Maybe<Scalars['String']['output']>;
   measurementRange: Maybe<Scalars['String']['output']>;
-  measurementTypeId: Maybe<Scalars['ID']['output']>;
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
   nomenclature: Maybe<Scalars['String']['output']>;
@@ -158,7 +157,7 @@ export type DeviceWithRelations = {
   inventoryNumber: Maybe<Scalars['String']['output']>;
   manufacturer: Maybe<Scalars['String']['output']>;
   measurementRange: Maybe<Scalars['String']['output']>;
-  measurementType: Maybe<MeasurementType>;
+  measurementTypes: Array<MeasurementType>;
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
   nomenclature: Maybe<Scalars['String']['output']>;
@@ -523,7 +522,7 @@ export type UpdateDeviceInput = {
   inventoryNumber?: InputMaybe<Scalars['String']['input']>;
   manufacturer?: InputMaybe<Scalars['String']['input']>;
   measurementRange?: InputMaybe<Scalars['String']['input']>;
-  measurementTypeId?: InputMaybe<Scalars['ID']['input']>;
+  measurementTypes?: InputMaybe<Array<Scalars['ID']['input']>>;
   model: Scalars['String']['input'];
   name: Scalars['String']['input'];
   nomenclature?: InputMaybe<Scalars['String']['input']>;
@@ -834,7 +833,6 @@ export type CreateDeviceMutation = {
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string | null;
-    measurementTypeId: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -863,7 +861,6 @@ export type GetDevicesListQuery = {
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string | null;
-    measurementTypeId: string | null;
     createdAt: string;
     updatedAt: string;
   }>;
@@ -915,6 +912,7 @@ export type GetDevicesWithRelationsListQuery = {
     }>;
     scopes: Array<{ __typename: 'Scope'; name: string }>;
     primaryStandarts: Array<{ __typename: 'PrimaryStandart'; name: string }>;
+    measurementTypes: Array<{ __typename: 'MeasurementType'; name: string }>;
   }>;
 };
 
@@ -942,11 +940,6 @@ export type GetDeviceWithRelationQuery = {
     comment: string | null;
     equipmentType: {
       __typename: 'EquipmentType';
-      id: string;
-      name: string;
-    } | null;
-    measurementType: {
-      __typename: 'MeasurementType';
       id: string;
       name: string;
     } | null;
@@ -978,6 +971,11 @@ export type GetDeviceWithRelationQuery = {
     scopes: Array<{ __typename: 'Scope'; id: string; name: string }>;
     primaryStandarts: Array<{
       __typename: 'PrimaryStandart';
+      id: string;
+      name: string;
+    }>;
+    measurementTypes: Array<{
+      __typename: 'MeasurementType';
       id: string;
       name: string;
     }>;
@@ -1016,7 +1014,6 @@ export type UpdateDeviceMutation = {
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string | null;
-    measurementTypeId: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -2184,10 +2181,6 @@ export const CreateDeviceDocument = {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'equipmentTypeId' },
                 },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'measurementTypeId' },
-                },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
               ],
@@ -2258,10 +2251,6 @@ export const GetDevicesListDocument = {
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'equipmentTypeId' },
-                },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'measurementTypeId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
@@ -2436,6 +2425,16 @@ export const GetDevicesWithRelationsListDocument = {
                     ],
                   },
                 },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'measurementTypes' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
               ],
             },
           },
@@ -2519,17 +2518,6 @@ export const GetDeviceWithRelationDocument = {
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'equipmentType' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                    ],
-                  },
-                },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'measurementType' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -2664,6 +2652,17 @@ export const GetDeviceWithRelationDocument = {
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'primaryStandarts' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'measurementTypes' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
@@ -2824,10 +2823,6 @@ export const UpdateDeviceDocument = {
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'equipmentTypeId' },
-                },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'measurementTypeId' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },

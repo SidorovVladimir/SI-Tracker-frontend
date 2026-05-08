@@ -237,12 +237,42 @@ export default function DeviceCard(props: {
       </Stack>
 
       <InfoRow label="Участок" value={device.productionSite.name} />
-      <InfoRow
-        label="Тип / Вид измерений"
-        value={`${device.equipmentType?.name ?? '-'} / ${
-          device.measurementType?.name ?? '-'
-        }`}
-      />
+      <InfoRow label="Тип оборудования" value={device.equipmentType?.name} />
+
+      <Divider sx={{ my: 1.5, borderStyle: 'dashed' }} />
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        display="block"
+        sx={{ mb: 1 }}
+      >
+        Вид измерений
+      </Typography>
+      <Stack direction="row" flexWrap="wrap" gap={0.5}>
+        {device.measurementTypes?.length > 0 ? (
+          device.measurementTypes.map((measurementType) => (
+            <Chip
+              key={measurementType.id}
+              label={measurementType.name}
+              size="small"
+              variant="outlined"
+              sx={{
+                height: 'auto',
+                '& .MuiChip-label': {
+                  display: 'block',
+                  whiteSpace: 'normal',
+                  py: 0.5,
+                  fontSize: '0.75rem',
+                },
+              }}
+            />
+          ))
+        ) : (
+          <Typography variant="body2" color="text.disabled">
+            Не указаны
+          </Typography>
+        )}
+      </Stack>
 
       <Divider sx={{ my: 2 }} />
 

@@ -38,11 +38,11 @@ import {
 } from '@mui/material';
 import { Add, Close, ExpandMore } from '@mui/icons-material';
 import ScopeAutocomplete from '../../components/ScopeAutocomplete';
-import MeasurementTextField from '../../components/MeasurementTextField';
 import EquipmentTextField from '../../components/EquipmentTextField';
 import StatusTextField from '../../components/StatusTextField';
 import ProductionSiteTextField from '../../components/ProductionSiteTextField';
 import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocomplete';
+import MeasurementAutocomplete from '../../components/MeasurementAutocomplete';
 
 export default function EditDevicePage(props: {
   deviceId: string;
@@ -130,7 +130,7 @@ function UserForm({
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string;
-    measurementTypeId: string;
+    measurementTypes: { id: string; name: string }[];
     scopes: { id: string; name: string }[];
     primaryStandarts: { id: string; name: string }[];
   }>({
@@ -165,7 +165,7 @@ function UserForm({
     statusId: device.status.id || '',
     productionSiteId: device.productionSite.id || '',
     equipmentTypeId: device.equipmentType?.id || '',
-    measurementTypeId: device.measurementType?.id || '',
+    measurementTypes: device.measurementTypes,
     scopes: device.scopes,
     primaryStandarts: device.primaryStandarts,
   });
@@ -357,7 +357,9 @@ function UserForm({
       verifications: verificationsInput,
       inventoryNumber: form.inventoryNumber || null,
       equipmentTypeId: form.equipmentTypeId || null,
-      measurementTypeId: form.measurementTypeId || null,
+      measurementTypes: form.measurementTypes.map(
+        (measurementType) => measurementType.id
+      ),
     };
     await updateDevice({
       variables: { id: device.id, input: data },
@@ -562,10 +564,12 @@ function UserForm({
             equipmentTypesList={equipmentTypesList}
           />
 
-          <MeasurementTextField
-            value={form.measurementTypeId}
-            onChange={handleChange}
-            measurementList={measurementTypesList}
+          <MeasurementAutocomplete
+            value={form.measurementTypes}
+            onChange={(_: string, val: { id: string; name: string }[]) =>
+              handleAutocompleteChange('measurementTypes', val)
+            }
+            measurementTypesList={measurementTypesList}
           />
 
           <ScopeAutocomplete
@@ -670,6 +674,8 @@ function UserForm({
 
                       <TextField
                         label="Результат"
+                        select
+                        name="result"
                         value={verification.result}
                         onChange={(e) =>
                           handleVerificationChange(
@@ -680,21 +686,17 @@ function UserForm({
                         }
                         fullWidth
                         size="small"
-                      />
+                      >
+                        <MenuItem value="">
+                          <em>Не выбрано</em>
+                        </MenuItem>
+                        {['Годен', 'Не годен'].map((name) => (
+                          <MenuItem key={name} value={name}>
+                            {name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
 
-                      {/* <TextField
-                        label="Комментарий"
-                        value={verification.comment}
-                        onChange={(e) =>
-                          handleVerificationChange(
-                            verification.id,
-                            'comment',
-                            e.target.value
-                          )
-                        }
-                        fullWidth
-                        size="small"
-                      /> */}
                       <TextField
                         label="Комментарий"
                         value={verification.comment}
@@ -744,6 +746,7 @@ function UserForm({
                         }
                         fullWidth
                         size="small"
+                        disabled={true}
                       />
 
                       <TextField
@@ -762,6 +765,9 @@ function UserForm({
                         }
                         value={verification.metrologyControleTypeId}
                       >
+                        <MenuItem value="">
+                          <em>Не выбрано</em>
+                        </MenuItem>
                         {metrologyControlTypeList.map(({ id, name }) => (
                           <MenuItem key={id} value={id}>
                             {name}

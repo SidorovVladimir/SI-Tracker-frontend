@@ -16,7 +16,6 @@ import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
 import { useEffect, useMemo, useState } from 'react';
 import CreateDevicePage from './admin/CreateDevicePage';
-// import EditDevicePage from './admin/EditDevicePage';
 import { useAuth } from '../hooks/useAuth';
 import DeviceCard from './DeviceCard';
 import EditDevicePage from './admin/EditDevicePage';
@@ -30,7 +29,7 @@ interface FilterState {
   deviceName: string;
   serialNumber: string;
   status: string;
-  // metrologyControle: string;
+  metrologyControle: string;
   dateStart: string | null;
   dateEnd: string | null;
 }
@@ -42,7 +41,7 @@ const initialFilters: FilterState = {
   deviceName: '',
   serialNumber: '',
   status: '',
-  // metrologyControle: '',
+  metrologyControle: '',
   dateStart: null,
   dateEnd: null,
 };
@@ -137,8 +136,11 @@ export default function DevicesPage() {
         const matchesDateEnd =
           !filters.dateEnd || (vDate && vDate <= new Date(filters.dateEnd));
 
-        //         const matchesMetrologyControle = !filters.metrologyControle || row.latestVerification?.metrologyControleType?.name
-        //  ?
+        const matchesMetrologyControle =
+          !filters.metrologyControle ||
+          row.latestVerification?.metrologyControleType?.name ===
+            filters.metrologyControle;
+
         return (
           matchesName &&
           matchesSerialNumber &&
@@ -147,7 +149,8 @@ export default function DevicesPage() {
           matchesSub &&
           matchesStatus &&
           matchesDateStart &&
-          matchesDateEnd
+          matchesDateEnd &&
+          matchesMetrologyControle
         );
       });
   }, [data, filters]);
@@ -170,6 +173,16 @@ export default function DevicesPage() {
     const raw = (data?.devicesWithRelations as Device[]) || [];
     return Array.from(
       new Set(raw.map((d) => d.status?.name).filter(Boolean))
+    ).sort();
+  }, [data]);
+
+  const metrologyControleTypes = useMemo(() => {
+    return Array.from(
+      new Set(
+        rows
+          .map((d) => d.latestVerification?.metrologyControleType?.name)
+          .filter(Boolean)
+      )
     ).sort();
   }, [data]);
 
@@ -479,6 +492,27 @@ export default function DevicesPage() {
                 }
                 sx={{ minWidth: 130, maxWidth: 150 }}
               />
+
+              <TextField
+                label="Вид контроля"
+                size="small"
+                select
+                slotProps={{
+                  select: { native: true },
+                }}
+                value={filters.metrologyControle}
+                onChange={(e) =>
+                  handleFilterChange('metrologyControle', e.target.value)
+                }
+                sx={{ minWidth: 130, maxWidth: 150 }}
+              >
+                <option value=""></option>
+                {metrologyControleTypes.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </TextField>
 
               <TextField
                 label="Статус"
