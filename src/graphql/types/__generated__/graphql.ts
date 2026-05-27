@@ -28,6 +28,36 @@ export type Scalars = {
   Float: { input: number; output: number };
 };
 
+export enum AuditAction {
+  Create = 'create',
+  Delete = 'delete',
+  Update = 'update',
+}
+
+export type AuditLog = {
+  __typename: 'AuditLog';
+  action: AuditAction;
+  createdAt: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  deviceId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  newData: Maybe<Scalars['String']['output']>;
+  oldData: Maybe<Scalars['String']['output']>;
+  user: Maybe<User>;
+};
+
+export type AuditLogFilter = {
+  action?: InputMaybe<AuditAction>;
+  deviceId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type AuditLogsResponse = {
+  __typename: 'AuditLogsResponse';
+  items: Array<AuditLog>;
+  totalCount: Scalars['Int']['output'];
+};
+
 export type AuthPayload = {
   __typename: 'AuthPayload';
   success: Scalars['Boolean']['output'];
@@ -442,6 +472,7 @@ export type Query = {
   companies: Array<Company>;
   company: Company;
   device: DeviceWithRelations;
+  deviceAuditLogs: AuditLogsResponse;
   devices: Array<Device>;
   devicesWithRelations: Array<DeviceWithRelations>;
   equipmentType: EquipmentType;
@@ -476,6 +507,12 @@ export type QueryCompanyArgs = {
 
 export type QueryDeviceArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type QueryDeviceAuditLogsArgs = {
+  filter?: InputMaybe<AuditLogFilter>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type QueryEquipmentTypeArgs = {
@@ -666,6 +703,37 @@ export type VerificationRelation = {
   updatedAt: Scalars['String']['output'];
   validUntil: Maybe<Scalars['String']['output']>;
   verificationOrganization: Maybe<VerificationOrganization>;
+};
+
+export type GetDeviceAuditLogsQueryVariables = Exact<{
+  filter?: InputMaybe<AuditLogFilter>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+export type GetDeviceAuditLogsQuery = {
+  deviceAuditLogs: {
+    __typename: 'AuditLogsResponse';
+    totalCount: number;
+    items: Array<{
+      __typename: 'AuditLog';
+      id: string;
+      deviceId: string;
+      action: AuditAction;
+      description: string;
+      oldData: string | null;
+      newData: string | null;
+      createdAt: string;
+      user: {
+        __typename: 'User';
+        id: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        email: string;
+      } | null;
+    }>;
+  };
 };
 
 export type GetMeQueryVariables = Exact<{ [key: string]: never }>;
@@ -1519,6 +1587,152 @@ export type DeleteVerificationOrganizationMutation = {
   deleteVerificationOrganization: boolean;
 };
 
+export const GetDeviceAuditLogsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetDeviceAuditLogs' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'filter' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'AuditLogFilter' },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'offset' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deviceAuditLogs' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'filter' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'filter' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'offset' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'offset' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deviceId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'action' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'description' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'oldData' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'newData' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createdAt' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'user' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'firstName' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'lastName' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'role' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'email' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetDeviceAuditLogsQuery,
+  GetDeviceAuditLogsQueryVariables
+>;
 export const GetMeDocument = {
   kind: 'Document',
   definitions: [

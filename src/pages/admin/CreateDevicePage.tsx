@@ -483,7 +483,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
             mb={3}
           >
             <Typography variant="h6" gutterBottom>
-              Добавить данные поверок
+              Добавить данные метрологического контроля
             </Typography>
             <Tooltip title="Добавить">
               <IconButton onClick={addVerification} color="primary">
@@ -493,7 +493,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
           </Stack>
           {verifications.length === 0 ? (
             <Typography color="textSecondary" sx={{ mb: 2 }}>
-              Поверки не добавлены
+              Данные не добавлены
             </Typography>
           ) : (
             verifications.map((verification) => {
@@ -523,6 +523,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
                           )
                         }
                         fullWidth
+                        required
                         size="small"
                         slotProps={{
                           inputLabel: { shrink: true },
@@ -531,6 +532,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
                       <TextField
                         type="date"
                         label="Действует до"
+                        required
                         value={verification.validUntil}
                         onChange={(e) =>
                           handleVerificationChange(

@@ -26,6 +26,10 @@ const menu = [
     item: 'Организации поверители',
     path: routes.admin.verificationOrganizations(),
   },
+  {
+    item: 'Логи',
+    path: routes.admin.auditLogs(),
+  },
 ];
 
 export default function AdminPage() {

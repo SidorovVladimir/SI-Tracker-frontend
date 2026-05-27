@@ -1,0 +1,21 @@
+query GetDeviceAuditLogs($filter: AuditLogFilter, $limit: Int, $offset: Int) {
+  deviceAuditLogs(filter: $filter, limit: $limit, offset: $offset) {
+    items {
+      id
+      deviceId
+      action
+      description
+      oldData
+      newData
+      createdAt
+      user {
+        id
+        firstName
+        lastName
+        role
+        email
+      }
+    }
+    totalCount
+  }
+}

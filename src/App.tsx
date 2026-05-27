@@ -36,6 +36,7 @@ import PrimaryStandartsPage from './pages/admin/PrimaryStandartsPage';
 import CreatePrimaryStandartPage from './pages/admin/CreatePrimaryStandartPage';
 import VerificationOrganizationsPage from './pages/admin/VerificationOrganizationsPage';
 import CreateVerificationOrganizationPage from './pages/admin/CreateVerificationOrganizationPage';
+import AuditLogPage from './pages/admin/AuditLogPage';
 
 function App() {
   return (
@@ -144,6 +145,11 @@ function App() {
                 <Route
                   path={routes.admin.createVerificationOrganization()}
                   element={<CreateVerificationOrganizationPage />}
+                />
+
+                <Route
+                  path={routes.admin.auditLogs()}
+                  element={<AuditLogPage />}
                 />
               </Route>
             </Route>

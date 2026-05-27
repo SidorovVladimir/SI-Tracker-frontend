@@ -626,7 +626,7 @@ function UserForm({
             mb={3}
           >
             <Typography variant="h6" gutterBottom>
-              Добавить данные поверок
+              Добавить данные метрологического контроля
             </Typography>
             <Tooltip title="Добавить">
               <IconButton onClick={addVerification} color="primary">
@@ -636,7 +636,7 @@ function UserForm({
           </Stack>
           {verifications.length === 0 ? (
             <Typography color="textSecondary" sx={{ mb: 2 }}>
-              Поверки не добавлены
+              Данные не добавлены
             </Typography>
           ) : (
             verifications.map((verification) => {
@@ -657,6 +657,7 @@ function UserForm({
                       <TextField
                         type="date"
                         label="Дата поверки"
+                        required
                         value={verification.date.split('T')[0]}
                         onChange={(e) =>
                           handleVerificationChange(
@@ -674,6 +675,7 @@ function UserForm({
                       <TextField
                         type="date"
                         label="Действует до"
+                        required
                         value={verification.validUntil.split('T')[0]}
                         onChange={(e) =>
                           handleVerificationChange(

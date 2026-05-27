@@ -15,8 +15,8 @@ import './index.css';
 const getClient = () => {
   return new ApolloClient({
     link: new HttpLink({
-      uri: '/graphql',
-      // uri: 'http://localhost:4000/graphql',
+      // uri: '/graphql',
+      uri: 'http://localhost:4000/graphql',
       credentials: 'include',
     }),
     cache: new InMemoryCache(),

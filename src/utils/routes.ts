@@ -36,5 +36,6 @@ export default {
     verificationOrganizations: () => '/admin/verification-organizations',
     createVerificationOrganization: () =>
       '/admin/verification-organizations/create',
+    auditLogs: () => '/admin/audit-logs',
   },
 };

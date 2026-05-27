@@ -327,7 +327,7 @@ export default function DeviceCard(props: {
           gap: 1,
         }}
       >
-        <CalendarMonth fontSize="small" /> История поверок
+        <CalendarMonth fontSize="small" /> История метрологического контроля
       </Typography>
 
       {device.verifications.map((v) => (

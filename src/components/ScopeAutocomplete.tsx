@@ -18,6 +18,7 @@ export default function ScopeAutocomplete({
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Autocomplete
+        sx={{ minWidth: 0 }}
         fullWidth // Чтобы поле занимало всё доступное место в Box
         multiple
         options={scopesList}

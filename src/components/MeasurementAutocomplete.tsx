@@ -18,7 +18,8 @@ export default function MeasurementAutocomplete({
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Autocomplete
-        fullWidth // Чтобы поле занимало всё доступное место в Box
+        sx={{ minWidth: 0 }}
+        fullWidth
         multiple
         options={measurementTypesList}
         getOptionLabel={(option) => option.name}
