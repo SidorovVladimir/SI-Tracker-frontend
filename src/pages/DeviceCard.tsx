@@ -19,6 +19,7 @@ import { CalendarMonth, Close, Edit, ExpandMore } from '@mui/icons-material';
 import { GetDeviceWithRelationDocument } from '../graphql/types/__generated__/graphql';
 import { formatDate } from '../utils/date';
 import { useAuth } from '../hooks/useAuth';
+import { toCapital } from '../utils/capitalize';
 
 const InfoRow = ({
   label,
@@ -92,8 +93,13 @@ export default function DeviceCard(props: {
         alignItems="center"
         mb={1}
       >
-        <Typography variant="h6" gutterBottom color="primary">
-          Инфорация о СИ
+        <Typography
+          variant="h6"
+          gutterBottom
+          color="primary"
+          sx={{ fontWeight: 700 }}
+        >
+          Информация о СИ
         </Typography>
         <Stack direction="row" spacing={1}>
           {user?.role === 'admin' && (
@@ -113,14 +119,44 @@ export default function DeviceCard(props: {
       </Stack>
 
       <Box mb={2}>
-        <Typography variant="h6" sx={{ lineHeight: 1.2, mb: 0.5 }}>
-          {device.name}
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            lineHeight: 1.2,
+            mb: 0.5,
+          }}
+        >
+          {toCapital(device.name)}
         </Typography>
         <Chip
           label={device.status.name}
           size="small"
-          color="primary"
           variant="outlined"
+          sx={{
+            fontWeight: 600,
+            borderColor:
+              device.status.name === 'исправен'
+                ? 'success.main'
+                : device.status.name === 'забракован' ||
+                  device.status.name === 'неисправен'
+                ? 'error.main'
+                : 'primary.main',
+            color:
+              device.status.name === 'исправен'
+                ? 'success.dark'
+                : device.status.name === 'забракован' ||
+                  device.status.name === 'неисправен'
+                ? 'error.dark'
+                : 'primary.dark',
+            bgcolor:
+              device.status.name === 'исправен'
+                ? '#f0fdf4'
+                : device.status.name === 'забракован' ||
+                  device.status.name === 'неисправен'
+                ? '#fff1f2'
+                : 'transparent',
+          }}
         />
       </Box>
 
@@ -132,7 +168,9 @@ export default function DeviceCard(props: {
         <InfoRow label="Зав. №" value={device.serialNumber} />
         <InfoRow label="Инвентарный номер" value={device.inventoryNumber} />
         <InfoRow label="ГРСИ" value={device.grsiNumber} />
+
         <InfoRow label="Изготовитель" value={device.manufacturer} />
+        <InfoRow label="Номенклатура" value={device.nomenclature} />
         {device.comment && (
           <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed #eee' }}>
             <InfoRow label="Комментарий" value={device.comment} />
@@ -143,7 +181,10 @@ export default function DeviceCard(props: {
       <Typography
         variant="overline"
         color="primary"
-        sx={{ fontWeight: 'bold' }}
+        sx={{
+          fontWeight: 700,
+          letterSpacing: '0.8px',
+        }}
       >
         Характеристики
       </Typography>
@@ -156,9 +197,10 @@ export default function DeviceCard(props: {
           variant="caption"
           color="text.secondary"
           display="block"
-          sx={{ mb: 1 }}
+          sx={{ mb: 1, fontWeight: 500 }}
         >
-          Сферы ГРОЕ
+          Сферы государственного регулирования обеспечения единства измерения
+          (ГРОЕИ)
         </Typography>
         <Stack direction="row" flexWrap="wrap" gap={0.5}>
           {device.scopes?.length > 0 ? (
@@ -190,7 +232,7 @@ export default function DeviceCard(props: {
           variant="caption"
           color="text.secondary"
           display="block"
-          sx={{ mb: 1 }}
+          sx={{ mb: 1, fontWeight: 500 }}
         >
           Государственные первичные эталоны (ГПЭ)
         </Typography>
@@ -244,7 +286,7 @@ export default function DeviceCard(props: {
         variant="caption"
         color="text.secondary"
         display="block"
-        sx={{ mb: 1 }}
+        sx={{ mb: 1, fontWeight: 500 }}
       >
         Вид измерений
       </Typography>
@@ -278,7 +320,12 @@ export default function DeviceCard(props: {
 
       <Typography
         variant="subtitle2"
-        sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}
+        sx={{
+          mb: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+        }}
       >
         <CalendarMonth fontSize="small" /> История поверок
       </Typography>
@@ -321,7 +368,10 @@ export default function DeviceCard(props: {
                 value={v?.date ? formatDate(v.date) : '-'}
               />
               <InfoRow label="№ Свидетельства" value={v.protocolNumber} />
-              <InfoRow label="Поверитель" value={v.organization} />
+              <InfoRow
+                label="Поверитель"
+                value={v.verificationOrganization?.name}
+              />
               <InfoRow
                 label="Вид контроля"
                 value={v.metrologyControleType?.name}

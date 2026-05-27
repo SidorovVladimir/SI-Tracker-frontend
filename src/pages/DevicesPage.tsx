@@ -11,6 +11,11 @@ import {
   Typography,
   Slide,
   Stack,
+  useTheme,
+  useMediaQuery,
+  Drawer,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
@@ -19,6 +24,7 @@ import CreateDevicePage from './admin/CreateDevicePage';
 import { useAuth } from '../hooks/useAuth';
 import DeviceCard from './DeviceCard';
 import EditDevicePage from './admin/EditDevicePage';
+import { Add, FilterAlt } from '@mui/icons-material';
 
 type Device = GetDevicesWithRelationsListQuery['devicesWithRelations'][0];
 const FILTERS_STORAGE_KEY = 'devices_filters_v1';
@@ -62,6 +68,11 @@ export default function DevicesPage() {
     }
   });
 
+  const theme = useTheme();
+
+  const isMobileOrLaptop = useMediaQuery(theme.breakpoints.down('md'));
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const [filters, setFilters] = useState<FilterState>(loadFilters);
 
   useEffect(() => {
@@ -81,10 +92,6 @@ export default function DevicesPage() {
 
   const rows = useMemo(() => {
     const rawDevices = (data?.devicesWithRelations as Device[]) || [];
-
-    // const filtered = rawDevices.filter((device) =>
-    //   device.name.toLowerCase().includes(filter.toLowerCase())
-    // );
 
     return rawDevices
       .map((device) => {
@@ -275,9 +282,8 @@ export default function DevicesPage() {
       flex: 1,
       minWidth: 140,
       valueGetter: (_, row) =>
-        row.latestVerification && row.latestVerification.metrologyControleType
-          ? row.latestVerification.metrologyControleType.name
-          : '-',
+        row?.latestVerification?.metrologyControleType?.name?.toUpperCase() ??
+        '-',
     },
     {
       field: 'status',
@@ -342,7 +348,7 @@ export default function DevicesPage() {
   return (
     <Paper
       sx={{
-        height: 'calc(100dvh - 150px)',
+        height: 'calc(100dvh - 130px)',
         margin: 2,
         display: 'flex',
         flexDirection: 'column',
@@ -391,177 +397,392 @@ export default function DevicesPage() {
             }}
           >
             <Typography variant="h6">Средства измерения</Typography>
-            {/* <Box sx={{ display: 'flex', gap: 1, flexGrow: 1, maxWidth: 500 }}>
-              <TextField
-                size="small"
-                placeholder="Поиск..."
-                fullWidth
-                onChange={handleChange}
-              />
-              <Button variant="outlined" size="small">
-                Фильтры
-              </Button>
-            </Box> */}
-            {user?.role === 'admin' && (
-              <Button variant="contained" onClick={handleAddClick}>
-                Добавить СИ
-              </Button>
+
+            {isMobileOrLaptop ? (
+              <Box sx={{ mb: 1, display: 'flex', gap: 1 }}>
+                <Tooltip title="Фильтры">
+                  <IconButton
+                    color="primary"
+                    onClick={() => setIsDrawerOpen(true)}
+                  >
+                    <FilterAlt />
+                  </IconButton>
+                </Tooltip>
+                <Drawer
+                  anchor="right"
+                  open={isDrawerOpen}
+                  onClose={() => setIsDrawerOpen(false)}
+                >
+                  <Stack
+                    direction={isMobileOrLaptop ? 'column' : 'row'}
+                    spacing={2}
+                    flexWrap="wrap"
+                    useFlexGap
+                    sx={{
+                      p: isMobileOrLaptop ? 3 : 0,
+                      width: isMobileOrLaptop ? 280 : 'auto',
+                    }}
+                  >
+                    <TextField
+                      label="Город"
+                      size="small"
+                      select
+                      slotProps={{ select: { native: true } }}
+                      value={filters.city}
+                      onChange={(e) =>
+                        handleFilterChange('city', e.target.value)
+                      }
+                      fullWidth={isMobileOrLaptop}
+                      sx={{ minWidth: 150 }}
+                    >
+                      <option value=""></option>
+                      {cities.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </TextField>
+
+                    <TextField
+                      label="Организация"
+                      size="small"
+                      select
+                      slotProps={{ select: { native: true } }}
+                      value={filters.company}
+                      onChange={(e) =>
+                        handleFilterChange('company', e.target.value)
+                      }
+                      fullWidth={isMobileOrLaptop}
+                      sx={{ minWidth: 150 }}
+                    >
+                      <option value=""></option>
+                      {companies.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </TextField>
+
+                    <TextField
+                      label="Подразделение"
+                      size="small"
+                      select
+                      slotProps={{ select: { native: true } }}
+                      value={filters.productionSite}
+                      onChange={(e) =>
+                        handleFilterChange('productionSite', e.target.value)
+                      }
+                      fullWidth={isMobileOrLaptop}
+                      sx={{
+                        minWidth: 150,
+                        maxWidth: isMobileOrLaptop ? 'none' : 200,
+                      }}
+                    >
+                      <option value=""></option>
+                      {productionSite.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </TextField>
+
+                    <TextField
+                      label="Наименование"
+                      size="small"
+                      fullWidth={isMobileOrLaptop}
+                      value={filters.deviceName}
+                      onChange={(e) =>
+                        handleFilterChange('deviceName', e.target.value)
+                      }
+                    />
+
+                    <TextField
+                      label="Заводской номер"
+                      size="small"
+                      value={filters.serialNumber}
+                      onChange={(e) =>
+                        handleFilterChange('serialNumber', e.target.value)
+                      }
+                      fullWidth={isMobileOrLaptop}
+                      sx={{
+                        minWidth: 130,
+                        maxWidth: isMobileOrLaptop ? 'none' : 150,
+                      }}
+                    />
+
+                    <TextField
+                      label="Вид контроля"
+                      size="small"
+                      select
+                      slotProps={{ select: { native: true } }}
+                      value={filters.metrologyControle}
+                      onChange={(e) =>
+                        handleFilterChange('metrologyControle', e.target.value)
+                      }
+                      fullWidth={isMobileOrLaptop}
+                      sx={{
+                        minWidth: 130,
+                        maxWidth: isMobileOrLaptop ? 'none' : 150,
+                      }}
+                    >
+                      <option value=""></option>
+                      {metrologyControleTypes.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </TextField>
+
+                    <TextField
+                      label="Статус"
+                      size="small"
+                      select
+                      slotProps={{ select: { native: true } }}
+                      value={filters.status}
+                      onChange={(e) =>
+                        handleFilterChange('status', e.target.value)
+                      }
+                      fullWidth={isMobileOrLaptop}
+                      sx={{
+                        minWidth: 130,
+                        maxWidth: isMobileOrLaptop ? 'none' : 150,
+                      }}
+                    >
+                      <option value=""></option>
+                      {statuses.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </TextField>
+
+                    <TextField
+                      label="Срок действия с..."
+                      size="small"
+                      fullWidth={isMobileOrLaptop}
+                      slotProps={{
+                        inputLabel: { shrink: true },
+                        htmlInput: { type: 'date' },
+                      }}
+                      value={filters.dateStart || ''}
+                      onChange={(e) =>
+                        handleFilterChange('dateStart', e.target.value)
+                      }
+                    />
+
+                    <TextField
+                      label="Срок действия до..."
+                      size="small"
+                      fullWidth={isMobileOrLaptop}
+                      slotProps={{
+                        inputLabel: { shrink: true },
+                        htmlInput: { type: 'date' },
+                      }}
+                      value={filters.dateEnd || ''}
+                      onChange={(e) =>
+                        handleFilterChange('dateEnd', e.target.value)
+                      }
+                    />
+
+                    <Button
+                      color="error"
+                      onClick={resetFilters}
+                      fullWidth={isMobileOrLaptop}
+                    >
+                      Сброс
+                    </Button>
+                  </Stack>
+                </Drawer>
+
+                {user?.role === 'admin' && (
+                  <Tooltip title="Добавить СИ">
+                    <IconButton color="primary" onClick={handleAddClick}>
+                      <Add />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
+            ) : (
+              <Box>
+                {user?.role === 'admin' && (
+                  <Button variant="contained" onClick={handleAddClick}>
+                    Добавить СИ
+                  </Button>
+                )}
+              </Box>
             )}
           </Box>
 
-          <Paper
-            sx={{
-              p: 2,
-              mb: 1,
-            }}
-          >
-            <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-              <TextField
-                label="Город"
-                size="small"
-                select
-                slotProps={{
-                  select: { native: true },
+          {!isMobileOrLaptop && (
+            <Paper sx={{ p: 2, mb: 1 }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                flexWrap="wrap"
+                useFlexGap
+                sx={{
+                  p: 0,
+                  width: 'auto',
                 }}
-                value={filters.city}
-                onChange={(e) => handleFilterChange('city', e.target.value)}
-                sx={{ minWidth: 150 }}
               >
-                <option value=""></option>
-                {cities.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </TextField>
+                <TextField
+                  label="Город"
+                  size="small"
+                  select
+                  slotProps={{ select: { native: true } }}
+                  value={filters.city}
+                  onChange={(e) => handleFilterChange('city', e.target.value)}
+                  sx={{ minWidth: 150 }}
+                >
+                  <option value=""></option>
+                  {cities.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </TextField>
 
-              <TextField
-                label="Организация"
-                size="small"
-                select
-                slotProps={{
-                  select: { native: true },
-                }}
-                value={filters.company}
-                onChange={(e) => handleFilterChange('company', e.target.value)}
-                sx={{ minWidth: 150 }}
-              >
-                <option value=""></option>
-                {companies.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </TextField>
+                <TextField
+                  label="Организация"
+                  size="small"
+                  select
+                  slotProps={{ select: { native: true } }}
+                  value={filters.company}
+                  onChange={(e) =>
+                    handleFilterChange('company', e.target.value)
+                  }
+                  sx={{ minWidth: 150, maxWidth: 160 }}
+                >
+                  <option value=""></option>
+                  {companies.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </TextField>
 
-              <TextField
-                label="Подразделение"
-                size="small"
-                select
-                slotProps={{
-                  select: { native: true },
-                }}
-                value={filters.productionSite}
-                onChange={(e) =>
-                  handleFilterChange('productionSite', e.target.value)
-                }
-                sx={{ minWidth: 150, maxWidth: 200 }}
-              >
-                <option value=""></option>
-                {productionSite.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </TextField>
+                <TextField
+                  label="Подразделение"
+                  size="small"
+                  select
+                  slotProps={{ select: { native: true } }}
+                  value={filters.productionSite}
+                  onChange={(e) =>
+                    handleFilterChange('productionSite', e.target.value)
+                  }
+                  sx={{
+                    minWidth: 150,
+                    maxWidth: 170,
+                  }}
+                >
+                  <option value=""></option>
+                  {productionSite.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </TextField>
 
-              <TextField
-                label="Наименование"
-                size="small"
-                value={filters.deviceName}
-                onChange={(e) =>
-                  handleFilterChange('deviceName', e.target.value)
-                }
-              />
-              <TextField
-                label="Заводской номер"
-                size="small"
-                value={filters.serialNumber}
-                onChange={(e) =>
-                  handleFilterChange('serialNumber', e.target.value)
-                }
-                sx={{ minWidth: 130, maxWidth: 150 }}
-              />
+                <TextField
+                  label="Наименование"
+                  size="small"
+                  value={filters.deviceName}
+                  onChange={(e) =>
+                    handleFilterChange('deviceName', e.target.value)
+                  }
+                  sx={{
+                    minWidth: 150,
+                    maxWidth: 170,
+                  }}
+                />
 
-              <TextField
-                label="Вид контроля"
-                size="small"
-                select
-                slotProps={{
-                  select: { native: true },
-                }}
-                value={filters.metrologyControle}
-                onChange={(e) =>
-                  handleFilterChange('metrologyControle', e.target.value)
-                }
-                sx={{ minWidth: 130, maxWidth: 150 }}
-              >
-                <option value=""></option>
-                {metrologyControleTypes.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </TextField>
+                <TextField
+                  label="Заводской номер"
+                  size="small"
+                  value={filters.serialNumber}
+                  onChange={(e) =>
+                    handleFilterChange('serialNumber', e.target.value)
+                  }
+                  sx={{
+                    minWidth: 130,
+                    maxWidth: 150,
+                  }}
+                />
 
-              <TextField
-                label="Статус"
-                size="small"
-                select
-                slotProps={{
-                  select: { native: true },
-                }}
-                value={filters.status}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
-                sx={{ minWidth: 130, maxWidth: 150 }}
-              >
-                <option value=""></option>
-                {statuses.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </TextField>
+                <TextField
+                  label="Вид контроля"
+                  size="small"
+                  select
+                  slotProps={{ select: { native: true } }}
+                  value={filters.metrologyControle}
+                  onChange={(e) =>
+                    handleFilterChange('metrologyControle', e.target.value)
+                  }
+                  sx={{
+                    minWidth: 130,
+                    maxWidth: 150,
+                  }}
+                >
+                  <option value=""></option>
+                  {metrologyControleTypes.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </TextField>
 
-              <TextField
-                label="Срок действия с..."
-                type="date"
-                size="small"
-                slotProps={{
-                  inputLabel: { shrink: true },
-                }}
-                value={filters.dateStart || ''}
-                onChange={(e) =>
-                  handleFilterChange('dateStart', e.target.value)
-                }
-              />
+                <TextField
+                  label="Статус"
+                  size="small"
+                  select
+                  slotProps={{ select: { native: true } }}
+                  value={filters.status}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  sx={{
+                    minWidth: 130,
+                    maxWidth: 150,
+                  }}
+                >
+                  <option value=""></option>
+                  {statuses.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </TextField>
 
-              <TextField
-                label="Срок действия до..."
-                type="date"
-                size="small"
-                slotProps={{
-                  inputLabel: { shrink: true },
-                }}
-                value={filters.dateEnd || ''}
-                onChange={(e) => handleFilterChange('dateEnd', e.target.value)}
-              />
+                <TextField
+                  label="Срок действия с..."
+                  size="small"
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    htmlInput: { type: 'date' },
+                  }}
+                  value={filters.dateStart || ''}
+                  onChange={(e) =>
+                    handleFilterChange('dateStart', e.target.value)
+                  }
+                />
 
-              <Button color="error" onClick={resetFilters}>
-                Сброс
-              </Button>
-            </Stack>
-          </Paper>
+                <TextField
+                  label="Срок действия до..."
+                  size="small"
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    htmlInput: { type: 'date' },
+                  }}
+                  value={filters.dateEnd || ''}
+                  onChange={(e) =>
+                    handleFilterChange('dateEnd', e.target.value)
+                  }
+                />
+
+                <Button color="error" onClick={resetFilters}>
+                  Сброс
+                </Button>
+              </Stack>
+            </Paper>
+          )}
 
           <Box
             sx={{
@@ -593,12 +814,19 @@ export default function DevicesPage() {
               }}
               getRowId={(row) => row.id}
               sx={{
+                fontFamily:
+                  '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+                fontSize: '0.85rem',
                 // height: '100%',
                 // border: 'none',
+                '& .MuiDataGrid-cell': {
+                  fontVariantNumeric: 'tabular-nums',
+                },
                 '& .MuiDataGrid-columnHeaderTitle': {
+                  fontFamily: '"Inter", sans-serif',
                   fontWeight: 700,
                   color: 'text.primary',
-                  fontSize: '0.9rem',
+                  fontSize: '0.88rem',
                 },
                 '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
                   outline: 'none',

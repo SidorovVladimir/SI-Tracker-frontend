@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@apollo/client/react';
 import {
-  DeleteStatusDocument,
-  GetStatusListDocument,
+  DeleteVerificationOrganizationDocument,
+  GetVerificationOrganizationsListDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { Link } from 'react-router';
 import {
@@ -34,50 +34,57 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
-import { toCapital } from '../../utils/capitalize';
 
-export default function StatusesPage() {
-  const { data, loading, refetch } = useQuery(GetStatusListDocument);
+export default function VerificationOrganizationsPage() {
+  const { data, loading, refetch } = useQuery(
+    GetVerificationOrganizationsListDocument
+  );
 
-  const [deleteStatus] = useMutation(DeleteStatusDocument, {
-    onCompleted: () => {
-      refetch();
-      enqueueSnackbar('Состояние успешно удалено', {
-        variant: 'success',
-      });
-    },
-    onError: (error) => {
-      enqueueSnackbar(`Ошибка удаления: ${error.message}`, {
-        variant: 'error',
-      });
-    },
-  });
+  const [deleteVerificationOrganization] = useMutation(
+    DeleteVerificationOrganizationDocument,
+    {
+      onCompleted: () => {
+        refetch();
+        enqueueSnackbar('Организация-поверитель успешно удалена', {
+          variant: 'success',
+        });
+      },
+      onError: (error) => {
+        enqueueSnackbar(`Ошибка удаления: ${error.message}`, {
+          variant: 'error',
+        });
+      },
+    }
+  );
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedStatusId, setSelectedStatusId] = useState<string>('');
+  const [
+    selectedVerificationOrganizationId,
+    setSelectedVerificationOrganizationId,
+  ] = useState<string>('');
 
   if (loading)
     return (
       <Typography sx={{ p: 4, textAlign: 'center' }}>Загрузка...</Typography>
     );
-  const statusesList = data?.statuses || [];
+  const verificationOrganizations = data?.verificationOrganizations || [];
 
   const handleDeleteClick = (id: string) => {
-    setSelectedStatusId(id);
+    setSelectedVerificationOrganizationId(id);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setSelectedStatusId('');
+    setSelectedVerificationOrganizationId('');
   };
 
   const handleConfirmDelete = async () => {
     handleCloseDialog();
-    await deleteStatus({
-      variables: { id: selectedStatusId },
+    await deleteVerificationOrganization({
+      variables: { id: selectedVerificationOrganizationId },
     });
   };
 
@@ -90,10 +97,10 @@ export default function StatusesPage() {
         sx={{ mb: 3 }}
       >
         <Typography variant="h5" fontWeight="bold">
-          Управление состояниями приборов
+          Управление организациями-поверителя
         </Typography>
         <Button
-          aria-label="Добавить состояние прибора"
+          aria-label="Добавить организацию-поверитель"
           variant="contained"
           startIcon={isMobile ? undefined : <Add />}
           sx={{
@@ -105,7 +112,7 @@ export default function StatusesPage() {
             padding: isMobile ? 0 : undefined,
           }}
           component={Link}
-          to={routes.admin.createStatus()}
+          to={routes.admin.createVerificationOrganization()}
         >
           {isMobile ? <Add /> : 'Добавить'}
         </Button>
@@ -114,21 +121,21 @@ export default function StatusesPage() {
       {isMobile ? (
         // Мобильная версия: Список карточек
         <Stack spacing={2}>
-          {statusesList.map((st) => (
-            <Card key={st.id} variant="outlined" sx={{ borderRadius: 2 }}>
+          {verificationOrganizations.map((v) => (
+            <Card key={v.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {toCapital(st.name)}
+                  {v.name.toUpperCase()}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
                   <IconButton
                     size="small"
                     color="primary"
-                    disabled={true}
                     sx={{ border: '1px solid', borderColor: 'primary.light' }}
+                    disabled={true}
                     // component={Link}
-                    // to={routes.admin.editProductionSite(p.id)}
+                    // to={routes.admin.editCity(v.id)}
                   >
                     <Edit fontSize="small" />
                   </IconButton>
@@ -136,7 +143,7 @@ export default function StatusesPage() {
                     size="small"
                     color="error"
                     sx={{ border: '1px solid', borderColor: 'error.light' }}
-                    onClick={() => handleDeleteClick(st.id)}
+                    onClick={() => handleDeleteClick(v.id)}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -169,11 +176,11 @@ export default function StatusesPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {statusesList.map((st) => (
-                <TableRow key={st.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{toCapital(st.name)}</TableCell>
-                  <TableCell>{formatDate(st.createdAt)}</TableCell>
-                  <TableCell>{formatDate(st.updatedAt)}</TableCell>
+              {verificationOrganizations.map((v) => (
+                <TableRow key={v.id} hover sx={{ '& > td': { py: 1.5 } }}>
+                  <TableCell>{v.name.toUpperCase()}</TableCell>
+                  <TableCell>{formatDate(v.createdAt)}</TableCell>
+                  <TableCell>{formatDate(v.updatedAt)}</TableCell>
                   <TableCell align="right">
                     <Stack
                       direction="row"
@@ -186,7 +193,7 @@ export default function StatusesPage() {
                           color="primary"
                           disabled={true}
                           // component={Link}
-                          // to={routes.admin.editProductionSite(eq.id)}
+                          // to={routes.admin.editCity(c.id)}
                         >
                           <Edit fontSize="small" />
                         </IconButton>
@@ -195,7 +202,7 @@ export default function StatusesPage() {
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleDeleteClick(st.id)}
+                          onClick={() => handleDeleteClick(v.id)}
                         >
                           <Delete fontSize="small" />
                         </IconButton>
@@ -217,8 +224,8 @@ export default function StatusesPage() {
         <DialogTitle id="delete-dialog-title">Подтвердите удаление</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Вы действительно хотите удалить это состояние? Это действие нельзя
-            отменить.
+            Вы действительно хотите удалить эту организацию-поверитель? Это
+            действие нельзя отменить.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

@@ -34,6 +34,7 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
+import { toCapital } from '../../utils/capitalize';
 
 export default function ScopesPage() {
   const { data, loading, refetch } = useQuery(GetScopesListDocument);
@@ -117,7 +118,7 @@ export default function ScopesPage() {
             <Card key={sc.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {sc.name}
+                  {toCapital(sc.name)}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -170,7 +171,7 @@ export default function ScopesPage() {
             <TableBody>
               {scopesList.map((sc) => (
                 <TableRow key={sc.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{sc.name}</TableCell>
+                  <TableCell>{toCapital(sc.name)}</TableCell>
                   <TableCell>{formatDate(sc.createdAt)}</TableCell>
                   <TableCell>{formatDate(sc.updatedAt)}</TableCell>
                   <TableCell align="right">

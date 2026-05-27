@@ -12,6 +12,7 @@ import {
   GetProductionSitesForSelectDocument,
   GetScopesListDocument,
   GetStatusListDocument,
+  GetVerificationOrganizationsListDocument,
   UpdateDeviceDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
@@ -35,14 +36,24 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import { Add, Close, ExpandMore } from '@mui/icons-material';
+import {
+  Add,
+  Close,
+  DeleteOutline,
+  ExpandMore,
+  Save,
+} from '@mui/icons-material';
 import ScopeAutocomplete from '../../components/ScopeAutocomplete';
 import EquipmentTextField from '../../components/EquipmentTextField';
 import StatusTextField from '../../components/StatusTextField';
 import ProductionSiteTextField from '../../components/ProductionSiteTextField';
 import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocomplete';
 import MeasurementAutocomplete from '../../components/MeasurementAutocomplete';
+import VerificationOrganizationTextField from '../../components/VerificationOrganizationTextField';
+import MetrologyControlTypeTextField from '../../components/MetrologyControlTypeTextField';
 
 export default function EditDevicePage(props: {
   deviceId: string;
@@ -94,6 +105,8 @@ function UserForm({
   closeDetails: () => void;
   close: () => void;
 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const { data: productionSiteData } = useQuery(
@@ -110,6 +123,10 @@ function UserForm({
   );
   const { data: metrologyControlTypeData } = useQuery(
     GetMetrologyControlTypesListDocument
+  );
+
+  const { data: verificationOrganizationsData } = useQuery(
+    GetVerificationOrganizationsListDocument
   );
 
   const [form, setForm] = useState<{
@@ -194,6 +211,8 @@ function UserForm({
       comment: verification.comment || '',
       documentUrl: verification.documentUrl || '',
       metrologyControleTypeId: verification.metrologyControleType?.id || '',
+      verificationOrganizationId:
+        verification.verificationOrganization?.id || '',
       deviceId: verification.deviceId,
       collapsed: true,
     };
@@ -211,6 +230,7 @@ function UserForm({
       documentUrl: string;
       deviceId: string;
       metrologyControleTypeId: string;
+      verificationOrganizationId: string;
       collapsed: boolean;
     }>
   >(verificationsState);
@@ -228,6 +248,7 @@ function UserForm({
         comment: '',
         documentUrl: '',
         metrologyControleTypeId: '',
+        verificationOrganizationId: '',
         deviceId: '',
         collapsed: false,
       },
@@ -264,6 +285,9 @@ function UserForm({
 
   const metrologyControlTypeList =
     metrologyControlTypeData?.metrologyControlTypes || [];
+
+  const verificationOrhanizationsList =
+    verificationOrganizationsData?.verificationOrganizations || [];
 
   const [updateDevice, { loading: updating }] = useMutation(
     UpdateDeviceDocument,
@@ -335,6 +359,7 @@ function UserForm({
       comment: v.comment || null,
       documentUrl: v.documentUrl || null,
       metrologyControleTypeId: v.metrologyControleTypeId || null,
+      verificationOrganizationId: v.verificationOrganizationId || null,
     }));
 
     const data = {
@@ -389,7 +414,12 @@ function UserForm({
         alignItems="center"
         mb={3}
       >
-        <Typography variant="h6" gutterBottom color="primary">
+        <Typography
+          variant="h6"
+          gutterBottom
+          color="primary"
+          sx={{ fontFamily: '"Inter", sans-serif', fontWeight: 700 }}
+        >
           Редактировать СИ
         </Typography>
         <Tooltip title="Закрыть">
@@ -698,6 +728,21 @@ function UserForm({
                       </TextField>
 
                       <TextField
+                        label="Ссылка на документ"
+                        value={verification.documentUrl}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'documentUrl',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                        disabled={true}
+                      />
+
+                      <TextField
                         label="Комментарий"
                         value={verification.comment}
                         onChange={(e) =>
@@ -721,59 +766,39 @@ function UserForm({
                         }}
                       />
 
-                      <TextField
-                        label="Организация поверитель"
-                        value={verification.organization}
-                        onChange={(e) =>
+                      <VerificationOrganizationTextField
+                        value={verification.verificationOrganizationId}
+                        onChange={(
+                          e: React.ChangeEvent<
+                            HTMLInputElement | HTMLTextAreaElement
+                          >
+                        ) =>
                           handleVerificationChange(
                             verification.id,
-                            'organization',
+                            'verificationOrganizationId',
                             e.target.value
                           )
                         }
-                        fullWidth
-                        size="small"
-                      />
-                      <TextField
-                        label="Ссылка на документ"
-                        value={verification.documentUrl}
-                        onChange={(e) =>
-                          handleVerificationChange(
-                            verification.id,
-                            'documentUrl',
-                            e.target.value
-                          )
+                        verificationOrganizationsList={
+                          verificationOrhanizationsList
                         }
-                        fullWidth
-                        size="small"
-                        disabled={true}
                       />
 
-                      <TextField
-                        id="outlined-select-currency"
-                        select
-                        label="Вид метрологического контроля"
-                        name="metrologyControleTypeId"
-                        size="small"
-                        fullWidth
-                        onChange={(e) =>
+                      <MetrologyControlTypeTextField
+                        value={verification.metrologyControleTypeId}
+                        onChange={(
+                          e: React.ChangeEvent<
+                            HTMLInputElement | HTMLTextAreaElement
+                          >
+                        ) =>
                           handleVerificationChange(
                             verification.id,
                             'metrologyControleTypeId',
                             e.target.value
                           )
                         }
-                        value={verification.metrologyControleTypeId}
-                      >
-                        <MenuItem value="">
-                          <em>Не выбрано</em>
-                        </MenuItem>
-                        {metrologyControlTypeList.map(({ id, name }) => (
-                          <MenuItem key={id} value={id}>
-                            {name}
-                          </MenuItem>
-                        ))}
-                      </TextField>
+                        metrologyControlTypeList={metrologyControlTypeList}
+                      />
 
                       <Button
                         size="small"
@@ -790,28 +815,55 @@ function UserForm({
             })
           )}
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button
-              type="button"
-              onClick={() => handleDeleteClick(device.id)}
-              color="error"
-              variant="contained"
-              size="large"
-              disabled={deleting}
-              startIcon={deleting && <CircularProgress size={16} />}
-            >
-              {deleting ? 'Удаление...' : 'Удалить СИ'}
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              disabled={updating}
-              startIcon={updating && <CircularProgress size={16} />}
-            >
-              {updating ? 'Сохранение...' : 'Сохранить'}
-            </Button>
-          </Box>
+          {isMobile ? (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Tooltip title="Удалить СИ">
+                <IconButton
+                  onClick={() => handleDeleteClick(device.id)}
+                  color="error"
+                  aria-label="Удалить"
+                  size="large"
+                  disabled={deleting}
+                >
+                  <DeleteOutline />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Сохранить изменения">
+                <IconButton
+                  type="submit"
+                  aria-label="Сохранить"
+                  size="large"
+                  color="primary"
+                  disabled={updating}
+                >
+                  <Save />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Button
+                type="button"
+                onClick={() => handleDeleteClick(device.id)}
+                color="error"
+                variant="contained"
+                size="large"
+                disabled={deleting}
+                startIcon={deleting && <CircularProgress size={16} />}
+              >
+                {deleting ? 'Удаление...' : 'Удалить СИ'}
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={updating}
+                startIcon={updating && <CircularProgress size={16} />}
+              >
+                {updating ? 'Сохранение...' : 'Сохранить'}
+              </Button>
+            </Box>
+          )}
         </Stack>
       </form>
       <Dialog

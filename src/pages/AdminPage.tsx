@@ -22,6 +22,10 @@ const menu = [
   { item: 'Сферы применения', path: routes.admin.scopes() },
   { item: 'Состояния приборов', path: routes.admin.statuses() },
   { item: 'Первичные эталоны', path: routes.admin.primaryStandarts() },
+  {
+    item: 'Организации поверители',
+    path: routes.admin.verificationOrganizations(),
+  },
 ];
 
 export default function AdminPage() {

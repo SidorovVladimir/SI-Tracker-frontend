@@ -10,6 +10,7 @@ import {
   GetProductionSitesForSelectDocument,
   GetScopesListDocument,
   GetStatusListDocument,
+  GetVerificationOrganizationsListDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
 import {
@@ -34,6 +35,8 @@ import StatusTextField from '../../components/StatusTextField';
 import ProductionSiteTextField from '../../components/ProductionSiteTextField';
 import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocomplete';
 import MeasurementAutocomplete from '../../components/MeasurementAutocomplete';
+import VerificationOrganizationTextField from '../../components/VerificationOrganizationTextField';
+import MetrologyControlTypeTextField from '../../components/MetrologyControlTypeTextField';
 
 export default function CreateDevicePage(props: { closeDetails: () => void }) {
   const { closeDetails } = props;
@@ -51,6 +54,9 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
   );
   const { data: metrologyControlTypeData } = useQuery(
     GetMetrologyControlTypesListDocument
+  );
+  const { data: verificationOrganizationsData } = useQuery(
+    GetVerificationOrganizationsListDocument
   );
 
   const [form, setForm] = useState<{
@@ -109,6 +115,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
       documentUrl: string;
       metrologyControleTypeId: string;
       collapsed: boolean;
+      verificationOrganizationId: string;
     }>
   >([]);
 
@@ -127,6 +134,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
         comment: '',
         documentUrl: '',
         metrologyControleTypeId: '',
+        verificationOrganizationId: '',
         deviceId: '',
         collapsed: false,
       },
@@ -164,6 +172,9 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
 
   const metrologyControlTypeList =
     metrologyControlTypeData?.metrologyControlTypes || [];
+
+  const verificationOrhanizationsList =
+    verificationOrganizationsData?.verificationOrganizations || [];
 
   const [createDevice, { loading: creating }] = useMutation(
     CreateDeviceDocument,
@@ -216,6 +227,7 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
       comment: v.comment || null,
       documentUrl: v.documentUrl || null,
       metrologyControleTypeId: v.metrologyControleTypeId || null,
+      verificationOrganizationId: v.verificationOrganizationId || null,
     }));
 
     const data = {
@@ -257,7 +269,12 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
         alignItems="center"
         mb={3}
       >
-        <Typography variant="h6" gutterBottom color="primary">
+        <Typography
+          variant="h6"
+          gutterBottom
+          color="primary"
+          sx={{ fontFamily: '"Inter", sans-serif', fontWeight: 700 }}
+        >
           Добавить новое СИ
         </Typography>
         <Tooltip title="Закрыть">
@@ -568,6 +585,21 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
                       </TextField>
 
                       <TextField
+                        label="Ссылка на документ"
+                        value={verification.documentUrl}
+                        onChange={(e) =>
+                          handleVerificationChange(
+                            verification.id,
+                            'documentUrl',
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                        size="small"
+                        disabled={true}
+                      />
+
+                      <TextField
                         label="Комментарий"
                         value={verification.comment}
                         onChange={(e) =>
@@ -591,60 +623,39 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
                         }}
                       />
 
-                      <TextField
-                        label="Организация поверитель"
-                        value={verification.organization}
-                        onChange={(e) =>
+                      <VerificationOrganizationTextField
+                        value={verification.verificationOrganizationId}
+                        onChange={(
+                          e: React.ChangeEvent<
+                            HTMLInputElement | HTMLTextAreaElement
+                          >
+                        ) =>
                           handleVerificationChange(
                             verification.id,
-                            'organization',
+                            'verificationOrganizationId',
                             e.target.value
                           )
                         }
-                        fullWidth
-                        size="small"
-                      />
-                      <TextField
-                        label="Ссылка на документ"
-                        value={verification.documentUrl}
-                        onChange={(e) =>
-                          handleVerificationChange(
-                            verification.id,
-                            'documentUrl',
-                            e.target.value
-                          )
+                        verificationOrganizationsList={
+                          verificationOrhanizationsList
                         }
-                        fullWidth
-                        size="small"
-                        disabled={true}
                       />
 
-                      <TextField
-                        id="outlined-select-currency"
-                        select
-                        label="Вид метрологического контроля"
-                        name="metrologyControleTypeId"
-                        size="small"
-                        fullWidth
-                        onChange={(e) =>
+                      <MetrologyControlTypeTextField
+                        value={verification.metrologyControleTypeId}
+                        onChange={(
+                          e: React.ChangeEvent<
+                            HTMLInputElement | HTMLTextAreaElement
+                          >
+                        ) =>
                           handleVerificationChange(
                             verification.id,
                             'metrologyControleTypeId',
                             e.target.value
                           )
                         }
-                        value={verification.metrologyControleTypeId}
-                      >
-                        <MenuItem value="">
-                          <em>Не выбрано</em>
-                        </MenuItem>
-
-                        {metrologyControlTypeList.map(({ id, name }) => (
-                          <MenuItem key={id} value={id}>
-                            {name}
-                          </MenuItem>
-                        ))}
-                      </TextField>
+                        metrologyControlTypeList={metrologyControlTypeList}
+                      />
 
                       <Button
                         size="small"

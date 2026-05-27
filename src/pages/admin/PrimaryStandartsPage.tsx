@@ -118,7 +118,7 @@ export default function PrimaryStandartsPage() {
             <Card key={sc.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {sc.name}
+                  {sc.name.toUpperCase()}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -171,7 +171,7 @@ export default function PrimaryStandartsPage() {
             <TableBody>
               {primaryStandartsList.map((sc) => (
                 <TableRow key={sc.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{sc.name}</TableCell>
+                  <TableCell>{sc.name.toUpperCase()}</TableCell>
                   <TableCell>{formatDate(sc.createdAt)}</TableCell>
                   <TableCell>{formatDate(sc.updatedAt)}</TableCell>
                   <TableCell align="right">

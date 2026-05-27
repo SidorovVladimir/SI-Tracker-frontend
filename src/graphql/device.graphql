@@ -89,6 +89,9 @@ query GetDevicesWithRelationsList {
       metrologyControleType {
         name
       }
+      verificationOrganization {
+        name
+      }
     }
     scopes {
       name
@@ -150,6 +153,10 @@ query GetDeviceWithRelation($id: ID!) {
       deviceId
       documentUrl
       metrologyControleType {
+        id
+        name
+      }
+      verificationOrganization {
         id
         name
       }

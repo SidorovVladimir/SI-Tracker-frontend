@@ -116,7 +116,7 @@ export default function EquipmentTypesPage() {
             <Card key={eq.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {eq.name}
+                  {eq.name.toUpperCase()}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -169,7 +169,7 @@ export default function EquipmentTypesPage() {
             <TableBody>
               {equipmentTypes.map((eq) => (
                 <TableRow key={eq.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{eq.name}</TableCell>
+                  <TableCell>{eq.name.toUpperCase()}</TableCell>
                   <TableCell>{formatDate(eq.createdAt)}</TableCell>
                   <TableCell>{formatDate(eq.updatedAt)}</TableCell>
                   <TableCell align="right">

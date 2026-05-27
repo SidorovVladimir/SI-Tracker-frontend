@@ -10,7 +10,6 @@ import AdminPage from './pages/AdminPage';
 import UsersPage from './pages/admin/UsersPage';
 import { AuthLayout } from './layouts/AuthLayout';
 import { MainLayout } from './layouts/MainLayout';
-import { CssBaseline } from '@mui/material';
 import EditUserPage from './pages/admin/EditUserPage';
 import NotFoundPage from './pages/NotFoundPage';
 import CitiesPage from './pages/admin/CitiesPage';
@@ -35,11 +34,12 @@ import CreateStatusPage from './pages/admin/CreateStatusPage';
 import StatusesPage from './pages/admin/StatusesPage';
 import PrimaryStandartsPage from './pages/admin/PrimaryStandartsPage';
 import CreatePrimaryStandartPage from './pages/admin/CreatePrimaryStandartPage';
+import VerificationOrganizationsPage from './pages/admin/VerificationOrganizationsPage';
+import CreateVerificationOrganizationPage from './pages/admin/CreateVerificationOrganizationPage';
 
 function App() {
   return (
     <>
-      <CssBaseline />
       <NavBar />
       <Routes>
         <Route element={<ProtectedRoute />}>
@@ -136,6 +136,14 @@ function App() {
                 <Route
                   path={routes.admin.statuses()}
                   element={<StatusesPage />}
+                />
+                <Route
+                  path={routes.admin.verificationOrganizations()}
+                  element={<VerificationOrganizationsPage />}
+                />
+                <Route
+                  path={routes.admin.createVerificationOrganization()}
+                  element={<CreateVerificationOrganizationPage />}
                 />
               </Route>
             </Route>

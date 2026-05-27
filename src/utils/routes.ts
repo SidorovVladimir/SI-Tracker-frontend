@@ -33,5 +33,8 @@ export default {
     createPrimaryStandart: () => '/admin/primary-standarts/create',
     statuses: () => '/admin/statuses',
     createStatus: () => '/admin/statuses/create',
+    verificationOrganizations: () => '/admin/verification-organizations',
+    createVerificationOrganization: () =>
+      '/admin/verification-organizations/create',
   },
 };

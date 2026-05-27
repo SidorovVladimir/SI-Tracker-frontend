@@ -1,0 +1,32 @@
+query GetVerificationOrganizationsList {
+  verificationOrganizations {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+query GetVerificationOrganization($id: ID!) {
+  verificationOrganization(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateVerificationOrganization(
+  $input: CreateVerificationOrganizationInput!
+) {
+  createVerificationOrganization(input: $input) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteVerificationOrganization($id: ID!) {
+  deleteVerificationOrganization(id: $id)
+}

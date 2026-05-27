@@ -34,6 +34,7 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
+import { toCapital } from '../../utils/capitalize';
 
 export default function MeasurementTypesPage() {
   const { data, loading, refetch } = useQuery(GetMeasurementTypesListDocument);
@@ -118,7 +119,7 @@ export default function MeasurementTypesPage() {
             <Card key={m.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {m.name}
+                  {toCapital(m.name)}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -171,7 +172,7 @@ export default function MeasurementTypesPage() {
             <TableBody>
               {measurementTypes.map((m) => (
                 <TableRow key={m.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{m.name}</TableCell>
+                  <TableCell>{toCapital(m.name)}</TableCell>
                   <TableCell>{formatDate(m.createdAt)}</TableCell>
                   <TableCell>{formatDate(m.updatedAt)}</TableCell>
                   <TableCell align="right">

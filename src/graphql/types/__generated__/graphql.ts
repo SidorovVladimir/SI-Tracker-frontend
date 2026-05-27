@@ -122,6 +122,10 @@ export type CreateUserInput = {
   role: Scalars['String']['input'];
 };
 
+export type CreateVerificationOrganizationInput = {
+  name: Scalars['String']['input'];
+};
+
 export type Device = {
   __typename: 'Device';
   accuracy: Maybe<Scalars['String']['output']>;
@@ -214,6 +218,7 @@ export type Mutation = {
   createScope: Scope;
   createStatus: Status;
   createUser: User;
+  createVerificationOrganization: VerificationOrganization;
   deleteCity: Scalars['Boolean']['output'];
   deleteCompany: Scalars['Boolean']['output'];
   deleteDevice: Scalars['Boolean']['output'];
@@ -225,6 +230,7 @@ export type Mutation = {
   deleteScope: Scalars['Boolean']['output'];
   deleteStatus: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
+  deleteVerificationOrganization: Scalars['Boolean']['output'];
   login: AuthPayload;
   logout: Scalars['Boolean']['output'];
   register: AuthPayload;
@@ -239,6 +245,7 @@ export type Mutation = {
   updateScope: Scope;
   updateStatus: Status;
   updateUser: User;
+  updateVerificationOrganization: VerificationOrganization;
 };
 
 export type MutationCreateCityArgs = {
@@ -285,6 +292,10 @@ export type MutationCreateUserArgs = {
   input: CreateUserInput;
 };
 
+export type MutationCreateVerificationOrganizationArgs = {
+  input: CreateVerificationOrganizationInput;
+};
+
 export type MutationDeleteCityArgs = {
   id: Scalars['ID']['input'];
 };
@@ -326,6 +337,10 @@ export type MutationDeleteStatusArgs = {
 };
 
 export type MutationDeleteUserArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteVerificationOrganizationArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -391,6 +406,11 @@ export type MutationUpdateUserArgs = {
   input: UpdateUserInput;
 };
 
+export type MutationUpdateVerificationOrganizationArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateVerificationOrganizationInput;
+};
+
 export type PrimaryStandart = {
   __typename: 'PrimaryStandart';
   createdAt: Scalars['String']['output'];
@@ -442,6 +462,8 @@ export type Query = {
   statuses: Array<Status>;
   user: User;
   users: Array<User>;
+  verificationOrganization: VerificationOrganization;
+  verificationOrganizations: Array<VerificationOrganization>;
 };
 
 export type QueryCityArgs = {
@@ -485,6 +507,10 @@ export type QueryStatusArgs = {
 };
 
 export type QueryUserArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type QueryVerificationOrganizationArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -573,6 +599,10 @@ export type UpdateUserInput = {
   role?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateVerificationOrganizationInput = {
+  name: Scalars['String']['input'];
+};
+
 export type User = {
   __typename: 'User';
   createdAt: Scalars['String']['output'];
@@ -598,6 +628,7 @@ export type Verification = {
   result: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
   validUntil: Maybe<Scalars['String']['output']>;
+  verificationOrganizationId: Maybe<Scalars['ID']['output']>;
 };
 
 export type VerificationInput = {
@@ -609,6 +640,15 @@ export type VerificationInput = {
   protocolNumber?: InputMaybe<Scalars['String']['input']>;
   result?: InputMaybe<Scalars['String']['input']>;
   validUntil?: InputMaybe<Scalars['String']['input']>;
+  verificationOrganizationId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type VerificationOrganization = {
+  __typename: 'VerificationOrganization';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
 };
 
 export type VerificationRelation = {
@@ -625,6 +665,7 @@ export type VerificationRelation = {
   result: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
   validUntil: Maybe<Scalars['String']['output']>;
+  verificationOrganization: Maybe<VerificationOrganization>;
 };
 
 export type GetMeQueryVariables = Exact<{ [key: string]: never }>;
@@ -909,6 +950,10 @@ export type GetDevicesWithRelationsListQuery = {
         __typename: 'MetrologyControlType';
         name: string;
       } | null;
+      verificationOrganization: {
+        __typename: 'VerificationOrganization';
+        name: string;
+      } | null;
     }>;
     scopes: Array<{ __typename: 'Scope'; name: string }>;
     primaryStandarts: Array<{ __typename: 'PrimaryStandart'; name: string }>;
@@ -964,6 +1009,11 @@ export type GetDeviceWithRelationQuery = {
       documentUrl: string | null;
       metrologyControleType: {
         __typename: 'MetrologyControlType';
+        id: string;
+        name: string;
+      } | null;
+      verificationOrganization: {
+        __typename: 'VerificationOrganization';
         id: string;
         name: string;
       } | null;
@@ -1417,6 +1467,56 @@ export type CreateUserMutation = {
     createdAt: string;
     updatedAt: string;
   };
+};
+
+export type GetVerificationOrganizationsListQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type GetVerificationOrganizationsListQuery = {
+  verificationOrganizations: Array<{
+    __typename: 'VerificationOrganization';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+};
+
+export type GetVerificationOrganizationQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type GetVerificationOrganizationQuery = {
+  verificationOrganization: {
+    __typename: 'VerificationOrganization';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type CreateVerificationOrganizationMutationVariables = Exact<{
+  input: CreateVerificationOrganizationInput;
+}>;
+
+export type CreateVerificationOrganizationMutation = {
+  createVerificationOrganization: {
+    __typename: 'VerificationOrganization';
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type DeleteVerificationOrganizationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type DeleteVerificationOrganizationMutation = {
+  deleteVerificationOrganization: boolean;
 };
 
 export const GetMeDocument = {
@@ -2402,6 +2502,22 @@ export const GetDevicesWithRelationsListDocument = {
                           ],
                         },
                       },
+                      {
+                        kind: 'Field',
+                        name: {
+                          kind: 'Name',
+                          value: 'verificationOrganization',
+                        },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                          ],
+                        },
+                      },
                     ],
                   },
                 },
@@ -2621,6 +2737,26 @@ export const GetDeviceWithRelationDocument = {
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'metrologyControleType' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: {
+                          kind: 'Name',
+                          value: 'verificationOrganization',
+                        },
                         selectionSet: {
                           kind: 'SelectionSet',
                           selections: [
@@ -4312,3 +4448,187 @@ export const CreateUserDocument = {
     },
   ],
 } as unknown as DocumentNode<CreateUserMutation, CreateUserMutationVariables>;
+export const GetVerificationOrganizationsListDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetVerificationOrganizationsList' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'verificationOrganizations' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetVerificationOrganizationsListQuery,
+  GetVerificationOrganizationsListQueryVariables
+>;
+export const GetVerificationOrganizationDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetVerificationOrganization' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'verificationOrganization' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetVerificationOrganizationQuery,
+  GetVerificationOrganizationQueryVariables
+>;
+export const CreateVerificationOrganizationDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateVerificationOrganization' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: {
+                kind: 'Name',
+                value: 'CreateVerificationOrganizationInput',
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createVerificationOrganization' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CreateVerificationOrganizationMutation,
+  CreateVerificationOrganizationMutationVariables
+>;
+export const DeleteVerificationOrganizationDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteVerificationOrganization' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteVerificationOrganization' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  DeleteVerificationOrganizationMutation,
+  DeleteVerificationOrganizationMutationVariables
+>;

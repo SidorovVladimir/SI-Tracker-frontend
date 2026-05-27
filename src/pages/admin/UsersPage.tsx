@@ -36,6 +36,7 @@ import { Link, useNavigate } from 'react-router';
 import { formatDate } from '../../utils/date';
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { toCapital } from '../../utils/capitalize';
 
 export default function UsersPage() {
   const { user } = useAuth();
@@ -117,7 +118,7 @@ export default function UsersPage() {
             <Card key={u.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {u.firstName} {u.lastName}
+                  {toCapital(u.firstName)} {toCapital(u.lastName)}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   {u.email}
@@ -182,8 +183,8 @@ export default function UsersPage() {
             <TableBody>
               {users.map((u) => (
                 <TableRow key={u.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{u.firstName}</TableCell>
-                  <TableCell>{u.lastName}</TableCell>
+                  <TableCell>{toCapital(u.firstName)}</TableCell>
+                  <TableCell>{toCapital(u.lastName)}</TableCell>
                   <TableCell>{u.email}</TableCell>
                   <TableCell>
                     {u.role === 'admin' ? 'Администратор' : 'Пользователь'}

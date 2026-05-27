@@ -21,6 +21,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { enqueueSnackbar } from 'notistack';
 import routes from '../../utils/routes';
 import { useAuth } from '../../hooks/useAuth';
+import { toCapital } from '../../utils/capitalize';
 
 type FieldErrors = {
   firstName?: string;
@@ -63,8 +64,8 @@ function UserForm({
 }) {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    firstName: user.firstName || '',
-    lastName: user.lastName || '',
+    firstName: toCapital(user.firstName) || '',
+    lastName: toCapital(user.lastName) || '',
     role: user.role || '',
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});

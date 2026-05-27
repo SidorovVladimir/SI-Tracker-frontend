@@ -118,7 +118,7 @@ export default function ProductionSitesPage() {
             <Card key={p.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {p.name}
+                  {p.name.toUpperCase()}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -128,6 +128,7 @@ export default function ProductionSitesPage() {
                     sx={{ border: '1px solid', borderColor: 'primary.light' }}
                     component={Link}
                     to={routes.admin.editProductionSite(p.id)}
+                    disabled={true}
                   >
                     <Edit fontSize="small" />
                   </IconButton>
@@ -170,7 +171,7 @@ export default function ProductionSitesPage() {
             <TableBody>
               {productionSites.map((p) => (
                 <TableRow key={p.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{p.name}</TableCell>
+                  <TableCell>{p.name.toUpperCase()}</TableCell>
                   <TableCell>{formatDate(p.createdAt)}</TableCell>
                   <TableCell>{formatDate(p.updatedAt)}</TableCell>
                   <TableCell align="right">
@@ -185,6 +186,7 @@ export default function ProductionSitesPage() {
                           color="primary"
                           component={Link}
                           to={routes.admin.editProductionSite(p.id)}
+                          disabled={true}
                         >
                           <Edit fontSize="small" />
                         </IconButton>

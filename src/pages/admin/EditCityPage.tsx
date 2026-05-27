@@ -19,6 +19,7 @@ import {
 import { useMutation, useQuery } from '@apollo/client/react';
 import { enqueueSnackbar } from 'notistack';
 import routes from '../../utils/routes';
+import { toCapital } from '../../utils/capitalize';
 
 type FieldErrors = {
   name?: string;
@@ -53,7 +54,7 @@ export default function EditCityPage() {
 function UserForm({ city }: { city: NonNullable<GetCityQuery['city']> }) {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    name: city.name || '',
+    name: toCapital(city.name) || '',
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
