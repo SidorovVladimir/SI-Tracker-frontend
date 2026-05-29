@@ -102,7 +102,7 @@ export default function DeviceCard(props: {
           Информация о СИ
         </Typography>
         <Stack direction="row" spacing={1}>
-          {user?.role === 'admin' && (
+          {user?.role !== 'user' && (
             <Tooltip title="Редактировать">
               <IconButton onClick={onEdit} size="small" color="primary">
                 <Edit fontSize="small" />

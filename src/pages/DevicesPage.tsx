@@ -594,7 +594,7 @@ export default function DevicesPage() {
                   </Stack>
                 </Drawer>
 
-                {user?.role === 'admin' && (
+                {user?.role !== 'user' && (
                   <Tooltip title="Добавить СИ">
                     <IconButton color="primary" onClick={handleAddClick}>
                       <Add />
@@ -604,7 +604,7 @@ export default function DevicesPage() {
               </Box>
             ) : (
               <Box>
-                {user?.role === 'admin' && (
+                {user?.role !== 'user' && (
                   <Button variant="contained" onClick={handleAddClick}>
                     Добавить СИ
                   </Button>

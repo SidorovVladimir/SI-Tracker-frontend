@@ -125,7 +125,7 @@ export default function NavBar() {
                   to={routes.admin.root()}
                   onClick={handleClose}
                 >
-                  {user?.role === 'admin' && (
+                  {user?.role !== 'user' && (
                     <ListItemText>Панель администратора</ListItemText>
                   )}
                   {/* <ListItemText>Панель администратора</ListItemText> */}
