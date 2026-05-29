@@ -25,6 +25,7 @@ const config: CodegenConfig = {
         // Apollo Client doesn't add the `__typename` field to root types so
         // don't generate a type for the `__typename` for root operation types.
         skipTypeNameForRoot: true,
+        enumsAsTypes: true,
       },
     },
   },

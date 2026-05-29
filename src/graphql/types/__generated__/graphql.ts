@@ -28,11 +28,7 @@ export type Scalars = {
   Float: { input: number; output: number };
 };
 
-export enum AuditAction {
-  Create = 'create',
-  Delete = 'delete',
-  Update = 'update',
-}
+export type AuditAction = 'create' | 'delete' | 'update';
 
 export type AuditLog = {
   __typename: 'AuditLog';

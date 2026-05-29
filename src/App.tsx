@@ -37,7 +37,6 @@ import CreatePrimaryStandartPage from './pages/admin/CreatePrimaryStandartPage';
 import VerificationOrganizationsPage from './pages/admin/VerificationOrganizationsPage';
 import CreateVerificationOrganizationPage from './pages/admin/CreateVerificationOrganizationPage';
 import AuditLogPage from './pages/admin/AuditLogPage';
-import { Box } from '@mui/material';
 
 function App() {
   return (
