@@ -48,7 +48,11 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path={routes.profile()} element={<ProfilePage />} />
 
-            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'superadmin']} />
+              }
+            >
               <Route path={routes.admin.root()} element={<AdminPage />}>
                 <Route path={routes.admin.users()} element={<UsersPage />} />
                 <Route
