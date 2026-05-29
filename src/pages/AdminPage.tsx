@@ -53,7 +53,8 @@ export default function AdminPage() {
           border: '1px solid',
           borderColor: 'divider',
           borderRadius: 2,
-          height: { md: 'calc(100dvh - 130px)' },
+          // height: { md: 'calc(100dvh - 130px)' },
+          height: { xs: 'auto', md: '100%' },
           position: { md: 'sticky' },
           top: { md: '96px' },
           overflowY: 'auto',
@@ -90,7 +91,14 @@ export default function AdminPage() {
                 component={Link}
                 to={path}
                 selected={pathname.includes(path)}
-                sx={{ borderRadius: { xs: 1, md: 0 }, whiteSpace: 'wrap' }}
+                sx={{
+                  borderRadius: { xs: 1, md: 0 },
+                  whiteSpace: {
+                    sm: 'nowrap',
+                    xs: 'nowrap',
+                    md: 'wrap',
+                  },
+                }}
               >
                 <ListItemText primary={item} />
               </ListItemButton>

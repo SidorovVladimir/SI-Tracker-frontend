@@ -58,7 +58,13 @@ export default function ProfilePage() {
               {toCapital(user?.lastName || '')}
             </Typography>
             <Chip
-              label={user?.role === 'admin' ? 'Администратор' : 'Пользователь'}
+              label={
+                user?.role === 'superadmin'
+                  ? 'Суперадминистратор'
+                  : user?.role === 'admin'
+                  ? 'Администратор'
+                  : 'Пользователь'
+              }
               size="small"
               color="primary"
               variant="outlined"

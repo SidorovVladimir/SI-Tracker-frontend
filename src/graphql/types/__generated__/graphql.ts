@@ -253,6 +253,7 @@ export type Mutation = {
   deleteCompany: Scalars['Boolean']['output'];
   deleteDevice: Scalars['Boolean']['output'];
   deleteEquipmentType: Scalars['Boolean']['output'];
+  deleteLog: Scalars['Boolean']['output'];
   deleteMeasurementType: Scalars['Boolean']['output'];
   deleteMetrologyControlType: Scalars['Boolean']['output'];
   deletePrimaryStandart: Scalars['Boolean']['output'];
@@ -339,6 +340,10 @@ export type MutationDeleteDeviceArgs = {
 };
 
 export type MutationDeleteEquipmentTypeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteLogArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -735,6 +740,12 @@ export type GetDeviceAuditLogsQuery = {
     }>;
   };
 };
+
+export type DeleteLogMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type DeleteLogMutation = { deleteLog: boolean };
 
 export type GetMeQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -1733,6 +1744,45 @@ export const GetDeviceAuditLogsDocument = {
   GetDeviceAuditLogsQuery,
   GetDeviceAuditLogsQueryVariables
 >;
+export const DeleteLogDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteLog' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteLog' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteLogMutation, DeleteLogMutationVariables>;
 export const GetMeDocument = {
   kind: 'Document',
   definitions: [

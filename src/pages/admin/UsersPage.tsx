@@ -106,6 +106,7 @@ export default function UsersPage() {
           }}
           component={Link}
           to={routes.admin.createUser()}
+          disabled={!(user?.role === 'superadmin')}
         >
           {isMobile ? <Add /> : 'Добавить'}
         </Button>
@@ -124,7 +125,11 @@ export default function UsersPage() {
                   {u.email}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {u.role === 'admin' ? 'Администратор' : 'Пользователь'}
+                  {u.role === 'superadmin'
+                    ? 'Суперадминистратор'
+                    : u.role === 'admin'
+                    ? 'Администратор'
+                    : 'Пользователь'}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -134,6 +139,7 @@ export default function UsersPage() {
                     sx={{ border: '1px solid', borderColor: 'primary.light' }}
                     component={Link}
                     to={routes.admin.editUser(u.id)}
+                    disabled={!(user?.role === 'superadmin')}
                   >
                     <Edit fontSize="small" />
                   </IconButton>
@@ -142,10 +148,7 @@ export default function UsersPage() {
                     color="error"
                     sx={{ border: '1px solid', borderColor: 'error.light' }}
                     onClick={() => handleDeleteClick(u.id)}
-                    disabled={
-                      user?.id === u.id ||
-                      u.email === 'v.sidorov29091988@gmail.com'
-                    }
+                    disabled={!(user?.role === 'superadmin')}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -203,6 +206,7 @@ export default function UsersPage() {
                           color="primary"
                           component={Link}
                           to={routes.admin.editUser(u.id)}
+                          disabled={!(user?.role === 'superadmin')}
                         >
                           <Edit fontSize="small" />
                         </IconButton>
@@ -212,10 +216,7 @@ export default function UsersPage() {
                           size="small"
                           color="error"
                           onClick={() => handleDeleteClick(u.id)}
-                          disabled={
-                            user?.id === u.id ||
-                            u.email === 'v.sidorov29091988@gmail.com'
-                          }
+                          disabled={!(user?.role === 'superadmin')}
                         >
                           <Delete fontSize="small" />
                         </IconButton>

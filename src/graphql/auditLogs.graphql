@@ -19,3 +19,7 @@ query GetDeviceAuditLogs($filter: AuditLogFilter, $limit: Int, $offset: Int) {
     totalCount
   }
 }
+
+mutation DeleteLog($id: ID!) {
+  deleteLog(id: $id)
+}
