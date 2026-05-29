@@ -190,7 +190,11 @@ export default function UsersPage() {
                   <TableCell>{toCapital(u.lastName)}</TableCell>
                   <TableCell>{u.email}</TableCell>
                   <TableCell>
-                    {u.role === 'admin' ? 'Администратор' : 'Пользователь'}
+                    {u.role === 'superadmin'
+                      ? 'Суперадминистратор'
+                      : u.role === 'admin'
+                      ? 'Администратор'
+                      : 'Пользователь'}
                   </TableCell>
                   <TableCell>{formatDate(u.createdAt)}</TableCell>
                   <TableCell>{formatDate(u.updatedAt)}</TableCell>
