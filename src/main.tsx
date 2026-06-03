@@ -19,7 +19,28 @@ const getClient = () => {
       // uri: 'http://localhost:4000/graphql',
       credentials: 'include',
     }),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            // Исправляет предупреждение о потере данных списка черновиков партий
+            getDraftBatchesByMonth: {
+              keyArgs: ['plannedMonth'], // Группируем кэш изолированно по месяцам
+              merge(_existing, incoming) {
+                return incoming; // Просто заменяем массив на свежий без паники кэша
+              },
+            },
+            // Защищает пул приборов от ложного склеивания при смене вкладок контроля и страниц
+            getPlanningPoolByMonth: {
+              keyArgs: ['targetMonth', 'limit', 'offset', 'controlTypeId'],
+              merge(_existing, incoming) {
+                return incoming; // Всегда берем чистый отфильтрованный срез с сервера
+              },
+            },
+          },
+        },
+      },
+    }),
   });
 };
 
