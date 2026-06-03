@@ -16,6 +16,8 @@ import {
   Drawer,
   IconButton,
   Tooltip,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
@@ -25,6 +27,9 @@ import { useAuth } from '../hooks/useAuth';
 import DeviceCard from './DeviceCard';
 import EditDevicePage from './admin/EditDevicePage';
 import { Add, FilterAlt } from '@mui/icons-material';
+import { Link } from 'react-router';
+import React from 'react';
+import routes from '../utils/routes';
 
 type Device = GetDevicesWithRelationsListQuery['devicesWithRelations'][0];
 const FILTERS_STORAGE_KEY = 'devices_filters_v1';
@@ -69,6 +74,9 @@ export default function DevicesPage() {
   });
 
   const theme = useTheme();
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const isMenuOpen = Boolean(anchorEl);
 
   const isMobileOrLaptop = useMediaQuery(theme.breakpoints.down('md'));
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -396,7 +404,71 @@ export default function DevicesPage() {
               bgcolor: 'background.default',
             }}
           >
-            <Typography variant="h6">Средства измерения</Typography>
+            <Box>
+              <Button
+                id="nav-section-button"
+                aria-controls={isMenuOpen ? 'nav-section-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={isMenuOpen ? 'true' : undefined}
+                onClick={(e) => setAnchorEl(e.currentTarget)}
+                // Если пользователь админ — показываем стрелочку выбора, если обычный — отключаем клик
+                endIcon={
+                  user?.role !== 'user' ? (
+                    <span style={{ fontSize: '0.8rem', marginLeft: 4 }}>▼</span>
+                  ) : null
+                }
+                disabled={user?.role === 'user'}
+                sx={{
+                  textTransform: 'none',
+                  p: 0,
+                  minWidth: 0,
+                  color: 'text.primary',
+                  textAlign: 'left',
+                  '&:hover': {
+                    bgcolor: 'transparent',
+                    opacity: user?.role !== 'user' ? 0.8 : 1,
+                  },
+                  '&.Mui-disabled': { color: 'text.primary' },
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  Средства измерения
+                </Typography>
+              </Button>
+
+              {/* ВЫПАДАЮЩИЙ СПИСОК РАЗДЕЛОВ ДЛЯ АДМИНИСТРАТОРА */}
+              {user?.role !== 'user' && (
+                <Menu
+                  id="nav-section-menu"
+                  anchorEl={anchorEl}
+                  open={isMenuOpen}
+                  onClose={() => setAnchorEl(null)}
+                  sx={{ mt: 0.5 }}
+                  slotProps={{
+                    paper: {
+                      sx: { borderRadius: 2, boxShadow: 3, minWidth: 220 },
+                    },
+                    list: {
+                      'aria-labelledby': 'nav-section-button', // Настройки списка передаем в слот list
+                    },
+                  }}
+                >
+                  {/* <MenuItem onClick={() => setAnchorEl(null)} selected>
+                        📊 База СИ (Текущий экран)
+                      </MenuItem> */}
+                  <MenuItem
+                    component={Link}
+                    to={routes.planning()}
+                    onClick={() => {
+                      setAnchorEl(null);
+                    }}
+                    sx={{ fontWeight: 'bold', color: 'primary.main' }}
+                  >
+                    📅 Планировщик поверок
+                  </MenuItem>
+                </Menu>
+              )}
+            </Box>
 
             {isMobileOrLaptop ? (
               <Box sx={{ mb: 1, display: 'flex', gap: 1 }}>

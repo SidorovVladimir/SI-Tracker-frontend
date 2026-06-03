@@ -77,6 +77,13 @@ export type Company = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type CreateBatchInput = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  number: Scalars['String']['input'];
+  plannedDate: Scalars['String']['input'];
+  verificationOrganizationId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type CreateCityInput = {
   name: Scalars['String']['input'];
 };
@@ -148,6 +155,18 @@ export type CreateUserInput = {
   role: Scalars['String']['input'];
 };
 
+export type CreateVerificationInput = {
+  batchId?: InputMaybe<Scalars['ID']['input']>;
+  comment?: InputMaybe<Scalars['String']['input']>;
+  date: Scalars['String']['input'];
+  deviceId: Scalars['ID']['input'];
+  metrologyControleTypeId: Scalars['ID']['input'];
+  protocolNumber: Scalars['String']['input'];
+  result: Scalars['String']['input'];
+  validUntil?: InputMaybe<Scalars['String']['input']>;
+  verificationOrganizationId: Scalars['ID']['input'];
+};
+
 export type CreateVerificationOrganizationInput = {
   name: Scalars['String']['input'];
 };
@@ -176,6 +195,22 @@ export type Device = {
   verificationInterval: Maybe<Scalars['Int']['output']>;
 };
 
+export type DeviceInBatch = {
+  __typename: 'DeviceInBatch';
+  id: Scalars['ID']['output'];
+  model: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  serialNumber: Scalars['String']['output'];
+  verifications: Maybe<Array<ShortVerification>>;
+};
+
+export type DeviceToBatchRelation = {
+  __typename: 'DeviceToBatchRelation';
+  device: DeviceInBatch;
+  deviceStatus: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+};
+
 export type DeviceWithRelations = {
   __typename: 'DeviceWithRelations';
   accuracy: Maybe<Scalars['String']['output']>;
@@ -200,6 +235,12 @@ export type DeviceWithRelations = {
   status: Status;
   verificationInterval: Maybe<Scalars['Int']['output']>;
   verifications: Array<VerificationRelation>;
+};
+
+export type DraftBatchOption = {
+  __typename: 'DraftBatchOption';
+  id: Scalars['ID']['output'];
+  number: Scalars['String']['output'];
 };
 
 export type EquipmentType = {
@@ -231,8 +272,16 @@ export type MetrologyControlType = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type MonthlySummary = {
+  __typename: 'MonthlySummary';
+  autoCount: Scalars['Int']['output'];
+  manualCount: Scalars['Int']['output'];
+  month: Scalars['String']['output'];
+};
+
 export type Mutation = {
   __typename: 'Mutation';
+  addDevicesToBatch: Scalars['Boolean']['output'];
   createCity: City;
   createCompany: Company;
   createDevice: Device;
@@ -244,6 +293,8 @@ export type Mutation = {
   createScope: Scope;
   createStatus: Status;
   createUser: User;
+  createVerification: VerificationModal;
+  createVerificationBatch: VerificationBatch;
   createVerificationOrganization: VerificationOrganization;
   deleteCity: Scalars['Boolean']['output'];
   deleteCompany: Scalars['Boolean']['output'];
@@ -257,10 +308,13 @@ export type Mutation = {
   deleteScope: Scalars['Boolean']['output'];
   deleteStatus: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
+  deleteVerificationBatch: Scalars['Boolean']['output'];
   deleteVerificationOrganization: Scalars['Boolean']['output'];
   login: AuthPayload;
   logout: Scalars['Boolean']['output'];
   register: AuthPayload;
+  removeDevicesFromBatch: Scalars['Boolean']['output'];
+  updateBatchStatus: VerificationBatch;
   updateCity: City;
   updateCompany: Company;
   updateDevice: Device;
@@ -273,6 +327,11 @@ export type Mutation = {
   updateStatus: Status;
   updateUser: User;
   updateVerificationOrganization: VerificationOrganization;
+};
+
+export type MutationAddDevicesToBatchArgs = {
+  batchId: Scalars['ID']['input'];
+  deviceIds: Array<Scalars['ID']['input']>;
 };
 
 export type MutationCreateCityArgs = {
@@ -317,6 +376,14 @@ export type MutationCreateStatusArgs = {
 
 export type MutationCreateUserArgs = {
   input: CreateUserInput;
+};
+
+export type MutationCreateVerificationArgs = {
+  input: CreateVerificationInput;
+};
+
+export type MutationCreateVerificationBatchArgs = {
+  input: CreateBatchInput;
 };
 
 export type MutationCreateVerificationOrganizationArgs = {
@@ -371,6 +438,10 @@ export type MutationDeleteUserArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type MutationDeleteVerificationBatchArgs = {
+  id: Scalars['ID']['input'];
+};
+
 export type MutationDeleteVerificationOrganizationArgs = {
   id: Scalars['ID']['input'];
 };
@@ -381,6 +452,16 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   input: CreateUserInput;
+};
+
+export type MutationRemoveDevicesFromBatchArgs = {
+  batchId: Scalars['ID']['input'];
+  deviceIds: Array<Scalars['ID']['input']>;
+};
+
+export type MutationUpdateBatchStatusArgs = {
+  id: Scalars['ID']['input'];
+  status: Scalars['String']['input'];
 };
 
 export type MutationUpdateCityArgs = {
@@ -442,6 +523,39 @@ export type MutationUpdateVerificationOrganizationArgs = {
   input: UpdateVerificationOrganizationInput;
 };
 
+export type PlanningPoolItem = {
+  __typename: 'PlanningPoolItem';
+  controlType: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isManualPlacement: Scalars['Boolean']['output'];
+  isOverdue: Scalars['Boolean']['output'];
+  model: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  serialNumber: Scalars['String']['output'];
+  suggestedMonth: Scalars['String']['output'];
+  targetBatchId: Maybe<Scalars['ID']['output']>;
+  validUntil: Maybe<Scalars['String']['output']>;
+};
+
+export type PlanningPoolResponse = {
+  __typename: 'PlanningPoolResponse';
+  items: Array<PlanningPoolItem>;
+  meta: PoolMeta;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PoolMeta = {
+  __typename: 'PoolMeta';
+  typeCounts: Array<PoolMetaTypeCounts>;
+  unassignedCount: Scalars['Int']['output'];
+};
+
+export type PoolMetaTypeCounts = {
+  __typename: 'PoolMetaTypeCounts';
+  count: Scalars['Int']['output'];
+  typeName: Scalars['String']['output'];
+};
+
 export type PrimaryStandart = {
   __typename: 'PrimaryStandart';
   createdAt: Scalars['String']['output'];
@@ -478,7 +592,11 @@ export type Query = {
   devicesWithRelations: Array<DeviceWithRelations>;
   equipmentType: EquipmentType;
   equipmentTypes: Array<EquipmentType>;
+  getDraftBatchesByMonth: Array<DraftBatchOption>;
+  getPlanningPoolByMonth: PlanningPoolResponse;
   getProductionSitesForSelect: Array<ProductionSite>;
+  getVerificationBatches: Array<VerificationBatch>;
+  getYearlyCalendarSummary: Array<MonthlySummary>;
   me: Maybe<User>;
   measurementType: MeasurementType;
   measurementTypes: Array<MeasurementType>;
@@ -520,6 +638,28 @@ export type QueryEquipmentTypeArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type QueryGetDraftBatchesByMonthArgs = {
+  plannedMonth: Scalars['String']['input'];
+};
+
+export type QueryGetPlanningPoolByMonthArgs = {
+  companyDefaultLeadTime?: InputMaybe<Scalars['Int']['input']>;
+  controlTypeId?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  targetMonth: Scalars['String']['input'];
+};
+
+export type QueryGetVerificationBatchesArgs = {
+  status?: InputMaybe<Scalars['String']['input']>;
+  year?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QueryGetYearlyCalendarSummaryArgs = {
+  companyDefaultLeadTime?: InputMaybe<Scalars['Int']['input']>;
+  year: Scalars['Int']['input'];
+};
+
 export type QueryMeasurementTypeArgs = {
   id: Scalars['ID']['input'];
 };
@@ -558,6 +698,12 @@ export type Scope = {
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+};
+
+export type ShortVerification = {
+  __typename: 'ShortVerification';
+  batchId: Maybe<Scalars['ID']['output']>;
+  id: Scalars['ID']['output'];
 };
 
 export type Status = {
@@ -669,6 +815,19 @@ export type Verification = {
   verificationOrganizationId: Maybe<Scalars['ID']['output']>;
 };
 
+export type VerificationBatch = {
+  __typename: 'VerificationBatch';
+  comment: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  devicesToBatches: Array<DeviceToBatchRelation>;
+  id: Scalars['ID']['output'];
+  number: Scalars['String']['output'];
+  plannedDate: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+  verificationOrganizationId: Maybe<Scalars['ID']['output']>;
+};
+
 export type VerificationInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   date?: InputMaybe<Scalars['String']['input']>;
@@ -679,6 +838,22 @@ export type VerificationInput = {
   result?: InputMaybe<Scalars['String']['input']>;
   validUntil?: InputMaybe<Scalars['String']['input']>;
   verificationOrganizationId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type VerificationModal = {
+  __typename: 'VerificationModal';
+  batchId: Maybe<Scalars['ID']['output']>;
+  comment: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  date: Scalars['String']['output'];
+  deviceId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  metrologyControleTypeId: Scalars['ID']['output'];
+  protocolNumber: Scalars['String']['output'];
+  result: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+  validUntil: Maybe<Scalars['String']['output']>;
+  verificationOrganizationId: Scalars['ID']['output'];
 };
 
 export type VerificationOrganization = {
@@ -1144,6 +1319,25 @@ export type UpdateDeviceMutation = {
   };
 };
 
+export type CreateVerificationMutationVariables = Exact<{
+  input: CreateVerificationInput;
+}>;
+
+export type CreateVerificationMutation = {
+  createVerification: {
+    __typename: 'VerificationModal';
+    id: string;
+    deviceId: string;
+    protocolNumber: string;
+    result: string;
+    date: string;
+    validUntil: string | null;
+    metrologyControleTypeId: string;
+    verificationOrganizationId: string;
+    comment: string | null;
+  };
+};
+
 export type GetEquipmentTypesListQueryVariables = Exact<{
   [key: string]: never;
 }>;
@@ -1288,6 +1482,154 @@ export type DeleteMetrologyControlTypeMutationVariables = Exact<{
 
 export type DeleteMetrologyControlTypeMutation = {
   deleteMetrologyControlType: boolean;
+};
+
+export type GetYearlySummaryQueryVariables = Exact<{
+  year: Scalars['Int']['input'];
+  companyDefaultLeadTime?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+export type GetYearlySummaryQuery = {
+  getYearlyCalendarSummary: Array<{
+    __typename: 'MonthlySummary';
+    month: string;
+    autoCount: number;
+    manualCount: number;
+  }>;
+};
+
+export type GetPlanningPoolQueryVariables = Exact<{
+  targetMonth: Scalars['String']['input'];
+  companyDefaultLeadTime?: InputMaybe<Scalars['Int']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  controlTypeId?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type GetPlanningPoolQuery = {
+  getPlanningPoolByMonth: {
+    __typename: 'PlanningPoolResponse';
+    totalCount: number;
+    items: Array<{
+      __typename: 'PlanningPoolItem';
+      id: string;
+      name: string;
+      model: string;
+      serialNumber: string;
+      validUntil: string | null;
+      suggestedMonth: string;
+      targetBatchId: string | null;
+      isManualPlacement: boolean;
+      controlType: string;
+      isOverdue: boolean;
+    }>;
+    meta: {
+      __typename: 'PoolMeta';
+      unassignedCount: number;
+      typeCounts: Array<{
+        __typename: 'PoolMetaTypeCounts';
+        typeName: string;
+        count: number;
+      }>;
+    };
+  };
+};
+
+export type GetVerificationBatchesQueryVariables = Exact<{
+  year?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type GetVerificationBatchesQuery = {
+  getVerificationBatches: Array<{
+    __typename: 'VerificationBatch';
+    id: string;
+    number: string;
+    status: string;
+    plannedDate: string;
+    comment: string | null;
+    devicesToBatches: Array<{
+      __typename: 'DeviceToBatchRelation';
+      id: string;
+      device: {
+        __typename: 'DeviceInBatch';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+        verifications: Array<{
+          __typename: 'ShortVerification';
+          id: string;
+          batchId: string | null;
+        }> | null;
+      };
+    }>;
+  }>;
+};
+
+export type GetDraftBatchesByMonthQueryVariables = Exact<{
+  plannedMonth: Scalars['String']['input'];
+}>;
+
+export type GetDraftBatchesByMonthQuery = {
+  getDraftBatchesByMonth: Array<{
+    __typename: 'DraftBatchOption';
+    id: string;
+    number: string;
+  }>;
+};
+
+export type CreateVerificationBatchMutationVariables = Exact<{
+  input: CreateBatchInput;
+}>;
+
+export type CreateVerificationBatchMutation = {
+  createVerificationBatch: {
+    __typename: 'VerificationBatch';
+    id: string;
+    number: string;
+    status: string;
+    plannedDate: string;
+  };
+};
+
+export type AddDevicesToBatchMutationVariables = Exact<{
+  batchId: Scalars['ID']['input'];
+  deviceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+export type AddDevicesToBatchMutation = { addDevicesToBatch: boolean };
+
+export type RemoveDevicesFromBatchMutationVariables = Exact<{
+  batchId: Scalars['ID']['input'];
+  deviceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+export type RemoveDevicesFromBatchMutation = {
+  removeDevicesFromBatch: boolean;
+};
+
+export type UpdateBatchStatusMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  status: Scalars['String']['input'];
+}>;
+
+export type UpdateBatchStatusMutation = {
+  updateBatchStatus: {
+    __typename: 'VerificationBatch';
+    id: string;
+    number: string;
+    status: string;
+    updatedAt: string;
+  };
+};
+
+export type DeleteVerificationBatchMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type DeleteVerificationBatchMutation = {
+  deleteVerificationBatch: boolean;
 };
 
 export type GetPrimaryStandartsListQueryVariables = Exact<{
@@ -3233,6 +3575,77 @@ export const UpdateDeviceDocument = {
   UpdateDeviceMutation,
   UpdateDeviceMutationVariables
 >;
+export const CreateVerificationDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateVerification' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'CreateVerificationInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createVerification' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'deviceId' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'protocolNumber' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'validUntil' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'metrologyControleTypeId' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'verificationOrganizationId' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CreateVerificationMutation,
+  CreateVerificationMutationVariables
+>;
 export const GetEquipmentTypesListDocument = {
   kind: 'Document',
   definitions: [
@@ -3775,6 +4188,750 @@ export const DeleteMetrologyControlTypeDocument = {
 } as unknown as DocumentNode<
   DeleteMetrologyControlTypeMutation,
   DeleteMetrologyControlTypeMutationVariables
+>;
+export const GetYearlySummaryDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetYearlySummary' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'year' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'companyDefaultLeadTime' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getYearlyCalendarSummary' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'year' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'year' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'companyDefaultLeadTime' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'companyDefaultLeadTime' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'month' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'autoCount' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'manualCount' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetYearlySummaryQuery,
+  GetYearlySummaryQueryVariables
+>;
+export const GetPlanningPoolDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetPlanningPool' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'targetMonth' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'companyDefaultLeadTime' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'offset' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'controlTypeId' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getPlanningPoolByMonth' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'targetMonth' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'targetMonth' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'companyDefaultLeadTime' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'companyDefaultLeadTime' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'offset' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'offset' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'controlTypeId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'controlTypeId' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'model' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'serialNumber' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'validUntil' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'suggestedMonth' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'targetBatchId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'isManualPlacement' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'controlType' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'isOverdue' },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'meta' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'unassignedCount' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'typeCounts' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'typeName' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'count' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetPlanningPoolQuery,
+  GetPlanningPoolQueryVariables
+>;
+export const GetVerificationBatchesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetVerificationBatches' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'year' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'status' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getVerificationBatches' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'year' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'year' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'status' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'status' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'plannedDate' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'devicesToBatches' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'device' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'verifications' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'id' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'batchId' },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetVerificationBatchesQuery,
+  GetVerificationBatchesQueryVariables
+>;
+export const GetDraftBatchesByMonthDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetDraftBatchesByMonth' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'plannedMonth' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getDraftBatchesByMonth' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'plannedMonth' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'plannedMonth' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetDraftBatchesByMonthQuery,
+  GetDraftBatchesByMonthQueryVariables
+>;
+export const CreateVerificationBatchDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateVerificationBatch' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'CreateBatchInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createVerificationBatch' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'plannedDate' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CreateVerificationBatchMutation,
+  CreateVerificationBatchMutationVariables
+>;
+export const AddDevicesToBatchDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'AddDevicesToBatch' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'batchId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'deviceIds' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'ID' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'addDevicesToBatch' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'batchId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'batchId' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'deviceIds' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'deviceIds' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  AddDevicesToBatchMutation,
+  AddDevicesToBatchMutationVariables
+>;
+export const RemoveDevicesFromBatchDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'RemoveDevicesFromBatch' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'batchId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'deviceIds' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'ID' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'removeDevicesFromBatch' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'batchId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'batchId' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'deviceIds' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'deviceIds' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  RemoveDevicesFromBatchMutation,
+  RemoveDevicesFromBatchMutationVariables
+>;
+export const UpdateBatchStatusDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateBatchStatus' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'status' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateBatchStatus' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'status' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'status' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  UpdateBatchStatusMutation,
+  UpdateBatchStatusMutationVariables
+>;
+export const DeleteVerificationBatchDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteVerificationBatch' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteVerificationBatch' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  DeleteVerificationBatchMutation,
+  DeleteVerificationBatchMutationVariables
 >;
 export const GetPrimaryStandartsListDocument = {
   kind: 'Document',

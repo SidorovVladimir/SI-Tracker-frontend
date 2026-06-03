@@ -38,6 +38,8 @@ import VerificationOrganizationsPage from './pages/admin/VerificationOrganizatio
 import CreateVerificationOrganizationPage from './pages/admin/CreateVerificationOrganizationPage';
 import AuditLogPage from './pages/admin/AuditLogPage';
 
+import { VerificationPageContainer } from './pages/VerificationPageContainer';
+
 function App() {
   return (
     <>
@@ -45,16 +47,19 @@ function App() {
       <Routes>
         <Route element={<ProtectedRoute />}>
           <Route path={routes.home()} element={<HomePage />} />
-          <Route element={<MainLayout />}>
-            <Route path={routes.profile()} element={<ProfilePage />} />
+          <Route path={routes.profile()} element={<ProfilePage />} />
 
+          <Route
+            element={<ProtectedRoute allowedRoles={['admin', 'superadmin']} />}
+          >
             <Route
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'superadmin']} />
-              }
-            >
+              path={routes.planning()}
+              element={<VerificationPageContainer />}
+            />
+            <Route element={<MainLayout />}>
               <Route path={routes.admin.root()} element={<AdminPage />}>
                 <Route path={routes.admin.users()} element={<UsersPage />} />
+
                 <Route
                   path={routes.admin.editUser(':userId')}
                   element={<EditUserPage />}

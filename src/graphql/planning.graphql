@@ -1,0 +1,108 @@
+query GetYearlySummary($year: Int!, $companyDefaultLeadTime: Int) {
+  getYearlyCalendarSummary(
+    year: $year
+    companyDefaultLeadTime: $companyDefaultLeadTime
+  ) {
+    month
+    autoCount
+    manualCount
+  }
+}
+
+query GetPlanningPool(
+  $targetMonth: String!
+  $companyDefaultLeadTime: Int
+  $limit: Int
+  $offset: Int
+  $controlTypeId: String
+) {
+  getPlanningPoolByMonth(
+    targetMonth: $targetMonth
+    companyDefaultLeadTime: $companyDefaultLeadTime
+    limit: $limit
+    offset: $offset
+    controlTypeId: $controlTypeId
+  ) {
+    items {
+      # Запрашиваем внутренний массив приборов
+      id
+      name
+      model
+      serialNumber
+      validUntil
+      suggestedMonth
+      targetBatchId
+      isManualPlacement
+      controlType
+      isOverdue
+    }
+    totalCount
+    meta {
+      unassignedCount
+      typeCounts {
+        typeName
+        count
+      }
+    }
+  }
+}
+
+query GetVerificationBatches($year: Int, $status: String) {
+  getVerificationBatches(year: $year, status: $status) {
+    id
+    number
+    status
+    plannedDate
+    comment
+    devicesToBatches {
+      id
+      device {
+        id
+        name
+        model
+        serialNumber
+        verifications {
+          id
+          batchId
+        }
+      }
+    }
+  }
+}
+
+query GetDraftBatchesByMonth($plannedMonth: String!) {
+  getDraftBatchesByMonth(plannedMonth: $plannedMonth) {
+    id
+    number
+  }
+}
+
+mutation CreateVerificationBatch($input: CreateBatchInput!) {
+  createVerificationBatch(input: $input) {
+    id
+    number
+    status
+    plannedDate
+  }
+}
+
+mutation AddDevicesToBatch($batchId: ID!, $deviceIds: [ID!]!) {
+  addDevicesToBatch(batchId: $batchId, deviceIds: $deviceIds)
+}
+
+mutation RemoveDevicesFromBatch($batchId: ID!, $deviceIds: [ID!]!) {
+  removeDevicesFromBatch(batchId: $batchId, deviceIds: $deviceIds)
+}
+
+mutation UpdateBatchStatus($id: ID!, $status: String!) {
+  updateBatchStatus(id: $id, status: $status) {
+    id
+    number
+    status
+    updatedAt
+  }
+}
+
+mutation DeleteVerificationBatch($id: ID!) {
+  deleteVerificationBatch(id: $id)
+}

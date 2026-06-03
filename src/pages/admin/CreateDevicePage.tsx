@@ -532,7 +532,6 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
                       <TextField
                         type="date"
                         label="Действует до"
-                        required
                         value={verification.validUntil}
                         onChange={(e) =>
                           handleVerificationChange(

@@ -3,6 +3,7 @@ export default {
   register: () => '/register',
   home: () => '/',
   profile: () => '/profile',
+  planning: () => '/verification-planning',
   admin: {
     root: () => '/admin',
     users: () => '/admin/users',

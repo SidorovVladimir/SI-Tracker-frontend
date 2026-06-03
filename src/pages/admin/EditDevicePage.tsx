@@ -675,7 +675,6 @@ function UserForm({
                       <TextField
                         type="date"
                         label="Действует до"
-                        required
                         value={verification.validUntil.split('T')[0]}
                         onChange={(e) =>
                           handleVerificationChange(

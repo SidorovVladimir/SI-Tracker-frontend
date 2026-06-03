@@ -204,3 +204,17 @@ mutation UpdateDevice($id: ID!, $input: UpdateDeviceInput!) {
     updatedAt
   }
 }
+
+mutation CreateVerification($input: CreateVerificationInput!) {
+  createVerification(input: $input) {
+    id
+    deviceId
+    protocolNumber
+    result
+    date
+    validUntil
+    metrologyControleTypeId
+    verificationOrganizationId
+    comment
+  }
+}
