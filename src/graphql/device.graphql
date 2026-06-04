@@ -48,60 +48,77 @@ query GetDevicesList {
   }
 }
 
-query GetDevicesWithRelationsList {
-  devicesWithRelations {
-    id
-    name
-    model
-    serialNumber
-    releaseDate
-    grsiNumber
-    measurementRange
-    accuracy
-    inventoryNumber
-    receiptDate
-    manufacturer
-    verificationInterval
-    archived
-    nomenclature
-    comment
-    status {
-      name
-    }
-    productionSite {
-      name
-      city {
-        name
-      }
-      company {
-        name
-      }
-    }
-    verifications {
+query GetDevicesWithRelationsList(
+  $limit: Int!
+  $offset: Int!
+  $filter: DeviceFilterInput
+) {
+  devicesWithRelations(limit: $limit, offset: $offset, filter: $filter) {
+    items {
       id
-      date
-      validUntil
-      result
-      protocolNumber
-      organization
-      comment
-      documentUrl
-      metrologyControleType {
+      name
+      model
+      serialNumber
+      releaseDate
+      grsiNumber
+      # measurementRange
+      # accuracy
+      inventoryNumber
+      receiptDate
+      manufacturer
+      # verificationInterval
+      # archived
+      # nomenclature
+      # comment
+      status {
         name
       }
-      verificationOrganization {
+      productionSite {
         name
+        city {
+          name
+        }
+        company {
+          name
+        }
       }
+      # verifications {
+      #  id
+      #  date
+      #  validUntil
+      #  result
+      # protocolNumber
+      # organization
+      # comment
+      # documentUrl
+      # metrologyControleType {
+      #   name
+      # }
+      # verificationOrganization {
+      #   name
+      # }
+      #}
+      latestVerification {
+        id
+        date
+        validUntil
+        protocolNumber
+        metrologyControleType {
+          name
+        }
+      }
+      # scopes {
+      #   name
+      #  }
+      #  primaryStandarts {
+      #    name
+      #  }
+      # measurementTypes {
+      #   name
+      #  }
     }
-    scopes {
-      name
-    }
-    primaryStandarts {
-      name
-    }
-    measurementTypes {
-      name
-    }
+    # 2. Запрашиваем общее количество записей с учетом фильтров для пагинатора
+    totalCount
   }
 }
 

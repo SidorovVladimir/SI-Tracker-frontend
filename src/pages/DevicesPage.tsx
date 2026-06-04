@@ -1,7 +1,12 @@
 import { useQuery } from '@apollo/client/react';
 import {
+  GetCompaniesDocument,
   GetDevicesWithRelationsListDocument,
   GetDevicesWithRelationsListQuery,
+  GetMetrologyControlTypesListDocument,
+  GetProductionSitesDocument,
+  GetSitiesDocument,
+  GetStatusListDocument,
 } from '../graphql/types/__generated__/graphql';
 import {
   Box,
@@ -31,7 +36,8 @@ import { Link } from 'react-router';
 import React from 'react';
 import routes from '../utils/routes';
 
-type Device = GetDevicesWithRelationsListQuery['devicesWithRelations'][0];
+type Device =
+  GetDevicesWithRelationsListQuery['devicesWithRelations']['items'][0];
 const FILTERS_STORAGE_KEY = 'devices_filters_v1';
 interface FilterState {
   city: string;
@@ -82,6 +88,10 @@ export default function DevicesPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const [filters, setFilters] = useState<FilterState>(loadFilters);
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 25,
+  });
 
   useEffect(() => {
     localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
@@ -96,117 +106,154 @@ export default function DevicesPage() {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
-  const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
+  // const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
+  const { data, loading, refetch } = useQuery(
+    GetDevicesWithRelationsListDocument,
+    {
+      variables: {
+        limit: paginationModel.pageSize,
+        offset: paginationModel.page * paginationModel.pageSize,
+        filter: {
+          city: filters.city || undefined,
+          company: filters.company || undefined,
+          productionSite: filters.productionSite || undefined,
+          deviceName: filters.deviceName || undefined,
+          serialNumber: filters.serialNumber || undefined,
+          status: filters.status || undefined,
+          metrologyControle: filters.metrologyControle || undefined,
+          dateStart: filters.dateStart || undefined,
+          dateEnd: filters.dateEnd || undefined,
+        },
+      },
+      fetchPolicy: 'network-only',
+      // fetchPolicy: 'cache-and-network',
+      notifyOnNetworkStatusChange: true,
+    }
+  );
+
+  const { data: productionSiteData } = useQuery(GetProductionSitesDocument);
+  const { data: statusesData } = useQuery(GetStatusListDocument);
+
+  const { data: metrologyControlTypeData } = useQuery(
+    GetMetrologyControlTypesListDocument
+  );
+
+  const { data: companiesData } = useQuery(GetCompaniesDocument);
+  const { data: citiesData } = useQuery(GetSitiesDocument);
+  // const rows = useMemo(() => {
+  //   const rawDevices = (data?.devicesWithRelations as Device[]) || [];
+
+  //   return rawDevices
+  //     .map((device) => {
+  //       const lastVerification =
+  //         device.verifications?.length > 0
+  //           ? device.verifications.reduce((prev, curr) =>
+  //               Number(curr.date) > Number(prev.date) ? curr : prev
+  //             )
+  //           : null;
+  //       return {
+  //         ...device,
+  //         latestVerification: lastVerification,
+  //       };
+  //     })
+  //     .filter((row) => {
+  //       const matchesCity =
+  //         !filters.city || row.productionSite?.city?.name === filters.city;
+
+  //       const matchesCompany =
+  //         !filters.company ||
+  //         row.productionSite?.company?.name
+  //           ?.toLowerCase()
+  //           .includes(filters.company.toLowerCase());
+
+  //       const matchesSub =
+  //         !filters.productionSite ||
+  //         row.productionSite?.name
+  //           .toLowerCase()
+  //           .includes(filters.productionSite.toLowerCase());
+
+  //       const matchesName =
+  //         !filters.deviceName ||
+  //         row.name.toLowerCase().includes(filters.deviceName.toLowerCase());
+
+  //       const matchesSerialNumber =
+  //         !filters.serialNumber ||
+  //         row.serialNumber
+  //           .toLowerCase()
+  //           .includes(filters.serialNumber.toLowerCase());
+
+  //       const matchesStatus =
+  //         !filters.status || row.status?.name === filters.status;
+
+  //       const vDate = row.latestVerification?.validUntil
+  //         ? new Date(Number(row.latestVerification.validUntil))
+  //         : null;
+  //       const matchesDateStart =
+  //         !filters.dateStart || (vDate && vDate >= new Date(filters.dateStart));
+  //       const matchesDateEnd =
+  //         !filters.dateEnd || (vDate && vDate <= new Date(filters.dateEnd));
+
+  //       const matchesMetrologyControle =
+  //         !filters.metrologyControle ||
+  //         row.latestVerification?.metrologyControleType?.name ===
+  //           filters.metrologyControle;
+
+  //       return (
+  //         matchesName &&
+  //         matchesSerialNumber &&
+  //         matchesCity &&
+  //         matchesCompany &&
+  //         matchesSub &&
+  //         matchesStatus &&
+  //         matchesDateStart &&
+  //         matchesDateEnd &&
+  //         matchesMetrologyControle
+  //       );
+  //     });
+  // }, [data, filters]);
+
+  // const rows = useMemo(() => {
+  //   const response = data?.devicesWithRelations;
+  //   const rawDevices = response?.items || [];
+
+  //   return rawDevices.map((device) => ({
+  //     ...device,
+  //     // Бэкенд возвращает в массиве строго 1 последнюю поверку (или 0 штук)
+  //     latestVerification: device.verifications?.[0] || null,
+  //   }));
+  // }, [data]);
 
   const rows = useMemo(() => {
-    const rawDevices = (data?.devicesWithRelations as Device[]) || [];
+    const response = data?.devicesWithRelations;
+    return response?.items || [];
+  }, [data]);
 
-    return rawDevices
-      .map((device) => {
-        const lastVerification =
-          device.verifications?.length > 0
-            ? device.verifications.reduce((prev, curr) =>
-                Number(curr.date) > Number(prev.date) ? curr : prev
-              )
-            : null;
-        return {
-          ...device,
-          latestVerification: lastVerification,
-        };
-      })
-      .filter((row) => {
-        const matchesCity =
-          !filters.city || row.productionSite?.city?.name === filters.city;
-
-        const matchesCompany =
-          !filters.company ||
-          row.productionSite?.company?.name
-            ?.toLowerCase()
-            .includes(filters.company.toLowerCase());
-
-        const matchesSub =
-          !filters.productionSite ||
-          row.productionSite?.name
-            .toLowerCase()
-            .includes(filters.productionSite.toLowerCase());
-
-        const matchesName =
-          !filters.deviceName ||
-          row.name.toLowerCase().includes(filters.deviceName.toLowerCase());
-
-        const matchesSerialNumber =
-          !filters.serialNumber ||
-          row.serialNumber
-            .toLowerCase()
-            .includes(filters.serialNumber.toLowerCase());
-
-        const matchesStatus =
-          !filters.status || row.status?.name === filters.status;
-
-        const vDate = row.latestVerification?.validUntil
-          ? new Date(Number(row.latestVerification.validUntil))
-          : null;
-        const matchesDateStart =
-          !filters.dateStart || (vDate && vDate >= new Date(filters.dateStart));
-        const matchesDateEnd =
-          !filters.dateEnd || (vDate && vDate <= new Date(filters.dateEnd));
-
-        const matchesMetrologyControle =
-          !filters.metrologyControle ||
-          row.latestVerification?.metrologyControleType?.name ===
-            filters.metrologyControle;
-
-        return (
-          matchesName &&
-          matchesSerialNumber &&
-          matchesCity &&
-          matchesCompany &&
-          matchesSub &&
-          matchesStatus &&
-          matchesDateStart &&
-          matchesDateEnd &&
-          matchesMetrologyControle
-        );
-      });
-  }, [data, filters]);
+  const totalCount = data?.devicesWithRelations?.totalCount || 0;
 
   const cities = useMemo(() => {
-    const raw = (data?.devicesWithRelations as Device[]) || [];
-    return Array.from(
-      new Set(raw.map((d) => d.productionSite?.city?.name).filter(Boolean))
-    ).sort();
-  }, [data]);
+    const raw = citiesData?.cities || [];
+    return [...raw].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }, [citiesData]);
 
   const companies = useMemo(() => {
-    const raw = (data?.devicesWithRelations as Device[]) || [];
-    return Array.from(
-      new Set(raw.map((d) => d.productionSite?.company?.name).filter(Boolean))
-    ).sort();
-  }, [data]);
-
-  const statuses = useMemo(() => {
-    const raw = (data?.devicesWithRelations as Device[]) || [];
-    return Array.from(
-      new Set(raw.map((d) => d.status?.name).filter(Boolean))
-    ).sort();
-  }, [data]);
-
-  const metrologyControleTypes = useMemo(() => {
-    return Array.from(
-      new Set(
-        rows
-          .map((d) => d.latestVerification?.metrologyControleType?.name)
-          .filter(Boolean)
-      )
-    ).sort();
-  }, [data]);
+    const raw = companiesData?.companies || [];
+    return [...raw].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }, [companiesData]);
 
   const productionSite = useMemo(() => {
-    const raw = (data?.devicesWithRelations as Device[]) || [];
-    return Array.from(
-      new Set(raw.map((d) => d.productionSite?.name).filter(Boolean))
-    ).sort();
-  }, [data]);
+    const raw = productionSiteData?.productionSites || [];
+    return Array.from(new Set(raw.map((p) => p.name).filter(Boolean))).sort();
+  }, [productionSiteData]);
+
+  const statuses = useMemo(() => {
+    const raw = statusesData?.statuses || [];
+    return [...raw].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }, [statusesData]);
+
+  const metrologyControleTypes = useMemo(() => {
+    const raw = metrologyControlTypeData?.metrologyControlTypes || [];
+    return [...raw].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }, [metrologyControlTypeData]);
 
   const [viewMode, setViewMode] = useState<'info' | 'create' | 'edit' | null>(
     null
@@ -508,9 +555,9 @@ export default function DevicesPage() {
                       sx={{ minWidth: 150 }}
                     >
                       <option value=""></option>
-                      {cities.map((name) => (
-                        <option key={name} value={name}>
-                          {name}
+                      {cities.map((city: any) => (
+                        <option key={city.id || city.name} value={city.name}>
+                          {city.name}
                         </option>
                       ))}
                     </TextField>
@@ -528,9 +575,12 @@ export default function DevicesPage() {
                       sx={{ minWidth: 150 }}
                     >
                       <option value=""></option>
-                      {companies.map((name) => (
-                        <option key={name} value={name}>
-                          {name}
+                      {companies.map((company: any) => (
+                        <option
+                          key={company.id || company.name}
+                          value={company.name}
+                        >
+                          {company.name}
                         </option>
                       ))}
                     </TextField>
@@ -598,9 +648,9 @@ export default function DevicesPage() {
                       }}
                     >
                       <option value=""></option>
-                      {metrologyControleTypes.map((name) => (
-                        <option key={name} value={name}>
-                          {name}
+                      {metrologyControleTypes.map((type: any) => (
+                        <option key={type.id || type.name} value={type.name}>
+                          {type.name}
                         </option>
                       ))}
                     </TextField>
@@ -621,9 +671,12 @@ export default function DevicesPage() {
                       }}
                     >
                       <option value=""></option>
-                      {statuses.map((name) => (
-                        <option key={name} value={name}>
-                          {name}
+                      {statuses.map((status: any) => (
+                        <option
+                          key={status.id || status.name}
+                          value={status.name}
+                        >
+                          {status.name}
                         </option>
                       ))}
                     </TextField>
@@ -707,9 +760,9 @@ export default function DevicesPage() {
                   sx={{ minWidth: 150 }}
                 >
                   <option value=""></option>
-                  {cities.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
+                  {cities.map((city: any) => (
+                    <option key={city.id || city.name} value={city.name}>
+                      {city.name}
                     </option>
                   ))}
                 </TextField>
@@ -726,9 +779,12 @@ export default function DevicesPage() {
                   sx={{ minWidth: 150, maxWidth: 160 }}
                 >
                   <option value=""></option>
-                  {companies.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
+                  {companies.map((company: any) => (
+                    <option
+                      key={company.id || company.name}
+                      value={company.name}
+                    >
+                      {company.name}
                     </option>
                   ))}
                 </TextField>
@@ -796,9 +852,9 @@ export default function DevicesPage() {
                   }}
                 >
                   <option value=""></option>
-                  {metrologyControleTypes.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
+                  {metrologyControleTypes.map((type: any) => (
+                    <option key={type.id || type.name} value={type.name}>
+                      {type.name}
                     </option>
                   ))}
                 </TextField>
@@ -816,9 +872,9 @@ export default function DevicesPage() {
                   }}
                 >
                   <option value=""></option>
-                  {statuses.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
+                  {statuses.map((status: any) => (
+                    <option key={status.id || status.name} value={status.name}>
+                      {status.name}
                     </option>
                   ))}
                 </TextField>
@@ -868,10 +924,21 @@ export default function DevicesPage() {
               rows={rows}
               columns={columns}
               loading={loading}
-              pagination
+              // pagination
+              // ----
+              paginationMode="server"
+              // rowCount={totalCount}
+              rowCount={loading ? undefined : totalCount}
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel}
+              // onPaginationModelChange={(newModel) => {
+              //   // Жестко фиксируем изменение стейта в памяти React
+              //   setPaginationModel(newModel);
+              // }}
+              // -------
               // showCellVerticalBorder
               density="compact"
-              // pageSizeOptions={[10, 25, 50]}
+              pageSizeOptions={[10, 25, 50]}
               onRowClick={handleRowClick}
               disableColumnSorting
               disableColumnFilter
@@ -952,12 +1019,16 @@ export default function DevicesPage() {
                 }}
               >
                 {viewMode === 'create' ? (
-                  <CreateDevicePage closeDetails={closeDetails} />
+                  <CreateDevicePage
+                    closeDetails={closeDetails}
+                    refetchDevice={refetch}
+                  />
                 ) : viewMode === 'edit' ? (
                   <EditDevicePage
                     deviceId={selectedDeviceId!}
                     closeDetails={() => setViewMode('info')}
                     close={closeDetails}
+                    refetchDevice={refetch}
                   />
                 ) : (
                   <DeviceCard

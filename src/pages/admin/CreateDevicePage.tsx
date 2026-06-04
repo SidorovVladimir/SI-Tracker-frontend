@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 import {
   CreateDeviceDocument,
-  GetDevicesWithRelationsListDocument,
+  // GetDevicesWithRelationsListDocument,
   GetEquipmentTypesListDocument,
   GetMeasurementTypesListDocument,
   GetMetrologyControlTypesListDocument,
@@ -38,8 +38,11 @@ import MeasurementAutocomplete from '../../components/MeasurementAutocomplete';
 import VerificationOrganizationTextField from '../../components/VerificationOrganizationTextField';
 import MetrologyControlTypeTextField from '../../components/MetrologyControlTypeTextField';
 
-export default function CreateDevicePage(props: { closeDetails: () => void }) {
-  const { closeDetails } = props;
+export default function CreateDevicePage(props: {
+  closeDetails: () => void;
+  refetchDevice: () => void;
+}) {
+  const { closeDetails, refetchDevice } = props;
   const { data: productionSiteData } = useQuery(
     GetProductionSitesForSelectDocument
   );
@@ -179,12 +182,13 @@ export default function CreateDevicePage(props: { closeDetails: () => void }) {
   const [createDevice, { loading: creating }] = useMutation(
     CreateDeviceDocument,
     {
-      refetchQueries: [{ query: GetDevicesWithRelationsListDocument }],
-      awaitRefetchQueries: true,
+      // refetchQueries: [{ query: GetDevicesWithRelationsListDocument }],
+      // awaitRefetchQueries: true,
       onCompleted: () => {
         enqueueSnackbar('Прибор успешно создан', {
           variant: 'success',
         });
+        refetchDevice();
         closeDetails();
       },
       onError: (error) => {

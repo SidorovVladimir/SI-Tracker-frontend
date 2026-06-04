@@ -28,7 +28,13 @@ export type Scalars = {
   Float: { input: number; output: number };
 };
 
-export type AuditAction = 'create' | 'delete' | 'update';
+export type AuditAction =
+  | 'assign_batch'
+  | 'create'
+  | 'delete'
+  | 'remove_batch'
+  | 'update'
+  | 'verify';
 
 export type AuditLog = {
   __typename: 'AuditLog';
@@ -195,6 +201,18 @@ export type Device = {
   verificationInterval: Maybe<Scalars['Int']['output']>;
 };
 
+export type DeviceFilterInput = {
+  city?: InputMaybe<Scalars['String']['input']>;
+  company?: InputMaybe<Scalars['String']['input']>;
+  dateEnd?: InputMaybe<Scalars['String']['input']>;
+  dateStart?: InputMaybe<Scalars['String']['input']>;
+  deviceName?: InputMaybe<Scalars['String']['input']>;
+  metrologyControle?: InputMaybe<Scalars['String']['input']>;
+  productionSite?: InputMaybe<Scalars['String']['input']>;
+  serialNumber?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type DeviceInBatch = {
   __typename: 'DeviceInBatch';
   id: Scalars['ID']['output'];
@@ -202,6 +220,23 @@ export type DeviceInBatch = {
   name: Scalars['String']['output'];
   serialNumber: Scalars['String']['output'];
   verifications: Maybe<Array<ShortVerification>>;
+};
+
+export type DeviceTableItem = {
+  __typename: 'DeviceTableItem';
+  grsiNumber: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  inventoryNumber: Maybe<Scalars['String']['output']>;
+  latestVerification: Maybe<VerificationTableItem>;
+  manufacturer: Maybe<Scalars['String']['output']>;
+  model: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  productionSite: ProductionSiteRelation;
+  receiptDate: Maybe<Scalars['String']['output']>;
+  releaseDate: Maybe<Scalars['String']['output']>;
+  serialNumber: Scalars['String']['output'];
+  status: Status;
+  verificationInterval: Maybe<Scalars['Int']['output']>;
 };
 
 export type DeviceToBatchRelation = {
@@ -235,6 +270,12 @@ export type DeviceWithRelations = {
   status: Status;
   verificationInterval: Maybe<Scalars['Int']['output']>;
   verifications: Array<VerificationRelation>;
+};
+
+export type DevicesWithRelationsResponse = {
+  __typename: 'DevicesWithRelationsResponse';
+  items: Array<DeviceTableItem>;
+  totalCount: Scalars['Int']['output'];
 };
 
 export type DraftBatchOption = {
@@ -586,10 +627,10 @@ export type Query = {
   city: City;
   companies: Array<Company>;
   company: Company;
-  device: DeviceWithRelations;
+  device: Maybe<DeviceWithRelations>;
   deviceAuditLogs: AuditLogsResponse;
   devices: Array<Device>;
-  devicesWithRelations: Array<DeviceWithRelations>;
+  devicesWithRelations: DevicesWithRelationsResponse;
   equipmentType: EquipmentType;
   equipmentTypes: Array<EquipmentType>;
   getDraftBatchesByMonth: Array<DraftBatchOption>;
@@ -632,6 +673,12 @@ export type QueryDeviceAuditLogsArgs = {
   filter?: InputMaybe<AuditLogFilter>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QueryDevicesWithRelationsArgs = {
+  filter?: InputMaybe<DeviceFilterInput>;
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
 };
 
 export type QueryEquipmentTypeArgs = {
@@ -832,6 +879,7 @@ export type VerificationInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   date?: InputMaybe<Scalars['String']['input']>;
   documentUrl?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
   metrologyControleTypeId?: InputMaybe<Scalars['ID']['input']>;
   organization?: InputMaybe<Scalars['String']['input']>;
   protocolNumber?: InputMaybe<Scalars['String']['input']>;
@@ -879,6 +927,15 @@ export type VerificationRelation = {
   updatedAt: Scalars['String']['output'];
   validUntil: Maybe<Scalars['String']['output']>;
   verificationOrganization: Maybe<VerificationOrganization>;
+};
+
+export type VerificationTableItem = {
+  __typename: 'VerificationTableItem';
+  date: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  metrologyControleType: Maybe<MetrologyControlType>;
+  protocolNumber: Maybe<Scalars['String']['output']>;
+  validUntil: Maybe<Scalars['String']['output']>;
 };
 
 export type GetDeviceAuditLogsQueryVariables = Exact<{
@@ -1158,57 +1215,46 @@ export type GetDevicesListQuery = {
 };
 
 export type GetDevicesWithRelationsListQueryVariables = Exact<{
-  [key: string]: never;
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+  filter?: InputMaybe<DeviceFilterInput>;
 }>;
 
 export type GetDevicesWithRelationsListQuery = {
-  devicesWithRelations: Array<{
-    __typename: 'DeviceWithRelations';
-    id: string;
-    name: string;
-    model: string;
-    serialNumber: string;
-    releaseDate: string | null;
-    grsiNumber: string | null;
-    measurementRange: string | null;
-    accuracy: string | null;
-    inventoryNumber: string | null;
-    receiptDate: string | null;
-    manufacturer: string | null;
-    verificationInterval: number | null;
-    archived: boolean;
-    nomenclature: string | null;
-    comment: string | null;
-    status: { __typename: 'Status'; name: string };
-    productionSite: {
-      __typename: 'ProductionSiteRelation';
-      name: string;
-      city: { __typename: 'City'; name: string };
-      company: { __typename: 'Company'; name: string };
-    };
-    verifications: Array<{
-      __typename: 'VerificationRelation';
+  devicesWithRelations: {
+    __typename: 'DevicesWithRelationsResponse';
+    totalCount: number;
+    items: Array<{
+      __typename: 'DeviceTableItem';
       id: string;
-      date: string | null;
-      validUntil: string | null;
-      result: string | null;
-      protocolNumber: string | null;
-      organization: string | null;
-      comment: string | null;
-      documentUrl: string | null;
-      metrologyControleType: {
-        __typename: 'MetrologyControlType';
+      name: string;
+      model: string;
+      serialNumber: string;
+      releaseDate: string | null;
+      grsiNumber: string | null;
+      inventoryNumber: string | null;
+      receiptDate: string | null;
+      manufacturer: string | null;
+      status: { __typename: 'Status'; name: string };
+      productionSite: {
+        __typename: 'ProductionSiteRelation';
         name: string;
-      } | null;
-      verificationOrganization: {
-        __typename: 'VerificationOrganization';
-        name: string;
+        city: { __typename: 'City'; name: string };
+        company: { __typename: 'Company'; name: string };
+      };
+      latestVerification: {
+        __typename: 'VerificationTableItem';
+        id: string;
+        date: string | null;
+        validUntil: string | null;
+        protocolNumber: string | null;
+        metrologyControleType: {
+          __typename: 'MetrologyControlType';
+          name: string;
+        } | null;
       } | null;
     }>;
-    scopes: Array<{ __typename: 'Scope'; name: string }>;
-    primaryStandarts: Array<{ __typename: 'PrimaryStandart'; name: string }>;
-    measurementTypes: Array<{ __typename: 'MeasurementType'; name: string }>;
-  }>;
+  };
 };
 
 export type GetDeviceWithRelationQueryVariables = Exact<{
@@ -1279,7 +1325,7 @@ export type GetDeviceWithRelationQuery = {
       id: string;
       name: string;
     }>;
-  };
+  } | null;
 };
 
 export type DeleteDeviceMutationVariables = Exact<{
@@ -2971,129 +3017,112 @@ export const GetDevicesWithRelationsListDocument = {
       kind: 'OperationDefinition',
       operation: 'query',
       name: { kind: 'Name', value: 'GetDevicesWithRelationsList' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'offset' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'filter' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'DeviceFilterInput' },
+          },
+        },
+      ],
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'devicesWithRelations' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'offset' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'offset' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'filter' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'filter' },
+                },
+              },
+            ],
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'model' } },
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'serialNumber' },
-                },
-                { kind: 'Field', name: { kind: 'Name', value: 'releaseDate' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'grsiNumber' } },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'measurementRange' },
-                },
-                { kind: 'Field', name: { kind: 'Name', value: 'accuracy' } },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'inventoryNumber' },
-                },
-                { kind: 'Field', name: { kind: 'Name', value: 'receiptDate' } },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'manufacturer' },
-                },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'verificationInterval' },
-                },
-                { kind: 'Field', name: { kind: 'Name', value: 'archived' } },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'nomenclature' },
-                },
-                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'status' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                    ],
-                  },
-                },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'productionSite' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'city' },
-                        selectionSet: {
-                          kind: 'SelectionSet',
-                          selections: [
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'name' },
-                            },
-                          ],
-                        },
-                      },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'company' },
-                        selectionSet: {
-                          kind: 'SelectionSet',
-                          selections: [
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'name' },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'verifications' },
+                  name: { kind: 'Name', value: 'items' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
                       { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                      { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'model' } },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'validUntil' },
+                        name: { kind: 'Name', value: 'serialNumber' },
                       },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'releaseDate' },
                       },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'protocolNumber' },
+                        name: { kind: 'Name', value: 'grsiNumber' },
                       },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'organization' },
+                        name: { kind: 'Name', value: 'inventoryNumber' },
                       },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'comment' },
+                        name: { kind: 'Name', value: 'receiptDate' },
                       },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'documentUrl' },
+                        name: { kind: 'Name', value: 'manufacturer' },
                       },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'metrologyControleType' },
+                        name: { kind: 'Name', value: 'status' },
                         selectionSet: {
                           kind: 'SelectionSet',
                           selections: [
@@ -3106,10 +3135,7 @@ export const GetDevicesWithRelationsListDocument = {
                       },
                       {
                         kind: 'Field',
-                        name: {
-                          kind: 'Name',
-                          value: 'verificationOrganization',
-                        },
+                        name: { kind: 'Name', value: 'productionSite' },
                         selectionSet: {
                           kind: 'SelectionSet',
                           selections: [
@@ -3117,42 +3143,80 @@ export const GetDevicesWithRelationsListDocument = {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'name' },
                             },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'city' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'name' },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'company' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'name' },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'latestVerification' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'date' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'validUntil' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'protocolNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: {
+                                kind: 'Name',
+                                value: 'metrologyControleType',
+                              },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'name' },
+                                  },
+                                ],
+                              },
+                            },
                           ],
                         },
                       },
                     ],
                   },
                 },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'scopes' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                    ],
-                  },
-                },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'primaryStandarts' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                    ],
-                  },
-                },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'measurementTypes' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                    ],
-                  },
-                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
               ],
             },
           },

@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useState } from 'react';
 import {
   DeleteDeviceDocument,
-  GetDevicesWithRelationsListDocument,
+  // GetDevicesWithRelationsListDocument,
   GetDeviceWithRelationDocument,
   GetDeviceWithRelationQuery,
   GetEquipmentTypesListDocument,
@@ -59,8 +59,9 @@ export default function EditDevicePage(props: {
   deviceId: string;
   closeDetails: () => void;
   close: () => void;
+  refetchDevice: () => void;
 }) {
-  const { deviceId, closeDetails, close } = props;
+  const { deviceId, closeDetails, close, refetchDevice } = props;
   const {
     data: deviceData,
     loading,
@@ -92,6 +93,7 @@ export default function EditDevicePage(props: {
       device={deviceData.device}
       closeDetails={closeDetails}
       close={close}
+      refetchDevice={refetchDevice}
     />
   );
 }
@@ -100,10 +102,12 @@ function UserForm({
   device,
   closeDetails,
   close,
+  refetchDevice,
 }: {
   device: NonNullable<GetDeviceWithRelationQuery['device']>;
   closeDetails: () => void;
   close: () => void;
+  refetchDevice: () => void;
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -292,12 +296,13 @@ function UserForm({
   const [updateDevice, { loading: updating }] = useMutation(
     UpdateDeviceDocument,
     {
-      refetchQueries: [{ query: GetDevicesWithRelationsListDocument }],
-      awaitRefetchQueries: true,
+      // refetchQueries: [{ query: GetDevicesWithRelationsListDocument }],
+      // awaitRefetchQueries: true,
       onCompleted: () => {
         enqueueSnackbar('Прибор успешно обновлен', {
           variant: 'success',
         });
+        refetchDevice();
         closeDetails();
       },
       onError: (error) => {
@@ -311,12 +316,13 @@ function UserForm({
   const [deleteDevice, { loading: deleting }] = useMutation(
     DeleteDeviceDocument,
     {
-      refetchQueries: [{ query: GetDevicesWithRelationsListDocument }],
-      awaitRefetchQueries: true,
+      // refetchQueries: [{ query: GetDevicesWithRelationsListDocument }],
+      // awaitRefetchQueries: true,
       onCompleted: () => {
         enqueueSnackbar('Прибор успешно удален', {
           variant: 'success',
         });
+        refetchDevice();
         close();
       },
       onError: (error) => {
@@ -351,6 +357,7 @@ function UserForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const verificationsInput = verifications.map((v) => ({
+      id: v.id.startsWith('new-') ? null : v.id,
       date: v.date || null,
       validUntil: v.validUntil || null,
       result: v.result || null,

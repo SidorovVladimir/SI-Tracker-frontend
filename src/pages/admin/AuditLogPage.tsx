@@ -118,7 +118,19 @@ export default function AuditLogPage() {
           >
             <MenuItem value="all">Все действия</MenuItem>
             <MenuItem value="create">Только создания</MenuItem>
-            <MenuItem value="update">Только изменения</MenuItem>
+            <MenuItem value="update">Только изменения паспорта</MenuItem>
+
+            {/* 🌟 НОВЫЕ СИСТЕМНЫЕ МЕНЮ-ПУНКТЫ ФИЛЬТРАЦИИ ПЛАНИРОВАНИЯ: */}
+            <MenuItem value="assign_batch">
+              Добавление в партии поверок
+            </MenuItem>
+            <MenuItem value="remove_batch">
+              Исключение из партий поверок
+            </MenuItem>
+            <MenuItem value="verify">
+              Фиксация результатов поверок/контроля
+            </MenuItem>
+
             <MenuItem value="delete">Только удаления</MenuItem>
           </Select>
         </FormControl>

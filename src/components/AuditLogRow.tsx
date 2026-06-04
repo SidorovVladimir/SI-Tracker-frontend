@@ -17,17 +17,37 @@ export function AuditLogRow({ log, onDelete }: any) {
   const { user } = useAuth();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
+  // const actionConfig: Record<
+  //   'create' | 'update' | 'delete',
+  //   { color: 'success' | 'info' | 'error'; label: string }
+  // > = {
+  //   create: { color: 'success' as const, label: 'Создание' },
+  //   update: { color: 'info' as const, label: 'Изменение' },
+  //   delete: { color: 'error' as const, label: 'Удаление' },
+  // };
   const actionConfig: Record<
-    'create' | 'update' | 'delete',
-    { color: 'success' | 'info' | 'error'; label: string }
+    'create' | 'update' | 'delete' | 'assign_batch' | 'remove_batch' | 'verify',
+    {
+      color: 'success' | 'info' | 'error' | 'secondary' | 'warning' | 'primary';
+      label: string;
+    }
   > = {
     create: { color: 'success' as const, label: 'Создание' },
     update: { color: 'info' as const, label: 'Изменение' },
     delete: { color: 'error' as const, label: 'Удаление' },
+
+    // 🎯 НОВЫЕ ЦВЕТА И МЕТКИ ДЛЯ ПЛАНИРОВЩИКА ПОВЕРОК:
+    assign_batch: { color: 'secondary' as const, label: '📦 В партию' },
+    remove_batch: { color: 'warning' as const, label: '↩️ Из партии' },
+    verify: { color: 'primary' as const, label: '✅ Поверен' },
   };
 
+  const fallbackAction = { color: 'default' as const, label: log.action };
   const currentAction =
-    actionConfig[log.action as 'create' | 'update' | 'delete'];
+    actionConfig[log.action as keyof typeof actionConfig] || fallbackAction;
+
+  // const currentAction =
+  //   actionConfig[log.action as 'create' | 'update' | 'delete'];
 
   return (
     <Paper

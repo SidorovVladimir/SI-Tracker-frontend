@@ -15,13 +15,16 @@ export const FIELD_TRANSLATIONS: Record<string, string> = {
   archived: 'В архиве',
   nomenclature: 'Номенклатура',
   comment: 'Комментарий',
-  status: 'Статуса',
+  status: 'Статус',
   productionSite: 'Участок',
   equipmentType: 'Тип оборудования',
   scopes: 'Области применения',
   primaryStandarts: 'Эталоны',
   measurementTypes: 'Виды измерений',
   verifications: 'Поверки',
+  result: 'Результат',
+  protocolNumber: '№ Протокола/Свидетельства',
+  batchNumber: '№ Партии',
 };
 
 const VERIFICATION_FIELD_TRANSLATIONS: Record<string, string> = {

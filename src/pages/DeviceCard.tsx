@@ -66,6 +66,7 @@ export default function DeviceCard(props: {
     variables: {
       id: deviceId,
     },
+    fetchPolicy: 'network-only',
   });
 
   if (loading)
