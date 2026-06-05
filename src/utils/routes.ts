@@ -4,6 +4,7 @@ export default {
   home: () => '/',
   profile: () => '/profile',
   planning: () => '/verification-planning',
+  analytics: () => '/analytics',
   admin: {
     root: () => '/admin',
     users: () => '/admin/users',

@@ -1,0 +1,22 @@
+query GetFinancialAnalytics($year: Int!, $month: Int) {
+  getFinancialAnalytics(year: $year, month: $month) {
+    totalSpent
+    monthlyTimeline {
+      month
+      amount
+    }
+    byCities {
+      cityName
+      amount
+    }
+    byCompanies {
+      companyName
+      amount
+    }
+    byProductionSites {
+      siteId
+      fullSiteLabel
+      amount
+    }
+  }
+}

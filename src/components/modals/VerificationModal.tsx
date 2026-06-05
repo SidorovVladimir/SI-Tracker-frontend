@@ -27,6 +27,7 @@ interface VerificationModalProps {
     metrologyControleTypeId: string;
     verificationOrganizationId: string;
     comment: string;
+    cost: number;
   }) => void;
   deviceName: string;
   verificationInterval?: number | null;
@@ -51,13 +52,15 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   const [result, setResult] = useState<string>('Годен');
   const [selectedControlType, setSelectedControlType] = useState<string>('');
   const [selectedOrg, setSelectedOrg] = useState<string>('');
+  const [cost, setCost] = useState<string>('');
 
   const handleFormSubmit = () => {
     if (
       !protocolNumber.trim() ||
       !date ||
       !selectedControlType ||
-      !selectedOrg
+      !selectedOrg ||
+      !cost
     ) {
       alert('Заполните все обязательные поля!');
       return;
@@ -75,6 +78,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
       metrologyControleTypeId: selectedControlType,
       verificationOrganizationId: selectedOrg,
       comment,
+      cost: cost ? parseFloat(cost) : 0,
     });
   };
 
@@ -144,6 +148,25 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
               </MenuItem>
             ))}
           </TextField>
+
+          <TextField
+            label="Стоимость (руб., без НДС)"
+            type="text"
+            required
+            size="small"
+            value={cost}
+            onChange={(e) => {
+              let val = e.target.value;
+              val = val.replace(',', '.');
+              if (/^\d*\.?\d{0,2}$/.test(val)) {
+                setCost(val);
+              }
+            }}
+            slotProps={{
+              htmlInput: { min: 0, step: '0.01' },
+            }}
+            fullWidth
+          />
 
           <TextField
             label="Дата проведения контроля"

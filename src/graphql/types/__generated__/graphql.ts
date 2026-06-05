@@ -164,6 +164,7 @@ export type CreateUserInput = {
 export type CreateVerificationInput = {
   batchId?: InputMaybe<Scalars['ID']['input']>;
   comment?: InputMaybe<Scalars['String']['input']>;
+  cost?: InputMaybe<Scalars['Float']['input']>;
   date: Scalars['String']['input'];
   deviceId: Scalars['ID']['input'];
   metrologyControleTypeId: Scalars['ID']['input'];
@@ -290,6 +291,40 @@ export type EquipmentType = {
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+};
+
+export type FinancialAnalyticsResponse = {
+  __typename: 'FinancialAnalyticsResponse';
+  byCities: Array<FinancialByCity>;
+  byCompanies: Array<FinancialByCompany>;
+  byProductionSites: Array<FinancialByProductionSite>;
+  monthlyTimeline: Array<FinancialMonthlyTimeline>;
+  totalSpent: Scalars['Float']['output'];
+};
+
+export type FinancialByCity = {
+  __typename: 'FinancialByCity';
+  amount: Scalars['Float']['output'];
+  cityName: Scalars['String']['output'];
+};
+
+export type FinancialByCompany = {
+  __typename: 'FinancialByCompany';
+  amount: Scalars['Float']['output'];
+  companyName: Scalars['String']['output'];
+};
+
+export type FinancialByProductionSite = {
+  __typename: 'FinancialByProductionSite';
+  amount: Scalars['Float']['output'];
+  fullSiteLabel: Scalars['String']['output'];
+  siteId: Scalars['ID']['output'];
+};
+
+export type FinancialMonthlyTimeline = {
+  __typename: 'FinancialMonthlyTimeline';
+  amount: Scalars['Float']['output'];
+  month: Scalars['Int']['output'];
 };
 
 export type LoginUserInput = {
@@ -634,6 +669,7 @@ export type Query = {
   equipmentType: EquipmentType;
   equipmentTypes: Array<EquipmentType>;
   getDraftBatchesByMonth: Array<DraftBatchOption>;
+  getFinancialAnalytics: FinancialAnalyticsResponse;
   getPlanningPoolByMonth: PlanningPoolResponse;
   getProductionSitesForSelect: Array<ProductionSite>;
   getVerificationBatches: Array<VerificationBatch>;
@@ -687,6 +723,11 @@ export type QueryEquipmentTypeArgs = {
 
 export type QueryGetDraftBatchesByMonthArgs = {
   plannedMonth: Scalars['String']['input'];
+};
+
+export type QueryGetFinancialAnalyticsArgs = {
+  month?: InputMaybe<Scalars['Int']['input']>;
+  year: Scalars['Int']['input'];
 };
 
 export type QueryGetPlanningPoolByMonthArgs = {
@@ -848,6 +889,7 @@ export type User = {
 export type Verification = {
   __typename: 'Verification';
   comment: Maybe<Scalars['String']['output']>;
+  cost: Maybe<Scalars['Float']['output']>;
   createdAt: Scalars['String']['output'];
   date: Maybe<Scalars['String']['output']>;
   deviceId: Scalars['ID']['output'];
@@ -877,6 +919,7 @@ export type VerificationBatch = {
 
 export type VerificationInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
+  cost?: InputMaybe<Scalars['Float']['input']>;
   date?: InputMaybe<Scalars['String']['input']>;
   documentUrl?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -892,6 +935,7 @@ export type VerificationModal = {
   __typename: 'VerificationModal';
   batchId: Maybe<Scalars['ID']['output']>;
   comment: Maybe<Scalars['String']['output']>;
+  cost: Maybe<Scalars['Float']['output']>;
   createdAt: Scalars['String']['output'];
   date: Scalars['String']['output'];
   deviceId: Scalars['ID']['output'];
@@ -915,6 +959,7 @@ export type VerificationOrganization = {
 export type VerificationRelation = {
   __typename: 'VerificationRelation';
   comment: Maybe<Scalars['String']['output']>;
+  cost: Maybe<Scalars['Float']['output']>;
   createdAt: Scalars['String']['output'];
   date: Maybe<Scalars['String']['output']>;
   deviceId: Scalars['ID']['output'];
@@ -936,6 +981,39 @@ export type VerificationTableItem = {
   metrologyControleType: Maybe<MetrologyControlType>;
   protocolNumber: Maybe<Scalars['String']['output']>;
   validUntil: Maybe<Scalars['String']['output']>;
+};
+
+export type GetFinancialAnalyticsQueryVariables = Exact<{
+  year: Scalars['Int']['input'];
+  month?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+export type GetFinancialAnalyticsQuery = {
+  getFinancialAnalytics: {
+    __typename: 'FinancialAnalyticsResponse';
+    totalSpent: number;
+    monthlyTimeline: Array<{
+      __typename: 'FinancialMonthlyTimeline';
+      month: number;
+      amount: number;
+    }>;
+    byCities: Array<{
+      __typename: 'FinancialByCity';
+      cityName: string;
+      amount: number;
+    }>;
+    byCompanies: Array<{
+      __typename: 'FinancialByCompany';
+      companyName: string;
+      amount: number;
+    }>;
+    byProductionSites: Array<{
+      __typename: 'FinancialByProductionSite';
+      siteId: string;
+      fullSiteLabel: string;
+      amount: number;
+    }>;
+  };
 };
 
 export type GetDeviceAuditLogsQueryVariables = Exact<{
@@ -1303,6 +1381,7 @@ export type GetDeviceWithRelationQuery = {
       comment: string | null;
       deviceId: string;
       documentUrl: string | null;
+      cost: number | null;
       metrologyControleType: {
         __typename: 'MetrologyControlType';
         id: string;
@@ -1378,6 +1457,7 @@ export type CreateVerificationMutation = {
     result: string;
     date: string;
     validUntil: string | null;
+    cost: number | null;
     metrologyControleTypeId: string;
     verificationOrganizationId: string;
     comment: string | null;
@@ -1982,6 +2062,139 @@ export type DeleteVerificationOrganizationMutation = {
   deleteVerificationOrganization: boolean;
 };
 
+export const GetFinancialAnalyticsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetFinancialAnalytics' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'year' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'month' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getFinancialAnalytics' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'year' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'year' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'month' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'month' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'totalSpent' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'monthlyTimeline' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'month' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'amount' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'byCities' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'cityName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'amount' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'byCompanies' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'companyName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'amount' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'byProductionSites' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'siteId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'fullSiteLabel' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'amount' },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetFinancialAnalyticsQuery,
+  GetFinancialAnalyticsQueryVariables
+>;
 export const GetDeviceAuditLogsDocument = {
   kind: 'Document',
   definitions: [
@@ -3400,6 +3613,7 @@ export const GetDeviceWithRelationDocument = {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'documentUrl' },
                       },
+                      { kind: 'Field', name: { kind: 'Name', value: 'cost' } },
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'metrologyControleType' },
@@ -3690,6 +3904,7 @@ export const CreateVerificationDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'result' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'date' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'validUntil' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'cost' } },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'metrologyControleTypeId' },

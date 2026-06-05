@@ -378,6 +378,8 @@ export default function DeviceCard(props: {
                 value={v.metrologyControleType?.name}
               />
               <InfoRow label="Результат" value={v.result} />
+              <InfoRow label="Стоимость" value={v.cost} />
+
               {v.comment && (
                 <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed #eee' }}>
                   <InfoRow label="Комментарий" value={v.comment} />

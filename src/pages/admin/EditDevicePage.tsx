@@ -219,6 +219,7 @@ function UserForm({
         verification.verificationOrganization?.id || '',
       deviceId: verification.deviceId,
       collapsed: true,
+      cost: verification.cost || '',
     };
   });
 
@@ -236,6 +237,7 @@ function UserForm({
       metrologyControleTypeId: string;
       verificationOrganizationId: string;
       collapsed: boolean;
+      cost: number | string;
     }>
   >(verificationsState);
 
@@ -255,6 +257,7 @@ function UserForm({
         verificationOrganizationId: '',
         deviceId: '',
         collapsed: false,
+        cost: '',
       },
     ]);
   };
@@ -268,9 +271,19 @@ function UserForm({
     field: string,
     value: string
   ) => {
-    setVerifications((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, [field]: value } : v))
-    );
+    if (field === 'cost') {
+      let val = value;
+      val = val.replace(',', '.');
+      if (/^\d*\.?\d{0,2}$/.test(val)) {
+        setVerifications((prev) =>
+          prev.map((v) => (v.id === id ? { ...v, [field]: val } : v))
+        );
+      }
+    } else {
+      setVerifications((prev) =>
+        prev.map((v) => (v.id === id ? { ...v, [field]: value } : v))
+      );
+    }
   };
 
   const toggleCollapse = (id: string) => {
@@ -356,6 +369,28 @@ function UserForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    //   for (let i = 0; i < verifications.length; i++) {
+    //   const v = verifications[i];
+    //   const yearLabel = v.date ? new Date(v.date).getFullYear() : `№${i + 1}`;
+
+    //   if (!v.date) {
+    //     alert(`Ошибка в секции [Поверка ${yearLabel}]: Заполните обязательную дату проведения контроля!`);
+    //     return;
+    //   }
+    //   if (!v.metrologyControleTypeId) {
+    //     alert(`Ошибка в секции [Поверка ${yearLabel}]: Выберите тип метрологического контроля!`);
+    //     return;
+    //   }
+    //   if (!v.verificationOrganizationId) {
+    //     alert(`Ошибка в секции [Поверка ${yearLabel}]: Укажите организацию, проводившую контроль!`);
+    //     return;
+    //   }
+    //   if (v.cost === undefined || v.cost === null || String(v.cost).trim() === '') {
+    //     alert(`Ошибка в секции [Поверка ${yearLabel}]: Введите стоимость выполненных работ!`);
+    //     return;
+    //   }
+    // }
     const verificationsInput = verifications.map((v) => ({
       id: v.id.startsWith('new-') ? null : v.id,
       date: v.date || null,
@@ -367,6 +402,7 @@ function UserForm({
       documentUrl: v.documentUrl || null,
       metrologyControleTypeId: v.metrologyControleTypeId || null,
       verificationOrganizationId: v.verificationOrganizationId || null,
+      cost: v.cost !== '' ? parseFloat(String(v.cost)) : 0,
     }));
 
     const data = {
@@ -664,7 +700,6 @@ function UserForm({
                       <TextField
                         type="date"
                         label="Дата поверки"
-                        required
                         value={verification.date.split('T')[0]}
                         onChange={(e) =>
                           handleVerificationChange(
@@ -734,6 +769,24 @@ function UserForm({
                           </MenuItem>
                         ))}
                       </TextField>
+
+                      <TextField
+                        label="Стоимость (руб., без НДС)"
+                        type="text"
+                        size="small"
+                        value={verification.cost}
+                        onChange={(e) => {
+                          handleVerificationChange(
+                            verification.id,
+                            'cost',
+                            e.target.value
+                          );
+                        }}
+                        slotProps={{
+                          htmlInput: { min: 0, step: '0.01' },
+                        }}
+                        fullWidth
+                      />
 
                       <TextField
                         label="Ссылка на документ"

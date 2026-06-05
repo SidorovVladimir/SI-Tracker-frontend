@@ -169,6 +169,7 @@ query GetDeviceWithRelation($id: ID!) {
       comment
       deviceId
       documentUrl
+      cost
       metrologyControleType {
         id
         name
@@ -230,6 +231,7 @@ mutation CreateVerification($input: CreateVerificationInput!) {
     result
     date
     validUntil
+    cost
     metrologyControleTypeId
     verificationOrganizationId
     comment

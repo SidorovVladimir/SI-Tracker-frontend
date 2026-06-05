@@ -39,6 +39,7 @@ import CreateVerificationOrganizationPage from './pages/admin/CreateVerification
 import AuditLogPage from './pages/admin/AuditLogPage';
 
 import { VerificationPageContainer } from './pages/VerificationPageContainer';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
               path={routes.planning()}
               element={<VerificationPageContainer />}
             />
+            <Route path={routes.analytics()} element={<AnalyticsPage />} />
             <Route element={<MainLayout />}>
               <Route path={routes.admin.root()} element={<AdminPage />}>
                 <Route path={routes.admin.users()} element={<UsersPage />} />

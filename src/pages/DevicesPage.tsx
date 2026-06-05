@@ -228,7 +228,18 @@ export default function DevicesPage() {
     return response?.items || [];
   }, [data]);
 
-  const totalCount = data?.devicesWithRelations?.totalCount || 0;
+  // const totalCount = data?.devicesWithRelations?.totalCount || 0;
+
+  const totalCountRaw = data?.devicesWithRelations?.totalCount;
+
+  const rowCountRef = React.useRef(0);
+
+  const rowCount = React.useMemo(() => {
+    if (totalCountRaw !== undefined) {
+      rowCountRef.current = totalCountRaw;
+    }
+    return rowCountRef.current;
+  }, [totalCountRaw]);
 
   const cities = useMemo(() => {
     const raw = citiesData?.cities || [];
@@ -512,6 +523,14 @@ export default function DevicesPage() {
                     sx={{ fontWeight: 'bold', color: 'primary.main' }}
                   >
                     📅 Планировщик поверок
+                  </MenuItem>
+                  <MenuItem
+                    component={Link}
+                    to={routes.analytics()}
+                    onClick={() => setAnchorEl(null)}
+                    sx={{ fontWeight: 'bold', color: 'success.main', py: 1 }}
+                  >
+                    📊 Аналитика и бюджет затрат
                   </MenuItem>
                 </Menu>
               )}
@@ -928,7 +947,8 @@ export default function DevicesPage() {
               // ----
               paginationMode="server"
               // rowCount={totalCount}
-              rowCount={loading ? undefined : totalCount}
+              rowCount={rowCount}
+              // rowCount={loading ? undefined : totalCount}
               paginationModel={paginationModel}
               onPaginationModelChange={setPaginationModel}
               // onPaginationModelChange={(newModel) => {

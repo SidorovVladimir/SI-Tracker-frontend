@@ -188,6 +188,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
           metrologyControleTypeId: formData.metrologyControleTypeId,
           verificationOrganizationId: formData.verificationOrganizationId,
           comment: formData.comment,
+          cost: formData.cost ? parseFloat(formData.cost) : 0,
         },
       },
     });

@@ -119,6 +119,7 @@ export default function CreateDevicePage(props: {
       metrologyControleTypeId: string;
       collapsed: boolean;
       verificationOrganizationId: string;
+      cost: string;
     }>
   >([]);
 
@@ -140,6 +141,7 @@ export default function CreateDevicePage(props: {
         verificationOrganizationId: '',
         deviceId: '',
         collapsed: false,
+        cost: '',
       },
     ]);
   };
@@ -153,9 +155,19 @@ export default function CreateDevicePage(props: {
     field: string,
     value: string
   ) => {
-    setVerifications((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, [field]: value } : v))
-    );
+    if (field === 'cost') {
+      let val = value;
+      val = val.replace(',', '.');
+      if (/^\d*\.?\d{0,2}$/.test(val)) {
+        setVerifications((prev) =>
+          prev.map((v) => (v.id === id ? { ...v, [field]: val } : v))
+        );
+      }
+    } else {
+      setVerifications((prev) =>
+        prev.map((v) => (v.id === id ? { ...v, [field]: value } : v))
+      );
+    }
   };
 
   const toggleCollapse = (id: number) => {
@@ -232,6 +244,7 @@ export default function CreateDevicePage(props: {
       documentUrl: v.documentUrl || null,
       metrologyControleTypeId: v.metrologyControleTypeId || null,
       verificationOrganizationId: v.verificationOrganizationId || null,
+      cost: v.cost ? parseFloat(v.cost) : 0,
     }));
 
     const data = {
@@ -527,7 +540,6 @@ export default function CreateDevicePage(props: {
                           )
                         }
                         fullWidth
-                        required
                         size="small"
                         slotProps={{
                           inputLabel: { shrink: true },
@@ -588,6 +600,24 @@ export default function CreateDevicePage(props: {
                           </MenuItem>
                         ))}
                       </TextField>
+
+                      <TextField
+                        label="Стоимость (руб., без НДС)"
+                        type="text"
+                        size="small"
+                        value={verification.cost}
+                        onChange={(e) => {
+                          handleVerificationChange(
+                            verification.id,
+                            'cost',
+                            e.target.value
+                          );
+                        }}
+                        slotProps={{
+                          htmlInput: { min: 0, step: '0.01' },
+                        }}
+                        fullWidth
+                      />
 
                       <TextField
                         label="Ссылка на документ"

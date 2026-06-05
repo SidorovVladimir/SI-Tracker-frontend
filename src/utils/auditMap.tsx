@@ -25,6 +25,7 @@ export const FIELD_TRANSLATIONS: Record<string, string> = {
   result: 'Результат',
   protocolNumber: '№ Протокола/Свидетельства',
   batchNumber: '№ Партии',
+  cost: 'Стоимость',
 };
 
 const VERIFICATION_FIELD_TRANSLATIONS: Record<string, string> = {
@@ -36,6 +37,7 @@ const VERIFICATION_FIELD_TRANSLATIONS: Record<string, string> = {
   documentUrl: 'Ссылка на документ',
   verificationOrganization: 'Организация-Поверитель',
   metrologyControleType: 'Вид контроля',
+  cost: 'Стоимость',
 };
 
 const IGNORED_VERIFICATION_FIELDS = [
