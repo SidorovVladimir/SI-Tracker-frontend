@@ -532,6 +532,14 @@ export default function DevicesPage() {
                   >
                     📊 Аналитика и бюджет затрат
                   </MenuItem>
+                  <MenuItem
+                    component={Link}
+                    to={routes.productionAnalytics()}
+                    onClick={() => setAnchorEl(null)}
+                    sx={{ fontWeight: 'bold', color: 'primary.main', py: 1 }}
+                  >
+                    📋 Объемы СИ и мониторинг
+                  </MenuItem>
                 </Menu>
               )}
             </Box>

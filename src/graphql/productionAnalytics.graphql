@@ -1,0 +1,20 @@
+# 🎯 КЛИЕНТСКИЙ ЗАПРОС КОЛИЧЕСТВЕННОГО УЧЕТА СИ С ФИЛЬТРАМИ ПЕРИОДОВ
+query GetProductionAnalytics($year: Int!, $month: Int) {
+  getProductionAnalytics(year: $year, month: $month) {
+    totalVerified
+    totalRejected
+    totalCalibrated
+    byProductionSites {
+      label
+      count
+    }
+    byCompanies {
+      label
+      count
+    }
+    byCities {
+      label
+      count
+    }
+  }
+}

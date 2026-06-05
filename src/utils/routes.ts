@@ -5,6 +5,7 @@ export default {
   profile: () => '/profile',
   planning: () => '/verification-planning',
   analytics: () => '/analytics',
+  productionAnalytics: () => '/production-analytics',
   admin: {
     root: () => '/admin',
     users: () => '/admin/users',

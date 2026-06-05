@@ -640,6 +640,16 @@ export type PrimaryStandart = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type ProductionAnalyticsResponse = {
+  __typename: 'ProductionAnalyticsResponse';
+  byCities: Array<QuantitiveItem>;
+  byCompanies: Array<QuantitiveItem>;
+  byProductionSites: Array<QuantitiveItem>;
+  totalCalibrated: Scalars['Int']['output'];
+  totalRejected: Scalars['Int']['output'];
+  totalVerified: Scalars['Int']['output'];
+};
+
 export type ProductionSite = {
   __typename: 'ProductionSite';
   createdAt: Scalars['String']['output'];
@@ -654,6 +664,12 @@ export type ProductionSiteRelation = {
   company: Company;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+};
+
+export type QuantitiveItem = {
+  __typename: 'QuantitiveItem';
+  count: Scalars['Int']['output'];
+  label: Scalars['String']['output'];
 };
 
 export type Query = {
@@ -671,6 +687,7 @@ export type Query = {
   getDraftBatchesByMonth: Array<DraftBatchOption>;
   getFinancialAnalytics: FinancialAnalyticsResponse;
   getPlanningPoolByMonth: PlanningPoolResponse;
+  getProductionAnalytics: ProductionAnalyticsResponse;
   getProductionSitesForSelect: Array<ProductionSite>;
   getVerificationBatches: Array<VerificationBatch>;
   getYearlyCalendarSummary: Array<MonthlySummary>;
@@ -736,6 +753,11 @@ export type QueryGetPlanningPoolByMonthArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   targetMonth: Scalars['String']['input'];
+};
+
+export type QueryGetProductionAnalyticsArgs = {
+  month?: InputMaybe<Scalars['Int']['input']>;
+  year: Scalars['Int']['input'];
 };
 
 export type QueryGetVerificationBatchesArgs = {
@@ -1805,6 +1827,35 @@ export type DeletePrimaryStandartMutationVariables = Exact<{
 }>;
 
 export type DeletePrimaryStandartMutation = { deletePrimaryStandart: boolean };
+
+export type GetProductionAnalyticsQueryVariables = Exact<{
+  year: Scalars['Int']['input'];
+  month?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+export type GetProductionAnalyticsQuery = {
+  getProductionAnalytics: {
+    __typename: 'ProductionAnalyticsResponse';
+    totalVerified: number;
+    totalRejected: number;
+    totalCalibrated: number;
+    byProductionSites: Array<{
+      __typename: 'QuantitiveItem';
+      label: string;
+      count: number;
+    }>;
+    byCompanies: Array<{
+      __typename: 'QuantitiveItem';
+      label: string;
+      count: number;
+    }>;
+    byCities: Array<{
+      __typename: 'QuantitiveItem';
+      label: string;
+      count: number;
+    }>;
+  };
+};
 
 export type GetProductionSitesQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -5392,6 +5443,114 @@ export const DeletePrimaryStandartDocument = {
 } as unknown as DocumentNode<
   DeletePrimaryStandartMutation,
   DeletePrimaryStandartMutationVariables
+>;
+export const GetProductionAnalyticsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetProductionAnalytics' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'year' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'month' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getProductionAnalytics' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'year' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'year' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'month' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'month' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'totalVerified' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'totalRejected' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'totalCalibrated' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'byProductionSites' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'label' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'count' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'byCompanies' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'label' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'count' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'byCities' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'label' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'count' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetProductionAnalyticsQuery,
+  GetProductionAnalyticsQueryVariables
 >;
 export const GetProductionSitesDocument = {
   kind: 'Document',

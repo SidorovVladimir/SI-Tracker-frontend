@@ -40,6 +40,7 @@ import AuditLogPage from './pages/admin/AuditLogPage';
 
 import { VerificationPageContainer } from './pages/VerificationPageContainer';
 import AnalyticsPage from './pages/AnalyticsPage';
+import ProductionAnalyticsPage from './pages/ProductionAnalyticsPage';
 
 function App() {
   return (
@@ -58,6 +59,10 @@ function App() {
               element={<VerificationPageContainer />}
             />
             <Route path={routes.analytics()} element={<AnalyticsPage />} />
+            <Route
+              path={routes.productionAnalytics()}
+              element={<ProductionAnalyticsPage />}
+            />
             <Route element={<MainLayout />}>
               <Route path={routes.admin.root()} element={<AdminPage />}>
                 <Route path={routes.admin.users()} element={<UsersPage />} />
