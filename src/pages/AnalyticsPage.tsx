@@ -139,7 +139,7 @@ export default function AnalyticsPage() {
   return (
     <Container
       maxWidth="xl"
-      sx={{ py: 3, height: 'calc(100dvh - 130px)', overflowY: 'auto' }}
+      sx={{ py: 3, height: 'calc(100dvh - 100px)', overflowY: 'auto' }}
     >
       {/* ================= ВЕРХНЯЯ ШАПКА И ДВА СЕЛЕКТОРОВ (ГОД + МЕСЯЦ) ================= */}
       <Box
