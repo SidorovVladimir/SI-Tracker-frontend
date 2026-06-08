@@ -26,6 +26,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  JSON: { input: unknown; output: unknown };
 };
 
 export type AuditAction =
@@ -64,6 +65,14 @@ export type AuthPayload = {
   __typename: 'AuthPayload';
   success: Scalars['Boolean']['output'];
   user: Maybe<User>;
+};
+
+export type BatchSyncResponse = {
+  __typename: 'BatchSyncResponse';
+  batchId: Scalars['ID']['output'];
+  details: Array<DeviceBatchSyncResult>;
+  syncedCount: Scalars['Int']['output'];
+  totalCount: Scalars['Int']['output'];
 };
 
 export type City = {
@@ -202,6 +211,13 @@ export type Device = {
   verificationInterval: Maybe<Scalars['Int']['output']>;
 };
 
+export type DeviceBatchSyncResult = {
+  __typename: 'DeviceBatchSyncResult';
+  deviceId: Scalars['ID']['output'];
+  message: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type DeviceFilterInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   company?: InputMaybe<Scalars['String']['input']>;
@@ -327,6 +343,28 @@ export type FinancialMonthlyTimeline = {
   month: Scalars['Int']['output'];
 };
 
+export type ImportDeviceItemInput = {
+  accuracy?: InputMaybe<Scalars['String']['input']>;
+  cityName: Scalars['String']['input'];
+  comment?: InputMaybe<Scalars['String']['input']>;
+  companyName: Scalars['String']['input'];
+  equipmentTypeName?: InputMaybe<Scalars['String']['input']>;
+  grsiNumber?: InputMaybe<Scalars['String']['input']>;
+  inventoryNumber?: InputMaybe<Scalars['String']['input']>;
+  manufacturer?: InputMaybe<Scalars['String']['input']>;
+  measurementRange?: InputMaybe<Scalars['String']['input']>;
+  measurementTypesNames?: InputMaybe<Scalars['String']['input']>;
+  model: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  nomenclature?: InputMaybe<Scalars['String']['input']>;
+  primaryStandardsNames?: InputMaybe<Scalars['String']['input']>;
+  productionSiteName: Scalars['String']['input'];
+  scopesNames?: InputMaybe<Scalars['String']['input']>;
+  serialNumber: Scalars['String']['input'];
+  statusName: Scalars['String']['input'];
+  verificationInterval?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type LoginUserInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -386,10 +424,13 @@ export type Mutation = {
   deleteUser: Scalars['Boolean']['output'];
   deleteVerificationBatch: Scalars['Boolean']['output'];
   deleteVerificationOrganization: Scalars['Boolean']['output'];
+  importDevicesFromExcel: Scalars['Int']['output'];
   login: AuthPayload;
   logout: Scalars['Boolean']['output'];
   register: AuthPayload;
   removeDevicesFromBatch: Scalars['Boolean']['output'];
+  syncBatchWithArshin: BatchSyncResponse;
+  syncDeviceWithArshin: Device;
   updateBatchStatus: VerificationBatch;
   updateCity: City;
   updateCompany: Company;
@@ -522,6 +563,10 @@ export type MutationDeleteVerificationOrganizationArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type MutationImportDevicesFromExcelArgs = {
+  input: Array<ImportDeviceItemInput>;
+};
+
 export type MutationLoginArgs = {
   input: LoginUserInput;
 };
@@ -533,6 +578,14 @@ export type MutationRegisterArgs = {
 export type MutationRemoveDevicesFromBatchArgs = {
   batchId: Scalars['ID']['input'];
   deviceIds: Array<Scalars['ID']['input']>;
+};
+
+export type MutationSyncBatchWithArshinArgs = {
+  batchId: Scalars['ID']['input'];
+};
+
+export type MutationSyncDeviceWithArshinArgs = {
+  input: SyncDeviceWithArshinInput;
 };
 
 export type MutationUpdateBatchStatusArgs = {
@@ -684,6 +737,7 @@ export type Query = {
   devicesWithRelations: DevicesWithRelationsResponse;
   equipmentType: EquipmentType;
   equipmentTypes: Array<EquipmentType>;
+  executeRawSql: RawSqlResponse;
   getDraftBatchesByMonth: Array<DraftBatchOption>;
   getFinancialAnalytics: FinancialAnalyticsResponse;
   getPlanningPoolByMonth: PlanningPoolResponse;
@@ -736,6 +790,10 @@ export type QueryDevicesWithRelationsArgs = {
 
 export type QueryEquipmentTypeArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type QueryExecuteRawSqlArgs = {
+  sqlQuery: Scalars['String']['input'];
 };
 
 export type QueryGetDraftBatchesByMonthArgs = {
@@ -802,6 +860,15 @@ export type QueryVerificationOrganizationArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type RawSqlResponse = {
+  __typename: 'RawSqlResponse';
+  affectedRows: Maybe<Scalars['Int']['output']>;
+  columns: Array<Scalars['String']['output']>;
+  errorMessage: Maybe<Scalars['String']['output']>;
+  rows: Array<Scalars['JSON']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type Scope = {
   __typename: 'Scope';
   createdAt: Scalars['String']['output'];
@@ -822,6 +889,11 @@ export type Status = {
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+};
+
+export type SyncDeviceWithArshinInput = {
+  batchId: Scalars['ID']['input'];
+  deviceId: Scalars['ID']['input'];
 };
 
 export type UpdateCityInput = {
@@ -1034,6 +1106,33 @@ export type GetFinancialAnalyticsQuery = {
       siteId: string;
       fullSiteLabel: string;
       amount: number;
+    }>;
+  };
+};
+
+export type SyncDeviceWithArshinMutationVariables = Exact<{
+  input: SyncDeviceWithArshinInput;
+}>;
+
+export type SyncDeviceWithArshinMutation = {
+  syncDeviceWithArshin: { __typename: 'Device'; id: string; name: string };
+};
+
+export type SyncBatchWithArshinMutationVariables = Exact<{
+  batchId: Scalars['ID']['input'];
+}>;
+
+export type SyncBatchWithArshinMutation = {
+  syncBatchWithArshin: {
+    __typename: 'BatchSyncResponse';
+    batchId: string;
+    syncedCount: number;
+    totalCount: number;
+    details: Array<{
+      __typename: 'DeviceBatchSyncResult';
+      deviceId: string;
+      success: boolean;
+      message: string | null;
     }>;
   };
 };
@@ -1483,6 +1582,27 @@ export type CreateVerificationMutation = {
     metrologyControleTypeId: string;
     verificationOrganizationId: string;
     comment: string | null;
+  };
+};
+
+export type ImportDevicesFromExcelMutationVariables = Exact<{
+  input: Array<ImportDeviceItemInput> | ImportDeviceItemInput;
+}>;
+
+export type ImportDevicesFromExcelMutation = { importDevicesFromExcel: number };
+
+export type ExecuteRawSqlQueryVariables = Exact<{
+  sqlQuery: Scalars['String']['input'];
+}>;
+
+export type ExecuteRawSqlQuery = {
+  executeRawSql: {
+    __typename: 'RawSqlResponse';
+    success: boolean;
+    columns: Array<string>;
+    rows: Array<unknown>;
+    affectedRows: number | null;
+    errorMessage: string | null;
   };
 };
 
@@ -2245,6 +2365,135 @@ export const GetFinancialAnalyticsDocument = {
 } as unknown as DocumentNode<
   GetFinancialAnalyticsQuery,
   GetFinancialAnalyticsQueryVariables
+>;
+export const SyncDeviceWithArshinDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'SyncDeviceWithArshin' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'SyncDeviceWithArshinInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'syncDeviceWithArshin' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  SyncDeviceWithArshinMutation,
+  SyncDeviceWithArshinMutationVariables
+>;
+export const SyncBatchWithArshinDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'SyncBatchWithArshin' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'batchId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'syncBatchWithArshin' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'batchId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'batchId' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'batchId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'syncedCount' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'details' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deviceId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'success' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'message' },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  SyncBatchWithArshinMutation,
+  SyncBatchWithArshinMutationVariables
 >;
 export const GetDeviceAuditLogsDocument = {
   kind: 'Document',
@@ -3976,6 +4225,121 @@ export const CreateVerificationDocument = {
   CreateVerificationMutation,
   CreateVerificationMutationVariables
 >;
+export const ImportDevicesFromExcelDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'ImportDevicesFromExcel' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'ImportDeviceItemInput' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'importDevicesFromExcel' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  ImportDevicesFromExcelMutation,
+  ImportDevicesFromExcelMutationVariables
+>;
+export const ExecuteRawSqlDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'ExecuteRawSql' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'sqlQuery' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'executeRawSql' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'sqlQuery' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'sqlQuery' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'success' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'columns' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rows' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'affectedRows' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'errorMessage' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ExecuteRawSqlQuery, ExecuteRawSqlQueryVariables>;
 export const GetEquipmentTypesListDocument = {
   kind: 'Document',
   definitions: [

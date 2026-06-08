@@ -6,6 +6,8 @@ export default {
   planning: () => '/verification-planning',
   analytics: () => '/analytics',
   productionAnalytics: () => '/production-analytics',
+  import: () => '/import',
+  sqlConsole: () => '/sql-console',
   admin: {
     root: () => '/admin',
     users: () => '/admin/users',

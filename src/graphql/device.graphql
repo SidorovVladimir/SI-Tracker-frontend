@@ -237,3 +237,17 @@ mutation CreateVerification($input: CreateVerificationInput!) {
     comment
   }
 }
+
+mutation ImportDevicesFromExcel($input: [ImportDeviceItemInput!]!) {
+  importDevicesFromExcel(input: $input)
+}
+
+query ExecuteRawSql($sqlQuery: String!) {
+  executeRawSql(sqlQuery: $sqlQuery) {
+    success
+    columns
+    rows
+    affectedRows
+    errorMessage
+  }
+}

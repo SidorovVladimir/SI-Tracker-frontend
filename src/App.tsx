@@ -41,6 +41,8 @@ import AuditLogPage from './pages/admin/AuditLogPage';
 import { VerificationPageContainer } from './pages/VerificationPageContainer';
 import AnalyticsPage from './pages/AnalyticsPage';
 import ProductionAnalyticsPage from './pages/ProductionAnalyticsPage';
+import { ExcelImporter } from './components/ExcelImporter';
+import { SqlConsolePage } from './pages/admin/SqlConsolePage';
 
 function App() {
   return (
@@ -63,6 +65,8 @@ function App() {
               path={routes.productionAnalytics()}
               element={<ProductionAnalyticsPage />}
             />
+            <Route path={routes.import()} element={<ExcelImporter />} />
+            <Route path={routes.sqlConsole()} element={<SqlConsolePage />} />
             <Route element={<MainLayout />}>
               <Route path={routes.admin.root()} element={<AdminPage />}>
                 <Route path={routes.admin.users()} element={<UsersPage />} />

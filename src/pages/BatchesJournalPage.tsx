@@ -27,9 +27,11 @@ import {
   GetVerificationBatchesDocument,
   GetVerificationOrganizationsListDocument,
   RemoveDevicesFromBatchDocument,
+  SyncBatchWithArshinDocument,
+  SyncDeviceWithArshinDocument,
   UpdateBatchStatusDocument,
 } from '../graphql/types/__generated__/graphql';
-import { CheckCircleOutline, Delete, Edit } from '@mui/icons-material';
+import { CheckCircleOutline, Delete, Edit, Sync } from '@mui/icons-material';
 import { VerificationModal } from '../components/modals/VerificationModal';
 import { enqueueSnackbar } from 'notistack';
 
@@ -136,6 +138,48 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
       });
     },
   });
+
+  const [syncDeviceWithArshin, { loading: isSyncing }] = useMutation(
+    SyncDeviceWithArshinDocument,
+    {
+      refetchQueries: [
+        'GetYearlySummary',
+        'GetPlanningPool',
+        'GetVerificationBatches',
+      ],
+      onCompleted: () => {
+        enqueueSnackbar('Данные успешно импортированы из ФГИС Аршин!', {
+          variant: 'success',
+        });
+      },
+      onError: (error) => {
+        enqueueSnackbar(`Не удалось синхронизировать: ${error.message}`, {
+          variant: 'error',
+        });
+      },
+    }
+  );
+
+  const [syncBatch, { loading: isBatchSyncing }] = useMutation(
+    SyncBatchWithArshinDocument,
+    {
+      refetchQueries: ['GetVerificationBatches'],
+      onCompleted: (data) => {
+        const { syncedCount, totalCount } = data.syncBatchWithArshin;
+        enqueueSnackbar(
+          `Пакетная проверка завершена: успешно обновлено ${syncedCount} из ${totalCount} приборов.`,
+          {
+            variant: syncedCount > 0 ? 'success' : 'info',
+          }
+        );
+      },
+      onError: (error) => {
+        enqueueSnackbar(`Ошибка пакетной синхронизации: ${error.message}`, {
+          variant: 'error',
+        });
+      },
+    }
+  );
 
   const [expandedBatchId, setExpandedBatchId] = useState<string | false>(false);
 
@@ -600,6 +644,48 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                   />
                                 </Tooltip>
                               )}
+
+                              {!isDeviceVerified && (
+                                <Tooltip
+                                  title="Синхронизировать данные с ФГИС Аршин"
+                                  placement="top"
+                                  arrow
+                                >
+                                  <span>
+                                    <IconButton
+                                      color="warning"
+                                      size="small"
+                                      disabled={isSyncing || isBatchSyncing}
+                                      onClick={async () => {
+                                        await syncDeviceWithArshin({
+                                          variables: {
+                                            input: {
+                                              deviceId: link.device.id,
+                                              batchId: batch.id,
+                                            },
+                                          },
+                                        });
+                                      }}
+                                    >
+                                      <Sync
+                                        fontSize="small"
+                                        sx={{
+                                          animation: isSyncing
+                                            ? 'spin 1s linear infinite'
+                                            : 'none',
+                                          '@keyframes spin': {
+                                            '0%': { transform: 'rotate(0deg)' },
+                                            '100%': {
+                                              transform: 'rotate(360deg)',
+                                            },
+                                          },
+                                        }}
+                                      />
+                                    </IconButton>
+                                  </span>
+                                </Tooltip>
+                              )}
+
                               <Tooltip
                                 title="Внести или изменить результаты поверки/калибровки"
                                 placement="top"
@@ -608,6 +694,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                 <IconButton
                                   color="primary"
                                   size="small"
+                                  disabled={isSyncing || isBatchSyncing}
                                   onClick={() =>
                                     handleOpenVerificationModal(
                                       link.device.id,
@@ -676,24 +763,46 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                     </>
                   )}
                   {isSent && (
-                    <Button
-                      variant="contained"
-                      color="success"
-                      size="small"
-                      onClick={async () =>
-                        await updateStatus({
-                          variables: { id: batch.id, status: 'completed' },
-                        })
-                      }
-                      sx={{
-                        textTransform: 'none',
-                        fontWeight: 'bold',
-                        width: { xs: '100%', sm: 'auto' },
-                        py: { xs: 1, sm: 0.5 },
-                      }}
-                    >
-                      ✅ Приборы вернулись (Закрыть поверку)
-                    </Button>
+                    <>
+                      <Button
+                        variant="outlined"
+                        color="warning"
+                        size="small"
+                        disabled={isBatchSyncing}
+                        onClick={async () => {
+                          await syncBatch({ variables: { batchId: batch.id } });
+                        }}
+                        sx={{
+                          textTransform: 'none',
+                          fontWeight: 'bold',
+                          width: { xs: '100%', sm: 'auto' },
+                          py: { xs: 1, sm: 0.5 },
+                        }}
+                      >
+                        {isBatchSyncing
+                          ? '⏳ Синхронизация...'
+                          : '🔄 Проверить всю партию в Аршин'}
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        size="small"
+                        disabled={isSyncing || isBatchSyncing}
+                        onClick={async () =>
+                          await updateStatus({
+                            variables: { id: batch.id, status: 'completed' },
+                          })
+                        }
+                        sx={{
+                          textTransform: 'none',
+                          fontWeight: 'bold',
+                          width: { xs: '100%', sm: 'auto' },
+                          py: { xs: 1, sm: 0.5 },
+                        }}
+                      >
+                        ✅ Приборы вернулись (Закрыть поверку)
+                      </Button>
+                    </>
                   )}
                 </Box>
               </AccordionDetails>

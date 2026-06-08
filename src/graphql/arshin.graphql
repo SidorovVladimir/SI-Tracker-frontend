@@ -1,0 +1,19 @@
+mutation SyncDeviceWithArshin($input: SyncDeviceWithArshinInput!) {
+  syncDeviceWithArshin(input: $input) {
+    id
+    name
+  }
+}
+
+mutation SyncBatchWithArshin($batchId: ID!) {
+  syncBatchWithArshin(batchId: $batchId) {
+    batchId
+    syncedCount
+    totalCount
+    details {
+      deviceId
+      success
+      message
+    }
+  }
+}
