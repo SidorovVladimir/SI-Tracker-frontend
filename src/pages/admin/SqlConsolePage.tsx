@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 
 import { ExecuteRawSqlDocument } from '../../graphql/types/__generated__/graphql';
-import { PlayArrow } from '@mui/icons-material';
+import { CloudDownload, PlayArrow } from '@mui/icons-material';
 import { useLazyQuery } from '@apollo/client/react';
 
 export const SqlConsolePage: React.FC = () => {
@@ -51,15 +51,37 @@ export const SqlConsolePage: React.FC = () => {
           borderBottom: '1px solid',
           borderColor: 'divider',
           pb: 2,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 2,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-          💻 Терминал сырых SQL запросов
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Инструмент прямого взаимодействия с PostgreSQL. Будьте осторожны с
-          командами UPDATE и DELETE.
-        </Typography>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+            💻 Терминал сырых SQL запросов
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Инструмент прямого взаимодействия с PostgreSQL. Будьте осторожны с
+            командами UPDATE и DELETE.
+          </Typography>
+        </Box>
+        <Button
+          variant="outlined"
+          color="success"
+          startIcon={<CloudDownload />}
+          // Браузер сам сделает GET-запрос по этой ссылке, передаст куки авторизации и скачает файл
+          href="http://localhost:4000/api/admin/backup" // ⚠️ Укажи здесь порт/URL своего бэкенда
+          sx={{
+            fontWeight: 'bold',
+            textTransform: 'none',
+            height: 40,
+            borderRadius: 2,
+          }}
+        >
+          Скачать дамп БД (.sql)
+        </Button>
       </Box>
 
       {/* Поле ввода SQL кода */}
