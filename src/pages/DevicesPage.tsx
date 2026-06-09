@@ -21,9 +21,6 @@ import {
   Drawer,
   IconButton,
   Tooltip,
-  Menu,
-  MenuItem,
-  ListItemIcon,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
@@ -32,18 +29,8 @@ import CreateDevicePage from './admin/CreateDevicePage';
 import { useAuth } from '../hooks/useAuth';
 import DeviceCard from './DeviceCard';
 import EditDevicePage from './admin/EditDevicePage';
-import {
-  Add,
-  Assessment,
-  BarChart,
-  CalendarMonth,
-  CloudUpload,
-  FilterAlt,
-  Terminal,
-} from '@mui/icons-material';
-import { Link } from 'react-router';
+import { Add, FilterAlt } from '@mui/icons-material';
 import React from 'react';
-import routes from '../utils/routes';
 
 type Device =
   GetDevicesWithRelationsListQuery['devicesWithRelations']['items'][0];
@@ -89,9 +76,6 @@ export default function DevicesPage() {
   });
 
   const theme = useTheme();
-
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const isMenuOpen = Boolean(anchorEl);
 
   const isMobileOrLaptop = useMediaQuery(theme.breakpoints.down('md'));
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -149,88 +133,6 @@ export default function DevicesPage() {
 
   const { data: companiesData } = useQuery(GetCompaniesDocument);
   const { data: citiesData } = useQuery(GetSitiesDocument);
-  // const rows = useMemo(() => {
-  //   const rawDevices = (data?.devicesWithRelations as Device[]) || [];
-
-  //   return rawDevices
-  //     .map((device) => {
-  //       const lastVerification =
-  //         device.verifications?.length > 0
-  //           ? device.verifications.reduce((prev, curr) =>
-  //               Number(curr.date) > Number(prev.date) ? curr : prev
-  //             )
-  //           : null;
-  //       return {
-  //         ...device,
-  //         latestVerification: lastVerification,
-  //       };
-  //     })
-  //     .filter((row) => {
-  //       const matchesCity =
-  //         !filters.city || row.productionSite?.city?.name === filters.city;
-
-  //       const matchesCompany =
-  //         !filters.company ||
-  //         row.productionSite?.company?.name
-  //           ?.toLowerCase()
-  //           .includes(filters.company.toLowerCase());
-
-  //       const matchesSub =
-  //         !filters.productionSite ||
-  //         row.productionSite?.name
-  //           .toLowerCase()
-  //           .includes(filters.productionSite.toLowerCase());
-
-  //       const matchesName =
-  //         !filters.deviceName ||
-  //         row.name.toLowerCase().includes(filters.deviceName.toLowerCase());
-
-  //       const matchesSerialNumber =
-  //         !filters.serialNumber ||
-  //         row.serialNumber
-  //           .toLowerCase()
-  //           .includes(filters.serialNumber.toLowerCase());
-
-  //       const matchesStatus =
-  //         !filters.status || row.status?.name === filters.status;
-
-  //       const vDate = row.latestVerification?.validUntil
-  //         ? new Date(Number(row.latestVerification.validUntil))
-  //         : null;
-  //       const matchesDateStart =
-  //         !filters.dateStart || (vDate && vDate >= new Date(filters.dateStart));
-  //       const matchesDateEnd =
-  //         !filters.dateEnd || (vDate && vDate <= new Date(filters.dateEnd));
-
-  //       const matchesMetrologyControle =
-  //         !filters.metrologyControle ||
-  //         row.latestVerification?.metrologyControleType?.name ===
-  //           filters.metrologyControle;
-
-  //       return (
-  //         matchesName &&
-  //         matchesSerialNumber &&
-  //         matchesCity &&
-  //         matchesCompany &&
-  //         matchesSub &&
-  //         matchesStatus &&
-  //         matchesDateStart &&
-  //         matchesDateEnd &&
-  //         matchesMetrologyControle
-  //       );
-  //     });
-  // }, [data, filters]);
-
-  // const rows = useMemo(() => {
-  //   const response = data?.devicesWithRelations;
-  //   const rawDevices = response?.items || [];
-
-  //   return rawDevices.map((device) => ({
-  //     ...device,
-  //     // Бэкенд возвращает в массиве строго 1 последнюю поверку (или 0 штук)
-  //     latestVerification: device.verifications?.[0] || null,
-  //   }));
-  // }, [data]);
 
   const rows = useMemo(() => {
     const response = data?.devicesWithRelations;
@@ -888,20 +790,10 @@ export default function DevicesPage() {
               rows={rows}
               columns={columns}
               loading={loading}
-              // pagination
-              // ----
               paginationMode="server"
-              // rowCount={totalCount}
               rowCount={rowCount}
-              // rowCount={loading ? undefined : totalCount}
               paginationModel={paginationModel}
               onPaginationModelChange={setPaginationModel}
-              // onPaginationModelChange={(newModel) => {
-              //   // Жестко фиксируем изменение стейта в памяти React
-              //   setPaginationModel(newModel);
-              // }}
-              // -------
-              // showCellVerticalBorder
               density="compact"
               pageSizeOptions={[10, 25, 50]}
               onRowClick={handleRowClick}
