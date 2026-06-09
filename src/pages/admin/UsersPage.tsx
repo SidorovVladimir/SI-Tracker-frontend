@@ -148,7 +148,7 @@ export default function UsersPage() {
                     color="error"
                     sx={{ border: '1px solid', borderColor: 'error.light' }}
                     onClick={() => handleDeleteClick(u.id)}
-                    disabled={!(user?.role === 'superadmin')}
+                    disabled={user?.role !== 'superadmin' || user?.id === u.id}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -220,7 +220,9 @@ export default function UsersPage() {
                           size="small"
                           color="error"
                           onClick={() => handleDeleteClick(u.id)}
-                          disabled={!(user?.role === 'superadmin')}
+                          disabled={
+                            user?.role !== 'superadmin' || user?.id === u.id
+                          }
                         >
                           <Delete fontSize="small" />
                         </IconButton>

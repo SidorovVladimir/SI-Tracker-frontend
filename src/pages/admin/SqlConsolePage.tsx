@@ -41,6 +41,39 @@ export const SqlConsolePage: React.FC = () => {
 
   const sqlResult = data?.executeRawSql;
 
+  const handleDownloadBackup = async () => {
+    try {
+      const response = await fetch(API_ROUTES.backup, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        enqueueSnackbar(`Ошибка скачивания: ${errText}`, { variant: 'error' });
+        return;
+      }
+
+      // Создаём blob и триггерим скачивание
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `si_tracker_backup_${
+        new Date().toISOString().split('T')[0]
+      }.sql`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      enqueueSnackbar('📦 Дамп успешно скачан!', { variant: 'success' });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      enqueueSnackbar(`Сбой сети: ${errorMessage}`, { variant: 'error' });
+    }
+  };
+
   const handleRestoreBackup = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -79,8 +112,9 @@ export const SqlConsolePage: React.FC = () => {
         const errText = await response.text();
         enqueueSnackbar(`Ошибка: ${errText}`, { variant: 'error' });
       }
-    } catch (err: any) {
-      enqueueSnackbar(`Сбой сети: ${err.message}`, { variant: 'error' });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      enqueueSnackbar(`Сбой сети: ${errorMessage}`, { variant: 'error' });
     } finally {
       setIsRestoring(false);
     }
@@ -150,7 +184,7 @@ export const SqlConsolePage: React.FC = () => {
             color="success"
             startIcon={<CloudDownload />}
             // Браузер сам сделает GET-запрос по этой ссылке, передаст куки авторизации и скачает файл
-            href={API_ROUTES.backup} // ⚠️ Укажи здесь порт/URL своего бэкенда
+            onClick={handleDownloadBackup}
             sx={{
               fontWeight: 'bold',
               textTransform: 'none',
