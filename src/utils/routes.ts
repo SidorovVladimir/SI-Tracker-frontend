@@ -8,6 +8,7 @@ export default {
   productionAnalytics: () => '/production-analytics',
   import: () => '/import',
   sqlConsole: () => '/sql-console',
+  chat: () => '/chat',
   admin: {
     root: () => '/admin',
     users: () => '/admin/users',

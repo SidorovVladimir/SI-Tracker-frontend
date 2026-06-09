@@ -10,6 +10,16 @@ query GetUsers {
   }
 }
 
+query GetChatUsers {
+  getChatUsers {
+    id
+    firstName
+    lastName
+    email
+    role
+  }
+}
+
 query GetUser($id: ID!) {
   user(id: $id) {
     id

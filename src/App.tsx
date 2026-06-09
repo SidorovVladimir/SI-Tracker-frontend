@@ -43,6 +43,7 @@ import AnalyticsPage from './pages/AnalyticsPage';
 import ProductionAnalyticsPage from './pages/ProductionAnalyticsPage';
 import { ExcelImporter } from './components/ExcelImporter';
 import { SqlConsolePage } from './pages/admin/SqlConsolePage';
+import { ChatPage } from './pages/ChatPage';
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path={routes.home()} element={<HomePage />} />
           <Route path={routes.profile()} element={<ProfilePage />} />
+          <Route path={routes.chat()} element={<ChatPage />} />
 
           <Route element={<ProtectedRoute allowedRoles={['superadmin']} />}>
             <Route path={routes.import()} element={<ExcelImporter />} />

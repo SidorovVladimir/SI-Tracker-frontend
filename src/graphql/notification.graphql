@@ -1,0 +1,27 @@
+# 1. Получить последние 20 уведомлений
+query GetSystemNotifications {
+  getSystemNotifications {
+    id
+    userId
+    title
+    message
+    type
+    isRead
+    createdAt
+  }
+}
+
+# 2. Счетчик для Badge на колокольчике
+query GetUnreadNotificationsCount {
+  getUnreadNotificationsCount
+}
+
+# 3. Мутация "Прочитать всё"
+mutation MarkAllNotificationsAsRead {
+  markAllNotificationsAsRead
+}
+
+# 4. Мутация прочтения одного уведомления
+mutation MarkNotificationAsRead($id: ID!) {
+  markNotificationAsRead(id: $id)
+}

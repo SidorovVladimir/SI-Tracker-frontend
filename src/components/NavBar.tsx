@@ -28,6 +28,8 @@ import {
   CloudUpload,
   Terminal,
 } from '@mui/icons-material';
+import { HeaderNotificationsBell } from './HeaderNotificationsBell';
+import { HeaderChatButton } from './HeaderChatButton';
 
 const pulseKeyframes = {
   '0%': { transform: 'scale(1)' },
@@ -78,6 +80,7 @@ export default function NavBar() {
     } catch (error) {
       console.warn('Logout failed', error);
     } finally {
+      await client.clearStore();
       await client.resetStore();
       navigate(routes.login());
     }
@@ -113,6 +116,7 @@ export default function NavBar() {
                 textDecoration: 'none',
                 color: 'inherit',
                 fontWeight: 700,
+                fontSize: { xs: '1.1rem', sm: '1.25rem' },
                 display: 'inline-block',
                 width: 'fit-content',
                 cursor: 'pointer',
@@ -129,7 +133,13 @@ export default function NavBar() {
           </Tooltip>
 
           {isAuthenticated ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: { xs: 0.5, sm: 1.5 },
+              }}
+            >
               {/* 🎯 КНОПКА «УПРАВЛЕНИЕ» ДЛЯ АДМИНОВ И МЕТРОЛОГОВ */}
               {user?.role !== 'user' && (
                 <Box>
@@ -147,6 +157,7 @@ export default function NavBar() {
                     startIcon={<Settings />}
                     size="small"
                     sx={{
+                      display: { xs: 'none', sm: 'inline-flex' },
                       fontWeight: 'bold',
                       textTransform: 'none',
                       borderRadius: 2,
@@ -156,6 +167,14 @@ export default function NavBar() {
                   >
                     Управление
                   </Button>
+                  <IconButton
+                    id="admin-nav-button-mobile"
+                    color="inherit"
+                    onClick={handleAdminMenuOpen}
+                    sx={{ display: { xs: 'flex', sm: 'none' }, p: 1 }}
+                  >
+                    <Settings />
+                  </IconButton>
 
                   <Menu
                     id="admin-nav-menu"
@@ -270,11 +289,19 @@ export default function NavBar() {
                   </Menu>
                 </Box>
               )}
+              <HeaderChatButton />
+
+              <HeaderNotificationsBell />
 
               {/* МЕНЮ ПРОФИЛЯ ПОЛЬЗОВАТЕЛЯ */}
               <IconButton
                 onClick={handleMenu}
-                sx={{ p: 0.5, border: '1px solid', borderColor: 'divider' }}
+                sx={{
+                  p: 0.5,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  ml: { xs: 0.5, sm: 1 },
+                }}
               >
                 <Avatar sx={{ width: 32, height: 32 }} />
               </IconButton>

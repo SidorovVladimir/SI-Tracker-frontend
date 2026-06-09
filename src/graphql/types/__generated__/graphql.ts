@@ -75,6 +75,26 @@ export type BatchSyncResponse = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type ChatDialog = {
+  __typename: 'ChatDialog';
+  companionId: Scalars['ID']['output'];
+  companionName: Scalars['String']['output'];
+  lastMessageCreatedAt: Scalars['String']['output'];
+  lastMessageText: Scalars['String']['output'];
+  unreadCount: Scalars['Int']['output'];
+};
+
+export type ChatMessage = {
+  __typename: 'ChatMessage';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  recipientId: Scalars['ID']['output'];
+  senderId: Scalars['ID']['output'];
+  text: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export type City = {
   __typename: 'City';
   createdAt: Scalars['String']['output'];
@@ -427,6 +447,9 @@ export type Mutation = {
   importDevicesFromExcel: Scalars['Int']['output'];
   login: AuthPayload;
   logout: Scalars['Boolean']['output'];
+  markAllNotificationsAsRead: Scalars['Boolean']['output'];
+  markAsRead: Scalars['Boolean']['output'];
+  markNotificationAsRead: Scalars['Boolean']['output'];
   register: AuthPayload;
   removeDevicesFromBatch: Scalars['Boolean']['output'];
   syncBatchWithArshin: BatchSyncResponse;
@@ -569,6 +592,14 @@ export type MutationImportDevicesFromExcelArgs = {
 
 export type MutationLoginArgs = {
   input: LoginUserInput;
+};
+
+export type MutationMarkAsReadArgs = {
+  senderId: Scalars['ID']['input'];
+};
+
+export type MutationMarkNotificationAsReadArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type MutationRegisterArgs = {
@@ -738,11 +769,17 @@ export type Query = {
   equipmentType: EquipmentType;
   equipmentTypes: Array<EquipmentType>;
   executeRawSql: RawSqlResponse;
+  getChatDialogs: Array<ChatDialog>;
+  getChatHistory: Array<ChatMessage>;
+  getChatUsers: Array<User>;
   getDraftBatchesByMonth: Array<DraftBatchOption>;
   getFinancialAnalytics: FinancialAnalyticsResponse;
   getPlanningPoolByMonth: PlanningPoolResponse;
   getProductionAnalytics: ProductionAnalyticsResponse;
   getProductionSitesForSelect: Array<ProductionSite>;
+  getSystemNotifications: Array<SystemNotification>;
+  getTotalUnreadCount: Scalars['Int']['output'];
+  getUnreadNotificationsCount: Scalars['Int']['output'];
   getVerificationBatches: Array<VerificationBatch>;
   getYearlyCalendarSummary: Array<MonthlySummary>;
   me: Maybe<User>;
@@ -794,6 +831,12 @@ export type QueryEquipmentTypeArgs = {
 
 export type QueryExecuteRawSqlArgs = {
   sqlQuery: Scalars['String']['input'];
+};
+
+export type QueryGetChatHistoryArgs = {
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+  recipientId: Scalars['ID']['input'];
 };
 
 export type QueryGetDraftBatchesByMonthArgs = {
@@ -894,6 +937,17 @@ export type Status = {
 export type SyncDeviceWithArshinInput = {
   batchId: Scalars['ID']['input'];
   deviceId: Scalars['ID']['input'];
+};
+
+export type SystemNotification = {
+  __typename: 'SystemNotification';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  message: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  userId: Maybe<Scalars['ID']['output']>;
 };
 
 export type UpdateCityInput = {
@@ -1228,6 +1282,48 @@ export type RegisterMutation = {
 export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
 
 export type LogoutMutation = { logout: boolean };
+
+export type GetChatHistoryQueryVariables = Exact<{
+  recipientId: Scalars['ID']['input'];
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+}>;
+
+export type GetChatHistoryQuery = {
+  getChatHistory: Array<{
+    __typename: 'ChatMessage';
+    id: string;
+    senderId: string;
+    recipientId: string;
+    text: string;
+    isRead: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+};
+
+export type GetChatDialogsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetChatDialogsQuery = {
+  getChatDialogs: Array<{
+    __typename: 'ChatDialog';
+    companionId: string;
+    companionName: string;
+    lastMessageText: string;
+    unreadCount: number;
+    lastMessageCreatedAt: string;
+  }>;
+};
+
+export type GetTotalUnreadCountQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetTotalUnreadCountQuery = { getTotalUnreadCount: number };
+
+export type MarkAsReadMutationVariables = Exact<{
+  senderId: Scalars['ID']['input'];
+}>;
+
+export type MarkAsReadMutation = { markAsRead: boolean };
 
 export type GetSitiesQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -1752,6 +1848,47 @@ export type DeleteMetrologyControlTypeMutation = {
   deleteMetrologyControlType: boolean;
 };
 
+export type GetSystemNotificationsQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type GetSystemNotificationsQuery = {
+  getSystemNotifications: Array<{
+    __typename: 'SystemNotification';
+    id: string;
+    userId: string | null;
+    title: string;
+    message: string;
+    type: string;
+    isRead: boolean;
+    createdAt: string;
+  }>;
+};
+
+export type GetUnreadNotificationsCountQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type GetUnreadNotificationsCountQuery = {
+  getUnreadNotificationsCount: number;
+};
+
+export type MarkAllNotificationsAsReadMutationVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type MarkAllNotificationsAsReadMutation = {
+  markAllNotificationsAsRead: boolean;
+};
+
+export type MarkNotificationAsReadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type MarkNotificationAsReadMutation = {
+  markNotificationAsRead: boolean;
+};
+
 export type GetYearlySummaryQueryVariables = Exact<{
   year: Scalars['Int']['input'];
   companyDefaultLeadTime?: InputMaybe<Scalars['Int']['input']>;
@@ -2127,6 +2264,19 @@ export type GetUsersQuery = {
     role: string;
     createdAt: string;
     updatedAt: string;
+  }>;
+};
+
+export type GetChatUsersQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetChatUsersQuery = {
+  getChatUsers: Array<{
+    __typename: 'User';
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
   }>;
 };
 
@@ -2867,6 +3017,200 @@ export const LogoutDocument = {
     },
   ],
 } as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
+export const GetChatHistoryDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetChatHistory' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'recipientId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'offset' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getChatHistory' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'recipientId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'recipientId' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'offset' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'offset' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'senderId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'recipientId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'isRead' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetChatHistoryQuery, GetChatHistoryQueryVariables>;
+export const GetChatDialogsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetChatDialogs' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getChatDialogs' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'companionId' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'companionName' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'lastMessageText' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'unreadCount' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'lastMessageCreatedAt' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetChatDialogsQuery, GetChatDialogsQueryVariables>;
+export const GetTotalUnreadCountDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetTotalUnreadCount' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getTotalUnreadCount' },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetTotalUnreadCountQuery,
+  GetTotalUnreadCountQueryVariables
+>;
+export const MarkAsReadDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'MarkAsRead' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'senderId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'markAsRead' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'senderId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'senderId' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<MarkAsReadMutation, MarkAsReadMutationVariables>;
 export const GetSitiesDocument = {
   kind: 'Document',
   definitions: [
@@ -4883,6 +5227,126 @@ export const DeleteMetrologyControlTypeDocument = {
   DeleteMetrologyControlTypeMutation,
   DeleteMetrologyControlTypeMutationVariables
 >;
+export const GetSystemNotificationsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetSystemNotifications' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getSystemNotifications' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'userId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'isRead' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetSystemNotificationsQuery,
+  GetSystemNotificationsQueryVariables
+>;
+export const GetUnreadNotificationsCountDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetUnreadNotificationsCount' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getUnreadNotificationsCount' },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetUnreadNotificationsCountQuery,
+  GetUnreadNotificationsCountQueryVariables
+>;
+export const MarkAllNotificationsAsReadDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'MarkAllNotificationsAsRead' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'markAllNotificationsAsRead' },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  MarkAllNotificationsAsReadMutation,
+  MarkAllNotificationsAsReadMutationVariables
+>;
+export const MarkNotificationAsReadDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'MarkNotificationAsRead' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'markNotificationAsRead' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  MarkNotificationAsReadMutation,
+  MarkNotificationAsReadMutationVariables
+>;
 export const GetYearlySummaryDocument = {
   kind: 'Document',
   definitions: [
@@ -6452,6 +6916,35 @@ export const GetUsersDocument = {
     },
   ],
 } as unknown as DocumentNode<GetUsersQuery, GetUsersQueryVariables>;
+export const GetChatUsersDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetChatUsers' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getChatUsers' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetChatUsersQuery, GetChatUsersQueryVariables>;
 export const GetUserDocument = {
   kind: 'Document',
   definitions: [

@@ -11,6 +11,7 @@ import { SnackbarProvider } from 'notistack';
 import theme from './utils/theme.ts';
 
 import './index.css';
+import { SocketProvider } from './context/SocketContext.tsx';
 
 const getClient = () => {
   return new ApolloClient({
@@ -60,7 +61,9 @@ const bootstrap = () => {
           <BrowserRouter>
             <ThemeProvider theme={theme}>
               <CssBaseline />
-              <App />
+              <SocketProvider>
+                <App />
+              </SocketProvider>
             </ThemeProvider>
           </BrowserRouter>
         </ApolloProvider>

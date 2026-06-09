@@ -1,0 +1,32 @@
+query GetChatHistory($recipientId: ID!, $limit: Int!, $offset: Int!) {
+  getChatHistory(recipientId: $recipientId, limit: $limit, offset: $offset) {
+    id
+    senderId
+    recipientId
+    text
+    isRead
+    createdAt
+    updatedAt
+  }
+}
+
+# 2. Получить список активных диалогов (левая панель)
+query GetChatDialogs {
+  getChatDialogs {
+    companionId
+    companionName
+    lastMessageText
+    unreadCount
+    lastMessageCreatedAt
+  }
+}
+
+# 3. Суммарный счетчик непрочитанных (для колокольчика)
+query GetTotalUnreadCount {
+  getTotalUnreadCount
+}
+
+# 4. Мутация прочтения сообщений
+mutation MarkAsRead($senderId: ID!) {
+  markAsRead(senderId: $senderId)
+}
