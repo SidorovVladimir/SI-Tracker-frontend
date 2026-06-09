@@ -16,13 +16,18 @@ import {
 } from '@mui/material';
 
 import { ExecuteRawSqlDocument } from '../../graphql/types/__generated__/graphql';
-import { CloudDownload, PlayArrow } from '@mui/icons-material';
+import { CloudDownload, CloudUpload, PlayArrow } from '@mui/icons-material';
 import { useLazyQuery } from '@apollo/client/react';
+import { useSnackbar } from 'notistack';
+import { API_ROUTES } from '../../config';
 
 export const SqlConsolePage: React.FC = () => {
   const [queryText, setQueryText] = useState<string>(
     'SELECT * FROM devices LIMIT 5;'
   );
+
+  const { enqueueSnackbar } = useSnackbar();
+  const [isRestoring, setIsRestoring] = useState(false);
 
   // Используем useLazyQuery, чтобы запрос улетал только по нажатию кнопки
   const [runSql, { data, loading }] = useLazyQuery(ExecuteRawSqlDocument, {
@@ -35,6 +40,51 @@ export const SqlConsolePage: React.FC = () => {
   };
 
   const sqlResult = data?.executeRawSql;
+
+  const handleRestoreBackup = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const confirmRestore = window.confirm(
+      '⚠️ ВНИМАНИЕ! Вы собираетесь полностью перезаписать текущую базу данных. Все текущие несохраненные данные будут стерты. Продолжить?'
+    );
+    if (!confirmRestore) return;
+
+    setIsRestoring(true);
+
+    try {
+      // Отправляем файл методом POST напрямую на наш REST-эндпоинт
+      const response = await fetch(API_ROUTES.restore, {
+        method: 'POST',
+        body: file, // Стримим файл напрямую в теле запроса
+        credentials: 'include',
+        headers: {
+          // Важно, чтобы Express понял, что мы шлем credentials
+          Accept: 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        enqueueSnackbar(
+          '📦 База данных успешно восстановлена из резервной копии!',
+          {
+            variant: 'success',
+          }
+        );
+        // Перезагружаем страницу, чтобы обновить все кэши и данные на экране
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        const errText = await response.text();
+        enqueueSnackbar(`Ошибка: ${errText}`, { variant: 'error' });
+      }
+    } catch (err: any) {
+      enqueueSnackbar(`Сбой сети: ${err.message}`, { variant: 'error' });
+    } finally {
+      setIsRestoring(false);
+    }
+  };
 
   return (
     <Box
@@ -67,21 +117,50 @@ export const SqlConsolePage: React.FC = () => {
             командами UPDATE и DELETE.
           </Typography>
         </Box>
-        <Button
-          variant="outlined"
-          color="success"
-          startIcon={<CloudDownload />}
-          // Браузер сам сделает GET-запрос по этой ссылке, передаст куки авторизации и скачает файл
-          href="http://localhost:4000/api/admin/backup" // ⚠️ Укажи здесь порт/URL своего бэкенда
-          sx={{
-            fontWeight: 'bold',
-            textTransform: 'none',
-            height: 40,
-            borderRadius: 2,
-          }}
-        >
-          Скачать дамп БД (.sql)
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          <Button
+            variant="contained"
+            color="warning"
+            component="label"
+            disabled={isRestoring}
+            startIcon={
+              isRestoring ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <CloudUpload />
+              )
+            }
+            sx={{
+              fontWeight: 'bold',
+              textTransform: 'none',
+              height: 40,
+              borderRadius: 2,
+            }}
+          >
+            {isRestoring ? '⏳ Восстановление...' : 'Восстановить БД из .sql'}
+            <input
+              type="file"
+              accept=".sql"
+              hidden
+              onChange={handleRestoreBackup}
+            />
+          </Button>
+          <Button
+            variant="outlined"
+            color="success"
+            startIcon={<CloudDownload />}
+            // Браузер сам сделает GET-запрос по этой ссылке, передаст куки авторизации и скачает файл
+            href={API_ROUTES.backup} // ⚠️ Укажи здесь порт/URL своего бэкенда
+            sx={{
+              fontWeight: 'bold',
+              textTransform: 'none',
+              height: 40,
+              borderRadius: 2,
+            }}
+          >
+            Скачать дамп БД (.sql)
+          </Button>
+        </Box>
       </Box>
 
       {/* Поле ввода SQL кода */}

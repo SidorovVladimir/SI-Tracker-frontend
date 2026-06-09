@@ -6,22 +6,6 @@ interface Props {
   allowedRoles?: string[];
 }
 
-// export default function ProtectedRoute() {
-//   const { isAuthenticated, isLoading } = useAuth();
-//   if (isLoading)
-//     return (
-//       <Box
-//         display="flex"
-//         justifyContent="center"
-//         alignItems="center"
-//         minHeight="100vh"
-//       >
-//         <CircularProgress />
-//       </Box>
-//     );
-//   return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
-// }
-
 export default function ProtectedRoute({ allowedRoles }: Props) {
   const { isAuthenticated, isLoading, user } = useAuth();
 

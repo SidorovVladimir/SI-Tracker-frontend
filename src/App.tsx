@@ -53,6 +53,11 @@ function App() {
           <Route path={routes.home()} element={<HomePage />} />
           <Route path={routes.profile()} element={<ProfilePage />} />
 
+          <Route element={<ProtectedRoute allowedRoles={['superadmin']} />}>
+            <Route path={routes.import()} element={<ExcelImporter />} />
+            <Route path={routes.sqlConsole()} element={<SqlConsolePage />} />
+          </Route>
+
           <Route
             element={<ProtectedRoute allowedRoles={['admin', 'superadmin']} />}
           >
@@ -65,8 +70,6 @@ function App() {
               path={routes.productionAnalytics()}
               element={<ProductionAnalyticsPage />}
             />
-            <Route path={routes.import()} element={<ExcelImporter />} />
-            <Route path={routes.sqlConsole()} element={<SqlConsolePage />} />
             <Route element={<MainLayout />}>
               <Route path={routes.admin.root()} element={<AdminPage />}>
                 <Route path={routes.admin.users()} element={<UsersPage />} />

@@ -13,7 +13,7 @@ import {
   Tooltip,
   ListItemIcon,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Link, useNavigate } from 'react-router';
 import { useApolloClient, useMutation } from '@apollo/client/react';
@@ -35,132 +35,6 @@ const pulseKeyframes = {
   '100%': { transform: 'scale(1)' },
 };
 
-// export default function NavBar() {
-//   const { isAuthenticated, user } = useAuth();
-//   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-//   const [logout] = useMutation(LogoutDocument);
-//   const client = useApolloClient();
-
-//   const navigate = useNavigate();
-//   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-//     setAnchorEl(event.currentTarget);
-//   };
-
-//   const handleClose = () => {
-//     setAnchorEl(null);
-//   };
-
-//   const handleLogout = async () => {
-//     try {
-//       await logout();
-//     } catch (error) {
-//       console.warn('Logout failed', error);
-//     } finally {
-//       await client.resetStore();
-//       navigate(routes.login());
-//     }
-//   };
-
-//   return (
-//     <AppBar
-//       position="sticky"
-//       elevation={0}
-//       sx={{
-//         height: '64px',
-//         borderBottom: '1px solid',
-//         borderColor: 'divider',
-//         bgcolor: 'background.paper',
-//         color: 'text.primary',
-//         zIndex: (theme) => theme.zIndex.drawer + 1, // Чтобы был поверх сайдбара
-//       }}
-//     >
-//       <Container maxWidth="lg">
-//         <Toolbar disableGutters>
-//           <Tooltip
-//             title="На главную"
-//             arrow
-//             placement="bottom-start"
-//             enterDelay={500} // Появится не сразу, чтобы не раздражать при случайном наведении
-//           >
-//             <Typography
-//               variant="h6"
-//               component={Link}
-//               to={routes.home()}
-//               sx={{
-//                 flexGrow: 1,
-//                 textDecoration: 'none',
-//                 color: 'inherit',
-//                 fontWeight: 700,
-//                 display: 'inline-block',
-//                 width: 'fit-content',
-//                 cursor: 'pointer',
-//                 animation: 'pulse-once 0.8s ease-in-out',
-//                 '@keyframes pulse-once': pulseKeyframes,
-//                 '&:hover': {
-//                   color: 'primary.main',
-//                   transition: 'opacity 0.2s',
-//                 },
-//               }}
-//             >
-//               SI-Tracker
-//             </Typography>
-//           </Tooltip>
-
-//           {isAuthenticated ? (
-//             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-//               <IconButton
-//                 onClick={handleMenu}
-//                 sx={{ p: 0.5, border: '1px solid', borderColor: 'divider' }}
-//               >
-//                 <Avatar sx={{ width: 32, height: 32 }} />
-//               </IconButton>
-
-//               <Menu
-//                 anchorEl={anchorEl}
-//                 open={Boolean(anchorEl)}
-//                 onClose={handleClose}
-//                 slotProps={{ paper: { sx: { width: 220, mt: 1.5 } } }}
-//                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-//                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-//               >
-//                 <MenuItem
-//                   component={Link}
-//                   to={routes.profile()}
-//                   onClick={handleClose}
-//                 >
-//                   <ListItemText>Профиль</ListItemText>
-//                 </MenuItem>
-//                 <MenuItem
-//                   component={Link}
-//                   to={routes.admin.root()}
-//                   onClick={handleClose}
-//                 >
-//                   {user?.role !== 'user' && (
-//                     <ListItemText>Панель администратора</ListItemText>
-//                   )}
-//                   {/* <ListItemText>Панель администратора</ListItemText> */}
-//                 </MenuItem>
-
-//                 <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-//                   <ListItemText>Выход</ListItemText>
-//                 </MenuItem>
-//               </Menu>
-//             </Box>
-//           ) : (
-//             <Button
-//               component={Link}
-//               to={routes.login()}
-//               variant="contained"
-//               size="small"
-//             >
-//               Вход
-//             </Button>
-//           )}
-//         </Toolbar>
-//       </Container>
-//     </AppBar>
-//   );
-// }
 export default function NavBar() {
   const { isAuthenticated, user } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -171,6 +45,13 @@ export default function NavBar() {
   const [logout] = useMutation(LogoutDocument);
   const client = useApolloClient();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setAnchorEl(null);
+      setAdminAnchorEl(null);
+    }
+  }, [isAuthenticated]);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -190,6 +71,8 @@ export default function NavBar() {
   };
 
   const handleLogout = async () => {
+    setAnchorEl(null);
+    setAdminAnchorEl(null);
     try {
       await logout();
     } catch (error) {
@@ -333,47 +216,57 @@ export default function NavBar() {
                       </ListItemText>
                     </MenuItem>
 
-                    <Box
-                      sx={{
-                        my: 0.5,
-                        borderBottom: '1px solid',
-                        borderColor: 'divider',
-                      }}
-                    />
-
-                    <MenuItem
-                      component={Link}
-                      to={routes.import()}
-                      onClick={handleAdminMenuClose}
-                    >
-                      <ListItemIcon sx={{ color: 'warning.main' }}>
-                        <CloudUpload fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText
-                        slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
-                      >
-                        📥 Импорт данных Excel
-                      </ListItemText>
-                    </MenuItem>
-
-                    <MenuItem
-                      component={Link}
-                      to={routes.sqlConsole()}
-                      onClick={handleAdminMenuClose}
-                    >
-                      <ListItemIcon sx={{ color: 'error.main' }}>
-                        <Terminal fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText
-                        slotProps={{
-                          primary: {
-                            sx: { fontWeight: 'bold', color: 'error.main' },
-                          },
+                    {user?.role === 'superadmin' && [
+                      // 1. Разделительная линия
+                      <Box
+                        key="superadmin-divider"
+                        sx={{
+                          my: 0.5,
+                          borderBottom: '1px solid',
+                          borderColor: 'divider',
                         }}
+                      />,
+
+                      // 2. Пункт импорта
+                      <MenuItem
+                        key="superadmin-import"
+                        component={Link}
+                        to={routes.import()}
+                        onClick={handleAdminMenuClose}
                       >
-                        💻 SQL Консоль (Сырая база)
-                      </ListItemText>
-                    </MenuItem>
+                        <ListItemIcon sx={{ color: 'warning.main' }}>
+                          <CloudUpload fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText
+                          slotProps={{
+                            primary: { sx: { fontWeight: 'bold' } },
+                          }}
+                        >
+                          📥 Импорт данных Excel
+                        </ListItemText>
+                      </MenuItem>,
+
+                      // 3. Пункт SQL консоли
+                      <MenuItem
+                        key="superadmin-sql"
+                        component={Link}
+                        to={routes.sqlConsole()}
+                        onClick={handleAdminMenuClose}
+                      >
+                        <ListItemIcon sx={{ color: 'error.main' }}>
+                          <Terminal fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText
+                          slotProps={{
+                            primary: {
+                              sx: { fontWeight: 'bold', color: 'error.main' },
+                            },
+                          }}
+                        >
+                          💻 SQL Консоль (Сырая база)
+                        </ListItemText>
+                      </MenuItem>,
+                    ]}
                   </Menu>
                 </Box>
               )}
@@ -402,7 +295,6 @@ export default function NavBar() {
                   <ListItemText>Профиль</ListItemText>
                 </MenuItem>
 
-                {/* 🎯 ИСПРАВЛЕНИЕ: Теперь MenuItem целиком скрывается от обычных юзеров */}
                 {user?.role !== 'user' && (
                   <MenuItem
                     component={Link}
