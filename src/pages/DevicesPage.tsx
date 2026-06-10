@@ -14,7 +14,7 @@ import {
   Paper,
   TextField,
   Typography,
-  Slide,
+  // Slide,
   Stack,
   useTheme,
   useMediaQuery,
@@ -25,12 +25,13 @@ import {
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
 import { useEffect, useMemo, useState } from 'react';
-import CreateDevicePage from './admin/CreateDevicePage';
+// import CreateDevicePage from './admin/CreateDevicePage';
 import { useAuth } from '../hooks/useAuth';
-import DeviceCard from './DeviceCard';
-import EditDevicePage from './admin/EditDevicePage';
+// import DeviceCard from './DeviceCard';
+// import EditDevicePage from './admin/EditDevicePage';
 import { Add, FilterAlt } from '@mui/icons-material';
 import React from 'react';
+import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 
 type Device =
   GetDevicesWithRelationsListQuery['devicesWithRelations']['items'][0];
@@ -367,10 +368,10 @@ export default function DevicesPage() {
     setViewMode('create');
   };
 
-  const closeDetails = () => {
-    setViewMode(null);
-    setSelectedDeviceId(null);
-  };
+  // const closeDetails = () => {
+  //   setViewMode(null);
+  //   setSelectedDeviceId(null);
+  // };
 
   const handleColumnVisibilityModelChange = (
     newModel: Record<string, boolean>
@@ -905,55 +906,13 @@ export default function DevicesPage() {
         </Box>
 
         {viewMode && (
-          <Box
-            sx={{
-              width: '30%',
-              minWidth: 300,
-              position: 'relative',
-              // height: '100%',
-            }}
-          >
-            <Slide direction="left" in={!!viewMode} mountOnEnter unmountOnExit>
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  borderRadius: 3,
-                  boxShadow: 4,
-                  bgcolor: 'background.paper',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  p: 3,
-                  overflowY: 'auto',
-                }}
-              >
-                {viewMode === 'create' ? (
-                  <CreateDevicePage
-                    closeDetails={closeDetails}
-                    refetchDevice={refetch}
-                  />
-                ) : viewMode === 'edit' ? (
-                  <EditDevicePage
-                    deviceId={selectedDeviceId!}
-                    closeDetails={() => setViewMode('info')}
-                    close={closeDetails}
-                    refetchDevice={refetch}
-                  />
-                ) : (
-                  <DeviceCard
-                    deviceId={selectedDeviceId!}
-                    closeDetails={closeDetails}
-                    onEdit={() => setViewMode('edit')}
-                  />
-                )}
-              </Box>
-            </Slide>
-          </Box>
+          <DeviceManageSidebar
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            selectedDeviceId={selectedDeviceId}
+            setSelectedDeviceId={setSelectedDeviceId}
+            refetchTable={refetch} // Ваша функция refetch от useQuery
+          />
         )}
       </Box>
     </Paper>

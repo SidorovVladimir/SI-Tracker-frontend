@@ -359,7 +359,7 @@ export const HeaderNotificationsBell: React.FC = () => {
   };
 
   const unreadCount = countData?.getUnreadNotificationsCount ?? 0;
-  console.log(countData);
+
   const notifications = listData?.getSystemNotifications ?? [];
   const open = Boolean(anchorEl);
 

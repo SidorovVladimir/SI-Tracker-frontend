@@ -24,8 +24,14 @@ import {
   GetYearlySummaryDocument,
 } from '../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
+import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 
 export const VerificationPlanningPage: React.FC = () => {
+  const [viewMode, setViewMode] = useState<'info' | 'create' | 'edit' | null>(
+    null
+  );
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+
   const currentYear = new Date().getFullYear();
   const currentMonthStr = `${currentYear}-${String(
     new Date().getMonth() + 1
@@ -204,6 +210,258 @@ export const VerificationPlanningPage: React.FC = () => {
     setPage(0);
   };
 
+  // return (
+  //   <Box
+  //     sx={{
+  //       display: 'flex',
+  //       flexDirection: { xs: 'column', md: 'row' },
+  //       width: '100%',
+  //       height: { xs: 'auto', md: '100%' },
+  //       maxHeight: { xs: 'none', md: '100%' },
+  //       overflow: { xs: 'visible', md: 'hidden' },
+  //       p: { xs: 1, md: 3 },
+  //       gap: { xs: 2, md: 3 },
+  //       boxSizing: 'border-box',
+  //     }}
+  //   >
+  //     {/* ЛЕВАЯ ЧАСТЬ: Календарь-статистика */}
+  //     <YearlyCalendarSummary
+  //       currentYear={currentYear}
+  //       selectedMonth={selectedMonth}
+  //       onSelectMonth={handleMonthChange}
+  //       summaryData={summaryData?.getYearlyCalendarSummary}
+  //       loading={summaryLoading}
+  //     />
+
+  //     {/* ПРАВАЯ ЧАСТЬ: Таблица пула и фильтры управления */}
+  //     <Box
+  //       sx={{
+  //         flex: 1,
+  //         bgcolor: 'background.paper',
+  //         borderRadius: 2,
+  //         boxShadow: 1,
+  //         p: 3,
+  //         display: 'flex',
+  //         flexDirection: 'column',
+  //         overflow: 'hidden',
+  //       }}
+  //     >
+  //       {/* Панель заголовка и фильтров контроля */}
+  //       <Box
+  //         sx={{
+  //           display: 'flex',
+  //           justifyContent: 'space-between',
+  //           alignItems: 'center',
+  //           borderBottom: 1,
+  //           borderColor: 'divider',
+  //           pb: 2,
+  //           mb: 2,
+  //           flexWrap: 'wrap',
+  //           gap: 2,
+  //         }}
+  //       >
+  //         {/* Название и подпись */}
+  //         <Box>
+  //           <Typography
+  //             variant="h5"
+  //             sx={{ fontWeight: 'bold', color: 'text.primary' }}
+  //           >
+  //             Пул оборудования
+  //           </Typography>
+  //           <Typography variant="caption" color="text.secondary">
+  //             Рабочий период планирования: {selectedMonth}
+  //           </Typography>
+  //         </Box>
+
+  //         {/* ЦЕНТРАЛЬНЫЙ БЛОК: Управление партиями текущего месяца (Виден ВСЕГДА) */}
+  //         <Box
+  //           //
+  //           sx={{
+  //             display: 'flex',
+  //             // На мобилках элементы встанут вертикальной стопкой, на ПК — в одну красивую линию
+  //             flexDirection: { xs: 'column', sm: 'row' },
+  //             alignItems: { xs: 'stretch', sm: 'center' },
+  //             gap: 1.5,
+  //             bg: 'grey.50',
+  //             p: 1,
+  //             borderRadius: 2,
+  //             border: '1px solid',
+  //             borderColor: 'divider',
+  //             width: { xs: '100%', md: 'auto' }, // Во всю ширину на мобилках
+  //           }}
+  //         >
+  //           {/* Выпадающий список созданных черновиков */}
+  //           <TextField
+  //             select
+  //             size="small"
+  //             label="Партия для сборки"
+  //             value={selectedBatchOption}
+  //             onChange={(e) => setSelectedBatchOption(e.target.value)}
+  //             // sx={{ bgcolor: 'background.paper', width: 220 }}
+  //             sx={{
+  //               bgcolor: 'background.paper',
+  //               width: { xs: '100%', sm: 220 },
+  //             }}
+  //           >
+  //             <MenuItem value="NEW">➕ Создать новую...</MenuItem>
+  //             {activeDraftBatches.length > 0 && <Divider />}
+  //             {activeDraftBatches.map((batch) => (
+  //               <MenuItem key={batch.id} value={batch.id}>
+  //                 📦 Черновик №{batch.number}
+  //               </MenuItem>
+  //             ))}
+  //           </TextField>
+
+  //           {/* Поле ввода названия — только для режима NEW */}
+  //           {selectedBatchOption === 'NEW' && (
+  //             <TextField
+  //               placeholder="Номер новой партии"
+  //               size="small"
+  //               value={batchNumber}
+  //               onChange={(e) => setBatchNumber(e.target.value)}
+  //               // sx={{ bgcolor: 'background.paper', width: 180 }}
+  //               sx={{
+  //                 bgcolor: 'background.paper',
+  //                 width: { xs: '100%', sm: 180 },
+  //               }}
+  //             />
+  //           )}
+  //           {selectedBatchOption === 'NEW' && (
+  //             <TextField
+  //               type="date"
+  //               size="small"
+  //               label="Дата отправки"
+  //               slotProps={{
+  //                 inputLabel: { shrink: true },
+  //               }}
+  //               value={exactPlannedDate}
+  //               onChange={(e) => setExactPlannedDate(e.target.value)}
+  //               // sx={{ bgcolor: 'background.paper', width: 160 }}
+  //               sx={{
+  //                 bgcolor: 'background.paper',
+  //                 width: { xs: '100%', sm: 160 },
+  //               }}
+  //             />
+  //           )}
+
+  //           {/* Кнопка действия — активна только если метролог выбрал приборы галочками */}
+  //           <Button
+  //             variant="contained"
+  //             color={selectedBatchOption === 'NEW' ? 'primary' : 'secondary'}
+  //             size="small"
+  //             onClick={handleCreateAndAssignBatch}
+  //             disabled={
+  //               selectedDeviceIds.length === 0 ||
+  //               (selectedBatchOption === 'NEW' && !batchNumber.trim())
+  //             }
+  //             // sx={{ textTransform: 'none', fontWeight: 'bold', height: 40 }}
+  //             sx={{
+  //               height: 40,
+  //               width: { xs: '100%', sm: 'auto' },
+  //               textTransform: 'none',
+  //               fontWeight: 'bold',
+  //             }}
+  //           >
+  //             {selectedBatchOption === 'NEW'
+  //               ? 'Создать и добавить'
+  //               : `Добавить (${selectedDeviceIds.length} СИ)`}
+  //           </Button>
+  //         </Box>
+
+  //         <Box
+  //           sx={{
+  //             borderBottom: 1,
+  //             borderColor: 'divider',
+  //             width: '100%',
+  //             mt: 2,
+  //           }}
+  //         >
+  //           {controlTypesLoading ? (
+  //             <Typography variant="caption">
+  //               Загрузка фильтров контроля...
+  //             </Typography>
+  //           ) : (
+  //             <Tabs
+  //               value={activeFilter}
+  //               onChange={handleTabChange}
+  //               variant="scrollable"
+  //               scrollButtons="auto"
+  //               textColor="primary"
+  //               indicatorColor="primary"
+  //             >
+  //               {/* 1. Базовая вкладка для отображения всего пула */}
+  //               <Tab
+  //                 value="ALL"
+  //                 label={`Все приборы (${globalTotalCount})`}
+  //                 sx={{ textTransform: 'none', fontWeight: 'bold' }}
+  //               />
+  //               {/* 2. Динамические вкладки под каждый тип контроля из вашей БД */}
+  //               {controlTypesData?.metrologyControlTypes.map((type) => {
+  //                 // Считаем сколько приборов этого типа сейчас находится в пуле текущего месяца
+  //                 const serverCountObj = meta?.typeCounts.find(
+  //                   (t) =>
+  //                     t.typeName.toLowerCase().trim() ===
+  //                     type.name.toLowerCase().trim()
+  //                 );
+  //                 const count = serverCountObj?.count ?? 0;
+  //                 return (
+  //                   <Tab
+  //                     key={type.id}
+  //                     value={type.id}
+  //                     label={`${type.name} (${count})`}
+  //                     sx={{ textTransform: 'none', fontWeight: 'medium' }}
+  //                   />
+  //                 );
+  //               })}
+  //               {/* 3. Вкладка для приборов без присвоенного контроля */}
+  //               <Tab
+  //                 value="NOT_SPECIFIED"
+  //                 label={`Другие / Без контроля (${
+  //                   meta?.unassignedCount ?? 0
+  //                 })`}
+  //                 sx={{
+  //                   textTransform: 'none',
+  //                   fontWeight: 'medium',
+  //                   color: 'text.secondary',
+  //                 }}
+  //               />
+  //             </Tabs>
+  //           )}
+  //         </Box>
+  //       </Box>
+
+  //       {/* Таблица оборудования на MUI */}
+  //       <PlanningPoolTable
+  //         devices={filteredDevices}
+  //         loading={poolLoading}
+  //         selectedDeviceIds={selectedDeviceIds}
+  //         onDeviceSelect={handleDeviceSelect}
+  //         onDeviceClick={(id) => {
+  //           setSelectedDeviceId(id);
+  //           setViewMode('info');
+  //         }}
+  //       />
+  //       <DeviceManageSidebar
+  //         viewMode={viewMode}
+  //         setViewMode={setViewMode}
+  //         selectedDeviceId={selectedDeviceId}
+  //         setSelectedDeviceId={setSelectedDeviceId}
+  //         refetchTable={refetchPool}
+  //       />
+  //       <TablePagination
+  //         component="div"
+  //         count={totalCount} // Общее число записей из БД
+  //         page={page} // Текущая страница
+  //         onPageChange={handleChangePage}
+  //         rowsPerPage={rowsPerPage}
+  //         onRowsPerPageChange={handleChangeRowsPerPage}
+  //         rowsPerPageOptions={[10, 20, 50, 100]} // Варианты строк на выбор метролога
+  //         labelRowsPerPage="Строк на странице:"
+  //         sx={{ borderTop: 1, borderColor: 'divider', mt: 'auto' }}
+  //       />
+  //     </Box>
+  //   </Box>
+  // );
   return (
     <Box
       sx={{
@@ -219,25 +477,49 @@ export const VerificationPlanningPage: React.FC = () => {
       }}
     >
       {/* ЛЕВАЯ ЧАСТЬ: Календарь-статистика */}
-      <YearlyCalendarSummary
-        currentYear={currentYear}
-        selectedMonth={selectedMonth}
-        onSelectMonth={handleMonthChange}
-        summaryData={summaryData?.getYearlyCalendarSummary}
-        loading={summaryLoading}
-      />
+      {/* 🎯 МОБИЛЬНОСТЬ: Прячем календарь на смартфонах, если открыли карточку прибора */}
+      {/* <Box sx={{ display: { xs: viewMode ? 'none' : 'block', md: 'block' } }}>
+        <YearlyCalendarSummary
+          currentYear={currentYear}
+          selectedMonth={selectedMonth}
+          onSelectMonth={handleMonthChange}
+          summaryData={summaryData?.getYearlyCalendarSummary}
+          loading={summaryLoading}
+        />
+      </Box> */}
+      <Box
+        sx={{
+          display: viewMode ? 'none' : 'block',
+          transition: 'all 0.3s ease',
+        }}
+      >
+        <YearlyCalendarSummary
+          currentYear={currentYear}
+          selectedMonth={selectedMonth}
+          onSelectMonth={handleMonthChange}
+          summaryData={summaryData?.getYearlyCalendarSummary}
+          loading={summaryLoading}
+        />
+      </Box>
 
       {/* ПРАВАЯ ЧАСТЬ: Таблица пула и фильтры управления */}
       <Box
         sx={{
-          flex: 1,
+          // 🎯 ИСПРАВЛЕНО: Если сайдбар открыт — плавно сжимаем таблицу до 70% на ПК, освобождая место.
+          // На мобилках при открытом сайдбаре полностью скрываем таблицу, чтобы не ломать экран.
+          width: {
+            xs: viewMode ? '0%' : '100%',
+            md: viewMode ? 'calc(70% - 24px)' : '100%',
+          },
+          display: { xs: viewMode ? 'none' : 'flex', md: 'flex' },
+          flexDirection: 'column',
+          flex: { xs: 'none', md: viewMode ? 'none' : 1 },
           bgcolor: 'background.paper',
           borderRadius: 2,
           boxShadow: 1,
           p: 3,
-          display: 'flex',
-          flexDirection: 'column',
           overflow: 'hidden',
+          transition: 'width 0.3s ease, flex 0.3s ease', // Красивая плавная анимация сдвига
         }}
       >
         {/* Панель заголовка и фильтров контроля */}
@@ -267,31 +549,27 @@ export const VerificationPlanningPage: React.FC = () => {
             </Typography>
           </Box>
 
-          {/* ЦЕНТРАЛЬНЫЙ БЛОК: Управление партиями текущего месяца (Виден ВСЕГДА) */}
+          {/* Управление партиями текущего месяца */}
           <Box
-            //
             sx={{
               display: 'flex',
-              // На мобилках элементы встанут вертикальной стопкой, на ПК — в одну красивую линию
               flexDirection: { xs: 'column', sm: 'row' },
               alignItems: { xs: 'stretch', sm: 'center' },
               gap: 1.5,
-              bg: 'grey.50',
+              bgcolor: 'grey.50',
               p: 1,
               borderRadius: 2,
               border: '1px solid',
               borderColor: 'divider',
-              width: { xs: '100%', md: 'auto' }, // Во всю ширину на мобилках
+              width: { xs: '100%', md: 'auto' },
             }}
           >
-            {/* Выпадающий список созданных черновиков */}
             <TextField
               select
               size="small"
               label="Партия для сборки"
               value={selectedBatchOption}
               onChange={(e) => setSelectedBatchOption(e.target.value)}
-              // sx={{ bgcolor: 'background.paper', width: 220 }}
               sx={{
                 bgcolor: 'background.paper',
                 width: { xs: '100%', sm: 220 },
@@ -306,31 +584,27 @@ export const VerificationPlanningPage: React.FC = () => {
               ))}
             </TextField>
 
-            {/* Поле ввода названия — только для режима NEW */}
             {selectedBatchOption === 'NEW' && (
               <TextField
                 placeholder="Номер новой партии"
                 size="small"
                 value={batchNumber}
                 onChange={(e) => setBatchNumber(e.target.value)}
-                // sx={{ bgcolor: 'background.paper', width: 180 }}
                 sx={{
                   bgcolor: 'background.paper',
                   width: { xs: '100%', sm: 180 },
                 }}
               />
             )}
+
             {selectedBatchOption === 'NEW' && (
               <TextField
                 type="date"
                 size="small"
                 label="Дата отправки"
-                slotProps={{
-                  inputLabel: { shrink: true },
-                }}
+                slotProps={{ inputLabel: { shrink: true } }}
                 value={exactPlannedDate}
                 onChange={(e) => setExactPlannedDate(e.target.value)}
-                // sx={{ bgcolor: 'background.paper', width: 160 }}
                 sx={{
                   bgcolor: 'background.paper',
                   width: { xs: '100%', sm: 160 },
@@ -338,7 +612,6 @@ export const VerificationPlanningPage: React.FC = () => {
               />
             )}
 
-            {/* Кнопка действия — активна только если метролог выбрал приборы галочками */}
             <Button
               variant="contained"
               color={selectedBatchOption === 'NEW' ? 'primary' : 'secondary'}
@@ -348,7 +621,6 @@ export const VerificationPlanningPage: React.FC = () => {
                 selectedDeviceIds.length === 0 ||
                 (selectedBatchOption === 'NEW' && !batchNumber.trim())
               }
-              // sx={{ textTransform: 'none', fontWeight: 'bold', height: 40 }}
               sx={{
                 height: 40,
                 width: { xs: '100%', sm: 'auto' },
@@ -362,6 +634,7 @@ export const VerificationPlanningPage: React.FC = () => {
             </Button>
           </Box>
 
+          {/* Вкладки типов контроля */}
           <Box
             sx={{
               borderBottom: 1,
@@ -383,15 +656,12 @@ export const VerificationPlanningPage: React.FC = () => {
                 textColor="primary"
                 indicatorColor="primary"
               >
-                {/* 1. Базовая вкладка для отображения всего пула */}
                 <Tab
                   value="ALL"
                   label={`Все приборы (${globalTotalCount})`}
                   sx={{ textTransform: 'none', fontWeight: 'bold' }}
                 />
-                {/* 2. Динамические вкладки под каждый тип контроля из вашей БД */}
                 {controlTypesData?.metrologyControlTypes.map((type) => {
-                  // Считаем сколько приборов этого типа сейчас находится в пуле текущего месяца
                   const serverCountObj = meta?.typeCounts.find(
                     (t) =>
                       t.typeName.toLowerCase().trim() ===
@@ -407,7 +677,6 @@ export const VerificationPlanningPage: React.FC = () => {
                     />
                   );
                 })}
-                {/* 3. Вкладка для приборов без присвоенного контроля */}
                 <Tab
                   value="NOT_SPECIFIED"
                   label={`Другие / Без контроля (${
@@ -430,19 +699,33 @@ export const VerificationPlanningPage: React.FC = () => {
           loading={poolLoading}
           selectedDeviceIds={selectedDeviceIds}
           onDeviceSelect={handleDeviceSelect}
+          onDeviceClick={(id) => {
+            setSelectedDeviceId(id);
+            setViewMode('info');
+          }}
         />
+
+        {/* Пагинация пула */}
         <TablePagination
           component="div"
-          count={totalCount} // Общее число записей из БД
-          page={page} // Текущая страница
+          count={totalCount}
+          page={page}
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[10, 20, 50, 100]} // Варианты строк на выбор метролога
+          rowsPerPageOptions={[10, 20, 50, 100]}
           labelRowsPerPage="Строк на странице:"
           sx={{ borderTop: 1, borderColor: 'divider', mt: 'auto' }}
         />
       </Box>
+
+      <DeviceManageSidebar
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        selectedDeviceId={selectedDeviceId}
+        setSelectedDeviceId={setSelectedDeviceId}
+        refetchTable={refetchPool}
+      />
     </Box>
   );
 };

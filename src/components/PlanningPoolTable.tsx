@@ -23,6 +23,7 @@ interface PlanningPoolTableProps {
   loading: boolean;
   selectedDeviceIds: string[];
   onDeviceSelect: (id: string) => void;
+  onDeviceClick: (id: string) => void;
 }
 
 export const PlanningPoolTable: React.FC<PlanningPoolTableProps> = ({
@@ -30,6 +31,7 @@ export const PlanningPoolTable: React.FC<PlanningPoolTableProps> = ({
   loading,
   selectedDeviceIds,
   onDeviceSelect,
+  onDeviceClick,
 }) => {
   if (loading) {
     return (
@@ -94,7 +96,12 @@ export const PlanningPoolTable: React.FC<PlanningPoolTableProps> = ({
               else if (device.isOverdue) rowBgColor = '#ffebee'; // Мягкий красный для долгов
 
               return (
-                <TableRow key={device.id} hover sx={{ bgcolor: rowBgColor }}>
+                <TableRow
+                  key={device.id}
+                  hover
+                  sx={{ bgcolor: rowBgColor }}
+                  onClick={() => onDeviceClick(device.id)}
+                >
                   <TableCell padding="checkbox">
                     <Checkbox
                       size="small"
@@ -220,6 +227,7 @@ export const PlanningPoolTable: React.FC<PlanningPoolTableProps> = ({
             <Paper
               key={device.id}
               variant="outlined"
+              onClick={() => onDeviceClick(device.id)}
               sx={{
                 p: 2,
                 borderRadius: 2,
