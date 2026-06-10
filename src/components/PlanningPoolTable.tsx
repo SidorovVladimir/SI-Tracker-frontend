@@ -108,6 +108,9 @@ export const PlanningPoolTable: React.FC<PlanningPoolTableProps> = ({
                       checked={isChecked}
                       disabled={isAssigned}
                       onChange={() => onDeviceSelect(device.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -255,6 +258,9 @@ export const PlanningPoolTable: React.FC<PlanningPoolTableProps> = ({
                     checked={isChecked}
                     disabled={isAssigned}
                     onChange={() => onDeviceSelect(device.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
                     sx={{ p: 0 }}
                   />
                   <Typography

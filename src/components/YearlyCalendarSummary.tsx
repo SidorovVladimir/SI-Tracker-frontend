@@ -44,7 +44,7 @@ export const YearlyCalendarSummary: React.FC<YearlyCalendarSummaryProps> = ({
     <Box
       sx={{
         // На ПК (md) фиксированная удобная ширина, на мобилках (xs) — на всю ширину экрана!
-        width: { xs: '100%', md: '280px' },
+        // width: { xs: '100%', md: '280px' },
         bgcolor: 'background.paper',
         p: 2,
         borderRadius: 2,

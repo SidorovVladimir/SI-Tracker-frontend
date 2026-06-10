@@ -489,7 +489,13 @@ export const VerificationPlanningPage: React.FC = () => {
       </Box> */}
       <Box
         sx={{
-          display: viewMode ? 'none' : 'block',
+          height: { xs: 'auto', md: '100%' },
+          maxHeight: { xs: 'none', md: '100%' },
+          // overflowY: { xs: 'visible', md: 'auto' },
+          overflowX: 'hidden',
+          flexShrink: 0,
+          width: { xs: '100%', md: 280 },
+          display: { xs: viewMode ? 'none' : 'block' },
           transition: 'all 0.3s ease',
         }}
       >
