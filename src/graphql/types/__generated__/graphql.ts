@@ -736,6 +736,8 @@ export type ProductionAnalyticsResponse = {
 
 export type ProductionSite = {
   __typename: 'ProductionSite';
+  cityId: Scalars['ID']['output'];
+  companyId: Scalars['ID']['output'];
   createdAt: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
@@ -2121,6 +2123,8 @@ export type GetProductionSitesQuery = {
     __typename: 'ProductionSite';
     id: string;
     name: string;
+    cityId: string;
+    companyId: string;
     createdAt: string;
     updatedAt: string;
   }>;
@@ -6398,6 +6402,8 @@ export const GetProductionSitesDocument = {
               selections: [
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'cityId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'companyId' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
               ],

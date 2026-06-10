@@ -16,10 +16,11 @@ import {
   Badge,
   Tooltip,
   Button,
+  useTheme,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // 🎯 Иконка назад для мобилок
-import { useMutation, useQuery, useApolloClient } from '@apollo/client/react';
+import { useMutation, useQuery } from '@apollo/client/react';
 import {
   GetChatDialogsDocument,
   GetChatHistoryDocument,
@@ -52,9 +53,11 @@ const getInitials = (
 };
 
 export const ChatPage: React.FC = () => {
+  const theme = useTheme();
   const { user } = useAuth();
-  const { socket, setUnreadChatCount } = useSocketApp();
-  const client = useApolloClient();
+  // const { socket, setUnreadChatCount, onlineUserIds  } = useSocketApp();
+  const { socket, setUnreadChatCount, onlineUsers } = useSocketApp();
+  // const client = useApolloClient();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Управление выбранным собеседником и текстом
@@ -66,7 +69,6 @@ export const ChatPage: React.FC = () => {
   const [localMessages, setLocalMessages] = useState<MessageLocal[]>([]);
   const [showAllUsers, setShowAllUsers] = useState(false);
 
-  // 🎯 НОВОЕ ДЛЯ МОБИЛОК: 'LIST' — показываем список контактов, 'CHAT' — окно переписки
   const [mobileActivePanel, setMobileActivePanel] = useState<'LIST' | 'CHAT'>(
     'LIST'
   );
@@ -125,13 +127,36 @@ export const ChatPage: React.FC = () => {
     }
   }, [historyData]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        socket.emit('setUserIdleStatus', { isIdle: true });
+      } else {
+        socket.emit('setUserIdleStatus', { isIdle: false });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [socket]);
+
   // Автоматическое прочтение при клике/смене пользователя
   useEffect(() => {
     const handleMarkRead = async () => {
-      if (activeCompanionId) {
+      if (activeCompanionId && socket) {
         try {
           await markAsRead({ variables: { senderId: activeCompanionId } });
           await refetchDialogs();
+
+          socket.emit('notifyMessagesRead', {
+            readerId: user?.id,
+            authorId: activeCompanionId,
+          });
 
           // Ищем в массиве диалогов тот, чей companionId равен активному
           const currentActiveDialog = dialogsData?.getChatDialogs?.find(
@@ -151,6 +176,8 @@ export const ChatPage: React.FC = () => {
     refetchDialogs,
     setUnreadChatCount,
     dialogsData,
+    socket,
+    user,
   ]);
 
   // Уведомление бэкенда об активной комнате переписки
@@ -174,8 +201,16 @@ export const ChatPage: React.FC = () => {
         currentCompanionId &&
         newMessage.senderId.toLowerCase() === currentCompanionId.toLowerCase()
       ) {
-        setLocalMessages((prev) => [...prev, newMessage]);
+        const formattedMsg = {
+          ...newMessage,
+          createdAt: new Date(newMessage.createdAt).toISOString(),
+        };
+        setLocalMessages((prev) => [...prev, formattedMsg]);
         await markAsRead({ variables: { senderId: currentCompanionId } });
+        socket.emit('notifyMessagesRead', {
+          readerId: user?.id,
+          authorId: currentCompanionId,
+        });
         setTimeout(scrollToBottom, 50);
         // await client.refetchQueries({ include: [GetTotalUnreadCountDocument] });
       }
@@ -189,23 +224,43 @@ export const ChatPage: React.FC = () => {
         sentMessage.recipientId.toLowerCase() ===
           currentCompanionId.toLowerCase()
       ) {
-        setLocalMessages((prev) => [...prev, sentMessage]);
+        const formattedMsg = {
+          ...sentMessage,
+          createdAt: new Date(sentMessage.createdAt).toISOString(),
+        };
+        setLocalMessages((prev) => [...prev, formattedMsg]);
         setTimeout(scrollToBottom, 50);
       }
 
-      await refetchDialogs();
-      await refetchUsers();
+      // await refetchDialogs();
+      // await refetchUsers();
     });
 
     socket.on('userCreated', async () => {
       await refetchUsers();
     });
 
+    socket.on(
+      'messagesMarkedAsRead',
+      (data: { senderId: string; recipientId: string }) => {
+        const currentCompanionId = companionIdRef.current;
+        // Если тот, кто сейчас открыт, прочитал наши сообщения — красим все галочки в true!
+        if (
+          data.recipientId.toLowerCase() === currentCompanionId?.toLowerCase()
+        ) {
+          setLocalMessages((prev) =>
+            prev.map((msg) => ({ ...msg, isRead: true }))
+          );
+        }
+      }
+    );
+
     return () => {
       socket.off('newMessage');
       socket.off('messageSentConfirmation');
+      socket.off('messagesMarkedAsRead');
     };
-  }, [socket, markAsRead, client]);
+  }, [socket, markAsRead, user]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,7 +274,7 @@ export const ChatPage: React.FC = () => {
     setMessageText('');
   };
 
-  // 🎯 БЕЗОПАСНОЕ ФОРМАТИРОВАНИЕ ВРЕМЕНИ ДЛЯ ПОДДЕРЖКИ ЛЮБЫХ ФОРМАТОВ БАЗЫ ДАННЫХ
+  //  БЕЗОПАСНОЕ ФОРМАТИРОВАНИЕ ВРЕМЕНИ ДЛЯ ПОДДЕРЖКИ ЛЮБЫХ ФОРМАТОВ БАЗЫ ДАННЫХ
   const formatMessageTime = (dateStr: string) => {
     try {
       // Защита: если прилетело число (timestamp) в виде строки
@@ -268,7 +323,7 @@ export const ChatPage: React.FC = () => {
             borderRight: '1px solid',
             borderColor: 'divider',
             height: '100%',
-            // 🎯 МОБИЛЬНАЯ АДАПТИВНОСТЬ: Прячем панель списка на мобилках, если открыт чат
+            //  МОБИЛЬНАЯ АДАПТИВНОСТЬ: Прячем панель списка на мобилках, если открыт чат
             display: {
               xs: mobileActivePanel === 'LIST' ? 'flex' : 'none',
               md: 'flex',
@@ -321,6 +376,22 @@ export const ChatPage: React.FC = () => {
               ) : (
                 <List disablePadding>
                   {systemUsers.map((u) => {
+                    // const isCompanionOnline = onlineUserIds.includes(
+                    //   u.id.toLowerCase()
+                    // );
+                    const companionStatus = onlineUsers.find(
+                      (o) => o.userId === u.id.toLowerCase()
+                    );
+                    const isOnline = !!companionStatus; // Физически в сети
+                    const isAway = companionStatus?.isIdle ?? false; // Вкладка в фоне
+                    const getStatusColor = () => {
+                      if (!isOnline) return 'transparent';
+                      return isAway ? '#ffa500' : '#44b700'; //  Желтый (Away) или Зеленый (Active)
+                    };
+                    const getStatusText = () => {
+                      if (!isOnline) return 'офлайн';
+                      return isAway ? 'отошел' : 'в сети';
+                    };
                     const fullName = `${u.firstName} ${u.lastName}`;
                     return (
                       <ListItem
@@ -333,7 +404,7 @@ export const ChatPage: React.FC = () => {
                           setActiveCompanionName(fullName);
                           setLocalMessages([]);
                           setShowAllUsers(false);
-                          setMobileActivePanel('CHAT'); // 🎯 Уводим мобилку на экран чата
+                          setMobileActivePanel('CHAT'); // Уводим мобилку на экран чата
                         }}
                         sx={{
                           cursor: 'pointer',
@@ -344,27 +415,78 @@ export const ChatPage: React.FC = () => {
                         }}
                       >
                         <ListItemAvatar>
-                          <Avatar
+                          <Badge
+                            overlap="circular"
+                            anchorOrigin={{
+                              vertical: 'bottom',
+                              horizontal: 'right',
+                            }}
+                            variant="dot"
+                            // Если пользователь в сети — зажигаем зеленую точку
                             sx={{
-                              bgcolor: 'primary.light',
-                              fontSize: '0.85rem',
-                              width: 36,
-                              height: 36,
+                              '& .MuiBadge-badge': {
+                                // backgroundColor: '#44b700',
+                                // color: '#44b700',
+                                backgroundColor: getStatusColor(),
+                                color: getStatusColor(),
+                                boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+                                // display: isCompanionOnline ? 'block' : 'none',
+                                display: isOnline ? 'block' : 'none',
+                              },
                             }}
                           >
-                            {/* 🎯 ИСПРАВЛЕНО: Выводим четкие инициалы сотрудника */}
-                            {getInitials(u.firstName, u.lastName)}
-                          </Avatar>
+                            <Avatar
+                              sx={{
+                                bgcolor: 'primary.light',
+                                fontSize: '0.85rem',
+                                width: 36,
+                                height: 36,
+                              }}
+                            >
+                              {/* 🎯 ИСПРАВЛЕНО: Выводим четкие инициалы сотрудника */}
+                              {getInitials(u.firstName, u.lastName)}
+                            </Avatar>
+                          </Badge>
                         </ListItemAvatar>
+
                         <ListItemText
-                          primary={fullName}
+                          primary={`${u.firstName} ${u.lastName}`}
                           secondary={
-                            u.role === 'admin' ? '⚙️ Админ' : '🔧 Метролог'
+                            <Box
+                              component="span"
+                              sx={{
+                                display: 'flex',
+                                gap: 1,
+                                alignItems: 'center',
+                              }}
+                            >
+                              <Typography
+                                component="span"
+                                variant="caption"
+                                sx={{ color: 'text.secondary' }}
+                              >
+                                {u.role === 'superadmin'
+                                  ? '⚙️ Суперадминистратор'
+                                  : u.role === 'admin'
+                                  ? '⚙️ Администратор'
+                                  : '🔧 Пользователь'}
+                              </Typography>
+                              <Typography
+                                component="span"
+                                variant="caption"
+                                sx={{
+                                  color: isOnline
+                                    ? isAway
+                                      ? 'warning.main'
+                                      : 'success.main'
+                                    : 'text.disabled',
+                                  fontWeight: 'medium',
+                                }}
+                              >
+                                • {getStatusText()}
+                              </Typography>
+                            </Box>
                           }
-                          slotProps={{
-                            primary: { variant: 'body2', fontWeight: 'medium' },
-                            secondary: { variant: 'caption' },
-                          }}
                         />
                       </ListItem>
                     );
@@ -397,12 +519,33 @@ export const ChatPage: React.FC = () => {
             ) : (
               <List disablePadding>
                 {dialogs.map((dialog) => {
+                  // const isCompanionOnline = onlineUserIds.includes(
+                  //   dialog.companionId.toLowerCase()
+                  // );
+
+                  // 2. Внутри .map списков сотрудников или диалогов находим статус этого человека:
+                  const companionStatus = onlineUsers.find(
+                    (o) => o.userId === dialog.companionId.toLowerCase()
+                  ); // или dialog.companionId
+
+                  const isOnline = !!companionStatus; // Физически в сети
+                  const isAway = companionStatus?.isIdle ?? false; // Вкладка в фоне
                   const isSelected = dialog.companionId === activeCompanionId;
                   const nameParts = dialog.companionName.trim().split(/\s+/);
                   const fLetter = nameParts[0]?.[0] || '';
                   const lLetter = nameParts[1]?.[0] || '';
                   const firstLetters =
                     `${fLetter}${lLetter}`.toUpperCase() || '??';
+
+                  const getStatusColor = () => {
+                    if (!isOnline) return 'transparent';
+                    return isAway ? '#ffa500' : '#44b700'; // Желтый (Away) или Зеленый (Active)
+                  };
+
+                  const getStatusText = () => {
+                    if (!isOnline) return 'офлайн';
+                    return isAway ? 'отошел' : 'в сети';
+                  };
 
                   return (
                     <ListItem
@@ -413,7 +556,7 @@ export const ChatPage: React.FC = () => {
                         }
                         setActiveCompanionId(dialog.companionId);
                         setActiveCompanionName(dialog.companionName);
-                        setMobileActivePanel('CHAT'); // 🎯 Переключаем мобильный таб на чат
+                        setMobileActivePanel('CHAT'); // Переключаем мобильный таб на чат
                       }}
                       sx={{
                         cursor: 'pointer',
@@ -430,39 +573,105 @@ export const ChatPage: React.FC = () => {
                           color="error"
                           max={99}
                         >
-                          <Avatar
+                          <Badge
+                            overlap="circular"
+                            anchorOrigin={{
+                              vertical: 'bottom',
+                              horizontal: 'right',
+                            }}
+                            variant="dot"
+                            //  Если пользователь в сети — зажигаем зеленую точку!
                             sx={{
-                              bgcolor: isSelected ? 'primary.main' : 'grey.400',
-                              fontSize: '0.75rem',
-                              width: 36,
-                              height: 36,
+                              '& .MuiBadge-badge': {
+                                // backgroundColor: '#44b700',
+                                // color: '#44b700',
+                                backgroundColor: getStatusColor(),
+                                color: getStatusColor(),
+                                boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+                                // display: isCompanionOnline ? 'block' : 'none',
+                                display: isOnline ? 'block' : 'none',
+                                zIndex: 10,
+                              },
                             }}
                           >
-                            {firstLetters}
-                          </Avatar>
+                            <Avatar
+                              sx={{
+                                bgcolor: isSelected
+                                  ? 'primary.main'
+                                  : 'grey.400',
+                                fontSize: '0.75rem',
+                                width: 36,
+                                height: 36,
+                              }}
+                            >
+                              {firstLetters}
+                            </Avatar>
+                          </Badge>
                         </Badge>
                       </ListItemAvatar>
                       <ListItemText
-                        primary={dialog.companionName}
-                        secondary={dialog.lastMessageText}
-                        slotProps={{
-                          primary: {
-                            variant: 'body2',
-                            fontWeight:
-                              dialog.unreadCount > 0 ? 'bold' : 'medium',
-                            noWrap: true,
-                          },
-                          secondary: {
-                            variant: 'caption',
-                            noWrap: true,
-                            color:
-                              dialog.unreadCount > 0
-                                ? 'text.primary'
-                                : 'text.secondary',
-                            fontWeight:
-                              dialog.unreadCount > 0 ? 'bold' : 'regular',
-                          },
-                        }}
+                        //
+                        primary={
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              noWrap
+                              sx={{
+                                fontWeight:
+                                  dialog.unreadCount > 0 ? 'bold' : 'medium',
+                                textOverflow: 'ellipsis',
+                                overflow: 'hidden',
+                                maxWidth: '65%',
+                              }}
+                            >
+                              {dialog.companionName}
+                            </Typography>
+
+                            {/* Текстовый индикатор статуса рядом с именем */}
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: isOnline
+                                  ? isAway
+                                    ? 'warning.main'
+                                    : 'success.main'
+                                  : 'text.disabled',
+                                fontSize: '0.7rem',
+                                fontWeight: 'medium',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              • {getStatusText()}
+                            </Typography>
+                          </Box>
+                        }
+                        //  ОБРЕЗКА ПОСЛЕДНЕГО СООБЩЕНИЯ С ТРОЕТОЧИЕМ
+                        secondary={
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              display: 'block',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              width: '100%',
+                              color:
+                                dialog.unreadCount > 0
+                                  ? 'text.primary'
+                                  : 'text.secondary',
+                              fontWeight:
+                                dialog.unreadCount > 0 ? 'bold' : 'regular',
+                            }}
+                          >
+                            {dialog.lastMessageText}
+                          </Typography>
+                        }
                       />
                     </ListItem>
                   );
@@ -476,7 +685,6 @@ export const ChatPage: React.FC = () => {
           size={{ xs: 12, md: 8 }}
           sx={{
             height: '100%',
-            // 🎯 МОБИЛЬНАЯ АДАПТИВНОСТЬ: Прячем чат на мобилках, если открыт список
             display: {
               xs: mobileActivePanel === 'CHAT' ? 'flex' : 'none',
               md: 'flex',
@@ -486,7 +694,7 @@ export const ChatPage: React.FC = () => {
         >
           {activeCompanionId ? (
             <>
-              {/* Шапка чата с кнопкой "Назад" для телефонов */}
+              {/* Шапка чата с кнопкой "Назад" для телефонов и аватаром онлайна */}
               <Box
                 sx={{
                   p: 1.5,
@@ -495,9 +703,10 @@ export const ChatPage: React.FC = () => {
                   borderColor: 'divider',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1.5, // Немного увеличили отступ для аватарки
+                  gap: 1.5,
                 }}
               >
+                {/* КНОПКА НАЗАД: Вынесена наверх, чтобы всегда отображаться на мобилках */}
                 <IconButton
                   sx={{ display: { xs: 'inline-flex', md: 'none' } }}
                   onClick={() => setMobileActivePanel('LIST')}
@@ -506,41 +715,100 @@ export const ChatPage: React.FC = () => {
                   <ArrowBackIcon fontSize="small" />
                 </IconButton>
 
-                {/* 🎯 ДОБАВИЛИ: Красивая аватарка собеседника в шапку переписки */}
-                <Avatar
-                  sx={{
-                    bgcolor: 'primary.main',
-                    width: 32,
-                    height: 32,
-                    fontSize: '0.75rem',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  {(() => {
-                    const parts = activeCompanionName.trim().split(/\s+/);
-                    return (
-                      `${parts[0]?.[0] || ''}${
-                        parts[1]?.[0] || ''
-                      }`.toUpperCase() || '??'
-                    );
-                  })()}
-                </Avatar>
+                {(() => {
+                  // Вычисляем статус собеседника внутри изолированной функции шапки
+                  const chatCompanionStatus = onlineUsers.find(
+                    (o) => o.userId === activeCompanionId?.toLowerCase()
+                  );
+                  const isChatOnline = !!chatCompanionStatus;
+                  const isChatAway = chatCompanionStatus?.isIdle ?? false;
 
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                  {activeCompanionName}
-                </Typography>
+                  const getHeaderStatusColor = () => {
+                    if (!isChatOnline) return 'transparent';
+                    return isChatAway ? '#ffa500' : '#44b700';
+                  };
+
+                  const parts = activeCompanionName.trim().split(/\s+/);
+                  const firstLetters =
+                    `${parts[0]?.[0] || ''}${
+                      parts[1]?.[0] || ''
+                    }`.toUpperCase() || '??';
+
+                  return (
+                    <>
+                      {/* Аватарка в шапке с точкой онлайна */}
+                      <Badge
+                        overlap="circular"
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'right',
+                        }}
+                        variant="dot"
+                        sx={{
+                          '& .MuiBadge-badge': {
+                            backgroundColor: getHeaderStatusColor(),
+                            color: getHeaderStatusColor(),
+                            boxShadow: (t) =>
+                              `0 0 0 2px ${t.palette.background.paper}`,
+                            display: isChatOnline ? 'block' : 'none',
+                          },
+                        }}
+                      >
+                        <Avatar
+                          sx={{
+                            bgcolor: 'primary.main',
+                            width: 36,
+                            height: 36,
+                            fontSize: '0.75rem',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {firstLetters}
+                        </Avatar>
+                      </Badge>
+
+                      {/* Текстовый блок имени и статуса */}
+                      <Box>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 'bold', lineHeight: 1.2 }}
+                        >
+                          {activeCompanionName}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: isChatOnline
+                              ? isChatAway
+                                ? 'warning.main'
+                                : 'success.main'
+                              : 'text.disabled',
+                            fontWeight: 'semibold',
+                            fontSize: '0.75rem',
+                          }}
+                        >
+                          {isChatOnline
+                            ? isChatAway
+                              ? 'отошел'
+                              : 'в сети'
+                            : 'офлайн'}
+                        </Typography>
+                      </Box>
+                    </>
+                  );
+                })()}
               </Box>
 
               {/* Лента компактных сообщений */}
               <Box
                 sx={{
                   flexGrow: 1,
-                  p: { xs: 1.5, sm: 3 },
+                  p: 2,
                   overflowY: 'auto',
                   bgcolor: 'grey.50',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 1, // Снизили отступы между облачками
+                  gap: 1,
                 }}
               >
                 {historyLoading && localMessages.length === 0 ? (
@@ -554,60 +822,149 @@ export const ChatPage: React.FC = () => {
                     <CircularProgress size={30} />
                   </Box>
                 ) : (
-                  localMessages.map((msg) => {
+                  localMessages.map((msg, index) => {
                     const isMe = msg.senderId === user?.id;
+
+                    const parsedMsgDate = isNaN(Number(msg.createdAt))
+                      ? new Date(msg.createdAt)
+                      : new Date(Number(msg.createdAt));
+
+                    const msgDate = isNaN(parsedMsgDate.getTime())
+                      ? 'Сегодня'
+                      : parsedMsgDate.toLocaleDateString('ru-RU', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        });
+
+                    const prevMsg = index > 0 ? localMessages[index - 1] : null;
+                    let prevMsgDate = null;
+
+                    if (prevMsg) {
+                      const parsedPrevDate = isNaN(Number(prevMsg.createdAt))
+                        ? new Date(prevMsg.createdAt)
+                        : new Date(Number(prevMsg.createdAt));
+                      prevMsgDate = isNaN(parsedPrevDate.getTime())
+                        ? null
+                        : parsedPrevDate.toLocaleDateString('ru-RU', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          });
+                    }
+
+                    const showDateDivider = msgDate !== prevMsgDate;
                     return (
-                      <Box
-                        key={msg.id}
-                        sx={{
-                          display: 'flex',
-                          justifyContent: isMe ? 'flex-end' : 'flex-start',
-                          width: '100%',
-                        }}
-                      >
-                        <Paper
-                          variant="outlined"
+                      <Box key={msg.id} sx={{ width: '100%' }}>
+                        {/* Красивая центрированная плашка даты */}
+                        {showDateDivider && (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'center',
+                              my: 2,
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                bgcolor: 'grey.200',
+                                color: 'text.secondary',
+                                px: 1.5,
+                                py: 0.25,
+                                borderRadius: 3,
+                                fontSize: '0.75rem',
+                                fontWeight: 'medium',
+                              }}
+                            >
+                              {msgDate}
+                            </Typography>
+                          </Box>
+                        )}
+
+                        {/* Баббл сообщения */}
+                        <Box
                           sx={{
-                            p: 1, // Ультра-компактные внутренние отступы
-                            px: 1.5,
-                            maxWidth: { xs: '85%', sm: '70%' },
-                            borderRadius: isMe
-                              ? '12px 12px 2px 12px'
-                              : '12px 12px 12px 2px', // Изящные скругления
-                            bgcolor: isMe ? 'primary.main' : 'background.paper',
-                            color: isMe
-                              ? 'primary.contrastText'
-                              : 'text.primary',
-                            boxShadow: '0px 1px 2px rgba(0,0,0,0.05)',
-                            borderColor: isMe ? 'primary.main' : 'grey.200',
+                            display: 'flex',
+                            justifyContent: isMe ? 'flex-end' : 'flex-start',
+                            width: '100%',
+                            mb: 0.5,
                           }}
                         >
-                          <Typography
-                            variant="body2"
+                          <Paper
+                            variant="outlined"
                             sx={{
-                              wordBreak: 'break-word',
-                              whiteSpace: 'pre-line',
-                              fontSize: '0.875rem',
+                              p: 1,
+                              px: 1.5,
+                              maxWidth: { xs: '85%', sm: '70%' },
+                              borderRadius: isMe
+                                ? '12px 12px 2px 12px'
+                                : '12px 12px 12px 2px',
+                              bgcolor: isMe
+                                ? 'primary.main'
+                                : 'background.paper',
+                              color: isMe
+                                ? 'primary.contrastText'
+                                : 'text.primary',
+                              boxShadow: '0px 1px 2px rgba(0,0,0,0.05)',
+                              borderColor: isMe ? 'primary.main' : 'grey.200',
+                              position: 'relative',
                             }}
                           >
-                            {msg.text}
-                          </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                wordBreak: 'break-word',
+                                whiteSpace: 'pre-line',
+                                fontSize: '0.875rem',
+                                pr: isMe ? 3 : 0,
+                              }}
+                            >
+                              {msg.text}
+                            </Typography>
 
-                          {/* 🎯 ТЕПЕРЬ ТУТ БЕЗОПАСНОЕ И КРАСИВОЕ ВРЕМЯ */}
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              display: 'block',
-                              textAlign: 'right',
-                              mt: 0.25,
-                              opacity: 0.7,
-                              fontSize: '0.65rem',
-                              fontWeight: 'medium',
-                            }}
-                          >
-                            {formatMessageTime(msg.createdAt)}
-                          </Typography>
-                        </Paper>
+                            {/* Контейнер времени и статуса прочтения */}
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-end',
+                                gap: 0.5,
+                                mt: 0.25,
+                                opacity: 0.8,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  fontSize: '0.65rem',
+                                  fontWeight: 'medium',
+                                }}
+                              >
+                                {formatMessageTime(msg.createdAt)}
+                              </Typography>
+
+                              {/* 2. ГАЛОЧКИ ПРОЧТЕНИЯ (ТОЛЬКО ДЛЯ МОИХ СООБЩЕНИЙ) */}
+                              {isMe && (
+                                <Typography
+                                  component="span"
+                                  sx={{
+                                    fontSize: '0.85rem',
+                                    lineHeight: 1,
+                                    color: isMe
+                                      ? 'primary.contrastText'
+                                      : 'primary.main',
+                                    fontWeight: 'bold',
+                                    ml: 0.25,
+                                  }}
+                                >
+                                  {/* Если в объекте сообщения от бэка пришло isRead: true — ставим две галочки, иначе одну */}
+                                  {(msg as any).isRead ? '✓✓' : '✓'}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Paper>
+                        </Box>
                       </Box>
                     );
                   })

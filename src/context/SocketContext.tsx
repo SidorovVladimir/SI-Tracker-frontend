@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../hooks/useAuth';
-import { enqueueSnackbar } from 'notistack'; // На будущее для всплывающих алертов
+// import { enqueueSnackbar } from 'notistack'; // На будущее для всплывающих алертов
 import { API_BASE_URL } from '../config';
 import { useApolloClient } from '@apollo/client/react';
 import {
@@ -11,19 +11,27 @@ import {
   GetUnreadNotificationsCountDocument,
 } from '../graphql/types/__generated__/graphql';
 
-// 🎯 Добавили unreadChatCount и функцию его изменения в интерфейс контекста
+interface OnlineUserPayload {
+  userId: string;
+  isIdle: boolean;
+}
+
+//  Добавили unreadChatCount и функцию его изменения в интерфейс контекста
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
   unreadChatCount: number;
   setUnreadChatCount: React.Dispatch<React.SetStateAction<number>>;
+  // onlineUserIds: string[];
+  onlineUsers: OnlineUserPayload[];
 }
 
 const SocketContext = createContext<SocketContextType>({
   socket: null,
   isConnected: false,
   unreadChatCount: 0,
-
+  // onlineUserIds: [],
+  onlineUsers: [],
   setUnreadChatCount: () => {},
 });
 
@@ -34,8 +42,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  // 🎯 Добавили локальный стейт для хранения точной цифры непрочитанных
+  // Добавили локальный стейт для хранения точной цифры непрочитанных
   const [unreadChatCount, setUnreadChatCount] = useState<number>(0);
+  // const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUserPayload[]>([]);
 
   const client = useApolloClient(); // Получаем доступ к глобальному кэшу Apollo
 
@@ -58,18 +68,18 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     socketInstance.on('connect', () => {
       setIsConnected(true);
-      console.log('📡 Веб-сокет успешно подключен!');
+      // console.log('📡 Веб-сокет успешно подключен!');
     });
 
     socketInstance.on('disconnect', () => {
       setIsConnected(false);
     });
 
-    // 🎯 ГЛОБАЛЬНЫЙ СЛУШАТЕЛЬ ЧАТА (РАБОТАЕТ ВСЕГДА И ВЕЗДЕ!)
+    //  ГЛОБАЛЬНЫЙ СЛУШАТЕЛЬ ЧАТА (РАБОТАЕТ ВСЕГДА И ВЕЗДЕ!)
     socketInstance.on('newMessage', async () => {
-      console.log(
-        '📨 Получено новое сообщение, обновляем счетчики приложения...'
-      );
+      // console.log(
+      //   '📨 Получено новое сообщение, обновляем счетчики приложения...'
+      // );
 
       // Заставляем Apollo обновить списки диалогов, если открыта страница чата
       await client.refetchQueries({
@@ -77,25 +87,71 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       });
     });
 
-    // 🎯 НОВЫЙ СОКЕТНЫЙ СЛУШАТЕЛЬ СЧЕТЧИКА: Принимает готовую цифру от бэкенда.
+    //  НОВЫЙ СОКЕТНЫЙ СЛУШАТЕЛЬ СЧЕТЧИКА: Принимает готовую цифру от бэкенда.
     // Срабатывает мгновенно, даже если пользователь на странице графиков СИ!
-    socketInstance.on('updateUnreadCount', (data: { count: number }) => {
-      setUnreadChatCount(data.count);
-    });
+    // socketInstance.on('updateUnreadCount', (data: { count: number }) => {
+    //   setUnreadChatCount(data.count);
+    // });
+
+    // socketInstance.on('updateOnlineStatus', (userIds: string[]) => {
+    //   setOnlineUserIds(userIds.map((id) => id.toLowerCase()));
+    // });
+
+    socketInstance.on(
+      'updateOnlineStatus',
+      (usersList: OnlineUserPayload[]) => {
+        // Приводим все ID к нижнему регистру для защиты от багов UUID
+        const formatted = usersList.map((u) => ({
+          userId: u.userId.toLowerCase(),
+          isIdle: u.isIdle,
+        }));
+        setOnlineUsers(formatted);
+      }
+    );
+    socketInstance.on(
+      'updateNotificationCount',
+      // async (data: { count: number }) => {
+      async () => {
+        // console.log(
+        //   '🔔 Сокет прислал команду обновить счетчик колокольчика:',
+        //   data.count
+        // );
+        try {
+          // Принудительно заставляем Apollo перерисовать Badge на колокольчике
+          await client.refetchQueries({
+            include: [GetUnreadNotificationsCountDocument],
+          });
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    );
+
+    socketInstance.on(
+      'updateUnreadCount',
+      async (data: { count: number; forceRefetchDialogs?: boolean }) => {
+        setUnreadChatCount(data.count);
+
+        if (data.forceRefetchDialogs) {
+          await client.refetchQueries({ include: [GetChatDialogsDocument] });
+        }
+      }
+    );
 
     // Слушатель системных уведомлений (колокольчика)
     socketInstance.on(
       'systemAlertReceived',
-      async (alert: {
-        title: string;
-        message: string;
-        type: 'info' | 'success' | 'warning' | 'error';
-      }) => {
+      // async (alert: {
+      //   title: string;
+      //   message: string;
+      //   type: 'info' | 'success' | 'warning' | 'error';
+      // }) => {
+      async () => {
         // Вызываем всплывающее окошко при системных логах
-        enqueueSnackbar(`${alert.title}: ${alert.message}`, {
-          variant: alert.type || 'info',
-          anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-        });
+        // enqueueSnackbar(`${alert.title}: ${alert.message}`, {
+        //   variant: alert.type || 'info',
+        //   anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+        // });
 
         await client.refetchQueries({
           include: [
@@ -118,9 +174,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         socket,
         isConnected,
-        unreadChatCount, // 🎯 Передаем стейт в приложение
-
-        setUnreadChatCount, // 🎯 Передаем функцию изменения в приложение
+        unreadChatCount,
+        // onlineUserIds,
+        onlineUsers,
+        setUnreadChatCount,
       }}
     >
       {children}

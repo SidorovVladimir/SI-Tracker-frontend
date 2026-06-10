@@ -2,6 +2,8 @@ query GetProductionSites {
   productionSites {
     id
     name
+    cityId
+    companyId
     createdAt
     updatedAt
   }

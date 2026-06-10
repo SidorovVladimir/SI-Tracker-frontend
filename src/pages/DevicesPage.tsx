@@ -95,8 +95,23 @@ export default function DevicesPage() {
     localStorage.removeItem(FILTERS_STORAGE_KEY);
   };
 
+  // const handleFilterChange = (field: keyof FilterState, value: any) => {
+  //   setFilters((prev) => ({ ...prev, [field]: value }));
+  // };
   const handleFilterChange = (field: keyof FilterState, value: any) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
+    setFilters((prev) => {
+      const updated = { ...prev, [field]: value };
+
+      if (field === 'city') {
+        updated.productionSite = '';
+      }
+
+      if (field === 'company') {
+        updated.productionSite = '';
+      }
+
+      return updated;
+    });
   };
 
   // const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
@@ -162,10 +177,52 @@ export default function DevicesPage() {
     return [...raw].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   }, [companiesData]);
 
+  // const productionSite = useMemo(() => {
+  //   const raw = productionSiteData?.productionSites || [];
+  //   return Array.from(new Set(raw.map((p) => p.name).filter(Boolean))).sort();
+  // }, [productionSiteData]);
   const productionSite = useMemo(() => {
-    const raw = productionSiteData?.productionSites || [];
-    return Array.from(new Set(raw.map((p) => p.name).filter(Boolean))).sort();
-  }, [productionSiteData]);
+    const rawSites = productionSiteData?.productionSites || [];
+
+    // 2. Находим объект выбранного города
+    const selectedCityObj = cities.find(
+      (c) => c.name?.toLowerCase().trim() === filters.city?.toLowerCase().trim()
+    );
+    const targetCityId = selectedCityObj?.id?.toLowerCase().trim();
+
+    // 3. Находим объект выбранной компании
+    const selectedCompanyObj = companies.find(
+      (co) =>
+        co.name?.toLowerCase().trim() === filters.company?.toLowerCase().trim()
+    );
+    const targetCompanyId = selectedCompanyObj?.id?.toLowerCase().trim();
+
+    // 4. Последовательно фильтруем массив площадок
+    let filtered = rawSites;
+
+    // Если город выбран — оставляем только участки, привязанные к этому cityId
+    if (targetCityId) {
+      filtered = filtered.filter(
+        (site) => site.cityId?.toLowerCase().trim() === targetCityId
+      );
+    }
+
+    // Если компания выбрана — дополнительно фильтруем по companyId
+    if (targetCompanyId) {
+      filtered = filtered.filter(
+        (site) => site.companyId?.toLowerCase().trim() === targetCompanyId
+      );
+    }
+
+    // 5. Собираем массив уникальных текстовых названий и сортируем их
+    const uniqueNames = Array.from(
+      new Set(filtered.map((p) => p.name).filter(Boolean))
+    );
+
+    return uniqueNames.sort((a, b) => a.localeCompare(b));
+
+    // Оставляем зависимости для мгновенного пересчета в браузере
+  }, [productionSiteData, filters.city, filters.company, cities, companies]);
 
   const statuses = useMemo(() => {
     const raw = statusesData?.statuses || [];
