@@ -40,12 +40,13 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
       sx={{
         width: { xs: '100vw', md: '30%' },
         minWidth: { xs: '100vw', md: 350 },
-        height: { xs: '100vh', md: '100%' },
+        height: { xs: '100dvh', md: '100%' },
         position: { xs: 'fixed', md: 'relative' },
         top: { xs: 0, md: 'auto' },
         left: { xs: 0, md: 'auto' },
         zIndex: { xs: (theme) => theme.zIndex.drawer + 2, md: 1 },
         boxSizing: 'border-box',
+        overflow: 'hidden',
       }}
     >
       <Slide direction="left" in={!!viewMode} mountOnEnter unmountOnExit>
@@ -85,7 +86,7 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
             pt: { xs: '64px', md: 3 },
             pl: 3,
             pr: 3,
-            pb: 3,
+            pb: { xs: '32px', md: 3 },
 
             overflowY: 'auto',
             height: '100%',
