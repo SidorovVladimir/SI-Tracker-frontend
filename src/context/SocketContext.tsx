@@ -82,9 +82,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       // );
 
       // Заставляем Apollo обновить списки диалогов, если открыта страница чата
-      await client.refetchQueries({
-        include: [GetChatDialogsDocument],
-      });
+      await client
+        .refetchQueries({
+          include: [GetChatDialogsDocument],
+        })
+        .catch(() => {});
     });
 
     //  НОВЫЙ СОКЕТНЫЙ СЛУШАТЕЛЬ СЧЕТЧИКА: Принимает готовую цифру от бэкенда.
@@ -118,9 +120,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         // );
         try {
           // Принудительно заставляем Apollo перерисовать Badge на колокольчике
-          await client.refetchQueries({
-            include: [GetUnreadNotificationsCountDocument],
-          });
+          await client
+            .refetchQueries({
+              include: [GetUnreadNotificationsCountDocument],
+            })
+            .catch(() => {});
         } catch (err) {
           console.error(err);
         }
@@ -133,7 +137,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         setUnreadChatCount(data.count);
 
         if (data.forceRefetchDialogs) {
-          await client.refetchQueries({ include: [GetChatDialogsDocument] });
+          await client
+            .refetchQueries({ include: [GetChatDialogsDocument] })
+            .catch(() => {});
         }
       }
     );
@@ -153,12 +159,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         //   anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
         // });
 
-        await client.refetchQueries({
-          include: [
-            GetSystemNotificationsDocument,
-            GetUnreadNotificationsCountDocument,
-          ],
-        });
+        await client
+          .refetchQueries({
+            include: [
+              GetSystemNotificationsDocument,
+              GetUnreadNotificationsCountDocument,
+            ],
+          })
+          .catch(() => {});
       }
     );
 

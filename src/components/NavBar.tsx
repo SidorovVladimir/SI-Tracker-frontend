@@ -30,6 +30,7 @@ import {
 } from '@mui/icons-material';
 import { HeaderNotificationsBell } from './HeaderNotificationsBell';
 import { HeaderChatButton } from './HeaderChatButton';
+import { useSocketApp } from '../context/SocketContext';
 
 const pulseKeyframes = {
   '0%': { transform: 'scale(1)' },
@@ -40,6 +41,8 @@ const pulseKeyframes = {
 export default function NavBar() {
   const { isAuthenticated, user } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const { socket } = useSocketApp();
 
   // 🎯 Новое состояние для админ-меню
   const [adminAnchorEl, setAdminAnchorEl] = useState<null | HTMLElement>(null);
@@ -72,16 +75,51 @@ export default function NavBar() {
     setAdminAnchorEl(null);
   };
 
+  // const handleLogout = async () => {
+  //   setAnchorEl(null);
+  //   setAdminAnchorEl(null);
+  //   try {
+  //     await logout();
+  //   } catch (error) {
+  //     console.warn('Logout failed', error);
+  //   } finally {
+  //     // try {
+  //     //   if (socket) {
+  //     //     socket.disconnect();
+  //     //   }
+  //     //   // client.stop();
+
+  //     //   await client.clearStore();
+  //     //   client.writeQuery({
+  //     //     query: GetMeDocument,
+  //     //     data: { me: null },
+  //     //   });
+  //     // } catch (clearError) {}
+  //     // navigate(routes.login());
+  //     if (socket) {
+  //       socket.disconnect();
+  //     }
+
+  //     window.location.href = routes.login();
+  //   }
+  // };
+
   const handleLogout = async () => {
     setAnchorEl(null);
     setAdminAnchorEl(null);
+
     try {
+      if (socket) {
+        socket.disconnect();
+      }
       await logout();
     } catch (error) {
       console.warn('Logout failed', error);
     } finally {
-      await client.clearStore();
-      await client.resetStore();
+      try {
+        await client.resetStore().catch(() => {});
+      } catch (e) {}
+
       navigate(routes.login());
     }
   };
@@ -132,7 +170,7 @@ export default function NavBar() {
             </Typography>
           </Tooltip>
 
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <Box
               sx={{
                 display: 'flex',
@@ -337,15 +375,6 @@ export default function NavBar() {
                 </MenuItem>
               </Menu>
             </Box>
-          ) : (
-            <Button
-              component={Link}
-              to={routes.login()}
-              variant="contained"
-              size="small"
-            >
-              Вход
-            </Button>
           )}
         </Toolbar>
       </Container>

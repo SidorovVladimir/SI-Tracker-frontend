@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // 🎯 Иконка назад для мобилок
-import { useMutation, useQuery } from '@apollo/client/react';
+import { useApolloClient, useMutation, useQuery } from '@apollo/client/react';
 import {
   GetChatDialogsDocument,
   GetChatHistoryDocument,
@@ -57,7 +57,7 @@ export const ChatPage: React.FC = () => {
   const { user } = useAuth();
   // const { socket, setUnreadChatCount, onlineUserIds  } = useSocketApp();
   const { socket, setUnreadChatCount, onlineUsers } = useSocketApp();
-  // const client = useApolloClient();
+  const client = useApolloClient();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Управление выбранным собеседником и текстом
@@ -68,6 +68,10 @@ export const ChatPage: React.FC = () => {
   const [messageText, setMessageText] = useState('');
   const [localMessages, setLocalMessages] = useState<MessageLocal[]>([]);
   const [showAllUsers, setShowAllUsers] = useState(false);
+
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+
+  const topLoaderRef = useRef<HTMLDivElement | null>(null);
 
   const [mobileActivePanel, setMobileActivePanel] = useState<'LIST' | 'CHAT'>(
     'LIST'
@@ -102,28 +106,89 @@ export const ChatPage: React.FC = () => {
     nextFetchPolicy: 'cache-first',
   });
 
-  const { data: historyData, loading: historyLoading } = useQuery(
-    GetChatHistoryDocument,
-    {
-      variables: { recipientId: activeCompanionId ?? '', limit: 50, offset: 0 },
-      skip: !activeCompanionId,
-      // fetchPolicy: 'network-only',
-      fetchPolicy: 'no-cache',
+  const {
+    data: historyData,
+    loading: historyLoading,
+    fetchMore,
+  } = useQuery(GetChatHistoryDocument, {
+    variables: { recipientId: activeCompanionId ?? '', limit: 50, offset: 0 },
+    skip: !activeCompanionId,
+    fetchPolicy: 'network-only',
+    // fetchPolicy: 'no-cache',
+  });
+
+  const loadMoreMessages = async () => {
+    if (historyLoading || !hasMoreMessages || !activeCompanionId) return;
+
+    const currentCount = localMessages.length;
+
+    const { data } = await fetchMore({
+      variables: {
+        offset: currentCount,
+      },
+    });
+
+    const newMessages = data?.getChatHistory || [];
+
+    if (newMessages.length < 50) {
+      setHasMoreMessages(false);
     }
-  );
+
+    if (newMessages.length > 0) {
+      const reversedNew = [...newMessages].reverse();
+
+      setLocalMessages((prev) => {
+        // Объединяем старые и текущие сообщения
+        const allMessages = [...reversedNew, ...prev];
+        // Фильтруем массив, оставляя только уникальные по id
+        return allMessages.filter(
+          (msg, index, self) => index === self.findIndex((m) => m.id === msg.id)
+        );
+      });
+    }
+  };
 
   const [markAsRead] = useMutation(MarkAsReadDocument);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // const scrollToBottom = () => {
+  //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // };
+
+  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
   };
+
+  useEffect(() => {
+    setLocalMessages([]);
+    setHasMoreMessages(true);
+  }, [activeCompanionId]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Если невидимый блок вверху чата стал виден пользователю (он доскроллил до верха)
+        if (entries[0].isIntersecting) {
+          loadMoreMessages();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (topLoaderRef.current) {
+      observer.observe(topLoaderRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [localMessages, hasMoreMessages]);
 
   // Синхронизация истории сообщений
   useEffect(() => {
     if (historyData?.getChatHistory) {
       const reversed = [...historyData.getChatHistory].reverse();
       setLocalMessages(reversed);
-      setTimeout(scrollToBottom, 50);
+      if (localMessages.length === 0) {
+        setTimeout(() => scrollToBottom('auto'), 50);
+      }
     }
   }, [historyData]);
 
@@ -211,7 +276,7 @@ export const ChatPage: React.FC = () => {
           readerId: user?.id,
           authorId: currentCompanionId,
         });
-        setTimeout(scrollToBottom, 50);
+        setTimeout(() => scrollToBottom('smooth'), 100);
         // await client.refetchQueries({ include: [GetTotalUnreadCountDocument] });
       }
     });
@@ -229,11 +294,17 @@ export const ChatPage: React.FC = () => {
           createdAt: new Date(sentMessage.createdAt).toISOString(),
         };
         setLocalMessages((prev) => [...prev, formattedMsg]);
-        setTimeout(scrollToBottom, 50);
+        setTimeout(() => scrollToBottom('auto'), 50);
       }
 
-      // await refetchDialogs();
-      // await refetchUsers();
+      try {
+        await client.refetchQueries({
+          // Принудительно обновляем и список активных чатов, и телефонную книгу в фоне!
+          include: [GetChatDialogsDocument, GetChatUsersDocument],
+        });
+      } catch (err) {
+        console.error('Ошибка принудительного обновления списков чата:', err);
+      }
     });
 
     socket.on('userCreated', async () => {
@@ -487,6 +558,9 @@ export const ChatPage: React.FC = () => {
                               </Typography>
                             </Box>
                           }
+                          slotProps={{
+                            secondary: { component: 'div' },
+                          }}
                         />
                       </ListItem>
                     );
@@ -811,6 +885,10 @@ export const ChatPage: React.FC = () => {
                   gap: 1,
                 }}
               >
+                <div
+                  ref={topLoaderRef}
+                  style={{ height: '5px', visibility: 'hidden' }}
+                />
                 {historyLoading && localMessages.length === 0 ? (
                   <Box
                     sx={{

@@ -4,22 +4,60 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import App from './App.tsx';
 import { BrowserRouter } from 'react-router';
-import { ApolloClient, InMemoryCache } from '@apollo/client';
-import { HttpLink } from '@apollo/client';
+import {
+  ApolloClient,
+  InMemoryCache,
+  HttpLink,
+  ApolloLink,
+  ServerError,
+} from '@apollo/client';
+import { ErrorLink } from '@apollo/client/link/error';
+import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { ApolloProvider } from '@apollo/client/react';
 import { SnackbarProvider } from 'notistack';
 import theme from './utils/theme.ts';
 
 import './index.css';
 import { SocketProvider } from './context/SocketContext.tsx';
+import { GetMeDocument } from './graphql/types/__generated__/graphql.ts';
 
 const getClient = () => {
-  return new ApolloClient({
-    link: new HttpLink({
-      uri: '/graphql',
-      // uri: 'http://localhost:4000/graphql',
-      credentials: 'include',
-    }),
+  let clientInstance: any;
+
+  const errorLink = new ErrorLink(({ error }) => {
+    let isUnauthorized = false;
+
+    if (CombinedGraphQLErrors.is(error)) {
+      for (const err of error.errors) {
+        if (
+          err.extensions?.code === 'UNAUTHENTICATED' ||
+          err.message?.toLowerCase().includes('unauthorized')
+        ) {
+          isUnauthorized = true;
+          break;
+        }
+      }
+    } else if (ServerError.is(error) && error.statusCode === 401) {
+      isUnauthorized = true;
+    }
+
+    if (isUnauthorized && !window.location.pathname.includes('/login')) {
+      clientInstance.clearStore().catch(() => {});
+      clientInstance.writeQuery({
+        query: GetMeDocument,
+        data: { me: null },
+      });
+    }
+  });
+
+  const httpLink = new HttpLink({
+    uri: '/graphql',
+    // uri: 'http://localhost:4000/graphql',
+    credentials: 'include',
+  });
+
+  clientInstance = new ApolloClient({
+    link: ApolloLink.from([errorLink, httpLink]),
     cache: new InMemoryCache({
       typePolicies: {
         Query: {
@@ -35,7 +73,31 @@ const getClient = () => {
             getPlanningPoolByMonth: {
               keyArgs: ['targetMonth', 'limit', 'offset', 'controlTypeId'],
               merge(_existing, incoming) {
-                return incoming; // Всегда берем чистый отфильтрованный срез с сервера
+                return incoming;
+              },
+            },
+            getChatHistory: {
+              keyArgs: ['recipientId'],
+              merge(existing = [], incoming = []) {
+                const messageMap = new Map();
+
+                existing.forEach((msg: any) => {
+                  if (msg && msg.__ref) {
+                    messageMap.set(msg.__ref, msg);
+                  } else if (msg && msg.id) {
+                    messageMap.set(msg.id, msg);
+                  }
+                });
+
+                incoming.forEach((msg: any) => {
+                  if (msg && msg.__ref) {
+                    messageMap.set(msg.__ref, msg);
+                  } else if (msg && msg.id) {
+                    messageMap.set(msg.id, msg);
+                  }
+                });
+
+                return Array.from(messageMap.values());
               },
             },
           },
@@ -43,6 +105,7 @@ const getClient = () => {
       },
     }),
   });
+  return clientInstance;
 };
 
 const bootstrap = () => {

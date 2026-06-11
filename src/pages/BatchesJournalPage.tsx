@@ -24,8 +24,10 @@ import {
   CreateVerificationDocument,
   DeleteVerificationBatchDocument,
   GetMetrologyControlTypesListDocument,
+  // GetPlanningPoolDocument,
   GetVerificationBatchesDocument,
   GetVerificationOrganizationsListDocument,
+  // GetYearlySummaryDocument,
   RemoveDevicesFromBatchDocument,
   SyncBatchWithArshinDocument,
   SyncDeviceWithArshinDocument,
@@ -74,9 +76,9 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
   );
   const [updateStatus] = useMutation(UpdateBatchStatusDocument, {
     refetchQueries: [
-      'GetYearlySummary',
-      'GetPlanningPool',
-      'GetVerificationBatches',
+      // GetYearlySummaryDocument,
+      // GetPlanningPoolDocument,
+      GetVerificationBatchesDocument,
     ],
     onCompleted: () => {
       enqueueSnackbar('Статус партии обновлен', {
@@ -91,9 +93,9 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
   });
   const [removeDevices] = useMutation(RemoveDevicesFromBatchDocument, {
     refetchQueries: [
-      'GetYearlySummary',
-      'GetPlanningPool',
-      'GetVerificationBatches',
+      // GetYearlySummaryDocument,
+      // GetPlanningPoolDocument,
+      GetVerificationBatchesDocument,
     ],
     onCompleted: () => {
       enqueueSnackbar('Прибор удален из партии!', {
@@ -108,7 +110,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
   });
 
   const [createVerification] = useMutation(CreateVerificationDocument, {
-    refetchQueries: ['GetVerificationBatches'],
+    refetchQueries: [GetVerificationBatchesDocument],
     onCompleted: () => {
       enqueueSnackbar('Данные поверки успешно сохранены в паспорт прибора!', {
         variant: 'success',
@@ -123,9 +125,9 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
 
   const [deleteBatch] = useMutation(DeleteVerificationBatchDocument, {
     refetchQueries: [
-      'GetYearlySummary',
-      'GetPlanningPool',
-      'GetVerificationBatches',
+      // GetYearlySummaryDocument,
+      // GetPlanningPoolDocument,
+      GetVerificationBatchesDocument,
     ],
     onCompleted: () => {
       enqueueSnackbar('Партия успешно удалена', {
@@ -143,9 +145,9 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
     SyncDeviceWithArshinDocument,
     {
       refetchQueries: [
-        'GetYearlySummary',
-        'GetPlanningPool',
-        'GetVerificationBatches',
+        // GetYearlySummaryDocument,
+        // GetPlanningPoolDocument,
+        GetVerificationBatchesDocument,
       ],
       onCompleted: () => {
         enqueueSnackbar('Данные успешно импортированы из ФГИС Аршин!', {
@@ -163,7 +165,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
   const [syncBatch, { loading: isBatchSyncing }] = useMutation(
     SyncBatchWithArshinDocument,
     {
-      refetchQueries: ['GetVerificationBatches'],
+      refetchQueries: [GetVerificationBatchesDocument],
       onCompleted: (data) => {
         const { syncedCount, totalCount } = data.syncBatchWithArshin;
         enqueueSnackbar(
@@ -608,13 +610,13 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                               <IconButton
                                 color="error"
                                 size="small"
-                                onClick={async () =>
-                                  await removeDevices({
+                                onClick={() =>
+                                  removeDevices({
                                     variables: {
                                       batchId: batch.id,
                                       deviceIds: [link.device.id],
                                     },
-                                  })
+                                  }).catch(() => {})
                                 }
                               >
                                 <Delete fontSize="small" />
@@ -656,15 +658,15 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                       color="warning"
                                       size="small"
                                       disabled={isSyncing || isBatchSyncing}
-                                      onClick={async () => {
-                                        await syncDeviceWithArshin({
+                                      onClick={() => {
+                                        syncDeviceWithArshin({
                                           variables: {
                                             input: {
                                               deviceId: link.device.id,
                                               batchId: batch.id,
                                             },
                                           },
-                                        });
+                                        }).catch(() => {});
                                       }}
                                     >
                                       <Sync
@@ -769,8 +771,10 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                         color="warning"
                         size="small"
                         disabled={isBatchSyncing}
-                        onClick={async () => {
-                          await syncBatch({ variables: { batchId: batch.id } });
+                        onClick={() => {
+                          syncBatch({ variables: { batchId: batch.id } }).catch(
+                            () => {}
+                          );
                         }}
                         sx={{
                           textTransform: 'none',
@@ -788,10 +792,10 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                         color="success"
                         size="small"
                         disabled={isSyncing || isBatchSyncing}
-                        onClick={async () =>
-                          await updateStatus({
+                        onClick={() =>
+                          updateStatus({
                             variables: { id: batch.id, status: 'completed' },
-                          })
+                          }).catch(() => {})
                         }
                         sx={{
                           textTransform: 'none',

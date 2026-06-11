@@ -6,13 +6,21 @@ import {
   GetDeviceWithRelationDocument,
   GetDeviceWithRelationQuery,
   GetEquipmentTypesListDocument,
+  GetEquipmentTypesListQuery,
   GetMeasurementTypesListDocument,
+  GetMeasurementTypesListQuery,
   GetMetrologyControlTypesListDocument,
+  GetMetrologyControlTypesListQuery,
   GetPrimaryStandartsListDocument,
+  GetPrimaryStandartsListQuery,
   GetProductionSitesForSelectDocument,
+  GetProductionSitesForSelectQuery,
   GetScopesListDocument,
+  GetScopesListQuery,
   GetStatusListDocument,
+  GetStatusListQuery,
   GetVerificationOrganizationsListDocument,
+  GetVerificationOrganizationsListQuery,
   UpdateDeviceDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
@@ -64,33 +72,79 @@ export default function EditDevicePage(props: {
   const { deviceId, closeDetails, close, refetchDevice } = props;
   const {
     data: deviceData,
-    loading,
-    error,
+    loading: deviceLoading,
+    error: deviceError,
   } = useQuery(GetDeviceWithRelationDocument, {
     variables: {
       id: deviceId,
     },
   });
 
-  if (loading)
+  const { data: productionSiteData, loading: productionSiteLoading } = useQuery(
+    GetProductionSitesForSelectDocument
+  );
+  const { data: equipmentData, loading: equipmentLoading } = useQuery(
+    GetEquipmentTypesListDocument
+  );
+  const { data: statusesData, loading: statusesLoading } = useQuery(
+    GetStatusListDocument
+  );
+  const { data: measurementData, loading: measurementLoading } = useQuery(
+    GetMeasurementTypesListDocument
+  );
+  const { data: scopesData, loading: scopesLoading } = useQuery(
+    GetScopesListDocument
+  );
+  const { data: standardsData, loading: standardsLoading } = useQuery(
+    GetPrimaryStandartsListDocument
+  );
+  const { data: metrologyData, loading: metrologyLoading } = useQuery(
+    GetMetrologyControlTypesListDocument
+  );
+  const { data: orgsData, loading: orgsLoading } = useQuery(
+    GetVerificationOrganizationsListDocument
+  );
+
+  const anyLoading =
+    deviceLoading ||
+    productionSiteLoading ||
+    equipmentLoading ||
+    statusesLoading ||
+    measurementLoading ||
+    scopesLoading ||
+    standardsLoading ||
+    metrologyLoading ||
+    orgsLoading;
+
+  if (anyLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );
+  }
 
-  if (error)
+  if (deviceError) {
     return (
       <Alert severity="error" sx={{ m: 3 }}>
-        Ошибка загрузки СИ: {error.message}
+        Ошибка загрузки: {deviceError.message}
       </Alert>
     );
-  if (!deviceData?.device) return <Alert>СИ не найдено</Alert>;
+  }
+  if (!deviceData?.device) return <Alert sx={{ m: 3 }}>СИ не найдено</Alert>;
 
   return (
     <UserForm
       key={deviceId}
       device={deviceData.device}
+      productionSiteList={productionSiteData?.getProductionSitesForSelect || []}
+      equipmentTypesList={equipmentData?.equipmentTypes || []}
+      statusesList={statusesData?.statuses || []}
+      measurementTypesList={measurementData?.measurementTypes || []}
+      scopesList={scopesData?.scopes || []}
+      primaryStandartsList={standardsData?.primaryStandarts || []}
+      metrologyControlTypeList={metrologyData?.metrologyControlTypes || []}
+      verificationOrhanizationsList={orgsData?.verificationOrganizations || []}
       closeDetails={closeDetails}
       close={close}
       refetchDevice={refetchDevice}
@@ -98,40 +152,52 @@ export default function EditDevicePage(props: {
   );
 }
 
+interface UserFormProps {
+  device: NonNullable<GetDeviceWithRelationQuery['device']>;
+  productionSiteList: NonNullable<
+    GetProductionSitesForSelectQuery['getProductionSitesForSelect']
+  >[number][];
+  equipmentTypesList: NonNullable<
+    GetEquipmentTypesListQuery['equipmentTypes']
+  >[number][];
+  statusesList: NonNullable<GetStatusListQuery['statuses']>[number][];
+  measurementTypesList: NonNullable<
+    GetMeasurementTypesListQuery['measurementTypes']
+  >[number][];
+  scopesList: NonNullable<GetScopesListQuery['scopes']>[number][];
+  primaryStandartsList: NonNullable<
+    GetPrimaryStandartsListQuery['primaryStandarts']
+  >[number][];
+  metrologyControlTypeList: NonNullable<
+    GetMetrologyControlTypesListQuery['metrologyControlTypes']
+  >[number][];
+  verificationOrhanizationsList: NonNullable<
+    GetVerificationOrganizationsListQuery['verificationOrganizations']
+  >[number][];
+
+  closeDetails: () => void;
+  close: () => void;
+  refetchDevice: () => void;
+}
+
 function UserForm({
   device,
   closeDetails,
   close,
   refetchDevice,
-}: {
-  device: NonNullable<GetDeviceWithRelationQuery['device']>;
-  closeDetails: () => void;
-  close: () => void;
-  refetchDevice: () => void;
-}) {
+  productionSiteList,
+  equipmentTypesList,
+  statusesList,
+  measurementTypesList,
+  scopesList,
+  primaryStandartsList,
+  metrologyControlTypeList,
+  verificationOrhanizationsList,
+}: UserFormProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
-  const { data: productionSiteData } = useQuery(
-    GetProductionSitesForSelectDocument
-  );
-  const { data: equipmentTypesData } = useQuery(GetEquipmentTypesListDocument);
-  const { data: statusesData } = useQuery(GetStatusListDocument);
-  const { data: measurementTypesData } = useQuery(
-    GetMeasurementTypesListDocument
-  );
-  const { data: scopesData } = useQuery(GetScopesListDocument);
-  const { data: primaryStandartsData } = useQuery(
-    GetPrimaryStandartsListDocument
-  );
-  const { data: metrologyControlTypeData } = useQuery(
-    GetMetrologyControlTypesListDocument
-  );
-
-  const { data: verificationOrganizationsData } = useQuery(
-    GetVerificationOrganizationsListDocument
-  );
 
   const [form, setForm] = useState<{
     name: string;
@@ -292,19 +358,19 @@ function UserForm({
     );
   };
 
-  const productionSiteList =
-    productionSiteData?.getProductionSitesForSelect || [];
-  const equipmentTypesList = equipmentTypesData?.equipmentTypes || [];
-  const statusesList = statusesData?.statuses || [];
-  const measurementTypesList = measurementTypesData?.measurementTypes || [];
-  const scopesList = scopesData?.scopes || [];
-  const primaryStandartsList = primaryStandartsData?.primaryStandarts || [];
+  // const productionSiteList =
+  //   productionSiteData?.getProductionSitesForSelect || [];
+  // const equipmentTypesList = equipmentTypesData?.equipmentTypes || [];
+  // const statusesList = statusesData?.statuses || [];
+  // const measurementTypesList = measurementTypesData?.measurementTypes || [];
+  // const scopesList = scopesData?.scopes || [];
+  // const primaryStandartsList = primaryStandartsData?.primaryStandarts || [];
 
-  const metrologyControlTypeList =
-    metrologyControlTypeData?.metrologyControlTypes || [];
+  // const metrologyControlTypeList =
+  //   metrologyControlTypeData?.metrologyControlTypes || [];
 
-  const verificationOrhanizationsList =
-    verificationOrganizationsData?.verificationOrganizations || [];
+  // const verificationOrhanizationsList =
+  //   verificationOrganizationsData?.verificationOrganizations || [];
 
   const [updateDevice, { loading: updating }] = useMutation(
     UpdateDeviceDocument,
@@ -626,7 +692,7 @@ function UserForm({
           />
 
           <ProductionSiteTextField
-            value={form.productionSiteId}
+            value={form.productionSiteId || ''}
             onChange={handleChange}
             productionSiteList={productionSiteList}
           />

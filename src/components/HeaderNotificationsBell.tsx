@@ -528,6 +528,7 @@ export const HeaderNotificationsBell: React.FC = () => {
                         variant: 'body2',
                         fontWeight: item.isRead ? 'medium' : 'bold',
                       },
+                      secondary: { component: 'div' },
                     }}
                     sx={{ m: 0 }}
                   />

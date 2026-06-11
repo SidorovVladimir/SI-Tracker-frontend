@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client/react';
+import { useApolloClient, useMutation } from '@apollo/client/react';
 import {
   Box,
   Button,
@@ -15,13 +15,17 @@ import { enqueueSnackbar } from 'notistack';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const client = useApolloClient();
   const [form, setForm] = useState({
     email: '',
     password: '',
   });
 
   const [login] = useMutation(LoginDocument, {
-    onCompleted: () => {
+    onCompleted: async () => {
+      try {
+        await client.resetStore().catch(() => {});
+      } catch (e) {}
       navigate(routes.home());
     },
     onError: (err) => {

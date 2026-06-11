@@ -31,12 +31,6 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
 
   return (
     <Box
-      // sx={{
-      //   width: { xs: '100%', md: '30%' }, // На мобилках во весь экран, на ПК — 30%
-      //   minWidth: { xs: '100%', md: 350 },
-      //   position: 'relative',
-      //   height: '100%',
-      // }}
       sx={{
         width: { xs: '100vw', md: '30%' },
         minWidth: { xs: '100vw', md: 350 },
@@ -44,6 +38,8 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
         position: { xs: 'fixed', md: 'relative' },
         top: { xs: 0, md: 'auto' },
         left: { xs: 0, md: 'auto' },
+        borderRadius: 3,
+        boxShadow: 4,
         zIndex: { xs: (theme) => theme.zIndex.drawer + 2, md: 1 },
         boxSizing: 'border-box',
         overflow: 'hidden',
@@ -51,22 +47,6 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
     >
       <Slide direction="left" in={!!viewMode} mountOnEnter unmountOnExit>
         <Box
-          // sx={{
-          //   position: 'absolute',
-          //   top: 0,
-          //   left: 0,
-          //   right: 0,
-          //   bottom: 0,
-          //   display: 'flex',
-          //   flexDirection: 'column',
-          //   borderRadius: { xs: 0, md: 3 },
-          //   boxShadow: 4,
-          //   bgcolor: 'background.paper',
-          //   border: '1px solid',
-          //   borderColor: 'divider',
-          //   p: 3,
-          //   overflowY: 'auto',
-          // }}
           sx={{
             position: 'absolute',
             top: 0,
@@ -81,7 +61,7 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
             border: '1px solid',
             borderColor: 'divider',
 
-            // 🎯 ИСПРАВЛЕНИЕ: На мобилках (xs) делаем верхний внутренний отступ 64px (высота NavBar),
+            //  ИСПРАВЛЕНИЕ: На мобилках (xs) делаем верхний внутренний отступ 64px (высота NavBar),
             // чтобы шапка карточки не уезжала под край экрана. На ПК (md) оставляем стандартные 24px (p: 3).
             pt: { xs: '64px', md: 3 },
             pl: 3,
@@ -91,6 +71,7 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
             overflowY: 'auto',
             height: '100%',
             boxSizing: 'border-box',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           {viewMode === 'create' ? (
