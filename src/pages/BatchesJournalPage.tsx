@@ -36,6 +36,8 @@ import {
 import { CheckCircleOutline, Delete, Edit, Sync } from '@mui/icons-material';
 import { VerificationModal } from '../components/modals/VerificationModal';
 import { enqueueSnackbar } from 'notistack';
+// import { JobProgressBar } from '../components/JobProgressBar';
+import { GlobalJobWatcher } from '../components/GlobalJobWatcher';
 
 interface BatchesJournalPageProps {
   locallyVerifiedIds: string[];
@@ -50,6 +52,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
 
   const [journalYear, setJournalYear] = useState<number>(currentYear);
   const [statusTab, setStatusTab] = useState<string>('ACTIVE'); // 'ACTIVE' | 'DRAFT' | 'SENT' | 'COMPLETED'
+  const [batchJobs, setBatchJobs] = useState<Record<string, string>>({});
 
   const getBackendStatusParam = () => {
     if (statusTab === 'ACTIVE') return undefined;
@@ -163,25 +166,40 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
   );
 
   const [syncBatch, { loading: isBatchSyncing }] = useMutation(
-    SyncBatchWithArshinDocument,
-    {
-      refetchQueries: [GetVerificationBatchesDocument],
-      onCompleted: (data) => {
-        const { syncedCount, totalCount } = data.syncBatchWithArshin;
-        enqueueSnackbar(
-          `Пакетная проверка завершена: успешно обновлено ${syncedCount} из ${totalCount} приборов.`,
-          {
-            variant: syncedCount > 0 ? 'success' : 'info',
-          }
-        );
-      },
-      onError: (error) => {
-        enqueueSnackbar(`Ошибка пакетной синхронизации: ${error.message}`, {
-          variant: 'error',
-        });
-      },
-    }
+    SyncBatchWithArshinDocument
   );
+
+  const handleSync = async (batchId: string) => {
+    try {
+      const { data } = await syncBatch({ variables: { batchId } });
+
+      if (data?.syncBatchWithArshin?.jobId) {
+        const { jobId } = data.syncBatchWithArshin;
+        // const { jobId, message } = data.syncBatchWithArshin;
+
+        // Показываем синюю плашку о старте фонового процесса
+        // enqueueSnackbar(message, { variant: 'info' });
+
+        // Записываем jobId именно для этой партии
+        setBatchJobs((prev) => ({
+          ...prev,
+          [batchId]: jobId,
+        }));
+      } else {
+        console.error('Бэкенд не вернул jobId!');
+      }
+    } catch (error) {
+      console.error('Ошибка вызова мутации:', error);
+    }
+  };
+
+  const handleRemoveJob = (batchId: string) => {
+    setBatchJobs((prev) => {
+      const copy = { ...prev };
+      delete copy[batchId];
+      return copy;
+    });
+  };
 
   const [expandedBatchId, setExpandedBatchId] = useState<string | false>(false);
 
@@ -488,6 +506,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
           const isDraft = batch.status === 'draft';
           const isSent = batch.status === 'sent';
           const isExpanded = expandedBatchId === batch.id;
+          const currentJobId = batchJobs[batch.id];
 
           return (
             <Accordion
@@ -534,6 +553,29 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                     }
                     size="small"
                   />
+                  {currentJobId && (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        ml: { xs: 0, sm: 'auto' },
+                      }}
+                    >
+                      <CircularProgress
+                        size={16}
+                        thickness={5}
+                        color="warning"
+                      />
+                      <Typography
+                        variant="caption"
+                        color="warning.main"
+                        sx={{ fontWeight: 'medium' }}
+                      >
+                        В очереди...
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
               </AccordionSummary>
               <AccordionDetails
@@ -657,7 +699,11 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                     <IconButton
                                       color="warning"
                                       size="small"
-                                      disabled={isSyncing || isBatchSyncing}
+                                      disabled={
+                                        !!batchJobs[batch.id] ||
+                                        isSyncing ||
+                                        isBatchSyncing
+                                      }
                                       onClick={() => {
                                         syncDeviceWithArshin({
                                           variables: {
@@ -696,7 +742,11 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                 <IconButton
                                   color="primary"
                                   size="small"
-                                  disabled={isSyncing || isBatchSyncing}
+                                  disabled={
+                                    !!batchJobs[batch.id] ||
+                                    isSyncing ||
+                                    isBatchSyncing
+                                  }
                                   onClick={() =>
                                     handleOpenVerificationModal(
                                       link.device.id,
@@ -770,12 +820,15 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                         variant="outlined"
                         color="warning"
                         size="small"
-                        disabled={isBatchSyncing}
-                        onClick={() => {
-                          syncBatch({ variables: { batchId: batch.id } }).catch(
-                            () => {}
-                          );
-                        }}
+                        disabled={
+                          !!batchJobs[batch.id] || isSyncing || isBatchSyncing
+                        }
+                        // onClick={() => {
+                        //   syncBatch({ variables: { batchId: batch.id } }).catch(
+                        //     () => {}
+                        //   );
+                        // }}
+                        onClick={() => handleSync(batch.id)}
                         sx={{
                           textTransform: 'none',
                           fontWeight: 'bold',
@@ -783,7 +836,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                           py: { xs: 1, sm: 0.5 },
                         }}
                       >
-                        {isBatchSyncing
+                        {batchJobs[batch.id]
                           ? '⏳ Синхронизация...'
                           : '🔄 Проверить всю партию в Аршин'}
                       </Button>
@@ -791,7 +844,9 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                         variant="contained"
                         color="success"
                         size="small"
-                        disabled={isSyncing || isBatchSyncing}
+                        disabled={
+                          !!batchJobs[batch.id] || isSyncing || isBatchSyncing
+                        }
                         onClick={() =>
                           updateStatus({
                             variables: { id: batch.id, status: 'completed' },
@@ -824,6 +879,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
           onSubmit={handleSaveVerification}
         />
       )}
+      <GlobalJobWatcher onJobClose={handleRemoveJob} />
     </Box>
   );
 };

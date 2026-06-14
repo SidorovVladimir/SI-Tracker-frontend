@@ -44,8 +44,50 @@ import ProductionAnalyticsPage from './pages/ProductionAnalyticsPage';
 import { ExcelImporter } from './components/ExcelImporter';
 import { SqlConsolePage } from './pages/admin/SqlConsolePage';
 import { ChatPage } from './pages/ChatPage';
+import { Box, CircularProgress, Typography } from '@mui/material';
+import { useSocketApp } from './context/SocketContext';
+import { useAuth } from './hooks/useAuth';
+import { GlobalJobWatcher } from './components/GlobalJobWatcher';
+// import { LicensesPage } from './pages/LicensesPage';
 
 function App() {
+  const { isMaintenance } = useSocketApp();
+  const { user } = useAuth();
+
+  // 🔥 Корневой перехват: гасит всё приложение, включая NavBar
+  if (isMaintenance && user?.role !== 'superadmin') {
+    return (
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          bgcolor: 'grey.900',
+          color: 'white',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 3,
+          p: 4,
+          textAlign: 'center',
+        }}
+      >
+        <CircularProgress color="error" size={60} thickness={4} />
+        <Typography variant="h4" fontWeight="bold">
+          🛠️ Техническое обслуживание системы
+        </Typography>
+        <Typography variant="body1" sx={{ color: 'grey.400', maxWidth: 500 }}>
+          Администратор запустил процесс восстановления базы данных из резервной
+          копии. Все операции временно приостановлены. Система автоматически
+          станет доступна сразу после завершения операции.
+        </Typography>
+      </Box>
+    );
+  }
   return (
     <>
       <NavBar />
@@ -54,6 +96,7 @@ function App() {
           <Route path={routes.home()} element={<HomePage />} />
           <Route path={routes.profile()} element={<ProfilePage />} />
           <Route path={routes.chat()} element={<ChatPage />} />
+          {/* <Route path="/about/licenses" element={<LicensesPage />} /> */}
 
           <Route element={<ProtectedRoute allowedRoles={['superadmin']} />}>
             <Route path={routes.import()} element={<ExcelImporter />} />
@@ -187,6 +230,7 @@ function App() {
         </Route>
         <Route path={'*'} element={<NotFoundPage />} />
       </Routes>
+      <GlobalJobWatcher />
     </>
   );
 }

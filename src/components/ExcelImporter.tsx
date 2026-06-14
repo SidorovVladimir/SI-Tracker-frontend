@@ -93,12 +93,24 @@ export const ExcelImporter: React.FC = () => {
   const [importDevices, { loading }] = useMutation(
     ImportDevicesFromExcelDocument,
     {
-      refetchQueries: ['GetDevicesWithRelations'], // Обновляем основную таблицу оборудования
+      // refetchQueries: ['GetDevicesWithRelations'], // Обновляем основную таблицу оборудования
       onCompleted: (res: any) => {
+        // enqueueSnackbar(
+        //   `Импорт успешно завершен! Загружено приборов: ${res.importDevicesFromExcel}`,
+        //   {
+        //     variant: 'success',
+        //   }
+
+        // const { jobId, message } = res.importDevicesFromExcel;
+        const { message } = res.importDevicesFromExcel;
+        // 1. Выводим тост Шага 1 в наш единый не накладывающийся менеджер тостов
         enqueueSnackbar(
-          `Импорт успешно завершен! Загружено приборов: ${res.importDevicesFromExcel}`,
+          message ||
+            'Файл успешно принят. Валидация строк запущена в фоновом режиме.',
           {
-            variant: 'success',
+            variant: 'warning',
+            key: 'db-import-toast',
+            autoHideDuration: 60000,
           }
         );
         // Сбрасываем состояние после успешного импорта
@@ -108,7 +120,11 @@ export const ExcelImporter: React.FC = () => {
         setFileName('');
       },
       onError: (err: any) => {
-        enqueueSnackbar(`Ошибка импорта: ${err.message}`, { variant: 'error' });
+        // enqueueSnackbar(`Ошибка импорта: ${err.message}`, { variant: 'error' });
+        enqueueSnackbar(`Ошибка старта импорта: ${err.message}`, {
+          variant: 'error',
+          key: 'db-import-toast',
+        });
       },
     }
   );
@@ -124,7 +140,7 @@ export const ExcelImporter: React.FC = () => {
     // Мы загружаем SheetJS прямо внутрь воркера через официальный CDN
     // importScripts("https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js");
     const workerCode = `
-   importScripts("https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js");
+   importScripts("${window.location.origin}/xlsx.full.min.js");
  self.addEventListener('message', (e) => {
     try {
       const buffer = e.data;
@@ -309,9 +325,19 @@ export const ExcelImporter: React.FC = () => {
       });
       return;
     }
-
+    try {
+      enqueueSnackbar(
+        `📦 Шаг 1/2: Отправка ${payload.length} приборов на сервер...`,
+        {
+          variant: 'info',
+          key: 'db-import-toast',
+        }
+      );
+      await importDevices({ variables: { input: payload as any } });
+    } catch (error) {
+      console.error('Ошибка вызова мутации импорта:', error);
+    }
     // Отправляем пачку готового JSON на бэкенд
-    await importDevices({ variables: { input: payload as any } });
   };
 
   return (
@@ -448,12 +474,12 @@ export const ExcelImporter: React.FC = () => {
                 color="success"
                 fullWidth
                 size="large"
-                disabled={loading}
+                disabled={loading || isFileReading}
                 onClick={handleStartImport}
                 sx={{ mt: 3, fontWeight: 'bold', textTransform: 'none' }}
               >
                 {loading
-                  ? '⏳ Загрузка в базу данных...'
+                  ? '⏳ Инициализация очереди...'
                   : '🚀 Запустить импорт приборов'}
               </Button>
             </Card>

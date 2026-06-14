@@ -5,15 +5,23 @@ mutation SyncDeviceWithArshin($input: SyncDeviceWithArshinInput!) {
   }
 }
 
+# mutation SyncBatchWithArshin($batchId: ID!) {
+#  syncBatchWithArshin(batchId: $batchId) {
+#    batchId
+#   syncedCount
+#  totalCount
+# details {
+#  deviceId
+# success
+# message
+# }
+# }
+# }
+
 mutation SyncBatchWithArshin($batchId: ID!) {
   syncBatchWithArshin(batchId: $batchId) {
-    batchId
-    syncedCount
-    totalCount
-    details {
-      deviceId
-      success
-      message
-    }
+    jobId # ID задачи из BullMQ, который мы передадим в прогресс-бар
+    batchId # ID партии приборов
+    message # Текст "Синхронизация запущена в фоновом режиме"
   }
 }

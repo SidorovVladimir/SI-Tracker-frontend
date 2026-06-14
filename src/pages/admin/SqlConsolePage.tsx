@@ -20,11 +20,14 @@ import { CloudDownload, CloudUpload, PlayArrow } from '@mui/icons-material';
 import { useLazyQuery } from '@apollo/client/react';
 import { useSnackbar } from 'notistack';
 import { API_ROUTES } from '../../config';
+import { useSocketApp } from '../../context/SocketContext';
 
 export const SqlConsolePage: React.FC = () => {
   const [queryText, setQueryText] = useState<string>(
     'SELECT * FROM devices LIMIT 5;'
   );
+
+  const { addRunningJob } = useSocketApp();
 
   const { enqueueSnackbar } = useSnackbar();
   const [isRestoring, setIsRestoring] = useState(false);
@@ -88,26 +91,42 @@ export const SqlConsolePage: React.FC = () => {
     setIsRestoring(true);
 
     try {
-      // Отправляем файл методом POST напрямую на наш REST-эндпоинт
+      enqueueSnackbar(
+        '📦 Шаг 1/2: Загрузка файла резервной копии на сервер...',
+        {
+          variant: 'info',
+          key: 'db-restore-toast',
+          anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+          autoHideDuration: 30000,
+        }
+      );
       const response = await fetch(API_ROUTES.restore, {
         method: 'POST',
-        body: file, // Стримим файл напрямую в теле запроса
+        body: file,
         credentials: 'include',
         headers: {
-          // Важно, чтобы Express понял, что мы шлем credentials
           Accept: 'application/json',
         },
       });
+      console.log(response);
 
-      if (response.ok) {
+      if (response.ok || response.status === 202) {
+        const data = await response.json();
         enqueueSnackbar(
-          '📦 База данных успешно восстановлена из резервной копии!',
+          '🛠️ Шаг 2/2: Файл загружен. Применяются SQL-скрипты. База данных заблокирована...',
           {
-            variant: 'success',
+            variant: 'warning',
+            key: 'db-restore-toast',
+            anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+            autoHideDuration: 60000,
           }
         );
+
+        if (data.jobId) {
+          addRunningJob(data.jobId, 'db-restore');
+        }
         // Перезагружаем страницу, чтобы обновить все кэши и данные на экране
-        setTimeout(() => window.location.reload(), 1500);
+        // setTimeout(() => window.location.reload(), 1500);
       } else {
         const errText = await response.text();
         enqueueSnackbar(`Ошибка: ${errText}`, { variant: 'error' });

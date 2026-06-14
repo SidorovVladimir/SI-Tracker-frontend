@@ -21,6 +21,11 @@ import {
   Drawer,
   IconButton,
   Tooltip,
+  TablePagination,
+  Card,
+  CardActionArea,
+  CardContent,
+  Chip,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
@@ -836,75 +841,285 @@ export default function DevicesPage() {
             </Paper>
           )}
 
-          <Box
-            sx={{
-              flexGrow: 1,
-              overflow: 'hidden',
-              // display: 'flex',
-              // flexDirection: 'column',
-            }}
-          >
-            <DataGrid
-              rows={rows}
-              columns={columns}
-              loading={loading}
-              paginationMode="server"
-              rowCount={rowCount}
-              paginationModel={paginationModel}
-              onPaginationModelChange={setPaginationModel}
-              density="compact"
-              pageSizeOptions={[10, 25, 50]}
-              onRowClick={handleRowClick}
-              disableColumnSorting
-              disableColumnFilter
-              hideFooterSelectedRowCount
-              columnVisibilityModel={columnVisibilityModel}
-              onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
-              localeText={{
-                columnMenuHideColumn: 'Скрыть столбец',
-                columnMenuManageColumns: 'Управлять колонками',
-                noRowsLabel: 'Нет средств измерения',
-                paginationRowsPerPage: 'Кол-во СИ на странице:',
-              }}
-              getRowId={(row) => row.id}
-              sx={{
-                fontFamily:
-                  '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-                fontSize: '0.85rem',
-                // height: '100%',
-                // border: 'none',
-                '& .MuiDataGrid-cell': {
-                  fontVariantNumeric: 'tabular-nums',
-                },
-                '& .MuiDataGrid-columnHeaderTitle': {
-                  fontFamily: '"Inter", sans-serif',
-                  fontWeight: 700,
-                  color: 'text.primary',
-                  fontSize: '0.88rem',
-                },
-                '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
-                  outline: 'none',
-                },
-                '& .MuiDataGrid-row:hover': {
-                  backgroundColor: 'action.hover',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s ease',
-                },
-                '& .Mui-selected': {
-                  backgroundColor: 'rgba(25, 100, 255, 0.08)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(25, 100, 255, 0.12)',
+          <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+            {isMobileOrLaptop ? (
+              /* ====== МОБИЛЬНАЯ ВЕРСИЯ: Карточки ====== */
+              <Box
+                sx={{
+                  overflow: 'auto',
+                  height: '100%',
+                  px: 1,
+                  pb: 2,
+                }}
+              >
+                {loading ? (
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}
+                  >
+                    <Typography color="text.secondary">Загрузка...</Typography>
+                  </Box>
+                ) : rows.length === 0 ? (
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}
+                  >
+                    <Typography color="text.secondary">
+                      Нет средств измерения
+                    </Typography>
+                  </Box>
+                ) : (
+                  rows.map((device) => {
+                    const statusName =
+                      device?.status?.name?.toLowerCase() || '';
+                    let statusColor:
+                      | 'error'
+                      | 'warning'
+                      | 'success'
+                      | 'default' = 'default';
+                    if (
+                      statusName.includes('брак') ||
+                      statusName.includes('списан') ||
+                      statusName.includes('на замен')
+                    )
+                      statusColor = 'error';
+                    else if (
+                      statusName.includes('ремонт') ||
+                      statusName.includes('ожид') ||
+                      statusName.includes('ремон')
+                    )
+                      statusColor = 'warning';
+                    else if (
+                      statusName.includes('исправен') ||
+                      statusName.includes('эксплуатац') ||
+                      statusName.includes('годен')
+                    )
+                      statusColor = 'success';
+
+                    const isOverdue = device.latestVerification?.validUntil
+                      ? new Date(device.latestVerification.validUntil) <
+                        new Date()
+                      : false;
+
+                    return (
+                      <Card
+                        key={device.id}
+                        sx={{
+                          mb: 1.5,
+                          borderRadius: 2,
+                          boxShadow: 2,
+                          borderLeft: 4,
+                          borderColor:
+                            statusColor === 'error'
+                              ? 'error.main'
+                              : statusColor === 'warning'
+                              ? 'warning.main'
+                              : statusColor === 'success'
+                              ? 'success.main'
+                              : 'divider',
+                        }}
+                      >
+                        <CardActionArea
+                          onClick={() => {
+                            setSelectedDeviceId(device.id);
+                            setViewMode('info');
+                          }}
+                          sx={{ p: 0 }}
+                        >
+                          <CardContent sx={{ pb: '12px !important' }}>
+                            {/* Заголовок: Наименование + Тип СИ */}
+                            <Typography
+                              variant="subtitle1"
+                              sx={{ fontWeight: 700, lineHeight: 1.3, mb: 0.5 }}
+                            >
+                              {device.name?.toUpperCase() || '—'}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ mb: 1 }}
+                            >
+                              {device.model?.toUpperCase() || '—'}
+                            </Typography>
+
+                            {/* Зав. номер + Статус */}
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                flexWrap: 'wrap',
+                                gap: 0.5,
+                                mb: 0.5,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                sx={{ fontFamily: 'monospace' }}
+                              >
+                                Зав. №:{' '}
+                                {device.serialNumber?.toUpperCase() || '—'}
+                              </Typography>
+                              <Chip
+                                label={device?.status?.name || '—'}
+                                size="small"
+                                color={statusColor}
+                                variant="outlined"
+                                sx={{
+                                  fontWeight: 600,
+                                  height: 22,
+                                  fontSize: 11,
+                                }}
+                              />
+                            </Box>
+
+                            {/* Дата поверки */}
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mt: 0.5,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                Поверка:{' '}
+                                {device.latestVerification?.date
+                                  ? formatDate(device.latestVerification.date)
+                                  : '—'}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: isOverdue
+                                    ? 'error.main'
+                                    : 'text.secondary',
+                                  fontWeight: isOverdue ? 700 : 400,
+                                }}
+                              >
+                                До:{' '}
+                                {device.latestVerification?.validUntil
+                                  ? formatDate(
+                                      device.latestVerification.validUntil
+                                    )
+                                  : '—'}
+                              </Typography>
+                            </Box>
+
+                            {/* Вид контроля + Город */}
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mt: 0.5,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {device?.latestVerification
+                                  ?.metrologyControleType?.name || ''}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {device?.productionSite?.city?.name?.toUpperCase() ||
+                                  ''}
+                              </Typography>
+                            </Box>
+                          </CardContent>
+                        </CardActionArea>
+                      </Card>
+                    );
+                  })
+                )}
+
+                {/* Пагинация для карточек */}
+                <TablePagination
+                  component="div"
+                  count={rowCount}
+                  page={paginationModel.page}
+                  onPageChange={(_e, newPage) =>
+                    setPaginationModel((prev) => ({ ...prev, page: newPage }))
+                  }
+                  rowsPerPage={paginationModel.pageSize}
+                  onRowsPerPageChange={(e) =>
+                    setPaginationModel({
+                      page: 0,
+                      pageSize: parseInt(e.target.value, 10),
+                    })
+                  }
+                  rowsPerPageOptions={[10, 25, 50]}
+                  labelRowsPerPage="На странице:"
+                  labelDisplayedRows={({ from, to, count }) =>
+                    `${from}–${to} из ${count !== -1 ? count : '>' + to}`
+                  }
+                />
+              </Box>
+            ) : (
+              /* ====== ДЕСКТОПНАЯ ВЕРСИЯ: DataGrid ====== */
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                loading={loading}
+                paginationMode="server"
+                rowCount={rowCount}
+                paginationModel={paginationModel}
+                onPaginationModelChange={setPaginationModel}
+                density="compact"
+                pageSizeOptions={[10, 25, 50]}
+                onRowClick={handleRowClick}
+                disableColumnSorting
+                disableColumnFilter
+                hideFooterSelectedRowCount
+                columnVisibilityModel={columnVisibilityModel}
+                onColumnVisibilityModelChange={
+                  handleColumnVisibilityModelChange
+                }
+                localeText={{
+                  columnMenuHideColumn: 'Скрыть столбец',
+                  columnMenuManageColumns: 'Управлять колонками',
+                  noRowsLabel: 'Нет средств измерения',
+                  paginationRowsPerPage: 'Кол-во СИ на странице:',
+                }}
+                getRowId={(row) => row.id}
+                sx={{
+                  fontFamily:
+                    '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+                  fontSize: '0.85rem',
+                  '& .MuiDataGrid-cell': {
+                    fontVariantNumeric: 'tabular-nums',
                   },
-                  transition: 'background-color 0.2s ease',
-                },
-              }}
-              getRowClassName={(params: GridRowParams<Device>) =>
-                selectedDeviceId === params.row.id ? 'Mui-selected' : ''
-              }
-            />
+                  '& .MuiDataGrid-columnHeaderTitle': {
+                    fontFamily: '"Inter", sans-serif',
+                    fontWeight: 700,
+                    color: 'text.primary',
+                    fontSize: '0.88rem',
+                  },
+                  '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within':
+                    { outline: 'none' },
+                  '& .MuiDataGrid-row:hover': {
+                    backgroundColor: 'action.hover',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease',
+                  },
+                  '& .Mui-selected': {
+                    backgroundColor: 'rgba(25, 100, 255, 0.08)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(25, 100, 255, 0.12)',
+                    },
+                    transition: 'background-color 0.2s ease',
+                  },
+                }}
+                getRowClassName={(params: GridRowParams<Device>) =>
+                  selectedDeviceId === params.row.id ? 'Mui-selected' : ''
+                }
+              />
+            )}
           </Box>
         </Box>
-
         {viewMode && (
           <DeviceManageSidebar
             viewMode={viewMode}

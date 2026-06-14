@@ -369,6 +369,13 @@ export default function NavBar() {
                     <ListItemText>Панель администратора</ListItemText>
                   </MenuItem>
                 )}
+                {/* <MenuItem
+                  component={Link}
+                  to={routes.about()}
+                  onClick={handleClose}
+                >
+                  <ListItemText>О программе</ListItemText>
+                </MenuItem> */}
 
                 <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
                   <ListItemText>Выход</ListItemText>

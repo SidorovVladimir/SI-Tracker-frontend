@@ -238,8 +238,16 @@ mutation CreateVerification($input: CreateVerificationInput!) {
   }
 }
 
+# mutation ImportDevicesFromExcel($input: [ImportDeviceItemInput!]!) {
+# importDevicesFromExcel(input: $input)
+# }
+
 mutation ImportDevicesFromExcel($input: [ImportDeviceItemInput!]!) {
-  importDevicesFromExcel(input: $input)
+  importDevicesFromExcel(input: $input) {
+    jobId # ID задачи для GlobalJobWatcher
+    itemCount # Сколько приборов в файле всего
+    message # Текст сообщения сервера
+  }
 }
 
 query ExecuteRawSql($sqlQuery: String!) {

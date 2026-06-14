@@ -9,6 +9,7 @@ export default {
   import: () => '/import',
   sqlConsole: () => '/sql-console',
   chat: () => '/chat',
+  // about: () => '/about/licenses',
   admin: {
     root: () => '/admin',
     users: () => '/admin/users',
