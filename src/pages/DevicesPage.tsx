@@ -14,20 +14,16 @@ import {
   Paper,
   TextField,
   Typography,
-  // Slide,
   Stack,
   useTheme,
   useMediaQuery,
   Drawer,
   IconButton,
   Tooltip,
-  TablePagination,
-  Card,
-  CardActionArea,
-  CardContent,
   Chip,
   Badge,
   Checkbox,
+  Divider,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
@@ -36,7 +32,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 // import DeviceCard from './DeviceCard';
 // import EditDevicePage from './admin/EditDevicePage';
-import { Add, Close, FilterAlt, QrCode } from '@mui/icons-material';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  Add,
+  Close,
+  FilterAlt,
+  QrCode,
+  ChevronLeft,
+  ChevronRight,
+} from '@mui/icons-material';
 import React from 'react';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
@@ -168,8 +172,6 @@ export default function DevicesPage() {
     const response = data?.devicesWithRelations;
     return response?.items || [];
   }, [data]);
-
-  // const totalCount = data?.devicesWithRelations?.totalCount || 0;
 
   const totalCountRaw = data?.devicesWithRelations?.totalCount;
 
@@ -472,15 +474,25 @@ export default function DevicesPage() {
             </Typography>
 
             {isMobileOrLaptop ? (
-              <Box sx={{ mb: 1, display: 'flex', gap: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  flexWrap: 'nowrap',
+                }}
+              >
+                {/* Фильтры — иконка + Drawer (остаётся) */}
                 <Tooltip title="Фильтры">
                   <IconButton
                     color="primary"
+                    size="small"
                     onClick={() => setIsDrawerOpen(true)}
                   >
-                    <FilterAlt />
+                    <FilterAlt fontSize="small" />
                   </IconButton>
                 </Tooltip>
+
                 <Drawer
                   anchor="right"
                   open={isDrawerOpen}
@@ -493,6 +505,7 @@ export default function DevicesPage() {
                     useFlexGap
                     sx={{
                       p: isMobileOrLaptop ? 3 : 0,
+                      pt: isMobileOrLaptop ? 10 : 0,
                       width: isMobileOrLaptop ? 280 : 'auto',
                     }}
                   >
@@ -673,71 +686,77 @@ export default function DevicesPage() {
                   </Stack>
                 </Drawer>
 
-                <Box display="flex" alignItems="center" gap={1}>
-                  {user?.role !== 'user' && (
-                    <>
-                      {/* Кнопка «Добавить СИ» */}
-                      <Tooltip title="Добавить СИ">
-                        <IconButton color="primary" onClick={handleAddClick}>
-                          <Add />
+                {/* Компактная группа: Добавить + Печать */}
+                {user?.role !== 'user' && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      gap: 0.5,
+                      ml: 'auto',
+                    }}
+                  >
+                    <Tooltip title="Добавить СИ">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={handleAddClick}
+                      >
+                        <Add fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+
+                    {selectedDeviceIds.length > 0 ? (
+                      <Tooltip
+                        title={`Отправить на печать (${selectedDeviceIds.length})`}
+                      >
+                        <IconButton
+                          size="small"
+                          color="success"
+                          onClick={() => setIsBarcodeModalOpen(true)}
+                          sx={{
+                            backgroundColor: 'success.lighter',
+                            '&:hover': { backgroundColor: 'success.light' },
+                          }}
+                        >
+                          <Badge
+                            badgeContent={selectedDeviceIds.length}
+                            color="error"
+                          >
+                            <QrCode fontSize="small" />
+                          </Badge>
                         </IconButton>
                       </Tooltip>
-
-                      {/* АДАПТИВНАЯ КНОПКА ПЕЧАТИ БИРОК */}
-                      {selectedDeviceIds.length > 0 ? (
-                        // СОСТОЯНИЕ: Приборы выбраны -> Зеленая кнопка с количеством бирок
-                        <Tooltip
-                          title={`Отправить на печать (${selectedDeviceIds.length})`}
+                    ) : (
+                      <Tooltip
+                        title={
+                          showCheckboxes
+                            ? 'Выберите СИ в таблице...'
+                            : 'Печать бирок'
+                        }
+                      >
+                        <IconButton
+                          size="small"
+                          color={showCheckboxes ? 'warning' : 'primary'}
+                          onClick={() => setShowCheckboxes(true)}
                         >
-                          <IconButton
-                            color="success"
-                            onClick={() => setIsBarcodeModalOpen(true)}
-                            sx={{
-                              backgroundColor: 'success.lighter', // Легкий зеленый фон для акцента, если настроен в теме
-                              '&:hover': { backgroundColor: 'success.light' },
-                            }}
-                          >
-                            {/* Показывает красивый кружок с цифрой поверх иконки */}
-                            <Badge
-                              badgeContent={selectedDeviceIds.length}
-                              color="error"
-                            >
-                              <QrCode />
-                            </Badge>
-                          </IconButton>
-                        </Tooltip>
-                      ) : (
-                        // СОСТОЯНИЕ: Режим ожидания или галочки еще не поставлены
-                        <Tooltip
-                          title={
-                            showCheckboxes
-                              ? 'Выберите СИ в таблице...'
-                              : 'Печать бирок'
-                          }
-                        >
-                          <IconButton
-                            color={showCheckboxes ? 'warning' : 'primary'} // Желтеет, напоминая о выборе
-                            onClick={() => setShowCheckboxes(true)}
-                          >
-                            <QrCode />
-                          </IconButton>
-                        </Tooltip>
-                      )}
+                          <QrCode fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
 
-                      {/* КНОПКА ОТМЕНЫ (Крестик, появляется только в режиме выбора) */}
-                      {showCheckboxes && (
-                        <Tooltip title="Отменить выбор">
-                          <IconButton
-                            color="default"
-                            onClick={handleCancelSelection}
-                          >
-                            <Close />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </>
-                  )}
-                </Box>
+                    {showCheckboxes && (
+                      <Tooltip title="Отменить выбор">
+                        <IconButton
+                          size="small"
+                          color="default"
+                          onClick={handleCancelSelection}
+                        >
+                          <Close fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
+                )}
               </Box>
             ) : (
               <Box>
@@ -984,154 +1003,151 @@ export default function DevicesPage() {
             </Paper>
           )}
 
-          <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             {isMobileOrLaptop ? (
-              /* ====== МОБИЛЬНАЯ ВЕРСИЯ: Карточки ====== */
-              <Box
-                sx={{
-                  overflow: 'auto',
-                  height: '100%',
-                  px: 1,
-                  pb: 2,
-                }}
-              >
-                {loading ? (
-                  <Box
-                    sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}
-                  >
-                    <Typography color="text.secondary">Загрузка...</Typography>
-                  </Box>
-                ) : rows.length === 0 ? (
-                  <Box
-                    sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}
-                  >
-                    <Typography color="text.secondary">
-                      Нет средств измерения
-                    </Typography>
-                  </Box>
-                ) : (
-                  rows.map((device) => {
-                    const statusName =
-                      device?.status?.name?.toLowerCase() || '';
-                    let statusColor:
-                      | 'error'
-                      | 'warning'
-                      | 'success'
-                      | 'default' = 'default';
-                    if (
-                      statusName.includes('брак') ||
-                      statusName.includes('списан') ||
-                      statusName.includes('на замен')
-                    )
-                      statusColor = 'error';
-                    else if (
-                      statusName.includes('ремонт') ||
-                      statusName.includes('ожид') ||
-                      statusName.includes('ремон')
-                    )
-                      statusColor = 'warning';
-                    else if (
-                      statusName.includes('исправен') ||
-                      statusName.includes('эксплуатац') ||
-                      statusName.includes('годен')
-                    )
-                      statusColor = 'success';
+              /* ====== МОБИЛЬНАЯ ВЕРСИЯ: Compact List ====== */
+              <>
+                {/* Список приборов (скроллится) */}
+                <Box
+                  sx={{
+                    overflow: 'auto',
+                    flex: '1 1 auto',
+                  }}
+                >
+                  {loading ? (
+                    <Box
+                      sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}
+                    >
+                      <Typography color="text.secondary">
+                        Загрузка...
+                      </Typography>
+                    </Box>
+                  ) : rows.length === 0 ? (
+                    <Box
+                      sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}
+                    >
+                      <Typography color="text.secondary">
+                        Нет средств измерения
+                      </Typography>
+                    </Box>
+                  ) : (
+                    rows.map((device) => {
+                      const statusName =
+                        device?.status?.name?.toLowerCase() || '';
+                      let statusColor:
+                        | 'error'
+                        | 'warning'
+                        | 'success'
+                        | 'default' = 'default';
+                      if (
+                        statusName.includes('брак') ||
+                        statusName.includes('списан') ||
+                        statusName.includes('на замен')
+                      )
+                        statusColor = 'error';
+                      else if (
+                        statusName.includes('ремонт') ||
+                        statusName.includes('ожид') ||
+                        statusName.includes('ремон')
+                      )
+                        statusColor = 'warning';
+                      else if (
+                        statusName.includes('исправен') ||
+                        statusName.includes('эксплуатац') ||
+                        statusName.includes('годен')
+                      )
+                        statusColor = 'success';
 
-                    const isOverdue = device.latestVerification?.validUntil
-                      ? new Date(device.latestVerification.validUntil) <
-                        new Date()
-                      : false;
+                      const isOverdue = device.latestVerification?.validUntil
+                        ? new Date(device.latestVerification.validUntil) <
+                          new Date()
+                        : false;
 
-                    const isChecked = selectedDeviceIds.includes(device.id);
+                      const isChecked = selectedDeviceIds.includes(device.id);
 
-                    return (
-                      <Card
-                        key={device.id}
-                        sx={{
-                          mb: 1.5,
-                          borderRadius: 2,
-                          boxShadow: 2,
-                          borderLeft: 4,
-                          borderColor:
-                            statusColor === 'error'
-                              ? 'error.main'
-                              : statusColor === 'warning'
-                              ? 'warning.main'
-                              : statusColor === 'success'
-                              ? 'success.main'
-                              : 'divider',
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                          {showCheckboxes && (
-                            <Box sx={{ pt: 1.5, pl: 1, pr: 0 }}>
-                              <Checkbox
-                                checked={isChecked}
-                                size="small"
-                                color="primary"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                }}
-                                onChange={(e) => {
-                                  const checked = e.target.checked;
-                                  setSelectedDeviceIds((prev) => {
-                                    if (checked) {
-                                      return [...prev, device.id];
-                                    } else {
-                                      return prev.filter(
-                                        (id) => id !== device.id
-                                      );
-                                    }
-                                  });
-                                }}
-                              />
-                            </Box>
-                          )}
-
-                          <CardActionArea
+                      return (
+                        <React.Fragment key={device.id}>
+                          <Box
                             onClick={() => {
                               setSelectedDeviceId(device.id);
                               setViewMode('info');
                             }}
-                            sx={{ p: 0 }}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              px: 1.5,
+                              py: 1,
+                              minHeight: 48,
+                              cursor: 'pointer',
+                              '&:hover': { bgcolor: 'action.hover' },
+                              transition: 'background-color 0.15s ease',
+                              bgcolor:
+                                showCheckboxes && isChecked
+                                  ? 'action.selected'
+                                  : 'transparent',
+                            }}
                           >
-                            <CardContent sx={{ pb: '12px !important' }}>
-                              {/* Заголовок: Наименование + Тип СИ */}
-                              <Typography
-                                variant="subtitle1"
+                            {/* Checkbox (если режим выбора) */}
+                            {showCheckboxes && (
+                              <Box
                                 sx={{
-                                  fontWeight: 700,
-                                  lineHeight: 1.3,
-                                  mb: 0.5,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  mr: 1,
+                                  ml: -0.5,
                                 }}
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                {device.name?.toUpperCase() || '—'}
-                              </Typography>
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{ mb: 1 }}
-                              >
-                                {device.model?.toUpperCase() || '—'}
-                              </Typography>
+                                <Checkbox
+                                  checked={isChecked}
+                                  size="small"
+                                  color="primary"
+                                  onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setSelectedDeviceIds((prev) => {
+                                      if (checked) {
+                                        return [...prev, device.id];
+                                      } else {
+                                        return prev.filter(
+                                          (id) => id !== device.id
+                                        );
+                                      }
+                                    });
+                                  }}
+                                  sx={{ p: 0.5 }}
+                                />
+                              </Box>
+                            )}
 
-                              {/* Зав. номер + Статус */}
+                            {/* Основной контент */}
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
                               <Box
                                 sx={{
                                   display: 'flex',
                                   justifyContent: 'space-between',
                                   alignItems: 'center',
-                                  flexWrap: 'wrap',
-                                  gap: 0.5,
-                                  mb: 0.5,
+                                  gap: 1,
                                 }}
                               >
                                 <Typography
-                                  variant="caption"
-                                  sx={{ fontFamily: 'monospace' }}
+                                  variant="body2"
+                                  sx={{
+                                    fontWeight: 700,
+                                    fontSize: '0.8rem',
+                                    lineHeight: 1.3,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
                                 >
-                                  Зав. №:{' '}
-                                  {device.serialNumber?.toUpperCase() || '—'}
+                                  {device.name?.toUpperCase() || '—'}
                                 </Typography>
                                 <Chip
                                   label={device?.status?.name || '—'}
@@ -1140,100 +1156,155 @@ export default function DevicesPage() {
                                   variant="outlined"
                                   sx={{
                                     fontWeight: 600,
-                                    height: 22,
-                                    fontSize: 11,
+                                    height: 18,
+                                    fontSize: 10,
+                                    flexShrink: 0,
+                                    '& .MuiChip-label': { px: 0.8 },
                                   }}
                                 />
                               </Box>
 
-                              {/* Дата поверки */}
                               <Box
                                 sx={{
                                   display: 'flex',
                                   justifyContent: 'space-between',
-                                  mt: 0.5,
+                                  alignItems: 'center',
+                                  mt: 0.25,
                                 }}
                               >
                                 <Typography
                                   variant="caption"
                                   color="text.secondary"
+                                  sx={{
+                                    fontSize: '0.7rem',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    maxWidth: '50%',
+                                  }}
                                 >
-                                  Поверка:{' '}
-                                  {device.latestVerification?.date
-                                    ? formatDate(device.latestVerification.date)
-                                    : '—'}
+                                  {[device.model, device.serialNumber]
+                                    .filter(Boolean)
+                                    .map((s) => s?.toUpperCase())
+                                    .join(' · ') || '—'}
                                 </Typography>
+
                                 <Typography
                                   variant="caption"
                                   sx={{
+                                    fontSize: '0.65rem',
                                     color: isOverdue
                                       ? 'error.main'
                                       : 'text.secondary',
                                     fontWeight: isOverdue ? 700 : 400,
+                                    flexShrink: 0,
+                                    ml: 1,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    maxWidth: '48%',
+                                    textAlign: 'right',
                                   }}
                                 >
-                                  До:{' '}
                                   {device.latestVerification?.validUntil
-                                    ? formatDate(
-                                        device.latestVerification.validUntil
-                                      )
+                                    ? (() => {
+                                        const typeName =
+                                          device.latestVerification
+                                            ?.metrologyControleType?.name || '';
+                                        const dateStr = formatDate(
+                                          device.latestVerification.validUntil
+                                        );
+                                        const prefix = isOverdue ? '❗ ' : '';
+                                        // Если есть тип контроля — используем его как подпись
+                                        if (
+                                          typeName
+                                            .toLowerCase()
+                                            .includes('поверк')
+                                        )
+                                          return `${prefix}Поверка: до ${dateStr}`;
+                                        if (
+                                          typeName
+                                            .toLowerCase()
+                                            .includes('осмотр')
+                                        )
+                                          return `${prefix}Осмотр: до ${dateStr}`;
+                                        if (typeName)
+                                          return `${prefix}${typeName}: до ${dateStr}`;
+                                        return `${prefix}до ${dateStr}`;
+                                      })()
                                     : '—'}
                                 </Typography>
                               </Box>
-
-                              {/* Вид контроля + Город */}
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  mt: 0.5,
-                                }}
-                              >
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                >
-                                  {device?.latestVerification
-                                    ?.metrologyControleType?.name || ''}
-                                </Typography>
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                >
-                                  {device?.productionSite?.city?.name?.toUpperCase() ||
-                                    ''}
-                                </Typography>
-                              </Box>
-                            </CardContent>
-                          </CardActionArea>
-                        </Box>
-                      </Card>
-                    );
-                  })
-                )}
-
-                {/* Пагинация для карточек */}
-                <TablePagination
-                  component="div"
-                  count={rowCount}
-                  page={paginationModel.page}
-                  onPageChange={(_e, newPage) =>
-                    setPaginationModel((prev) => ({ ...prev, page: newPage }))
-                  }
-                  rowsPerPage={paginationModel.pageSize}
-                  onRowsPerPageChange={(e) =>
-                    setPaginationModel({
-                      page: 0,
-                      pageSize: parseInt(e.target.value, 10),
+                            </Box>
+                          </Box>
+                          <Divider sx={{ mx: 1.5 }} />
+                        </React.Fragment>
+                      );
                     })
-                  }
-                  rowsPerPageOptions={[10, 25, 50]}
-                  labelRowsPerPage="На странице:"
-                  labelDisplayedRows={({ from, to, count }) =>
-                    `${from}–${to} из ${count !== -1 ? count : '>' + to}`
-                  }
-                />
-              </Box>
+                  )}
+                </Box>
+
+                {/* Пагинация — фиксированная снизу */}
+                {!loading && rows.length > 0 && (
+                  <Box
+                    sx={{
+                      flexShrink: 0,
+                      borderTop: '1px solid',
+                      borderColor: 'divider',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 2,
+                      px: 2,
+                      py: 1,
+                      bgcolor: 'background.paper',
+                    }}
+                  >
+                    <IconButton
+                      size="small"
+                      disabled={paginationModel.page === 0}
+                      onClick={() =>
+                        setPaginationModel((prev) => ({
+                          ...prev,
+                          page: prev.page - 1,
+                        }))
+                      }
+                    >
+                      <ChevronLeft />
+                    </IconButton>
+
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ fontSize: '0.75rem' }}
+                    >
+                      {paginationModel.page * paginationModel.pageSize + 1}–
+                      {Math.min(
+                        (paginationModel.page + 1) * paginationModel.pageSize,
+                        rowCount
+                      )}
+                      {' из '}
+                      {rowCount}
+                    </Typography>
+
+                    <IconButton
+                      size="small"
+                      disabled={
+                        (paginationModel.page + 1) * paginationModel.pageSize >=
+                        rowCount
+                      }
+                      onClick={() =>
+                        setPaginationModel((prev) => ({
+                          ...prev,
+                          page: prev.page + 1,
+                        }))
+                      }
+                    >
+                      <ChevronRight />
+                    </IconButton>
+                  </Box>
+                )}
+              </>
             ) : (
               /* ====== ДЕСКТОПНАЯ ВЕРСИЯ: DataGrid ====== */
               <DataGrid

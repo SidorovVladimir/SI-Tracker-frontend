@@ -248,7 +248,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
               // --- СЦЕНАРИЙ 1: ЛЕНТА И РАЗМЕР 40х30 мм (ВЫВОДИМ ДВЕ НАКЛЕЙКИ НА ПРИБОР) ---
               if (labelSize === '40x30' && printMode === 'ROLL') {
                 return (
-                  <React.Fragment key={device.id}>
+                  <React.Fragment key={`${device.id}-${index}`}>
                     {/* Бирка №1: Текстовый паспорт */}
                     <Box sx={getLabelContainerStyles(false)}>
                       <Box
@@ -347,7 +347,10 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
 
               // --- СЦЕНАРИЙ 2: БОЛЬШАЯ БИРКА 58х40 мм (ИЛИ ВЫВОД НА А4) ---
               return (
-                <Box key={device.id} sx={getLabelContainerStyles(true)}>
+                <Box
+                  key={`${device.id}-${index}`}
+                  sx={getLabelContainerStyles(true)}
+                >
                   {/* Левая часть: Текстовая информация */}
                   <Box
                     sx={{
