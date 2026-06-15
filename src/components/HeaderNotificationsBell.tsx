@@ -36,7 +36,6 @@ export const HeaderNotificationsBell: React.FC = () => {
       fetchPolicy: 'cache-and-network',
     }
   );
-  console.log('COUNT', countData);
 
   // 2. GraphQL Запрос: Список последних 20 уведомлений
   const {
@@ -48,7 +47,6 @@ export const HeaderNotificationsBell: React.FC = () => {
     fetchPolicy: 'network-only',
   });
 
-  console.log('DATA', listData?.getSystemNotifications);
   const [markAllAsRead] = useMutation(MarkAllNotificationsAsReadDocument);
   const [markAsRead] = useMutation(MarkNotificationAsReadDocument);
 

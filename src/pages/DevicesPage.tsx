@@ -26,6 +26,8 @@ import {
   CardActionArea,
   CardContent,
   Chip,
+  Badge,
+  Checkbox,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
@@ -34,9 +36,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 // import DeviceCard from './DeviceCard';
 // import EditDevicePage from './admin/EditDevicePage';
-import { Add, FilterAlt } from '@mui/icons-material';
+import { Add, Close, FilterAlt, QrCode } from '@mui/icons-material';
 import React from 'react';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
+import { BarcodePrintModal } from '../components/BarcodePrintModal';
 
 type Device =
   GetDevicesWithRelationsListQuery['devicesWithRelations']['items'][0];
@@ -91,6 +94,12 @@ export default function DevicesPage() {
     page: 0,
     pageSize: 25,
   });
+
+  const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
+
+  const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
+
+  const [showCheckboxes, setShowCheckboxes] = useState<boolean>(false);
 
   useEffect(() => {
     localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
@@ -385,6 +394,22 @@ export default function DevicesPage() {
     localStorage.setItem('devicesColumnVisibility', JSON.stringify(newModel));
   };
 
+  //  const handleToggleCheckboxes = () => {
+  //   setShowCheckboxes((prev) => {
+  //     const nextState = !prev;
+  //     if (!nextState) {
+  //       setSelectedDeviceIds([]);
+  //     }
+  //     return nextState;
+  //   });
+
+  // };
+
+  const handleCancelSelection = () => {
+    setShowCheckboxes(false);
+    setSelectedDeviceIds([]);
+  };
+
   return (
     <Paper
       sx={{
@@ -648,20 +673,138 @@ export default function DevicesPage() {
                   </Stack>
                 </Drawer>
 
-                {user?.role !== 'user' && (
-                  <Tooltip title="Добавить СИ">
-                    <IconButton color="primary" onClick={handleAddClick}>
-                      <Add />
-                    </IconButton>
-                  </Tooltip>
-                )}
+                <Box display="flex" alignItems="center" gap={1}>
+                  {user?.role !== 'user' && (
+                    <>
+                      {/* Кнопка «Добавить СИ» */}
+                      <Tooltip title="Добавить СИ">
+                        <IconButton color="primary" onClick={handleAddClick}>
+                          <Add />
+                        </IconButton>
+                      </Tooltip>
+
+                      {/* АДАПТИВНАЯ КНОПКА ПЕЧАТИ БИРОК */}
+                      {selectedDeviceIds.length > 0 ? (
+                        // СОСТОЯНИЕ: Приборы выбраны -> Зеленая кнопка с количеством бирок
+                        <Tooltip
+                          title={`Отправить на печать (${selectedDeviceIds.length})`}
+                        >
+                          <IconButton
+                            color="success"
+                            onClick={() => setIsBarcodeModalOpen(true)}
+                            sx={{
+                              backgroundColor: 'success.lighter', // Легкий зеленый фон для акцента, если настроен в теме
+                              '&:hover': { backgroundColor: 'success.light' },
+                            }}
+                          >
+                            {/* Показывает красивый кружок с цифрой поверх иконки */}
+                            <Badge
+                              badgeContent={selectedDeviceIds.length}
+                              color="error"
+                            >
+                              <QrCode />
+                            </Badge>
+                          </IconButton>
+                        </Tooltip>
+                      ) : (
+                        // СОСТОЯНИЕ: Режим ожидания или галочки еще не поставлены
+                        <Tooltip
+                          title={
+                            showCheckboxes
+                              ? 'Выберите СИ в таблице...'
+                              : 'Печать бирок'
+                          }
+                        >
+                          <IconButton
+                            color={showCheckboxes ? 'warning' : 'primary'} // Желтеет, напоминая о выборе
+                            onClick={() => setShowCheckboxes(true)}
+                          >
+                            <QrCode />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      {/* КНОПКА ОТМЕНЫ (Крестик, появляется только в режиме выбора) */}
+                      {showCheckboxes && (
+                        <Tooltip title="Отменить выбор">
+                          <IconButton
+                            color="default"
+                            onClick={handleCancelSelection}
+                          >
+                            <Close />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </>
+                  )}
+                </Box>
               </Box>
             ) : (
               <Box>
                 {user?.role !== 'user' && (
-                  <Button variant="contained" onClick={handleAddClick}>
-                    Добавить СИ
-                  </Button>
+                  <div
+                    style={{
+                      marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <Button variant="contained" onClick={handleAddClick}>
+                      Добавить СИ
+                    </Button>
+                    {selectedDeviceIds.length > 0 ? (
+                      // СОСТОЯНИЕ: Приборы выбраны -> Готовы отправлять на печать
+                      <Button
+                        variant="contained"
+                        color="success"
+                        startIcon={<QrCode />}
+                        onClick={() => setIsBarcodeModalOpen(true)}
+                        sx={{
+                          height: 36,
+                          textTransform: 'none',
+                          fontWeight: 'bold',
+                          borderRadius: 2,
+                          boxShadow: '0px 4px 10px rgba(46, 125, 50, 0.2)', // Легкая красивая тень
+                        }}
+                      >
+                        Отправить на печать ({selectedDeviceIds.length})
+                      </Button>
+                    ) : (
+                      // СОСТОЯНИЕ: Выбор еще не сделан (или режим вообще выключен)
+                      <Button
+                        variant={showCheckboxes ? 'contained' : 'outlined'}
+                        color="primary"
+                        startIcon={<QrCode />}
+                        onClick={() => setShowCheckboxes(true)} // Включает чекбоксы при первом клике
+                        sx={{
+                          height: 36,
+                          textTransform: 'none',
+                          fontWeight: 'bold',
+                          borderRadius: 2,
+                        }}
+                      >
+                        {showCheckboxes
+                          ? 'Выберите СИ в таблице...'
+                          : 'Печать бирок'}
+                      </Button>
+                    )}
+
+                    {showCheckboxes && (
+                      <Button
+                        variant="text"
+                        color="inherit"
+                        onClick={handleCancelSelection}
+                        sx={{
+                          height: 36,
+                          textTransform: 'none',
+                          color: 'text.secondary',
+                        }}
+                      >
+                        Отмена
+                      </Button>
+                    )}
+                  </div>
                 )}
               </Box>
             )}
@@ -899,6 +1042,8 @@ export default function DevicesPage() {
                         new Date()
                       : false;
 
+                    const isChecked = selectedDeviceIds.includes(device.id);
+
                     return (
                       <Card
                         key={device.id}
@@ -917,120 +1062,151 @@ export default function DevicesPage() {
                               : 'divider',
                         }}
                       >
-                        <CardActionArea
-                          onClick={() => {
-                            setSelectedDeviceId(device.id);
-                            setViewMode('info');
-                          }}
-                          sx={{ p: 0 }}
-                        >
-                          <CardContent sx={{ pb: '12px !important' }}>
-                            {/* Заголовок: Наименование + Тип СИ */}
-                            <Typography
-                              variant="subtitle1"
-                              sx={{ fontWeight: 700, lineHeight: 1.3, mb: 0.5 }}
-                            >
-                              {device.name?.toUpperCase() || '—'}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ mb: 1 }}
-                            >
-                              {device.model?.toUpperCase() || '—'}
-                            </Typography>
-
-                            {/* Зав. номер + Статус */}
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                flexWrap: 'wrap',
-                                gap: 0.5,
-                                mb: 0.5,
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                sx={{ fontFamily: 'monospace' }}
-                              >
-                                Зав. №:{' '}
-                                {device.serialNumber?.toUpperCase() || '—'}
-                              </Typography>
-                              <Chip
-                                label={device?.status?.name || '—'}
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                          {showCheckboxes && (
+                            <Box sx={{ pt: 1.5, pl: 1, pr: 0 }}>
+                              <Checkbox
+                                checked={isChecked}
                                 size="small"
-                                color={statusColor}
-                                variant="outlined"
-                                sx={{
-                                  fontWeight: 600,
-                                  height: 22,
-                                  fontSize: 11,
+                                color="primary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setSelectedDeviceIds((prev) => {
+                                    if (checked) {
+                                      return [...prev, device.id];
+                                    } else {
+                                      return prev.filter(
+                                        (id) => id !== device.id
+                                      );
+                                    }
+                                  });
                                 }}
                               />
                             </Box>
+                          )}
 
-                            {/* Дата поверки */}
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                mt: 0.5,
-                              }}
-                            >
+                          <CardActionArea
+                            onClick={() => {
+                              setSelectedDeviceId(device.id);
+                              setViewMode('info');
+                            }}
+                            sx={{ p: 0 }}
+                          >
+                            <CardContent sx={{ pb: '12px !important' }}>
+                              {/* Заголовок: Наименование + Тип СИ */}
                               <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                Поверка:{' '}
-                                {device.latestVerification?.date
-                                  ? formatDate(device.latestVerification.date)
-                                  : '—'}
-                              </Typography>
-                              <Typography
-                                variant="caption"
+                                variant="subtitle1"
                                 sx={{
-                                  color: isOverdue
-                                    ? 'error.main'
-                                    : 'text.secondary',
-                                  fontWeight: isOverdue ? 700 : 400,
+                                  fontWeight: 700,
+                                  lineHeight: 1.3,
+                                  mb: 0.5,
                                 }}
                               >
-                                До:{' '}
-                                {device.latestVerification?.validUntil
-                                  ? formatDate(
-                                      device.latestVerification.validUntil
-                                    )
-                                  : '—'}
+                                {device.name?.toUpperCase() || '—'}
                               </Typography>
-                            </Box>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ mb: 1 }}
+                              >
+                                {device.model?.toUpperCase() || '—'}
+                              </Typography>
 
-                            {/* Вид контроля + Город */}
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                mt: 0.5,
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
+                              {/* Зав. номер + Статус */}
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  flexWrap: 'wrap',
+                                  gap: 0.5,
+                                  mb: 0.5,
+                                }}
                               >
-                                {device?.latestVerification
-                                  ?.metrologyControleType?.name || ''}
-                              </Typography>
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
+                                <Typography
+                                  variant="caption"
+                                  sx={{ fontFamily: 'monospace' }}
+                                >
+                                  Зав. №:{' '}
+                                  {device.serialNumber?.toUpperCase() || '—'}
+                                </Typography>
+                                <Chip
+                                  label={device?.status?.name || '—'}
+                                  size="small"
+                                  color={statusColor}
+                                  variant="outlined"
+                                  sx={{
+                                    fontWeight: 600,
+                                    height: 22,
+                                    fontSize: 11,
+                                  }}
+                                />
+                              </Box>
+
+                              {/* Дата поверки */}
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  mt: 0.5,
+                                }}
                               >
-                                {device?.productionSite?.city?.name?.toUpperCase() ||
-                                  ''}
-                              </Typography>
-                            </Box>
-                          </CardContent>
-                        </CardActionArea>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  Поверка:{' '}
+                                  {device.latestVerification?.date
+                                    ? formatDate(device.latestVerification.date)
+                                    : '—'}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    color: isOverdue
+                                      ? 'error.main'
+                                      : 'text.secondary',
+                                    fontWeight: isOverdue ? 700 : 400,
+                                  }}
+                                >
+                                  До:{' '}
+                                  {device.latestVerification?.validUntil
+                                    ? formatDate(
+                                        device.latestVerification.validUntil
+                                      )
+                                    : '—'}
+                                </Typography>
+                              </Box>
+
+                              {/* Вид контроля + Город */}
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  mt: 0.5,
+                                }}
+                              >
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  {device?.latestVerification
+                                    ?.metrologyControleType?.name || ''}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  {device?.productionSite?.city?.name?.toUpperCase() ||
+                                    ''}
+                                </Typography>
+                              </Box>
+                            </CardContent>
+                          </CardActionArea>
+                        </Box>
                       </Card>
                     );
                   })
@@ -1066,9 +1242,29 @@ export default function DevicesPage() {
                 loading={loading}
                 paginationMode="server"
                 rowCount={rowCount}
+                // checkboxSelection
+                checkboxSelection={showCheckboxes}
                 paginationModel={paginationModel}
+                // rowSelectionModel={selectedDeviceIds}
+                rowSelectionModel={{
+                  type: 'include',
+                  ids: new Set(selectedDeviceIds),
+                }}
+                keepNonExistentRowsSelected
                 onPaginationModelChange={setPaginationModel}
+                isRowSelectable={() => showCheckboxes}
                 density="compact"
+                disableRowSelectionOnClick
+                // onRowSelectionModelChange={(newSelection) => {
+                //   setSelectedDeviceIds(newSelection);
+                // }}
+                onRowSelectionModelChange={(newSelection) => {
+                  // Преобразуем Set обратно в массив строк
+                  const idsArray = Array.from(newSelection.ids).map((id) =>
+                    String(id)
+                  );
+                  setSelectedDeviceIds(idsArray);
+                }}
                 pageSizeOptions={[10, 25, 50]}
                 onRowClick={handleRowClick}
                 disableColumnSorting
@@ -1092,6 +1288,10 @@ export default function DevicesPage() {
                   '& .MuiDataGrid-cell': {
                     fontVariantNumeric: 'tabular-nums',
                   },
+                  '& .MuiDataGrid-columnHeaderCheckbox .MuiDataGrid-columnHeaderTitleContainer':
+                    {
+                      display: 'none',
+                    },
                   '& .MuiDataGrid-columnHeaderTitle': {
                     fontFamily: '"Inter", sans-serif',
                     fontWeight: 700,
@@ -1112,9 +1312,17 @@ export default function DevicesPage() {
                     },
                     transition: 'background-color 0.2s ease',
                   },
+                  '& .clicked-row-active': {
+                    backgroundColor: 'rgba(25, 100, 255, 0.08)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(25, 100, 255, 0.12)',
+                    },
+                    transition: 'background-color 0.2s ease',
+                  },
                 }}
                 getRowClassName={(params: GridRowParams<Device>) =>
-                  selectedDeviceId === params.row.id ? 'Mui-selected' : ''
+                  // selectedDeviceId === params.row.id ? 'Mui-selected' : ''
+                  selectedDeviceId === params.row.id ? 'clicked-row-active' : ''
                 }
               />
             )}
@@ -1129,6 +1337,16 @@ export default function DevicesPage() {
             refetchTable={refetch} // Ваша функция refetch от useQuery
           />
         )}
+        <BarcodePrintModal
+          open={isBarcodeModalOpen}
+          onClose={() => {
+            setIsBarcodeModalOpen(false);
+            // Бонус UX: после закрытия печатного окна можно сбросить галочки в таблице,
+            // чтобы они не висели, раскомментируйте строчку ниже если это нужно:
+            // setSelectedDeviceIds([]);
+          }}
+          deviceIds={selectedDeviceIds as unknown as string[]}
+        />
       </Box>
     </Paper>
   );

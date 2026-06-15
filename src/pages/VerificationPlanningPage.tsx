@@ -25,12 +25,16 @@ import {
 } from '../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
+import { BarcodePrintModal } from '../components/BarcodePrintModal';
+import QrCodeIcon from '@mui/icons-material/QrCode';
 
 export const VerificationPlanningPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'info' | 'create' | 'edit' | null>(
     null
   );
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+
+  const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
 
   const currentYear = new Date().getFullYear();
   const currentMonthStr = `${currentYear}-${String(
@@ -377,6 +381,25 @@ export const VerificationPlanningPage: React.FC = () => {
                 ? 'Создать и добавить'
                 : `Добавить (${selectedDeviceIds.length} СИ)`}
             </Button>
+
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              startIcon={<QrCodeIcon />}
+              onClick={() => setIsBarcodeModalOpen(true)}
+              // Кнопка активна, только если метролог выбрал хотя бы один прибор галочкой в таблице!
+              disabled={selectedDeviceIds.length === 0}
+              sx={{
+                height: 40,
+                width: { xs: '100%', sm: 'auto' },
+                textTransform: 'none',
+                fontWeight: 'bold',
+                borderRadius: 2,
+              }}
+            >
+              Печать бирок ({selectedDeviceIds.length})
+            </Button>
           </Box>
 
           {/* Вкладки типов контроля */}
@@ -470,6 +493,12 @@ export const VerificationPlanningPage: React.FC = () => {
         selectedDeviceId={selectedDeviceId}
         setSelectedDeviceId={setSelectedDeviceId}
         refetchTable={refetchPool}
+      />
+
+      <BarcodePrintModal
+        open={isBarcodeModalOpen}
+        onClose={() => setIsBarcodeModalOpen(false)}
+        deviceIds={selectedDeviceIds} // Передаем массив выделенных галочками UUID
       />
     </Box>
   );

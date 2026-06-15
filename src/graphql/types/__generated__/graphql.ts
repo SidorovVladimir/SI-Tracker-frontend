@@ -218,6 +218,17 @@ export type Device = {
   verificationInterval: Maybe<Scalars['Int']['output']>;
 };
 
+export type DeviceBarcodeData = {
+  __typename: 'DeviceBarcodeData';
+  controlType: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  model: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  serialNumber: Scalars['String']['output'];
+  statusName: Maybe<Scalars['String']['output']>;
+  validUntil: Maybe<Scalars['String']['output']>;
+};
+
 export type DeviceBatchSyncResult = {
   __typename: 'DeviceBatchSyncResult';
   deviceId: Scalars['ID']['output'];
@@ -820,6 +831,7 @@ export type Query = {
   getChatDialogs: Array<ChatDialog>;
   getChatHistory: Array<ChatMessage>;
   getChatUsers: Array<User>;
+  getDevicesBarcodeData: Array<DeviceBarcodeData>;
   getDraftBatchesByMonth: Array<DraftBatchOption>;
   getFinancialAnalytics: FinancialAnalyticsResponse;
   getJobStatus: Maybe<JobStatusResponse>;
@@ -894,6 +906,11 @@ export type QueryGetChatHistoryArgs = {
   limit: Scalars['Int']['input'];
   offset: Scalars['Int']['input'];
   recipientId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetDevicesBarcodeDataArgs = {
+  ids: Array<Scalars['ID']['input']>;
 };
 
 
@@ -1435,6 +1452,13 @@ export type ExecuteRawSqlQueryVariables = Exact<{
 
 export type ExecuteRawSqlQuery = { executeRawSql: { __typename: 'RawSqlResponse', success: boolean, columns: Array<string>, rows: Array<unknown>, affectedRows: number | null, errorMessage: string | null } };
 
+export type GetDevicesBarcodeDataQueryVariables = Exact<{
+  ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type GetDevicesBarcodeDataQuery = { getDevicesBarcodeData: Array<{ __typename: 'DeviceBarcodeData', id: string, name: string, model: string, serialNumber: string, statusName: string | null, controlType: string | null, validUntil: string | null }> };
+
 export type GetEquipmentTypesListQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1815,6 +1839,7 @@ export const UpdateDeviceDocument = {"kind":"Document","definitions":[{"kind":"O
 export const CreateVerificationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateVerification"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateVerificationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createVerification"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"deviceId"}},{"kind":"Field","name":{"kind":"Name","value":"protocolNumber"}},{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"date"}},{"kind":"Field","name":{"kind":"Name","value":"validUntil"}},{"kind":"Field","name":{"kind":"Name","value":"cost"}},{"kind":"Field","name":{"kind":"Name","value":"metrologyControleTypeId"}},{"kind":"Field","name":{"kind":"Name","value":"verificationOrganizationId"}},{"kind":"Field","name":{"kind":"Name","value":"comment"}}]}}]}}]} as unknown as DocumentNode<CreateVerificationMutation, CreateVerificationMutationVariables>;
 export const ImportDevicesFromExcelDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ImportDevicesFromExcel"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ImportDeviceItemInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"importDevicesFromExcel"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jobId"}},{"kind":"Field","name":{"kind":"Name","value":"itemCount"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<ImportDevicesFromExcelMutation, ImportDevicesFromExcelMutationVariables>;
 export const ExecuteRawSqlDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ExecuteRawSql"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sqlQuery"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"executeRawSql"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sqlQuery"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sqlQuery"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"columns"}},{"kind":"Field","name":{"kind":"Name","value":"rows"}},{"kind":"Field","name":{"kind":"Name","value":"affectedRows"}},{"kind":"Field","name":{"kind":"Name","value":"errorMessage"}}]}}]}}]} as unknown as DocumentNode<ExecuteRawSqlQuery, ExecuteRawSqlQueryVariables>;
+export const GetDevicesBarcodeDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDevicesBarcodeData"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getDevicesBarcodeData"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"model"}},{"kind":"Field","name":{"kind":"Name","value":"serialNumber"}},{"kind":"Field","name":{"kind":"Name","value":"statusName"}},{"kind":"Field","name":{"kind":"Name","value":"controlType"}},{"kind":"Field","name":{"kind":"Name","value":"validUntil"}}]}}]}}]} as unknown as DocumentNode<GetDevicesBarcodeDataQuery, GetDevicesBarcodeDataQueryVariables>;
 export const GetEquipmentTypesListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetEquipmentTypesList"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"equipmentTypes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<GetEquipmentTypesListQuery, GetEquipmentTypesListQueryVariables>;
 export const GetEquipmentTypeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetEquipmentType"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"equipmentType"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<GetEquipmentTypeQuery, GetEquipmentTypeQueryVariables>;
 export const CreateEquipmentTypeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateEquipmentType"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateEquipmentTypeInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createEquipmentType"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<CreateEquipmentTypeMutation, CreateEquipmentTypeMutationVariables>;

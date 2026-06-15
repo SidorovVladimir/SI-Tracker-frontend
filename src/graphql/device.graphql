@@ -259,3 +259,15 @@ query ExecuteRawSql($sqlQuery: String!) {
     errorMessage
   }
 }
+
+query GetDevicesBarcodeData($ids: [ID!]!) {
+  getDevicesBarcodeData(ids: $ids) {
+    id
+    name
+    model
+    serialNumber
+    statusName
+    controlType
+    validUntil
+  }
+}
