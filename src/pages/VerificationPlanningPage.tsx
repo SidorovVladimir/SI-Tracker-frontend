@@ -26,7 +26,7 @@ import {
 import { enqueueSnackbar } from 'notistack';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
-import QrCodeIcon from '@mui/icons-material/QrCode';
+import { QrCode } from '@mui/icons-material';
 
 export const VerificationPlanningPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'info' | 'create' | 'edit' | null>(
@@ -386,7 +386,7 @@ export const VerificationPlanningPage: React.FC = () => {
               variant="outlined"
               color="primary"
               size="small"
-              startIcon={<QrCodeIcon />}
+              startIcon={<QrCode />}
               onClick={() => setIsBarcodeModalOpen(true)}
               // Кнопка активна, только если метролог выбрал хотя бы один прибор галочкой в таблице!
               disabled={selectedDeviceIds.length === 0}
@@ -498,7 +498,7 @@ export const VerificationPlanningPage: React.FC = () => {
       <BarcodePrintModal
         open={isBarcodeModalOpen}
         onClose={() => setIsBarcodeModalOpen(false)}
-        deviceIds={selectedDeviceIds} // Передаем массив выделенных галочками UUID
+        deviceIds={selectedDeviceIds}
       />
     </Box>
   );

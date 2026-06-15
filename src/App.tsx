@@ -48,6 +48,7 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import { useSocketApp } from './context/SocketContext';
 import { useAuth } from './hooks/useAuth';
 import { GlobalJobWatcher } from './components/GlobalJobWatcher';
+import { MobileDevicePage } from './pages/MobileDevicePage';
 // import { LicensesPage } from './pages/LicensesPage';
 
 function App() {
@@ -96,6 +97,7 @@ function App() {
           <Route path={routes.home()} element={<HomePage />} />
           <Route path={routes.profile()} element={<ProfilePage />} />
           <Route path={routes.chat()} element={<ChatPage />} />
+          <Route path="/m/device/:id" element={<MobileDevicePage />} />
           {/* <Route path="/about/licenses" element={<LicensesPage />} /> */}
 
           <Route element={<ProtectedRoute allowedRoles={['superadmin']} />}>

@@ -150,7 +150,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                 value="40x30"
                 sx={{ textTransform: 'none', gap: 0.5, fontSize: '0.8rem' }}
               >
-                <AspectRatioIcon fontSize="small" /> 40x30 мм (x2)
+                <AspectRatioIcon fontSize="small" /> 30x40 мм (x2)
               </ToggleButton>
             </ToggleButtonGroup>
           )}
@@ -203,7 +203,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
             }}
           >
             {devices.map((device, index) => {
-              const deviceUrl = `${window.location.origin}/devices?id=${device.id}`;
+              const deviceUrl = `${window.location.origin}/m/device/${device.id}`;
               const isLastDevice = index === devices.length - 1;
 
               const currentWidth = labelSize === '40x30' ? '40mm' : '58mm';
@@ -261,7 +261,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                         }}
                       >
                         <Box>
-                          <Typography
+                          {/* <Typography
                             sx={{
                               fontSize: '7.5pt',
                               fontWeight: 'bold',
@@ -270,7 +270,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                             }}
                           >
                             SI-TRACKER
-                          </Typography>
+                          </Typography> */}
                           <Typography
                             sx={{
                               fontSize: '7.5pt',
@@ -360,7 +360,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                     }}
                   >
                     <Box>
-                      <Typography
+                      {/* <Typography
                         sx={{
                           fontSize: '8pt',
                           fontWeight: 'bold',
@@ -369,7 +369,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                         }}
                       >
                         SI-TRACKER
-                      </Typography>
+                      </Typography> */}
                       <Typography
                         sx={{
                           fontSize: '8pt',

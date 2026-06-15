@@ -69,6 +69,8 @@ export default function DeviceCard(props: {
     fetchPolicy: 'network-only',
   });
 
+  const isMobileRoute = window.location.pathname.startsWith('/m/');
+
   if (loading)
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -103,7 +105,7 @@ export default function DeviceCard(props: {
           Информация о СИ
         </Typography>
         <Stack direction="row" spacing={1}>
-          {user?.role !== 'user' && (
+          {user?.role !== 'user' && !isMobileRoute && (
             <Tooltip title="Редактировать">
               <IconButton onClick={onEdit} size="small" color="primary">
                 <Edit fontSize="small" />
@@ -111,11 +113,13 @@ export default function DeviceCard(props: {
             </Tooltip>
           )}
 
-          <Tooltip title="Закрыть">
-            <IconButton onClick={closeDetails}>
-              <Close />
-            </IconButton>
-          </Tooltip>
+          {!isMobileRoute && (
+            <Tooltip title="Закрыть">
+              <IconButton onClick={closeDetails}>
+                <Close />
+              </IconButton>
+            </Tooltip>
+          )}
         </Stack>
       </Stack>
 
@@ -126,6 +130,7 @@ export default function DeviceCard(props: {
             fontWeight: 700,
             lineHeight: 1.2,
             mb: 0.5,
+            fontSize: { xs: '1.15rem', sm: '1.25rem' },
           }}
         >
           {toCapital(device.name)}

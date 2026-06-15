@@ -17,6 +17,7 @@ import {
   Tabs,
   TextField,
   Tooltip,
+  Checkbox,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -33,11 +34,18 @@ import {
   SyncDeviceWithArshinDocument,
   UpdateBatchStatusDocument,
 } from '../graphql/types/__generated__/graphql';
-import { CheckCircleOutline, Delete, Edit, Sync } from '@mui/icons-material';
+import {
+  CheckCircleOutline,
+  Delete,
+  Edit,
+  QrCode,
+  Sync,
+} from '@mui/icons-material';
 import { VerificationModal } from '../components/modals/VerificationModal';
 import { enqueueSnackbar } from 'notistack';
 // import { JobProgressBar } from '../components/JobProgressBar';
 import { GlobalJobWatcher } from '../components/GlobalJobWatcher';
+import { BarcodePrintModal } from '../components/BarcodePrintModal';
 
 interface BatchesJournalPageProps {
   locallyVerifiedIds: string[];
@@ -53,6 +61,18 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
   const [journalYear, setJournalYear] = useState<number>(currentYear);
   const [statusTab, setStatusTab] = useState<string>('ACTIVE'); // 'ACTIVE' | 'DRAFT' | 'SENT' | 'COMPLETED'
   const [batchJobs, setBatchJobs] = useState<Record<string, string>>({});
+
+  const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
+
+  const handleDeviceSelect = (deviceId: string) => {
+    setSelectedDeviceIds((prev) =>
+      prev.includes(deviceId)
+        ? prev.filter((id) => id !== deviceId)
+        : [...prev, deviceId]
+    );
+  };
+
+  const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
 
   const getBackendStatusParam = () => {
     if (statusTab === 'ACTIVE') return undefined;
@@ -607,6 +627,9 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
 
                     const isDeviceVerified =
                       isBackendVerified || isLocallyVerified;
+
+                    const isChecked = selectedDeviceIds.includes(link.id);
+
                     return (
                       <Paper
                         key={link.id}
@@ -623,6 +646,29 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                           bgcolor: 'background.paper',
                         }}
                       >
+                        {isSent && (
+                          <Tooltip
+                            title={
+                              isDeviceVerified
+                                ? 'Выбрать для печати бирки'
+                                : 'Печать недоступна: прибор еще не поверен'
+                            }
+                            placement="top"
+                            arrow
+                          >
+                            <span>
+                              <Checkbox
+                                size="small"
+                                checked={isChecked}
+                                disabled={!isDeviceVerified}
+                                onChange={() =>
+                                  handleDeviceSelect(link.device.id)
+                                }
+                              />
+                            </span>
+                          </Tooltip>
+                        )}
+
                         <ListItemText
                           primary={`${link.device.name} (${link.device.model})`}
                           secondary={`Заводской номер: ${link.device.serialNumber}`}
@@ -818,6 +864,23 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                     <>
                       <Button
                         variant="outlined"
+                        color="primary"
+                        size="small"
+                        startIcon={<QrCode />}
+                        onClick={() => setIsBarcodeModalOpen(true)}
+                        disabled={selectedDeviceIds.length === 0}
+                        sx={{
+                          height: 40,
+                          width: { xs: '100%', sm: 'auto' },
+                          textTransform: 'none',
+                          fontWeight: 'bold',
+                          borderRadius: 2,
+                        }}
+                      >
+                        Печать бирок ({selectedDeviceIds.length})
+                      </Button>
+                      <Button
+                        variant="outlined"
                         color="warning"
                         size="small"
                         disabled={
@@ -879,6 +942,11 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
           onSubmit={handleSaveVerification}
         />
       )}
+      <BarcodePrintModal
+        open={isBarcodeModalOpen}
+        onClose={() => setIsBarcodeModalOpen(false)}
+        deviceIds={selectedDeviceIds}
+      />
       <GlobalJobWatcher onJobClose={handleRemoveJob} />
     </Box>
   );
