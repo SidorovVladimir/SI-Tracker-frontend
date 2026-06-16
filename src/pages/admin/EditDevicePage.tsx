@@ -977,6 +977,7 @@ function UserForm({
                 size="large"
                 disabled={deleting}
                 startIcon={deleting && <CircularProgress size={16} />}
+                sx={{ height: 36, borderRadius: 2 }}
               >
                 {deleting ? 'Удаление...' : 'Удалить СИ'}
               </Button>
@@ -986,6 +987,7 @@ function UserForm({
                 size="large"
                 disabled={updating}
                 startIcon={updating && <CircularProgress size={16} />}
+                sx={{ height: 36, borderRadius: 2 }}
               >
                 {updating ? 'Сохранение...' : 'Сохранить'}
               </Button>

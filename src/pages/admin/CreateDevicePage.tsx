@@ -714,6 +714,7 @@ export default function CreateDevicePage(props: {
               size="large"
               disabled={creating}
               startIcon={creating && <CircularProgress size={16} />}
+              sx={{ height: 36, borderRadius: 2 }}
             >
               {creating ? 'Создание...' : 'Создать'}
             </Button>

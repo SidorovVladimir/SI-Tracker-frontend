@@ -769,7 +769,11 @@ export default function DevicesPage() {
                       gap: '8px',
                     }}
                   >
-                    <Button variant="contained" onClick={handleAddClick}>
+                    <Button
+                      variant="contained"
+                      sx={{ height: 36, borderRadius: 2 }}
+                      onClick={handleAddClick}
+                    >
                       Добавить СИ
                     </Button>
                     {selectedDeviceIds.length > 0 ? (

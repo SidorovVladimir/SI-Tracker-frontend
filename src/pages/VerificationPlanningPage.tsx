@@ -371,7 +371,8 @@ export const VerificationPlanningPage: React.FC = () => {
                 (selectedBatchOption === 'NEW' && !batchNumber.trim())
               }
               sx={{
-                height: 40,
+                height: 36,
+                borderRadius: 2,
                 width: { xs: '100%', sm: 'auto' },
                 textTransform: 'none',
                 fontWeight: 'bold',
@@ -391,7 +392,7 @@ export const VerificationPlanningPage: React.FC = () => {
               // Кнопка активна, только если метролог выбрал хотя бы один прибор галочкой в таблице!
               disabled={selectedDeviceIds.length === 0}
               sx={{
-                height: 40,
+                height: 36,
                 width: { xs: '100%', sm: 'auto' },
                 textTransform: 'none',
                 fontWeight: 'bold',

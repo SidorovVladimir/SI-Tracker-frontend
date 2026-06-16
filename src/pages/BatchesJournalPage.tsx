@@ -528,6 +528,26 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
           const isExpanded = expandedBatchId === batch.id;
           const currentJobId = batchJobs[batch.id];
 
+          const deviceLinks = batch?.devicesToBatches ?? [];
+
+          const isAllDevicesVerified =
+            deviceLinks.length > 0 &&
+            deviceLinks.every((link) => {
+              const isBackendVerified =
+                link.device.verifications?.some(
+                  (v) => v.batchId === batch.id
+                ) ?? false;
+
+              const isLocallyVerified = locallyVerifiedIds.includes(
+                link.device.id
+              );
+
+              return isBackendVerified || isLocallyVerified;
+            });
+
+          const isSyncDisabled =
+            deviceLinks.length === 0 || isAllDevicesVerified;
+
           return (
             <Accordion
               key={batch.id}
@@ -628,7 +648,9 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                     const isDeviceVerified =
                       isBackendVerified || isLocallyVerified;
 
-                    const isChecked = selectedDeviceIds.includes(link.id);
+                    const isChecked = selectedDeviceIds.includes(
+                      link.device.id
+                    );
 
                     return (
                       <Paper
@@ -836,6 +858,8 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                           textTransform: 'none',
                           width: { xs: '100%', sm: 'auto' },
                           py: { xs: 1, sm: 0.5 },
+                          height: 36,
+                          borderRadius: 2,
                         }}
                       >
                         🗑️ Удалить партию
@@ -854,6 +878,8 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                           fontWeight: 'bold',
                           width: { xs: '100%', sm: 'auto' },
                           py: { xs: 1, sm: 0.5 },
+                          height: 36,
+                          borderRadius: 2,
                         }}
                       >
                         🚀 Отправить в ЦСМ
@@ -870,7 +896,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                         onClick={() => setIsBarcodeModalOpen(true)}
                         disabled={selectedDeviceIds.length === 0}
                         sx={{
-                          height: 40,
+                          height: 36,
                           width: { xs: '100%', sm: 'auto' },
                           textTransform: 'none',
                           fontWeight: 'bold',
@@ -879,7 +905,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                       >
                         Печать бирок ({selectedDeviceIds.length})
                       </Button>
-                      <Button
+                      {/* <Button
                         variant="outlined"
                         color="warning"
                         size="small"
@@ -902,7 +928,48 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                         {batchJobs[batch.id]
                           ? '⏳ Синхронизация...'
                           : '🔄 Проверить всю партию в Аршин'}
-                      </Button>
+                      </Button> */}
+                      <Tooltip
+                        title={
+                          isSyncDisabled &&
+                          (batch?.devicesToBatches?.length ?? 0) > 0
+                            ? 'Все средства измерения в этой партии уже имеют актуальную поверку'
+                            : 'Проверить наличие поверок для всех СИ партии во ФГИС Аршин'
+                        }
+                      >
+                        {/* Обертка в Box дублирует адаптивную ширину кнопки, чтобы Tooltip на смартфонах не ломал верстку */}
+                        <Box
+                          sx={{
+                            width: { xs: '100%', sm: 'auto' },
+                            display: 'inline-block',
+                          }}
+                        >
+                          <Button
+                            variant="outlined"
+                            color="warning"
+                            size="small"
+                            disabled={
+                              !!batchJobs[batch.id] ||
+                              isSyncing ||
+                              isBatchSyncing ||
+                              isSyncDisabled
+                            }
+                            onClick={() => handleSync(batch.id)}
+                            sx={{
+                              textTransform: 'none',
+                              fontWeight: 'bold',
+                              width: '100%', // Теперь кнопка занимает 100% от ширины Box-обертки
+                              py: { xs: 1, sm: 0.5 },
+                              height: 36,
+                              borderRadius: 2,
+                            }}
+                          >
+                            {batchJobs[batch.id]
+                              ? '⏳ Синхронизация...'
+                              : '🔄 Проверить всю партию в Аршин'}
+                          </Button>
+                        </Box>
+                      </Tooltip>
                       <Button
                         variant="contained"
                         color="success"
@@ -920,6 +987,8 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                           fontWeight: 'bold',
                           width: { xs: '100%', sm: 'auto' },
                           py: { xs: 1, sm: 0.5 },
+                          height: 36,
+                          borderRadius: 2,
                         }}
                       >
                         ✅ Приборы вернулись (Закрыть поверку)
