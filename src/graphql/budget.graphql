@@ -1,0 +1,27 @@
+query GetBudgetMatrix(
+  $targetYear: Int!
+  $groupBy: BudgetGroupBy!
+  $companyId: ID
+  $cityId: ID
+  $siteId: ID
+) {
+  getBudgetMatrix(
+    targetYear: $targetYear
+    groupBy: $groupBy
+    companyId: $companyId
+    cityId: $cityId
+    siteId: $siteId
+  ) {
+    targetYear
+    grandTotal
+    rows {
+      rowId
+      rowName
+      totalYearCost
+      months {
+        month
+        totalCost
+      }
+    }
+  }
+}

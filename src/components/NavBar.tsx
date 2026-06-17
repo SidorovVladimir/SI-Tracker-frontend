@@ -27,6 +27,7 @@ import {
   Assessment,
   CloudUpload,
   Terminal,
+  AccountBalanceWallet,
 } from '@mui/icons-material';
 import { HeaderNotificationsBell } from './HeaderNotificationsBell';
 import { HeaderChatButton } from './HeaderChatButton';
@@ -255,6 +256,20 @@ export default function NavBar() {
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
                         📊 Аналитика и бюджет затрат
+                      </ListItemText>
+                    </MenuItem>
+                    <MenuItem
+                      component={Link}
+                      to={routes.budget()}
+                      onClick={handleAdminMenuClose}
+                    >
+                      <ListItemIcon sx={{ color: 'primary.main' }}>
+                        <AccountBalanceWallet fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText
+                        slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
+                      >
+                        💰 Планирование бюджета поверок
                       </ListItemText>
                     </MenuItem>
 

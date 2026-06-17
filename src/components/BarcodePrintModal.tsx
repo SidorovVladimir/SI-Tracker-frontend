@@ -18,6 +18,7 @@ import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 import { GetDevicesBarcodeDataDocument } from '../graphql/types/__generated__/graphql';
+import { Layers } from '@mui/icons-material';
 
 interface BarcodePrintModalProps {
   open: boolean;
@@ -32,7 +33,9 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
 }) => {
   const [printMode, setPrintMode] = useState<'A4' | 'ROLL'>('A4');
   // Контроль размера ленты термопринтера
-  const [labelSize, setLabelSize] = useState<'40x58' | '40x30'>('40x58');
+  const [labelSize, setLabelSize] = useState<
+    '40x58' | '40x30' | '40x30_double'
+  >('40x58');
 
   const { data, loading } = useQuery(GetDevicesBarcodeDataDocument, {
     variables: { ids: deviceIds },
@@ -91,16 +94,28 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: 2,
-          flexWrap: 'wrap',
+          gap: 1.5,
+          flexWrap: 'wrap', // Разрешаем перенос блоков на мобилках
+          p: { xs: 1.5, sm: 2 }, // Меньше отступы на телефонах
           '@media print': { display: 'none' },
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          🖨️ Маркировка оборудования ({deviceIds.length} шт.)
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: 'bold', fontSize: { xs: '1.1rem', sm: '1.25rem' } }}
+        >
+          🖨️ Маркировка ({deviceIds.length} шт.)
         </Typography>
 
-        <Box display="flex" gap={1} flexWrap="wrap">
+        <Box
+          display="flex"
+          gap={1}
+          flexWrap="wrap"
+          sx={{
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+          }}
+        >
           {/* Переключатель типа носителя */}
           <ToggleButtonGroup
             value={printMode}
@@ -108,10 +123,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
             onChange={(_e, val) => {
               if (val) {
                 setPrintMode(val);
-
-                if (val === 'A4') {
-                  setLabelSize('40x58');
-                }
+                if (val === 'A4') setLabelSize('40x58');
               }
             }}
             size="small"
@@ -119,15 +131,37 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
           >
             <ToggleButton
               value="A4"
-              sx={{ textTransform: 'none', gap: 0.5, fontWeight: 'bold' }}
+              sx={{
+                textTransform: 'none',
+                gap: 0.5,
+                fontWeight: 'bold',
+                py: 0.5,
+              }}
             >
-              <GridOnIcon fontSize="small" /> А4
+              <GridOnIcon fontSize="small" />
+              <Box
+                component="span"
+                sx={{ display: { xs: 'none', sm: 'inline-block' } }}
+              >
+                А4
+              </Box>
             </ToggleButton>
             <ToggleButton
               value="ROLL"
-              sx={{ textTransform: 'none', gap: 0.5, fontWeight: 'bold' }}
+              sx={{
+                textTransform: 'none',
+                gap: 0.5,
+                fontWeight: 'bold',
+                py: 0.5,
+              }}
             >
-              <ToggleOnIcon fontSize="small" /> Лента
+              <ToggleOnIcon fontSize="small" />
+              <Box
+                component="span"
+                sx={{ display: { xs: 'none', sm: 'inline-block' } }}
+              >
+                Лента
+              </Box>
             </ToggleButton>
           </ToggleButtonGroup>
 
@@ -139,18 +173,71 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
               onChange={(_e, val) => val && setLabelSize(val)}
               size="small"
               color="secondary"
+              sx={{ flexWrap: 'wrap' }} // Защита от сжатия кнопок внутри группы
             >
               <ToggleButton
                 value="40x58"
-                sx={{ textTransform: 'none', gap: 0.5, fontSize: '0.8rem' }}
+                sx={{
+                  textTransform: 'none',
+                  gap: 0.5,
+                  fontSize: '0.8rem',
+                  py: 0.5,
+                }}
               >
-                <AspectRatioIcon fontSize="small" /> 40x58 мм
+                <AspectRatioIcon fontSize="small" />
+                <Box
+                  component="span"
+                  sx={{ display: { xs: 'none', md: 'inline-block' } }}
+                >
+                  40x58 мм
+                </Box>
               </ToggleButton>
               <ToggleButton
                 value="40x30"
-                sx={{ textTransform: 'none', gap: 0.5, fontSize: '0.8rem' }}
+                sx={{
+                  textTransform: 'none',
+                  gap: 0.5,
+                  fontSize: '0.8rem',
+                  py: 0.5,
+                }}
               >
-                <AspectRatioIcon fontSize="small" /> 30x40 мм (x2)
+                <AspectRatioIcon fontSize="small" />
+                <Box
+                  component="span"
+                  sx={{ display: { xs: 'none', md: 'inline-block' } }}
+                >
+                  30x40 (x2)
+                </Box>
+                <Box
+                  component="span"
+                  sx={{ display: { xs: 'inline-block', md: 'none' } }}
+                >
+                  x2
+                </Box>
+              </ToggleButton>
+              <ToggleButton
+                value="40x30_double"
+                sx={{
+                  textTransform: 'none',
+                  gap: 0.5,
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  py: 0.5,
+                }}
+              >
+                <Layers fontSize="small" />
+                <Box
+                  component="span"
+                  sx={{ display: { xs: 'none', md: 'inline-block' } }}
+                >
+                  30x40 (2 в 1)
+                </Box>
+                <Box
+                  component="span"
+                  sx={{ display: { xs: 'inline-block', md: 'none' } }}
+                >
+                  2в1
+                </Box>
               </ToggleButton>
             </ToggleButtonGroup>
           )}
@@ -189,12 +276,11 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
               justifyContent: 'center',
               '@media print': {
                 display: printMode === 'A4' ? 'grid' : 'block',
-                // ИСПРАВЛЕНО: Ширина колонок на А4 зависит от выбранного формата
                 gridTemplateColumns:
                   printMode === 'A4'
-                    ? labelSize === '40x30'
-                      ? 'repeat(4, 40mm)'
-                      : 'repeat(3, 58mm)'
+                    ? labelSize === '40x58'
+                      ? 'repeat(3, 58mm)'
+                      : 'repeat(4, 40mm)'
                     : 'none',
                 gap: printMode === 'A4' ? '5mm' : 0,
                 p: printMode === 'A4' ? '10mm' : 0,
@@ -202,81 +288,383 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
               },
             }}
           >
-            {devices.map((device, index) => {
-              const deviceUrl = `${window.location.origin}/m/device/${device.id}`;
-              const isLastDevice = index === devices.length - 1;
+            {labelSize === '40x30_double'
+              ? // Сценарий 3: Два прибора на одну бирку 30х40 мм + 2 отдельные бирки с QR
+                devices.map((device, index) => {
+                  if (index % 2 !== 0) return null;
+                  const nextDevice = devices[index + 1];
 
-              const currentWidth = labelSize === '40x30' ? '40mm' : '58mm';
-              const currentHeight = labelSize === '40x30' ? '30mm' : '40mm';
+                  const deviceUrl1 = `${window.location.origin}/m/device/${device.id}`;
+                  const deviceUrl2 = nextDevice
+                    ? `${window.location.origin}/m/device/${nextDevice.id}`
+                    : '';
 
-              const getLabelContainerStyles = (
-                isSecondPartForRoll = false
-              ) => ({
-                width: currentWidth,
-                height: currentHeight,
-                bgcolor: 'white',
-                border: printMode === 'A4' ? '1px dashed #b0bec5' : 'none',
-                borderRadius: 1,
-                p: '2mm',
-                display: 'flex',
-                // На 40х30 всё идет в колонку, на 58х40 — в ряд (горизонтально)
-                flexDirection: labelSize === '40x30' ? 'column' : 'row',
-                gap: '2mm',
-                alignItems: 'center',
-                boxSizing: 'border-box',
-                '@media print': {
-                  width: currentWidth,
-                  height: currentHeight,
-                  m: 0,
-                  pageBreakInside: 'avoid',
-                  breakInside: 'avoid',
-                  pageBreakAfter:
-                    printMode === 'A4'
-                      ? 'auto'
-                      : isLastDevice && isSecondPartForRoll
-                      ? 'auto'
-                      : 'always',
-                  breakAfter:
-                    printMode === 'A4'
-                      ? 'auto'
-                      : isLastDevice && isSecondPartForRoll
-                      ? 'auto'
-                      : 'page',
-                },
-              });
+                  const getControlPrefix = (controlName?: string | null) => {
+                    const name = controlName?.toLowerCase() || '';
+                    if (name.includes('калибр')) return 'Калибр. до:';
+                    if (name.includes('осмотр') || name.includes('инспек'))
+                      return 'Осмотр. до:';
+                    return 'Повер. до:';
+                  };
 
-              // --- СЦЕНАРИЙ 1: ЛЕНТА И РАЗМЕР 40х30 мм (ВЫВОДИМ ДВЕ НАКЛЕЙКИ НА ПРИБОР) ---
-              if (labelSize === '40x30' && printMode === 'ROLL') {
-                return (
-                  <React.Fragment key={`${device.id}-${index}`}>
-                    {/* Бирка №1: Текстовый паспорт */}
-                    <Box sx={getLabelContainerStyles(false)}>
+                  // Базовые стили для каждой из трех бирок в пачке
+                  const qrLabelStyles = {
+                    width: '40mm',
+                    height: '30mm',
+                    bgcolor: 'white',
+                    border: printMode === 'A4' ? '1px dashed #b0bec5' : 'none',
+                    borderRadius: 1,
+                    p: '1mm 2mm',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    boxSizing: 'border-box',
+                    '@media print': {
+                      width: '40mm',
+                      height: '30mm',
+                      m: 0,
+                      pageBreakInside: 'avoid',
+                      breakInside: 'avoid',
+                      pageBreakAfter: printMode === 'A4' ? 'auto' : 'always',
+                      breakAfter: printMode === 'A4' ? 'auto' : 'page',
+                    },
+                  };
+
+                  return (
+                    <React.Fragment key={`double-${device.id}-${index}`}>
                       <Box
                         sx={{
-                          width: '100%',
-                          height: '100%',
+                          width: '40mm',
+                          height: '30mm',
+                          bgcolor: 'white',
+                          border:
+                            printMode === 'A4' ? '1px dashed #b0bec5' : 'none',
+                          borderRadius: 1,
+                          p: '1mm 2mm',
                           display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'space-between',
+                          boxSizing: 'border-box',
+                          '@media print': {
+                            width: '40mm',
+                            height: '30mm',
+                            m: 0,
+                            pageBreakInside: 'avoid',
+                            breakInside: 'avoid',
+                            pageBreakAfter:
+                              printMode === 'A4' ? 'auto' : 'always',
+                            breakAfter: printMode === 'A4' ? 'auto' : 'page',
+                          },
+                        }}
+                      >
+                        {/* ПЕРВЫЙ ПРИБОР */}
+                        <Box
+                          sx={{
+                            height: '13mm',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            borderBottom: nextDevice
+                              ? '0.5px dashed #ccc'
+                              : 'none',
+                            pb: 0.25,
+                          }}
+                        >
+                          <Typography
+                            sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
+                            noWrap
+                          >
+                            {device.name?.toUpperCase()}
+                          </Typography>
+                          <Typography
+                            sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
+                            noWrap
+                          >
+                            Мод: {device.model || '—'}
+                          </Typography>
+                          <Typography
+                            sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
+                            noWrap
+                          >
+                            № {device.serialNumber}
+                          </Typography>
+                          <Typography
+                            sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
+                            noWrap
+                          >
+                            {getControlPrefix(device.controlType)}{' '}
+                            {formatLabelDate(device.validUntil)}
+                          </Typography>
+                        </Box>
+
+                        {/* ВТОРОЙ ПРИБОР */}
+                        {nextDevice ? (
+                          <Box
+                            sx={{
+                              height: '13mm',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              pt: 0.25,
+                            }}
+                          >
+                            <Typography
+                              sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
+                              noWrap
+                            >
+                              {nextDevice.name?.toUpperCase()}
+                            </Typography>
+                            <Typography
+                              sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
+                              noWrap
+                            >
+                              Мод: {nextDevice.model || '—'}
+                            </Typography>
+                            <Typography
+                              sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
+                              noWrap
+                            >
+                              № {nextDevice.serialNumber}
+                            </Typography>
+                            <Typography
+                              sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
+                            >
+                              {getControlPrefix(nextDevice.controlType)}{' '}
+                              {formatLabelDate(nextDevice.validUntil)}
+                            </Typography>
+                          </Box>
+                        ) : (
+                          <Box
+                            sx={{
+                              height: '13mm',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Typography
+                              sx={{
+                                fontSize: '6.5pt',
+                                color: 'text.disabled',
+                                fontStyle: 'italic',
+                              }}
+                            >
+                              [ Свободно ]
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* 📱 2. ОТДЕЛЬНАЯ БИРКА: QR-КОД ДЛЯ ПЕРВОГО ПРИБОРА */}
+                      <Box sx={qrLabelStyles}>
+                        <QRCodeSVG value={deviceUrl1} size={70} level="M" />
+                        <Typography
+                          sx={{
+                            fontSize: '7.0pt',
+                            color: 'text.secondary',
+                            mt: 0.3,
+                            fontFamily: 'monospace',
+                            fontWeight: 'bold',
+                          }}
+                          noWrap
+                        >
+                          Зав.№ {device.serialNumber}
+                        </Typography>
+                      </Box>
+
+                      {/* 📱 3. ОТДЕЛЬНАЯ БИРКА: QR-КОД ДЛЯ ВТОРОГО ПРИБОРА (ЕСЛИ СУЩЕСТВУЕТ) */}
+                      {nextDevice && (
+                        <Box sx={qrLabelStyles}>
+                          <QRCodeSVG value={deviceUrl2} size={70} level="M" />
+                          <Typography
+                            sx={{
+                              fontSize: '7.0pt',
+                              color: 'text.secondary',
+                              mt: 0.3,
+                              fontFamily: 'monospace',
+                              fontWeight: 'bold',
+                            }}
+                            noWrap
+                          >
+                            Зав.№ {nextDevice.serialNumber}
+                          </Typography>
+                        </Box>
+                      )}
+                    </React.Fragment>
+                  );
+                })
+              : // Сценарии 1 и 2: Обычный маппинг по одному прибору (весь ваш старый devices.map от начала до конца)
+                devices.map((device, index) => {
+                  const deviceUrl = `${window.location.origin}/m/device/${device.id}`;
+                  const isLastDevice = index === devices.length - 1;
+                  const currentWidth = labelSize === '40x30' ? '40mm' : '58mm';
+                  const currentHeight = labelSize === '40x30' ? '30mm' : '40mm';
+
+                  const getControlPrefix = (controlName?: string | null) => {
+                    const name = controlName?.toLowerCase() || '';
+                    if (name.includes('калибр')) return 'Калибровано до:';
+                    if (name.includes('осмотр') || name.includes('инспек'))
+                      return 'Осмотрено до:';
+                    return 'Поверено до:';
+                  };
+
+                  const getLabelContainerStyles = (
+                    isSecondPartForRoll = false
+                  ) => ({
+                    width: currentWidth,
+                    height: currentHeight,
+                    bgcolor: 'white',
+                    border: printMode === 'A4' ? '1px dashed #b0bec5' : 'none',
+                    borderRadius: 1,
+                    p: '2mm',
+                    display: 'flex',
+                    flexDirection: labelSize === '40x30' ? 'column' : 'row',
+                    gap: '2mm',
+                    alignItems: 'center',
+                    boxSizing: 'border-box',
+                    '@media print': {
+                      width: currentWidth,
+                      height: currentHeight,
+                      m: 0,
+                      pageBreakInside: 'avoid',
+                      breakInside: 'avoid',
+                      pageBreakAfter:
+                        printMode === 'A4'
+                          ? 'auto'
+                          : isLastDevice && isSecondPartForRoll
+                          ? 'auto'
+                          : 'always',
+                      breakAfter:
+                        printMode === 'A4'
+                          ? 'auto'
+                          : isLastDevice && isSecondPartForRoll
+                          ? 'auto'
+                          : 'page',
+                    },
+                  });
+
+                  if (labelSize === '40x30' && printMode === 'ROLL') {
+                    return (
+                      <React.Fragment key={`${device.id}-${index}`}>
+                        {/* Ваша старая первая бирка (Текст) */}
+                        <Box sx={getLabelContainerStyles(false)}>
+                          <Box
+                            sx={{
+                              width: '100%',
+                              height: '100%',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'space-between',
+                            }}
+                          >
+                            <Box>
+                              <Typography
+                                sx={{
+                                  fontSize: '8.5pt',
+                                  lineHeight: '1.1',
+                                  fontWeight: 'bold',
+                                  mt: 0.3,
+                                  overflow: 'hidden',
+                                }}
+                                noWrap
+                              >
+                                {device.name}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  fontSize: '7.5pt',
+                                  color: 'text.secondary',
+                                }}
+                                noWrap
+                              >
+                                Мод: {device.model || '—'}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  fontSize: '7.5pt',
+                                  fontFamily: 'monospace',
+                                }}
+                              >
+                                Зав. №: {device.serialNumber}
+                              </Typography>
+                            </Box>
+                            <Box
+                              sx={{ borderTop: '0.5px solid #e0e0e0', pt: 0.3 }}
+                            >
+                              <Typography
+                                sx={{
+                                  fontSize: '7.5pt',
+                                  color: 'text.secondary',
+                                }}
+                              >
+                                {device.controlType || 'Контроль'} •{' '}
+                                {device.statusName || '—'}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  fontSize: '8pt',
+                                  fontWeight: 'bold',
+                                  color: 'error.main',
+                                }}
+                              >
+                                {getControlPrefix(device.controlType)}{' '}
+                                {formatLabelDate(device.validUntil)}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Box>
+                        {/* Ваша старая вторая бирка (QR) */}
+                        <Box sx={getLabelContainerStyles(true)}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '100%',
+                              height: '100%',
+                            }}
+                          >
+                            <QRCodeSVG value={deviceUrl} size={75} level="M" />
+                            <Typography
+                              sx={{
+                                fontSize: '7.5pt',
+                                color: 'text.secondary',
+                                mt: 0.3,
+                                fontFamily: 'monospace',
+                              }}
+                            >
+                              Зав.№ {device.serialNumber}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </React.Fragment>
+                    );
+                  }
+
+                  // Ваш старый Сценарий 2: Большая совмещенная бирка 58х40 мм
+                  return (
+                    <Box
+                      key={`${device.id}-${index}`}
+                      sx={getLabelContainerStyles(true)}
+                    >
+                      <Box
+                        sx={{
+                          flex: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          height: '100%',
+                          minWidth: 0,
                         }}
                       >
                         <Box>
-                          {/* <Typography
-                            sx={{
-                              fontSize: '7.5pt',
-                              fontWeight: 'bold',
-                              color: 'primary.main',
-                              lineHeight: 1,
-                            }}
-                          >
-                            SI-TRACKER
-                          </Typography> */}
                           <Typography
                             sx={{
-                              fontSize: '8.5pt',
-                              lineHeight: '1.1',
+                              fontSize: '8pt',
                               fontWeight: 'bold',
-                              mt: 0.3,
+                              mt: 0.25,
                               overflow: 'hidden',
                             }}
                             noWrap
@@ -284,188 +672,105 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                             {device.name}
                           </Typography>
                           <Typography
-                            sx={{ fontSize: '7.5pt', color: 'text.secondary' }}
-                            noWrap
+                            sx={{ fontSize: '7pt', color: 'text.secondary' }}
                           >
                             Мод: {device.model || '—'}
                           </Typography>
                           <Typography
-                            sx={{ fontSize: '7.5pt', fontFamily: 'monospace' }}
-                            //  noWrap
+                            sx={{
+                              fontSize: '7pt',
+                              fontFamily: 'monospace',
+                              mt: 0.25,
+                              overflow: 'hidden',
+                            }}
                           >
                             Зав. №: {device.serialNumber}
                           </Typography>
                         </Box>
-                        <Box sx={{ borderTop: '0.5px solid #e0e0e0', pt: 0.3 }}>
+                        <Box
+                          sx={{
+                            borderTop: '0.5px solid',
+                            borderColor: 'divider',
+                            pt: 0.25,
+                          }}
+                        >
                           <Typography
-                            sx={{ fontSize: '7.5pt', color: 'text.secondary' }}
-                            // noWrap
+                            sx={{ fontSize: '6.5pt', color: 'text.secondary' }}
+                            noWrap
                           >
                             {device.controlType || 'Контроль'} •{' '}
                             {device.statusName || '—'}
                           </Typography>
                           <Typography
                             sx={{
-                              fontSize: '8pt',
+                              fontSize: '7.5pt',
                               fontWeight: 'bold',
                               color: 'error.main',
+                              mt: 0.25,
                             }}
                           >
-                            ГОДЕН ДО: {formatLabelDate(device.validUntil)}
+                            {getControlPrefix(device.controlType)}{' '}
+                            {formatLabelDate(device.validUntil)}
                           </Typography>
                         </Box>
                       </Box>
-                    </Box>
-
-                    {/* Бирка №2: Изолированный QR-код */}
-                    <Box sx={getLabelContainerStyles(true)}>
                       <Box
                         sx={{
                           display: 'flex',
-                          flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          width: '100%',
-                          height: '100%',
+                          flexShrink: 0,
                         }}
                       >
-                        <QRCodeSVG value={deviceUrl} size={75} level="M" />
-                        <Typography
-                          sx={{
-                            fontSize: '7.5pt',
-                            color: 'text.secondary',
-                            mt: 0.3,
-                            fontFamily: 'monospace',
-                          }}
-                        >
-                          Зав.№ {device.serialNumber}
-                        </Typography>
+                        <QRCodeSVG value={deviceUrl} size={100} level="M" />
                       </Box>
                     </Box>
-                  </React.Fragment>
-                );
-              }
-
-              // --- СЦЕНАРИЙ 2: БОЛЬШАЯ БИРКА 58х40 мм (ИЛИ ВЫВОД НА А4) ---
-              return (
-                <Box
-                  key={`${device.id}-${index}`}
-                  sx={getLabelContainerStyles(true)}
-                >
-                  {/* Левая часть: Текстовая информация */}
-                  <Box
-                    sx={{
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      height: '100%',
-                      minWidth: 0,
-                    }}
-                  >
-                    <Box>
-                      {/* <Typography
-                        sx={{
-                          fontSize: '8pt',
-                          fontWeight: 'bold',
-                          color: 'primary.main',
-                          lineHeight: 1.1,
-                        }}
-                      >
-                        SI-TRACKER
-                      </Typography> */}
-                      <Typography
-                        sx={{
-                          fontSize: '8pt',
-                          fontWeight: 'bold',
-                          mt: 0.25,
-                          overflow: 'hidden',
-                        }}
-                        noWrap
-                      >
-                        {device.name}
-                      </Typography>
-                      <Typography
-                        sx={{ fontSize: '7pt', color: 'text.secondary' }}
-                        // noWrap
-                      >
-                        Мод: {device.model || '—'}
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontSize: '7pt',
-                          fontFamily: 'monospace',
-                          mt: 0.25,
-                          overflow: 'hidden',
-                        }}
-                        // noWrap
-                      >
-                        Зав. №: {device.serialNumber}
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        borderTop: '0.5px solid',
-                        borderColor: 'divider',
-                        pt: 0.25,
-                      }}
-                    >
-                      <Typography
-                        sx={{ fontSize: '6.5pt', color: 'text.secondary' }}
-                        noWrap
-                      >
-                        {device.controlType || 'Контроль'} •{' '}
-                        {device.statusName || '—'}
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontSize: '7.5pt',
-                          fontWeight: 'bold',
-                          color: 'error.main',
-                          mt: 0.25,
-                        }}
-                      >
-                        ГОДЕН ДО: {formatLabelDate(device.validUntil)}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  {/* Правая часть: QR-код */}
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <QRCodeSVG value={deviceUrl} size={100} level="M" />
-                  </Box>
-                </Box>
-              );
-            })}
+                  );
+                })}
           </Box>
         )}
       </DialogContent>
 
       <DialogActions
-        sx={{ p: 2, bgcolor: 'grey.50', '@media print': { display: 'none' } }}
+        sx={{
+          p: { xs: 1.5, sm: 2 },
+          bgcolor: 'grey.50',
+          gap: 1,
+          '@media print': { display: 'none' },
+        }}
       >
         <Button
           onClick={onClose}
           color="inherit"
-          sx={{ textTransform: 'none' }}
+          size="small"
+          sx={{ textTransform: 'none', fontWeight: 'medium' }}
         >
           Отмена
         </Button>
+
         <Button
           variant="contained"
-          startIcon={<PrintIcon />}
           onClick={handlePrint}
           disabled={loading || devices.length === 0}
-          sx={{ textTransform: 'none', fontWeight: 'bold', borderRadius: 2 }}
+          size="small"
+          sx={{
+            textTransform: 'none',
+            fontWeight: 'bold',
+            borderRadius: { xs: '50%', sm: 2 }, // Круглая на мобилках, прямоугольная на ПК
+            minWidth: { xs: 40, sm: 'auto' },
+            width: { xs: 40, sm: 'auto' },
+            height: { xs: 40, sm: 'auto' },
+            p: { xs: 0, sm: '6px 16px' }, // Убираем внутренние отступы для идеального круга
+          }}
         >
-          Пустить в печать
+          <PrintIcon fontSize="small" />
+          {/* Скрываем текст на телефонах, оставляя только круглую кнопку с иконкой принтера */}
+          <Box
+            component="span"
+            sx={{ display: { xs: 'none', sm: 'inline-block' }, ml: 0.5 }}
+          >
+            Пустить в печать
+          </Box>
         </Button>
       </DialogActions>
     </Dialog>
