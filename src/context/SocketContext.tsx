@@ -129,7 +129,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       // Заставляем Apollo обновить списки диалогов, если открыта страница чата
       await client
         .refetchQueries({
-          include: [GetChatDialogsDocument],
+          include: [GetChatDialogsDocument, 'GetChatHistory'],
         })
         .catch(() => {});
     });

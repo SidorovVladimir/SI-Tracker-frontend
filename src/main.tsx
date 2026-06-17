@@ -77,47 +77,58 @@ const getClient = () => {
               },
             },
 
-            getChatHistory: {
-              keyArgs: ['recipientId'],
-              merge(existing = [], incoming = []) {
-                const messageMap = new Map();
-
-                existing.forEach((msg: any) => {
-                  if (msg && msg.__ref) {
-                    messageMap.set(msg.__ref, msg);
-                  } else if (msg && msg.id) {
-                    messageMap.set(msg.id, msg);
-                  }
-                });
-
-                incoming.forEach((msg: any) => {
-                  if (msg && msg.__ref) {
-                    messageMap.set(msg.__ref, msg);
-                  } else if (msg && msg.id) {
-                    messageMap.set(msg.id, msg);
-                  }
-                });
-
-                return Array.from(messageMap.values());
-              },
-            },
             // getChatHistory: {
             //   keyArgs: ['recipientId'],
             //   merge(existing = [], incoming = []) {
-            //     // Оптимизировано: concat + сортировка быстрее, чем Map.
-            //     // При большом количестве сообщений не создает временный Map,
-            //     // что снижает нагрузку на сборщик мусора.
-            //     const merged = [...existing, ...incoming];
-            //     merged.sort((a: any, b: any) => {
-            //       if (!a || !b) return 0;
-            //       return (
-            //         new Date(a.createdAt).getTime() -
-            //         new Date(b.createdAt).getTime()
-            //       );
+            //     const messageMap = new Map();
+
+            //     existing.forEach((msg: any) => {
+            //       if (msg && msg.__ref) {
+            //         messageMap.set(msg.__ref, msg);
+            //       } else if (msg && msg.id) {
+            //         messageMap.set(msg.id, msg);
+            //       }
             //     });
-            //     return merged;
+
+            //     incoming.forEach((msg: any) => {
+            //       if (msg && msg.__ref) {
+            //         messageMap.set(msg.__ref, msg);
+            //       } else if (msg && msg.id) {
+            //         messageMap.set(msg.id, msg);
+            //       }
+            //     });
+
+            //     return Array.from(messageMap.values());
             //   },
             // },
+
+            getChatHistory: {
+              keyArgs: ['recipientId'],
+              merge(existing = [], incoming = [], { readField }) {
+                const messageMap = new Map();
+                const getMessageId = (msg: any) =>
+                  readField<string>('id', msg) || msg.id || msg.__ref;
+
+                // Складываем существующие сообщения
+                existing.forEach((msg: any) => {
+                  if (msg) {
+                    const id = getMessageId(msg);
+                    if (id) messageMap.set(id, msg);
+                  }
+                });
+
+                // Добавляем новые (из сокетов или пагинации)
+                incoming.forEach((msg: any) => {
+                  if (msg) {
+                    const id = getMessageId(msg);
+                    if (id) messageMap.set(id, msg);
+                  }
+                });
+
+                // 🔥 Просто возвращаем объединенный массив! База данных уже все отсортировала за нас.
+                return Array.from(messageMap.values());
+              },
+            },
           },
         },
       },

@@ -273,7 +273,8 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                           </Typography> */}
                           <Typography
                             sx={{
-                              fontSize: '7.5pt',
+                              fontSize: '8.5pt',
+                              lineHeight: '1.1',
                               fontWeight: 'bold',
                               mt: 0.3,
                               overflow: 'hidden',
@@ -283,13 +284,13 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                             {device.name}
                           </Typography>
                           <Typography
-                            sx={{ fontSize: '6.5pt', color: 'text.secondary' }}
+                            sx={{ fontSize: '7.5pt', color: 'text.secondary' }}
                             noWrap
                           >
                             Мод: {device.model || '—'}
                           </Typography>
                           <Typography
-                            sx={{ fontSize: '6.5pt', fontFamily: 'monospace' }}
+                            sx={{ fontSize: '7.5pt', fontFamily: 'monospace' }}
                             //  noWrap
                           >
                             Зав. №: {device.serialNumber}
@@ -297,7 +298,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                         </Box>
                         <Box sx={{ borderTop: '0.5px solid #e0e0e0', pt: 0.3 }}>
                           <Typography
-                            sx={{ fontSize: '6.5pt', color: 'text.secondary' }}
+                            sx={{ fontSize: '7.5pt', color: 'text.secondary' }}
                             // noWrap
                           >
                             {device.controlType || 'Контроль'} •{' '}
@@ -305,7 +306,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                           </Typography>
                           <Typography
                             sx={{
-                              fontSize: '7pt',
+                              fontSize: '8pt',
                               fontWeight: 'bold',
                               color: 'error.main',
                             }}
@@ -331,7 +332,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                         <QRCodeSVG value={deviceUrl} size={75} level="M" />
                         <Typography
                           sx={{
-                            fontSize: '5pt',
+                            fontSize: '7.5pt',
                             color: 'text.secondary',
                             mt: 0.3,
                             fontFamily: 'monospace',

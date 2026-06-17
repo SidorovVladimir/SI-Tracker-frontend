@@ -135,11 +135,12 @@ export const ChatPage: React.FC = () => {
     }
 
     if (newMessages.length > 0) {
-      const reversedNew = [...newMessages].reverse();
+      // const reversedNew = [...newMessages].reverse();
 
       setLocalMessages((prev) => {
         // Объединяем старые и текущие сообщения
-        const allMessages = [...reversedNew, ...prev];
+        // const allMessages = [...reversedNew, ...prev];
+        const allMessages = [...newMessages, ...prev];
         // Фильтруем массив, оставляя только уникальные по id
         return allMessages.filter(
           (msg, index, self) => index === self.findIndex((m) => m.id === msg.id)
@@ -167,7 +168,13 @@ export const ChatPage: React.FC = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         // Если невидимый блок вверху чата стал виден пользователю (он доскроллил до верха)
-        if (entries[0].isIntersecting) {
+        // if (entries[0].isIntersecting) {
+        if (
+          entries[0].isIntersecting &&
+          !historyLoading &&
+          hasMoreMessages &&
+          localMessages.length >= 50
+        ) {
           loadMoreMessages();
         }
       },
@@ -179,13 +186,15 @@ export const ChatPage: React.FC = () => {
     }
 
     return () => observer.disconnect();
-  }, [localMessages, hasMoreMessages]);
+  }, [localMessages, hasMoreMessages, historyLoading]);
 
   // Синхронизация истории сообщений
   useEffect(() => {
     if (historyData?.getChatHistory) {
-      const reversed = [...historyData.getChatHistory].reverse();
-      setLocalMessages(reversed);
+      // const reversed = [...historyData.getChatHistory].reverse();
+      // setLocalMessages(reversed);
+
+      setLocalMessages(historyData.getChatHistory);
       if (localMessages.length === 0) {
         setTimeout(() => scrollToBottom('auto'), 50);
       }
@@ -259,25 +268,59 @@ export const ChatPage: React.FC = () => {
   useEffect(() => {
     if (!socket) return;
 
+    // socket.on('newMessage', async (newMessage: MessageLocal) => {
+    //   const currentCompanionId = companionIdRef.current;
+
+    //   if (
+    //     currentCompanionId &&
+    //     newMessage.senderId.toLowerCase() === currentCompanionId.toLowerCase()
+    //   ) {
+    //     const formattedMsg = {
+    //       ...newMessage,
+    //       createdAt: new Date(newMessage.createdAt).toISOString(),
+    //     };
+    //     setLocalMessages((prev) => [...prev, formattedMsg]);
+    //     await markAsRead({ variables: { senderId: currentCompanionId } });
+    //     socket.emit('notifyMessagesRead', {
+    //       readerId: user?.id,
+    //       authorId: currentCompanionId,
+    //     });
+    //     setTimeout(() => scrollToBottom('smooth'), 100);
+    //     // await client.refetchQueries({ include: [GetTotalUnreadCountDocument] });
+    //   }
+    // });
     socket.on('newMessage', async (newMessage: MessageLocal) => {
       const currentCompanionId = companionIdRef.current;
 
-      if (
-        currentCompanionId &&
-        newMessage.senderId.toLowerCase() === currentCompanionId.toLowerCase()
-      ) {
+      if (!currentCompanionId) return;
+
+      // 🔥 ИСПРАВЛЕНО: Проверяем, относится ли сообщение к текущему открытому диалогу вообще
+      const isMessageFromCurrentDialog =
+        newMessage.senderId.toLowerCase() ===
+          currentCompanionId.toLowerCase() ||
+        newMessage.recipientId.toLowerCase() ===
+          currentCompanionId.toLowerCase();
+
+      if (isMessageFromCurrentDialog) {
         const formattedMsg = {
           ...newMessage,
           createdAt: new Date(newMessage.createdAt).toISOString(),
         };
-        setLocalMessages((prev) => [...prev, formattedMsg]);
+
+        setLocalMessages((prev) => {
+          // Защита от дублирования с событием messageSentConfirmation
+          if (prev.some((m) => m.id === formattedMsg.id)) return prev;
+          return [...prev, formattedMsg]; // Пушим в конец
+        });
+
         await markAsRead({ variables: { senderId: currentCompanionId } });
+
         socket.emit('notifyMessagesRead', {
           readerId: user?.id,
           authorId: currentCompanionId,
         });
+
         setTimeout(() => scrollToBottom('smooth'), 100);
-        // await client.refetchQueries({ include: [GetTotalUnreadCountDocument] });
       }
     });
 
