@@ -415,11 +415,14 @@ export default function DevicesPage() {
   return (
     <Paper
       sx={{
-        height: 'calc(100dvh - 130px)',
-        margin: 2,
+        height: isMobileOrLaptop
+          ? 'calc(100dvh - 110px)'
+          : 'calc(100dvh - 130px)',
+        // margin: 2,
         display: 'flex',
         flexDirection: 'column',
-        borderRadius: 2,
+        borderRadius: isMobileOrLaptop ? 0 : 2,
+        margin: isMobileOrLaptop ? 0 : 2,
         overflow: 'hidden',
         bgcolor: 'transparent',
         boxShadow: 'none',
@@ -430,8 +433,8 @@ export default function DevicesPage() {
         sx={{
           display: 'flex',
           flexGrow: 1,
-          gap: 2,
-          p: 1,
+          gap: isMobileOrLaptop ? 0 : 2,
+          p: isMobileOrLaptop ? 0 : 1,
           minHeight: 0,
         }}
       >
@@ -441,11 +444,11 @@ export default function DevicesPage() {
             minWidth: 0,
             display: 'flex',
             flexDirection: 'column',
-            borderRadius: 3,
+            borderRadius: isMobileOrLaptop ? 0 : 3,
+            boxShadow: isMobileOrLaptop ? 0 : 4,
             overflow: 'hidden',
-            boxShadow: 4,
-            bgcolor: 'background.paper',
-            border: '1px solid',
+            bgcolor: isMobileOrLaptop ? 'transparent' : 'background.paper',
+            border: isMobileOrLaptop ? 'none' : '1px solid',
             borderColor: 'divider',
             transition: 'width 0.4s ease-in-out',
           }}
