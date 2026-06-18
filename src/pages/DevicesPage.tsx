@@ -111,6 +111,7 @@ export default function DevicesPage() {
 
   const resetFilters = () => {
     setFilters(initialFilters);
+    setPaginationModel({ page: 0, pageSize: 25 });
     localStorage.removeItem(FILTERS_STORAGE_KEY);
   };
 
@@ -131,6 +132,8 @@ export default function DevicesPage() {
 
       return updated;
     });
+
+    setPaginationModel((prev) => ({ ...prev, page: 0 }));
   };
 
   // const { data, loading } = useQuery(GetDevicesWithRelationsListDocument);
@@ -198,47 +201,88 @@ export default function DevicesPage() {
   //   const raw = productionSiteData?.productionSites || [];
   //   return Array.from(new Set(raw.map((p) => p.name).filter(Boolean))).sort();
   // }, [productionSiteData]);
+  // const productionSite = useMemo(() => {
+  //   const rawSites = productionSiteData?.productionSites || [];
+
+  //   // 2. Находим объект выбранного города
+  //   const selectedCityObj = cities.find(
+  //     (c) => c.name?.toLowerCase().trim() === filters.city?.toLowerCase().trim()
+  //   );
+  //   const targetCityId = selectedCityObj?.id?.toLowerCase().trim();
+
+  //   // 3. Находим объект выбранной компании
+  //   const selectedCompanyObj = companies.find(
+  //     (co) =>
+  //       co.name?.toLowerCase().trim() === filters.company?.toLowerCase().trim()
+  //   );
+  //   const targetCompanyId = selectedCompanyObj?.id?.toLowerCase().trim();
+
+  //   // 4. Последовательно фильтруем массив площадок
+  //   let filtered = rawSites;
+
+  //   // Если город выбран — оставляем только участки, привязанные к этому cityId
+  //   if (targetCityId) {
+  //     filtered = filtered.filter(
+  //       (site) => site.cityId?.toLowerCase().trim() === targetCityId
+  //     );
+  //   }
+
+  //   // Если компания выбрана — дополнительно фильтруем по companyId
+  //   if (targetCompanyId) {
+  //     filtered = filtered.filter(
+  //       (site) => site.companyId?.toLowerCase().trim() === targetCompanyId
+  //     );
+  //   }
+
+  //   // 5. Собираем массив уникальных текстовых названий и сортируем их
+  //   const uniqueNames = Array.from(
+  //     new Set(filtered.map((p) => p.name).filter(Boolean))
+  //   );
+
+  //   return uniqueNames.sort((a, b) => a.localeCompare(b));
+
+  //   // Оставляем зависимости для мгновенного пересчета в браузере
+  // }, [productionSiteData, filters.city, filters.company, cities, companies]);
+
   const productionSite = useMemo(() => {
     const rawSites = productionSiteData?.productionSites || [];
 
-    // 2. Находим объект выбранного города
-    const selectedCityObj = cities.find(
-      (c) => c.name?.toLowerCase().trim() === filters.city?.toLowerCase().trim()
-    );
-    const targetCityId = selectedCityObj?.id?.toLowerCase().trim();
+    // Если справочники городов/компаний еще загружаются, возвращаем уникальные имена из сырых данных,
+    // чтобы интерфейс не «моргал» пустым списком при перезагрузке страницы
+    if (cities.length === 0 && companies.length === 0) {
+      return Array.from(
+        new Set(rawSites.map((p) => p.name).filter(Boolean))
+      ).sort();
+    }
 
-    // 3. Находим объект выбранной компании
+    // 1. Находим объект выбранного города (сравнение без учета регистра и пробелов)
+    const selectedCityObj = cities.find(
+      (c) => c.name?.trim().toLowerCase() === filters.city?.trim().toLowerCase()
+    );
+    const targetCityId = selectedCityObj?.id; // ID сравниваем в оригинальном виде
+
+    // 2. Находим объект выбранной компании
     const selectedCompanyObj = companies.find(
       (co) =>
-        co.name?.toLowerCase().trim() === filters.company?.toLowerCase().trim()
+        co.name?.trim().toLowerCase() === filters.company?.trim().toLowerCase()
     );
-    const targetCompanyId = selectedCompanyObj?.id?.toLowerCase().trim();
+    const targetCompanyId = selectedCompanyObj?.id;
 
-    // 4. Последовательно фильтруем массив площадок
+    // 3. Последовательно фильтруем массив площадок по ID
     let filtered = rawSites;
 
-    // Если город выбран — оставляем только участки, привязанные к этому cityId
     if (targetCityId) {
-      filtered = filtered.filter(
-        (site) => site.cityId?.toLowerCase().trim() === targetCityId
-      );
+      filtered = filtered.filter((site) => site.cityId === targetCityId);
     }
 
-    // Если компания выбрана — дополнительно фильтруем по companyId
     if (targetCompanyId) {
-      filtered = filtered.filter(
-        (site) => site.companyId?.toLowerCase().trim() === targetCompanyId
-      );
+      filtered = filtered.filter((site) => site.companyId === targetCompanyId);
     }
 
-    // 5. Собираем массив уникальных текстовых названий и сортируем их
-    const uniqueNames = Array.from(
+    // 4. Собираем массив уникальных текстовых названий и сортируем их
+    return Array.from(
       new Set(filtered.map((p) => p.name).filter(Boolean))
-    );
-
-    return uniqueNames.sort((a, b) => a.localeCompare(b));
-
-    // Оставляем зависимости для мгновенного пересчета в браузере
+    ).sort((a, b) => a.localeCompare(b));
   }, [productionSiteData, filters.city, filters.company, cities, companies]);
 
   const statuses = useMemo(() => {
@@ -852,7 +896,10 @@ export default function DevicesPage() {
                   label="Город"
                   size="small"
                   select
-                  slotProps={{ select: { native: true } }}
+                  slotProps={{
+                    select: { native: true },
+                    inputLabel: { shrink: filters.city !== '' },
+                  }}
                   value={filters.city}
                   onChange={(e) => handleFilterChange('city', e.target.value)}
                   sx={{ minWidth: 150 }}
@@ -869,7 +916,10 @@ export default function DevicesPage() {
                   label="Организация"
                   size="small"
                   select
-                  slotProps={{ select: { native: true } }}
+                  slotProps={{
+                    select: { native: true },
+                    inputLabel: { shrink: filters.company !== '' },
+                  }}
                   value={filters.company}
                   onChange={(e) =>
                     handleFilterChange('company', e.target.value)
@@ -891,7 +941,10 @@ export default function DevicesPage() {
                   label="Подразделение"
                   size="small"
                   select
-                  slotProps={{ select: { native: true } }}
+                  slotProps={{
+                    select: { native: true },
+                    inputLabel: { shrink: filters.productionSite !== '' },
+                  }}
                   value={filters.productionSite}
                   onChange={(e) =>
                     handleFilterChange('productionSite', e.target.value)
@@ -912,6 +965,9 @@ export default function DevicesPage() {
                 <TextField
                   label="Наименование"
                   size="small"
+                  slotProps={{
+                    inputLabel: { shrink: filters.deviceName !== '' },
+                  }}
                   value={filters.deviceName}
                   onChange={(e) =>
                     handleFilterChange('deviceName', e.target.value)
@@ -925,6 +981,9 @@ export default function DevicesPage() {
                 <TextField
                   label="Заводской номер"
                   size="small"
+                  slotProps={{
+                    inputLabel: { shrink: filters.serialNumber !== '' },
+                  }}
                   value={filters.serialNumber}
                   onChange={(e) =>
                     handleFilterChange('serialNumber', e.target.value)
@@ -939,7 +998,10 @@ export default function DevicesPage() {
                   label="Вид контроля"
                   size="small"
                   select
-                  slotProps={{ select: { native: true } }}
+                  slotProps={{
+                    select: { native: true },
+                    inputLabel: { shrink: filters.metrologyControle !== '' },
+                  }}
                   value={filters.metrologyControle}
                   onChange={(e) =>
                     handleFilterChange('metrologyControle', e.target.value)
@@ -961,7 +1023,10 @@ export default function DevicesPage() {
                   label="Статус"
                   size="small"
                   select
-                  slotProps={{ select: { native: true } }}
+                  slotProps={{
+                    select: { native: true },
+                    inputLabel: { shrink: filters.status !== '' },
+                  }}
                   value={filters.status}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
                   sx={{

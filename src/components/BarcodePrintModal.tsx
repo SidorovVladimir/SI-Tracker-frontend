@@ -301,10 +301,10 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
 
                   const getControlPrefix = (controlName?: string | null) => {
                     const name = controlName?.toLowerCase() || '';
-                    if (name.includes('калибр')) return 'Калибр. до:';
+                    if (name.includes('калибр')) return 'Калибровано до';
                     if (name.includes('осмотр') || name.includes('инспек'))
-                      return 'Осмотр. до:';
-                    return 'Повер. до:';
+                      return 'Осмотрено до';
+                    return 'Поверено до';
                   };
 
                   // Базовые стили для каждой из трех бирок в пачке
@@ -381,13 +381,13 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                             sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
                             noWrap
                           >
-                            Мод: {device.model || '—'}
+                            Тип: {device.model.toUpperCase() || '—'}
                           </Typography>
                           <Typography
                             sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
                             noWrap
                           >
-                            № {device.serialNumber}
+                            № {device.serialNumber.toUpperCase() || '—'}
                           </Typography>
                           <Typography
                             sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
@@ -395,6 +395,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                           >
                             {getControlPrefix(device.controlType)}{' '}
                             {formatLabelDate(device.validUntil)}
+                            {' г.'}
                           </Typography>
                         </Box>
 
@@ -419,19 +420,20 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                               sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
                               noWrap
                             >
-                              Мод: {nextDevice.model || '—'}
+                              Тип: {nextDevice.model.toUpperCase() || '—'}
                             </Typography>
                             <Typography
                               sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
                               noWrap
                             >
-                              № {nextDevice.serialNumber}
+                              № {nextDevice.serialNumber.toUpperCase() || '—'}
                             </Typography>
                             <Typography
                               sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
                             >
                               {getControlPrefix(nextDevice.controlType)}{' '}
                               {formatLabelDate(nextDevice.validUntil)}
+                              {' г.'}
                             </Typography>
                           </Box>
                         ) : (
@@ -469,7 +471,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                           }}
                           noWrap
                         >
-                          Зав.№ {device.serialNumber}
+                          Зав.№ {device.serialNumber.toUpperCase() || '—'}
                         </Typography>
                       </Box>
 
@@ -487,7 +489,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                             }}
                             noWrap
                           >
-                            Зав.№ {nextDevice.serialNumber}
+                            Зав.№ {nextDevice.serialNumber.toUpperCase() || '—'}
                           </Typography>
                         </Box>
                       )}
@@ -503,10 +505,10 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
 
                   const getControlPrefix = (controlName?: string | null) => {
                     const name = controlName?.toLowerCase() || '';
-                    if (name.includes('калибр')) return 'Калибровано до:';
+                    if (name.includes('калибр')) return 'Калибровано до';
                     if (name.includes('осмотр') || name.includes('инспек'))
-                      return 'Осмотрено до:';
-                    return 'Поверено до:';
+                      return 'Осмотрено до';
+                    return 'Поверено до';
                   };
 
                   const getLabelContainerStyles = (
@@ -578,7 +580,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                                 }}
                                 noWrap
                               >
-                                Мод: {device.model || '—'}
+                                Тип: {device.model || '—'}
                               </Typography>
                               <Typography
                                 sx={{
@@ -674,7 +676,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                           <Typography
                             sx={{ fontSize: '7pt', color: 'text.secondary' }}
                           >
-                            Мод: {device.model || '—'}
+                            Тип: {device.model || '—'}
                           </Typography>
                           <Typography
                             sx={{
