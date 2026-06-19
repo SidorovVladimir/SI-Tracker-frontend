@@ -11,7 +11,7 @@ interface DeviceManageSidebarProps {
   >;
   selectedDeviceId: string | null;
   setSelectedDeviceId: React.Dispatch<React.SetStateAction<string | null>>;
-  refetchTable: () => void; // 🎯 Функция обновления данных в главной таблице
+  refetchTable: () => void;
 }
 
 export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
@@ -55,14 +55,12 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
             bottom: 0,
             display: 'flex',
             flexDirection: 'column',
-            borderRadius: { xs: 0, md: 3 }, // Круглые углы только на десктопе
+            borderRadius: { xs: 0, md: 3 },
             boxShadow: 4,
             bgcolor: 'background.paper',
             border: '1px solid',
             borderColor: 'divider',
 
-            //  ИСПРАВЛЕНИЕ: На мобилках (xs) делаем верхний внутренний отступ 64px (высота NavBar),
-            // чтобы шапка карточки не уезжала под край экрана. На ПК (md) оставляем стандартные 24px (p: 3).
             pt: { xs: '64px', md: 3 },
             pl: 3,
             pr: 3,

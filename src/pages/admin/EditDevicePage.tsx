@@ -62,6 +62,7 @@ import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocom
 import MeasurementAutocomplete from '../../components/MeasurementAutocomplete';
 import VerificationOrganizationTextField from '../../components/VerificationOrganizationTextField';
 import MetrologyControlTypeTextField from '../../components/MetrologyControlTypeTextField';
+import { toCapital } from '../../utils/capitalize';
 
 export default function EditDevicePage(props: {
   deviceId: string;
@@ -221,7 +222,7 @@ function UserForm({
     scopes: { id: string; name: string }[];
     primaryStandarts: { id: string; name: string }[];
   }>({
-    name: device?.name?.toUpperCase() ?? '',
+    name: device?.name ? toCapital(device.name) : '',
     model: device?.model?.toUpperCase() ?? '',
     serialNumber: device?.serialNumber?.toUpperCase() ?? '',
     releaseDate: device.releaseDate
@@ -244,10 +245,10 @@ function UserForm({
           .toISOString()
           .split('T')[0]
       : '',
-    manufacturer: device.manufacturer?.toUpperCase() || '',
+    manufacturer: device?.manufacturer ? toCapital(device.manufacturer) : '',
     verificationInterval: device.verificationInterval || '',
     archived: device.archived,
-    nomenclature: device?.nomenclature?.toUpperCase() ?? '',
+    nomenclature: device?.nomenclature ? toCapital(device.nomenclature) : '',
     comment: device.comment || '',
     statusId: device.status.id || '',
     productionSiteId: device.productionSite.id || '',

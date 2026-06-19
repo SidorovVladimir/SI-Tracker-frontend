@@ -2,6 +2,7 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { Box, TextField, Tooltip, IconButton, MenuItem } from '@mui/material';
 import { useState } from 'react';
 import MetrologyControlTypeModal from './modals/MetrologyControlTypeModal';
+import { toCapital } from '../utils/capitalize';
 
 export default function MetrologyControlTypeTextField({
   value,
@@ -27,7 +28,7 @@ export default function MetrologyControlTypeTextField({
         {metrologyControlTypeList.map(
           ({ id, name }: { id: string; name: string }) => (
             <MenuItem key={id} value={id}>
-              {name.toUpperCase()}
+              {toCapital(name)}
             </MenuItem>
           )
         )}

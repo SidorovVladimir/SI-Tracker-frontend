@@ -24,6 +24,7 @@ import {
   Badge,
   Checkbox,
   Divider,
+  MenuItem,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
@@ -44,6 +45,7 @@ import {
 import React from 'react';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
+import { toCapital } from '../utils/capitalize';
 
 type Device =
   GetDevicesWithRelationsListQuery['devicesWithRelations']['items'][0];
@@ -305,53 +307,62 @@ export default function DevicesPage() {
       field: 'city',
       headerName: 'Город',
       flex: 1,
-      minWidth: 100,
-      valueGetter: (_, row) =>
-        row?.productionSite?.city?.name?.toUpperCase() ?? '-',
+      minWidth: 120,
+      valueGetter: (_, row) => {
+        const name = row?.productionSite?.city?.name;
+        return name ? toCapital(name) : '—';
+      },
     },
     {
       field: 'company',
       headerName: 'Организация',
       flex: 1,
       minWidth: 160,
-      valueGetter: (_, row) =>
-        row?.productionSite?.company?.name.toUpperCase() ?? '-',
+      valueGetter: (_, row) => {
+        const name = row?.productionSite?.company?.name;
+        return name ? toCapital(name) : '—';
+      },
     },
     {
       field: 'productionSite',
       headerName: 'Подразделение',
       flex: 1,
-      minWidth: 160,
-      valueGetter: (_, row) => row?.productionSite?.name?.toUpperCase() ?? '-',
+      minWidth: 180,
+      valueGetter: (_, row) => {
+        const name = row?.productionSite?.name;
+        return name ? toCapital(name) : '—';
+      },
     },
     {
       field: 'name',
       headerName: 'Наименование',
       flex: 1,
       minWidth: 200,
-      valueFormatter: (_, value) => value?.name?.toUpperCase() ?? '-',
+      valueGetter: (_, row) => {
+        return row?.name ? toCapital(row.name) : '—';
+      },
     },
     {
       field: 'model',
       headerName: 'Тип СИ',
       flex: 1,
       minWidth: 120,
-      valueFormatter: (_, value) => value?.model?.toUpperCase() ?? '-',
+      // Модели и типы приборов (например, МП4-У, ТРМ101) лучше оставлять Капсом
+      valueGetter: (_, row) => row?.model?.toUpperCase() ?? '—',
     },
     {
       field: 'serialNumber',
       headerName: 'Заводской номер',
       flex: 1,
       minWidth: 130,
-      valueFormatter: (_, value) => value?.serialNumber?.toUpperCase() ?? '-',
+      valueGetter: (_, row) => row?.serialNumber?.toUpperCase() ?? '—',
     },
     {
       field: 'inventoryNumber',
       headerName: 'Инвентарный номер',
       flex: 1,
       minWidth: 130,
-      valueFormatter: (_, value) =>
-        value?.inventoryNumber?.toUpperCase() ?? '-',
+      valueGetter: (_, row) => row?.inventoryNumber?.toUpperCase() ?? '—',
     },
     {
       field: 'verificationDate',
@@ -359,7 +370,7 @@ export default function DevicesPage() {
       flex: 1,
       minWidth: 130,
       valueGetter: (_, row) =>
-        row.latestVerification ? formatDate(row.latestVerification.date) : '-',
+        row.latestVerification ? formatDate(row.latestVerification.date) : '—',
     },
     {
       field: 'verificationNextDate',
@@ -369,30 +380,34 @@ export default function DevicesPage() {
       valueGetter: (_, row) =>
         row.latestVerification
           ? formatDate(row.latestVerification.validUntil)
-          : '-',
+          : '—',
     },
     {
       field: 'metrologyControlType',
       headerName: 'Вид контроля',
       flex: 1,
       minWidth: 140,
-      valueGetter: (_, row) =>
-        row?.latestVerification?.metrologyControleType?.name?.toUpperCase() ??
-        '-',
+      valueGetter: (_, row) => {
+        const name = row?.latestVerification?.metrologyControleType?.name;
+        return name ? toCapital(name) : '—';
+      },
     },
     {
       field: 'status',
       headerName: 'Состояние',
       flex: 1,
       minWidth: 120,
-      valueGetter: (_, row) => row?.status?.name?.toUpperCase() ?? '-',
+      valueGetter: (_, row) => {
+        const name = row?.status?.name;
+        return name ? toCapital(name) : '—';
+      },
     },
     {
       field: 'grsiNumber',
       headerName: 'Госреестр',
       flex: 1,
       minWidth: 130,
-      valueFormatter: (value) => (value ? value : '-'),
+      valueGetter: (_, row) => row?.grsiNumber ?? '—',
     },
     {
       field: 'certificate',
@@ -400,21 +415,24 @@ export default function DevicesPage() {
       flex: 1,
       minWidth: 130,
       valueGetter: (_, row) =>
-        row?.latestVerification?.protocolNumber?.toUpperCase() ?? '-',
+        row?.latestVerification?.protocolNumber?.toUpperCase() ?? '—',
     },
     {
       field: 'releaseDate',
       headerName: 'Дата производства',
       flex: 1,
       minWidth: 130,
-      valueFormatter: (value) => (value ? formatDate(value) : '-'),
+      valueGetter: (_, row) =>
+        row?.releaseDate ? formatDate(row.releaseDate) : '—',
     },
     {
       field: 'manufacturer',
       headerName: 'Изготовитель',
       flex: 1,
       minWidth: 160,
-      valueFormatter: (_, value) => value?.manufacturer?.toUpperCase() || '-',
+      valueGetter: (_, row) => {
+        return row?.manufacturer ? toCapital(row.manufacturer) : '—';
+      },
     },
   ];
 
@@ -556,11 +574,15 @@ export default function DevicesPage() {
                       width: isMobileOrLaptop ? 280 : 'auto',
                     }}
                   >
+                    {/* 🏙️ ГОРОД */}
                     <TextField
                       label="Город"
                       size="small"
                       select
-                      slotProps={{ select: { native: true } }}
+                      slotProps={{
+                        select: { native: true },
+                        inputLabel: { shrink: true },
+                      }}
                       value={filters.city}
                       onChange={(e) =>
                         handleFilterChange('city', e.target.value)
@@ -568,19 +590,22 @@ export default function DevicesPage() {
                       fullWidth={isMobileOrLaptop}
                       sx={{ minWidth: 150 }}
                     >
-                      <option value=""></option>
+                      <option value="">Все города</option>
                       {cities.map((city: any) => (
                         <option key={city.id || city.name} value={city.name}>
-                          {city.name}
+                          {toCapital(city.name)}
                         </option>
                       ))}
                     </TextField>
-
+                    {/* 🏢 ОРГАНИЗАЦИЯ */}
                     <TextField
                       label="Организация"
                       size="small"
                       select
-                      slotProps={{ select: { native: true } }}
+                      slotProps={{
+                        select: { native: true },
+                        inputLabel: { shrink: true },
+                      }}
                       value={filters.company}
                       onChange={(e) =>
                         handleFilterChange('company', e.target.value)
@@ -588,22 +613,25 @@ export default function DevicesPage() {
                       fullWidth={isMobileOrLaptop}
                       sx={{ minWidth: 150 }}
                     >
-                      <option value=""></option>
+                      <option value="">Все организации</option>
                       {companies.map((company: any) => (
                         <option
                           key={company.id || company.name}
                           value={company.name}
                         >
-                          {company.name}
+                          {toCapital(company.name)}
                         </option>
                       ))}
                     </TextField>
-
+                    {/* 🏭 ПОДРАЗДЕЛЕНИЕ */}
                     <TextField
                       label="Подразделение"
                       size="small"
                       select
-                      slotProps={{ select: { native: true } }}
+                      slotProps={{
+                        select: { native: true },
+                        inputLabel: { shrink: true },
+                      }}
                       value={filters.productionSite}
                       onChange={(e) =>
                         handleFilterChange('productionSite', e.target.value)
@@ -614,14 +642,14 @@ export default function DevicesPage() {
                         maxWidth: isMobileOrLaptop ? 'none' : 200,
                       }}
                     >
-                      <option value=""></option>
+                      <option value="">Все подразделения</option>
                       {productionSite.map((name) => (
                         <option key={name} value={name}>
-                          {name}
+                          {toCapital(name)}
                         </option>
                       ))}
                     </TextField>
-
+                    {/* 🔍 НАИМЕНОВАНИЕ */}
                     <TextField
                       label="Наименование"
                       size="small"
@@ -631,7 +659,7 @@ export default function DevicesPage() {
                         handleFilterChange('deviceName', e.target.value)
                       }
                     />
-
+                    {/* 🔢 ЗАВОДСКОЙ НОМЕР */}
                     <TextField
                       label="Заводской номер"
                       size="small"
@@ -645,12 +673,15 @@ export default function DevicesPage() {
                         maxWidth: isMobileOrLaptop ? 'none' : 150,
                       }}
                     />
-
+                    {/* 🛡️ ВИД КОНТРОЛЯ */}
                     <TextField
                       label="Вид контроля"
                       size="small"
                       select
-                      slotProps={{ select: { native: true } }}
+                      slotProps={{
+                        select: { native: true },
+                        inputLabel: { shrink: true },
+                      }}
                       value={filters.metrologyControle}
                       onChange={(e) =>
                         handleFilterChange('metrologyControle', e.target.value)
@@ -661,19 +692,22 @@ export default function DevicesPage() {
                         maxWidth: isMobileOrLaptop ? 'none' : 150,
                       }}
                     >
-                      <option value=""></option>
+                      <option value="">Все виды контроля</option>
                       {metrologyControleTypes.map((type: any) => (
                         <option key={type.id || type.name} value={type.name}>
-                          {type.name}
+                          {toCapital(type.name)}
                         </option>
                       ))}
                     </TextField>
-
+                    {/* 📊 СТАТУС */}
                     <TextField
                       label="Статус"
                       size="small"
                       select
-                      slotProps={{ select: { native: true } }}
+                      slotProps={{
+                        select: { native: true },
+                        inputLabel: { shrink: true },
+                      }}
                       value={filters.status}
                       onChange={(e) =>
                         handleFilterChange('status', e.target.value)
@@ -684,17 +718,17 @@ export default function DevicesPage() {
                         maxWidth: isMobileOrLaptop ? 'none' : 150,
                       }}
                     >
-                      <option value=""></option>
+                      <option value="">Все статусы</option>
                       {statuses.map((status: any) => (
                         <option
                           key={status.id || status.name}
                           value={status.name}
                         >
-                          {status.name}
+                          {toCapital(status.name)}
                         </option>
                       ))}
                     </TextField>
-
+                    {/* 📅 СРОК ДЕЙСТВИЯ С... */}
                     <TextField
                       label="Срок действия с..."
                       size="small"
@@ -708,7 +742,7 @@ export default function DevicesPage() {
                         handleFilterChange('dateStart', e.target.value)
                       }
                     />
-
+                    {/* 📅 СРОК ДЕЙСТВИЯ ДО... */}
                     <TextField
                       label="Срок действия до..."
                       size="small"
@@ -722,7 +756,6 @@ export default function DevicesPage() {
                         handleFilterChange('dateEnd', e.target.value)
                       }
                     />
-
                     <Button
                       color="error"
                       onClick={resetFilters}
@@ -892,156 +925,137 @@ export default function DevicesPage() {
                   width: 'auto',
                 }}
               >
+                {/* 🏙️ ГОРОД */}
                 <TextField
                   label="Город"
                   size="small"
                   select
-                  slotProps={{
-                    select: { native: true },
-                    inputLabel: { shrink: filters.city !== '' },
-                  }}
                   value={filters.city}
                   onChange={(e) => handleFilterChange('city', e.target.value)}
                   sx={{ minWidth: 150 }}
                 >
-                  <option value=""></option>
+                  <MenuItem value="">
+                    <em>Все города</em>
+                  </MenuItem>
                   {cities.map((city: any) => (
-                    <option key={city.id || city.name} value={city.name}>
-                      {city.name}
-                    </option>
+                    <MenuItem key={city.id || city.name} value={city.name}>
+                      {toCapital(city.name)}
+                    </MenuItem>
                   ))}
                 </TextField>
 
+                {/* 🏢 ОРГАНИЗАЦИЯ */}
                 <TextField
                   label="Организация"
                   size="small"
                   select
-                  slotProps={{
-                    select: { native: true },
-                    inputLabel: { shrink: filters.company !== '' },
-                  }}
                   value={filters.company}
                   onChange={(e) =>
                     handleFilterChange('company', e.target.value)
                   }
-                  sx={{ minWidth: 150, maxWidth: 160 }}
+                  sx={{ minWidth: 160, maxWidth: 200 }} // Немного увеличили ширину, чтобы длинные названия не сжимались
                 >
-                  <option value=""></option>
+                  <MenuItem value="">
+                    <em>Все организации</em>
+                  </MenuItem>
                   {companies.map((company: any) => (
-                    <option
+                    <MenuItem
                       key={company.id || company.name}
                       value={company.name}
                     >
-                      {company.name}
-                    </option>
+                      {/* Используем исходный вид или toCapital, чтобы уйти от тяжелого ТОЛЬКО КАПСА */}
+                      {toCapital(company.name)}
+                    </MenuItem>
                   ))}
                 </TextField>
 
+                {/* 🏭 ПОДРАЗДЕЛЕНИЕ */}
                 <TextField
                   label="Подразделение"
                   size="small"
                   select
-                  slotProps={{
-                    select: { native: true },
-                    inputLabel: { shrink: filters.productionSite !== '' },
-                  }}
                   value={filters.productionSite}
                   onChange={(e) =>
                     handleFilterChange('productionSite', e.target.value)
                   }
-                  sx={{
-                    minWidth: 150,
-                    maxWidth: 170,
-                  }}
+                  sx={{ minWidth: 170, maxWidth: 220 }}
                 >
-                  <option value=""></option>
+                  <MenuItem value="">
+                    <em>Все подразделения</em>
+                  </MenuItem>
                   {productionSite.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
+                    <MenuItem key={name} value={name}>
+                      {toCapital(name)}
+                    </MenuItem>
                   ))}
                 </TextField>
 
+                {/* 🔍 НАИМЕНОВАНИЕ */}
                 <TextField
                   label="Наименование"
                   size="small"
-                  slotProps={{
-                    inputLabel: { shrink: filters.deviceName !== '' },
-                  }}
                   value={filters.deviceName}
                   onChange={(e) =>
                     handleFilterChange('deviceName', e.target.value)
                   }
-                  sx={{
-                    minWidth: 150,
-                    maxWidth: 170,
-                  }}
+                  sx={{ minWidth: 150, maxWidth: 180 }}
                 />
 
+                {/* 🔢 ЗАВОДСКОЙ НОМЕР */}
                 <TextField
                   label="Заводской номер"
                   size="small"
-                  slotProps={{
-                    inputLabel: { shrink: filters.serialNumber !== '' },
-                  }}
                   value={filters.serialNumber}
                   onChange={(e) =>
                     handleFilterChange('serialNumber', e.target.value)
                   }
-                  sx={{
-                    minWidth: 130,
-                    maxWidth: 150,
-                  }}
+                  sx={{ minWidth: 130, maxWidth: 160 }}
                 />
 
+                {/* 🛡️ ВИД КОНТРОЛЯ */}
                 <TextField
                   label="Вид контроля"
                   size="small"
                   select
-                  slotProps={{
-                    select: { native: true },
-                    inputLabel: { shrink: filters.metrologyControle !== '' },
-                  }}
                   value={filters.metrologyControle}
                   onChange={(e) =>
                     handleFilterChange('metrologyControle', e.target.value)
                   }
-                  sx={{
-                    minWidth: 130,
-                    maxWidth: 150,
-                  }}
+                  sx={{ minWidth: 150, maxWidth: 180 }}
                 >
-                  <option value=""></option>
+                  <MenuItem value="">
+                    <em>Все виды контроля</em>
+                  </MenuItem>
                   {metrologyControleTypes.map((type: any) => (
-                    <option key={type.id || type.name} value={type.name}>
-                      {type.name}
-                    </option>
+                    <MenuItem key={type.id || type.name} value={type.name}>
+                      {toCapital(type.name)}
+                    </MenuItem>
                   ))}
                 </TextField>
 
+                {/* 📊 СТАТУС */}
                 <TextField
                   label="Статус"
                   size="small"
                   select
-                  slotProps={{
-                    select: { native: true },
-                    inputLabel: { shrink: filters.status !== '' },
-                  }}
                   value={filters.status}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
-                  sx={{
-                    minWidth: 130,
-                    maxWidth: 150,
-                  }}
+                  sx={{ minWidth: 130, maxWidth: 160 }}
                 >
-                  <option value=""></option>
+                  <MenuItem value="">
+                    <em>Все статусы</em>
+                  </MenuItem>
                   {statuses.map((status: any) => (
-                    <option key={status.id || status.name} value={status.name}>
-                      {status.name}
-                    </option>
+                    <MenuItem
+                      key={status.id || status.name}
+                      value={status.name}
+                    >
+                      {toCapital(status.name)}
+                    </MenuItem>
                   ))}
                 </TextField>
 
+                {/* 📅 СРОК ДЕЙСТВИЯ С... */}
                 <TextField
                   label="Срок действия с..."
                   size="small"
@@ -1053,8 +1067,10 @@ export default function DevicesPage() {
                   onChange={(e) =>
                     handleFilterChange('dateStart', e.target.value)
                   }
+                  sx={{ minWidth: 140 }}
                 />
 
+                {/* 📅 СРОК ДЕЙСТВИЯ ДО... */}
                 <TextField
                   label="Срок действия до..."
                   size="small"
@@ -1066,6 +1082,7 @@ export default function DevicesPage() {
                   onChange={(e) =>
                     handleFilterChange('dateEnd', e.target.value)
                   }
+                  sx={{ minWidth: 140 }}
                 />
 
                 <Button color="error" onClick={resetFilters}>

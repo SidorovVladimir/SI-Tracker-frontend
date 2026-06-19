@@ -2,6 +2,7 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { Box, TextField, Tooltip, IconButton, MenuItem } from '@mui/material';
 import { useState } from 'react';
 import EquipmentModal from './modals/EquipmentModal';
+import { toCapital } from '../utils/capitalize';
 
 export default function EquipmentTextField({
   value,
@@ -9,6 +10,7 @@ export default function EquipmentTextField({
   equipmentTypesList,
 }: any) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <TextField
@@ -27,7 +29,7 @@ export default function EquipmentTextField({
         {equipmentTypesList.map(
           ({ id, name }: { id: string; name: string }) => (
             <MenuItem key={id} value={id}>
-              {name.toUpperCase()}
+              {toCapital(name)}
             </MenuItem>
           )
         )}

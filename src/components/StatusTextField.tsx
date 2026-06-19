@@ -2,6 +2,7 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { Box, TextField, Tooltip, IconButton, MenuItem } from '@mui/material';
 import { useState } from 'react';
 import StatusModal from './modals/StatusModal';
+import { toCapital } from '../utils/capitalize';
 
 export default function StatusTextField({
   value,
@@ -24,7 +25,7 @@ export default function StatusTextField({
       >
         {statusesList.map(({ id, name }: { id: string; name: string }) => (
           <MenuItem key={id} value={id}>
-            {name.toUpperCase()}
+            {toCapital(name)}
           </MenuItem>
         ))}
       </TextField>

@@ -2,6 +2,7 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { Box, TextField, Tooltip, IconButton, MenuItem } from '@mui/material';
 import { useState } from 'react';
 import ProductionSiteModal from './modals/ProductionSiteModal';
+import { toCapital } from '../utils/capitalize';
 
 export default function ProductionSiteTextField({
   value,
@@ -25,7 +26,7 @@ export default function ProductionSiteTextField({
         {productionSiteList.map(
           ({ id, name }: { id: string; name: string }) => (
             <MenuItem key={id} value={id}>
-              {name.toUpperCase()}
+              {toCapital(name)}
             </MenuItem>
           )
         )}

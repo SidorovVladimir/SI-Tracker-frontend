@@ -395,7 +395,6 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                           >
                             {getControlPrefix(device.controlType)}{' '}
                             {formatLabelDate(device.validUntil)}
-                            {' г.'}
                           </Typography>
                         </Box>
 
@@ -433,7 +432,6 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                             >
                               {getControlPrefix(nextDevice.controlType)}{' '}
                               {formatLabelDate(nextDevice.validUntil)}
-                              {' г.'}
                             </Typography>
                           </Box>
                         ) : (

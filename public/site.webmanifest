@@ -1,6 +1,6 @@
 {
-  "name": "SI-Tracker",
-  "short_name": "SI-Tracker",
+ "name": "Система учета СИ «Эталон-Трекер»",
+  "short_name": "Эталон-Трекер",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import ScopeModal from './modals/ScopeModal';
+import { toCapital } from '../utils/capitalize';
 
 export default function ScopeAutocomplete({
   value,
@@ -22,10 +23,18 @@ export default function ScopeAutocomplete({
         fullWidth // Чтобы поле занимало всё доступное место в Box
         multiple
         options={scopesList}
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={(option) => toCapital(option.name)}
         value={value}
         onChange={onChange}
         isOptionEqualToValue={(option, value) => option.id === value.id}
+        renderOption={(props, option) => {
+          const { key, ...optionProps } = props;
+          return (
+            <li key={key} {...optionProps}>
+              {toCapital(option.name)}
+            </li>
+          );
+        }}
         renderInput={(params) => (
           <TextField
             {...params}

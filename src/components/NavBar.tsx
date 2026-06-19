@@ -154,8 +154,9 @@ export default function NavBar() {
                 flexGrow: 1,
                 textDecoration: 'none',
                 color: 'inherit',
-                fontWeight: 700,
-                fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                fontWeight: 800,
+                letterSpacing: { xs: '0.5px', sm: '2px' },
+                fontSize: { xs: '1rem', sm: '1.25rem' },
                 display: 'inline-block',
                 width: 'fit-content',
                 cursor: 'pointer',
@@ -167,7 +168,25 @@ export default function NavBar() {
                 },
               }}
             >
-              SI-Tracker
+              ЭТАЛОН
+              <Box
+                component="span"
+                sx={{
+                  color: 'primary.main',
+                  display: { xs: 'none', sm: 'inline' },
+                }}
+              >
+                -ТРЕКЕР
+              </Box>
+              <Box
+                component="span"
+                sx={{
+                  color: 'primary.main',
+                  display: { xs: 'inline', sm: 'none' },
+                }}
+              >
+                ·Т
+              </Box>
             </Typography>
           </Tooltip>
 
