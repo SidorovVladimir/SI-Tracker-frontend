@@ -1318,7 +1318,9 @@ export default function DevicesPage() {
                                         )
                                           return `${prefix}Осмотр: до ${dateStr}`;
                                         if (typeName)
-                                          return `${prefix}${typeName}: до ${dateStr}`;
+                                          return `${prefix}${toCapital(
+                                            typeName
+                                          )}: до ${dateStr}`;
                                         return `${prefix}до ${dateStr}`;
                                       })()
                                     : '—'}

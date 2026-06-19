@@ -34,6 +34,7 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
+import { toCapital } from '../../utils/capitalize';
 
 export default function EquipmentTypesPage() {
   const { data, loading, refetch } = useQuery(GetEquipmentTypesListDocument);
@@ -116,7 +117,7 @@ export default function EquipmentTypesPage() {
             <Card key={eq.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {eq.name.toUpperCase()}
+                  {toCapital(eq.name)}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -169,7 +170,7 @@ export default function EquipmentTypesPage() {
             <TableBody>
               {equipmentTypes.map((eq) => (
                 <TableRow key={eq.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{eq.name.toUpperCase()}</TableCell>
+                  <TableCell>{toCapital(eq.name)}</TableCell>
                   <TableCell>{formatDate(eq.createdAt)}</TableCell>
                   <TableCell>{formatDate(eq.updatedAt)}</TableCell>
                   <TableCell align="right">

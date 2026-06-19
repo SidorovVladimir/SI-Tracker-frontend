@@ -8,7 +8,6 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import PrimaryStandartModal from './modals/PrimaryStandartModal';
-import { toCapital } from '../utils/capitalize';
 
 export default function PrimaryStandartAutocomplete({
   value,
@@ -23,7 +22,7 @@ export default function PrimaryStandartAutocomplete({
         fullWidth // Чтобы поле занимало всё доступное место в Box
         multiple
         options={primaryStandartsList}
-        getOptionLabel={(option) => toCapital(option.name)}
+        getOptionLabel={(option) => option.name.toUpperCase()}
         value={value}
         onChange={onChange}
         isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -31,7 +30,7 @@ export default function PrimaryStandartAutocomplete({
           const { key, ...optionProps } = props;
           return (
             <li key={key} {...optionProps}>
-              {toCapital(option.name)}
+              {option.name.toUpperCase()}
             </li>
           );
         }}

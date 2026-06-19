@@ -34,6 +34,7 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
+import { toCapital } from '../../utils/capitalize';
 
 export default function ProductionSitesPage() {
   const { data, loading, refetch } = useQuery(
@@ -118,7 +119,7 @@ export default function ProductionSitesPage() {
             <Card key={p.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {p.name.toUpperCase()}
+                  {toCapital(p.name)}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -171,7 +172,7 @@ export default function ProductionSitesPage() {
             <TableBody>
               {productionSites.map((p) => (
                 <TableRow key={p.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{p.name.toUpperCase()}</TableCell>
+                  <TableCell>{toCapital(p.name)}</TableCell>
                   <TableCell>{formatDate(p.createdAt)}</TableCell>
                   <TableCell>{formatDate(p.updatedAt)}</TableCell>
                   <TableCell align="right">
