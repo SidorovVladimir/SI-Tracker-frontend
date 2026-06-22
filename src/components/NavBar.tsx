@@ -405,6 +405,13 @@ export default function NavBar() {
                 )}
                 {/* <MenuItem
                   component={Link}
+                  to={routes.help()}
+                  onClick={handleClose}
+                >
+                  <ListItemText>Справка</ListItemText>
+                </MenuItem> */}
+                {/* <MenuItem
+                  component={Link}
                   to={routes.about()}
                   onClick={handleClose}
                 >

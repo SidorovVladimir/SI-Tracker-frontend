@@ -7,7 +7,7 @@ import { useApolloClient } from '@apollo/client/react';
 import {
   GetChatDialogsDocument,
   GetSystemNotificationsDocument,
-  // GetTotalUnreadCountDocument,
+  GetTotalUnreadCountDocument,
   GetUnreadNotificationsCountDocument,
   GetVerificationBatchesDocument,
 } from '../graphql/types/__generated__/graphql';
@@ -111,9 +111,25 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       autoConnect: true,
     });
 
-    socketInstance.on('connect', () => {
+    socketInstance.on('connect', async () => {
       setIsConnected(true);
       // console.log('📡 Веб-сокет успешно подключен!');
+      try {
+        // Запрашиваем актуальное количество непрочитанных из базы данных через GraphQL
+        const result = await client.query({
+          query: GetTotalUnreadCountDocument,
+          fetchPolicy: 'network-only', // Игнорируем кэш, берем строго свежие данные с бэка
+        });
+
+        // Записываем полученное число в стейт контекста
+        const count = result.data?.getTotalUnreadCount ?? 0;
+        setUnreadChatCount(count);
+      } catch (err) {
+        console.error(
+          'Ошибка первоначального получения unread count после коннекта:',
+          err
+        );
+      }
     });
 
     socketInstance.on('disconnect', () => {
