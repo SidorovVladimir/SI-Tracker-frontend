@@ -22,6 +22,25 @@ export default function ProductionSiteTextField({
         onChange={onChange}
         value={value}
         required
+        slotProps={{
+          select: {
+            MenuProps: {
+              PaperProps: {
+                sx: {
+                  maxHeight: { xs: 250, md: 500 },
+
+                  '&::-webkit-scrollbar': {
+                    width: '4px',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(0,0,0,0.16)',
+                    borderRadius: '4px',
+                  },
+                },
+              },
+            },
+          },
+        }}
         sx={{
           '& .MuiInputBase-input': {
             textTransform: 'uppercase',
@@ -41,6 +60,10 @@ export default function ProductionSiteTextField({
                 fontSize: '0.77rem',
                 letterSpacing: '0.55px',
                 fontWeight: 500,
+                whiteSpace: 'normal', // Разрешаем тексту занимать несколько строк
+                wordBreak: 'break-word',
+                lineHeight: 1.3,
+                py: 1,
               }}
             >
               {cleanSpaces(name)}

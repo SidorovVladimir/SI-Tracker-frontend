@@ -22,6 +22,25 @@ export default function EquipmentTextField({
         fullWidth
         onChange={onChange}
         value={value}
+        slotProps={{
+          select: {
+            MenuProps: {
+              PaperProps: {
+                sx: {
+                  maxHeight: { xs: 250, md: 500 },
+
+                  '&::-webkit-scrollbar': {
+                    width: '4px',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(0,0,0,0.16)',
+                    borderRadius: '4px',
+                  },
+                },
+              },
+            },
+          },
+        }}
         sx={{
           '& .MuiInputBase-input': {
             textTransform: 'uppercase',
