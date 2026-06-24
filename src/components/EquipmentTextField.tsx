@@ -2,7 +2,7 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { Box, TextField, Tooltip, IconButton, MenuItem } from '@mui/material';
 import { useState } from 'react';
 import EquipmentModal from './modals/EquipmentModal';
-import { toCapital } from '../utils/capitalize';
+import { cleanSpaces } from '../utils/capitalize';
 
 export default function EquipmentTextField({
   value,
@@ -22,14 +22,31 @@ export default function EquipmentTextField({
         fullWidth
         onChange={onChange}
         value={value}
+        sx={{
+          '& .MuiInputBase-input': {
+            textTransform: 'uppercase',
+            fontSize: '0.8rem',
+            letterSpacing: '0.6px',
+            fontWeight: 500,
+          },
+        }}
       >
         <MenuItem value="">
           <em>Не выбрано</em>
         </MenuItem>
         {equipmentTypesList.map(
           ({ id, name }: { id: string; name: string }) => (
-            <MenuItem key={id} value={id}>
-              {toCapital(name)}
+            <MenuItem
+              key={id}
+              value={id}
+              sx={{
+                textTransform: 'uppercase',
+                fontSize: '0.77rem',
+                letterSpacing: '0.55px',
+                fontWeight: 500,
+              }}
+            >
+              {cleanSpaces(name)}
             </MenuItem>
           )
         )}

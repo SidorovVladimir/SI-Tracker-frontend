@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import PrimaryStandartModal from './modals/PrimaryStandartModal';
+import { cleanSpaces } from '../utils/capitalize';
 
 export default function PrimaryStandartAutocomplete({
   value,
@@ -18,19 +19,39 @@ export default function PrimaryStandartAutocomplete({
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Autocomplete
-        sx={{ minWidth: 0 }}
+        sx={{
+          minWidth: 0,
+          '& .MuiInputBase-input, & .MuiChip-label': {
+            textTransform: 'uppercase',
+            fontSize: '0.8rem',
+            letterSpacing: '0.6px',
+            fontWeight: 500,
+          },
+          '& .MuiChip-root': {
+            height: 24,
+          },
+        }}
         fullWidth // Чтобы поле занимало всё доступное место в Box
         multiple
         options={primaryStandartsList}
-        getOptionLabel={(option) => option.name.toUpperCase()}
+        getOptionLabel={(option) => cleanSpaces(option.name)}
         value={value}
         onChange={onChange}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         renderOption={(props, option) => {
           const { key, ...optionProps } = props;
           return (
-            <li key={key} {...optionProps}>
-              {option.name.toUpperCase()}
+            <li
+              key={key}
+              {...optionProps}
+              style={{
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              }}
+            >
+              {cleanSpaces(option.name)}
             </li>
           );
         }}

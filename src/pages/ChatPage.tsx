@@ -31,6 +31,7 @@ import {
 import { useSocketApp } from '../context/SocketContext';
 import { useAuth } from '../hooks/useAuth';
 import { Chat, People } from '@mui/icons-material';
+import { toCapital } from '../utils/capitalize';
 
 interface MessageLocal {
   id: string;
@@ -564,7 +565,9 @@ export const ChatPage: React.FC = () => {
                         </ListItemAvatar>
 
                         <ListItemText
-                          primary={`${u.firstName} ${u.lastName}`}
+                          primary={`${toCapital(u.firstName)} ${toCapital(
+                            u.lastName
+                          )}`}
                           secondary={
                             <Box
                               component="span"
@@ -621,7 +624,7 @@ export const ChatPage: React.FC = () => {
                   color="text.secondary"
                   sx={{ mb: 2 }}
                 >
-                  У вас пока нет active диалогов.
+                  У вас пока нет активных диалогов.
                 </Typography>
                 <Button
                   size="small"
@@ -747,7 +750,10 @@ export const ChatPage: React.FC = () => {
                                 maxWidth: '65%',
                               }}
                             >
-                              {dialog.companionName}
+                              {dialog.companionName
+                                .split(' ')
+                                .map((val) => toCapital(val))
+                                .join(' ')}
                             </Typography>
 
                             {/* Текстовый индикатор статуса рядом с именем */}
@@ -890,7 +896,10 @@ export const ChatPage: React.FC = () => {
                           variant="subtitle1"
                           sx={{ fontWeight: 'bold', lineHeight: 1.2 }}
                         >
-                          {activeCompanionName}
+                          {activeCompanionName
+                            .split(' ')
+                            .map((val) => toCapital(val))
+                            .join(' ')}
                         </Typography>
                         <Typography
                           variant="caption"

@@ -34,7 +34,7 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
-import { toCapital } from '../../utils/capitalize';
+import { cleanSpaces } from '../../utils/capitalize';
 
 export default function MeasurementTypesPage() {
   const { data, loading, refetch } = useQuery(GetMeasurementTypesListDocument);
@@ -118,8 +118,17 @@ export default function MeasurementTypesPage() {
           {measurementTypes.map((m) => (
             <Card key={m.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {toCapital(m.name)}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    letterSpacing: '0.8px',
+                    fontWeight: 700,
+                    color: 'text.primary',
+                  }}
+                >
+                  {cleanSpaces(m.name)}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -171,8 +180,20 @@ export default function MeasurementTypesPage() {
             </TableHead>
             <TableBody>
               {measurementTypes.map((m) => (
-                <TableRow key={m.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{toCapital(m.name)}</TableCell>
+                <TableRow
+                  key={m.id}
+                  hover
+                  sx={{
+                    '& > td': {
+                      py: 1.5,
+                      textTransform: 'uppercase',
+                      fontSize: '0.825rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
+                >
+                  <TableCell>{cleanSpaces(m.name)}</TableCell>
                   <TableCell>{formatDate(m.createdAt)}</TableCell>
                   <TableCell>{formatDate(m.updatedAt)}</TableCell>
                   <TableCell align="right">
@@ -182,15 +203,17 @@ export default function MeasurementTypesPage() {
                       justifyContent="flex-end"
                     >
                       <Tooltip title="Редактировать" arrow>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          disabled={true}
-                          // component={Link}
-                          // to={routes.admin.editProductionSite(eq.id)}
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            disabled={true}
+                            // component={Link}
+                            // to={routes.admin.editProductionSite(eq.id)}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
                         <IconButton

@@ -795,6 +795,16 @@ export type ProductionSiteRelation = {
   name: Scalars['String']['output'];
 };
 
+export type ProductionSiteSelectOption = {
+  __typename: 'ProductionSiteSelectOption';
+  cityId: Scalars['ID']['output'];
+  companyId: Scalars['ID']['output'];
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export type QuantitiveItem = {
   __typename: 'QuantitiveItem';
   count: Scalars['Int']['output'];
@@ -837,8 +847,8 @@ export type Query = {
   metrologyControlTypes: Array<MetrologyControlType>;
   primaryStandart: PrimaryStandart;
   primaryStandarts: Array<PrimaryStandart>;
-  productionSite: ProductionSite;
-  productionSites: Array<ProductionSite>;
+  productionSite: ProductionSiteSelectOption;
+  productionSites: Array<ProductionSiteSelectOption>;
   scope: Scope;
   scopes: Array<Scope>;
   status: Status;
@@ -2235,7 +2245,7 @@ export type GetProductionSitesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetProductionSitesQuery = {
   productionSites: Array<{
-    __typename: 'ProductionSite';
+    __typename: 'ProductionSiteSelectOption';
     id: string;
     name: string;
     cityId: string;

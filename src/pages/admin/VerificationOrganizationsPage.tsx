@@ -34,6 +34,7 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
+import { cleanSpaces } from '../../utils/capitalize';
 
 export default function VerificationOrganizationsPage() {
   const { data, loading, refetch } = useQuery(
@@ -124,8 +125,17 @@ export default function VerificationOrganizationsPage() {
           {verificationOrganizations.map((v) => (
             <Card key={v.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {v.name.toUpperCase()}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    letterSpacing: '0.8px',
+                    fontWeight: 700,
+                    color: 'text.primary',
+                  }}
+                >
+                  {cleanSpaces(v.name)}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -177,8 +187,20 @@ export default function VerificationOrganizationsPage() {
             </TableHead>
             <TableBody>
               {verificationOrganizations.map((v) => (
-                <TableRow key={v.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{v.name.toUpperCase()}</TableCell>
+                <TableRow
+                  key={v.id}
+                  hover
+                  sx={{
+                    '& > td': {
+                      py: 1.5,
+                      textTransform: 'uppercase',
+                      fontSize: '0.825rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
+                >
+                  <TableCell>{cleanSpaces(v.name)}</TableCell>
                   <TableCell>{formatDate(v.createdAt)}</TableCell>
                   <TableCell>{formatDate(v.updatedAt)}</TableCell>
                   <TableCell align="right">
@@ -188,15 +210,17 @@ export default function VerificationOrganizationsPage() {
                       justifyContent="flex-end"
                     >
                       <Tooltip title="Редактировать" arrow>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          disabled={true}
-                          // component={Link}
-                          // to={routes.admin.editCity(c.id)}
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            disabled={true}
+                            // component={Link}
+                            // to={routes.admin.editCity(c.id)}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
                         <IconButton

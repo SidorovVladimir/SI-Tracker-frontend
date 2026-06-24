@@ -34,7 +34,7 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
-import { toCapital } from '../../utils/capitalize';
+import { cleanSpaces } from '../../utils/capitalize';
 
 export default function EquipmentTypesPage() {
   const { data, loading, refetch } = useQuery(GetEquipmentTypesListDocument);
@@ -116,8 +116,17 @@ export default function EquipmentTypesPage() {
           {equipmentTypes.map((eq) => (
             <Card key={eq.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {toCapital(eq.name)}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    letterSpacing: '0.8px',
+                    fontWeight: 700,
+                    color: 'text.primary',
+                  }}
+                >
+                  {cleanSpaces(eq.name)}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -169,8 +178,20 @@ export default function EquipmentTypesPage() {
             </TableHead>
             <TableBody>
               {equipmentTypes.map((eq) => (
-                <TableRow key={eq.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{toCapital(eq.name)}</TableCell>
+                <TableRow
+                  key={eq.id}
+                  hover
+                  sx={{
+                    '& > td': {
+                      py: 1.5,
+                      textTransform: 'uppercase',
+                      fontSize: '0.825rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
+                >
+                  <TableCell>{cleanSpaces(eq.name)}</TableCell>
                   <TableCell>{formatDate(eq.createdAt)}</TableCell>
                   <TableCell>{formatDate(eq.updatedAt)}</TableCell>
                   <TableCell align="right">
@@ -180,15 +201,17 @@ export default function EquipmentTypesPage() {
                       justifyContent="flex-end"
                     >
                       <Tooltip title="Редактировать" arrow>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          disabled={true}
-                          // component={Link}
-                          // to={routes.admin.editProductionSite(eq.id)}
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            disabled={true}
+                            // component={Link}
+                            // to={routes.admin.editProductionSite(eq.id)}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
                         <IconButton

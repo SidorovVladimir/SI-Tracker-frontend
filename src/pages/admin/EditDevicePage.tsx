@@ -62,7 +62,7 @@ import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocom
 import MeasurementAutocomplete from '../../components/MeasurementAutocomplete';
 import VerificationOrganizationTextField from '../../components/VerificationOrganizationTextField';
 import MetrologyControlTypeTextField from '../../components/MetrologyControlTypeTextField';
-import { toCapital } from '../../utils/capitalize';
+import { cleanSpaces } from '../../utils/capitalize';
 
 export default function EditDevicePage(props: {
   deviceId: string;
@@ -222,9 +222,9 @@ function UserForm({
     scopes: { id: string; name: string }[];
     primaryStandarts: { id: string; name: string }[];
   }>({
-    name: device?.name ? toCapital(device.name) : '',
-    model: device?.model?.toUpperCase() ?? '',
-    serialNumber: device?.serialNumber?.toUpperCase() ?? '',
+    name: device?.name || '',
+    model: device?.model || '',
+    serialNumber: device?.serialNumber || '',
     releaseDate: device.releaseDate
       ? new Date(
           new Date(Number(device.releaseDate)).getTime() -
@@ -234,9 +234,9 @@ function UserForm({
           .split('T')[0]
       : '',
     grsiNumber: device.grsiNumber || '',
-    measurementRange: device?.measurementRange?.toUpperCase() ?? '',
+    measurementRange: device?.measurementRange || '',
     accuracy: device?.accuracy?.toUpperCase() ?? '',
-    inventoryNumber: device?.inventoryNumber?.toUpperCase() ?? '',
+    inventoryNumber: device?.inventoryNumber || '',
     receiptDate: device.receiptDate
       ? new Date(
           new Date(Number(device.receiptDate)).getTime() -
@@ -245,10 +245,10 @@ function UserForm({
           .toISOString()
           .split('T')[0]
       : '',
-    manufacturer: device?.manufacturer ? toCapital(device.manufacturer) : '',
+    manufacturer: device?.manufacturer || '',
     verificationInterval: device.verificationInterval || '',
     archived: device.archived,
-    nomenclature: device?.nomenclature ? toCapital(device.nomenclature) : '',
+    nomenclature: device?.nomenclature || '',
     comment: device.comment || '',
     statusId: device.status.id || '',
     productionSiteId: device.productionSite.id || '',
@@ -549,6 +549,18 @@ function UserForm({
             variant="outlined"
             size="small"
             required
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
           <TextField
             label="Модель"
@@ -559,6 +571,18 @@ function UserForm({
             variant="outlined"
             size="small"
             required
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
           <TextField
             label="Заводской номер"
@@ -569,6 +593,18 @@ function UserForm({
             variant="outlined"
             size="small"
             required
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
           <TextField
             label="Номер ГРСИ"
@@ -578,6 +614,18 @@ function UserForm({
             fullWidth
             variant="outlined"
             size="small"
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
           <TextField
             label="Диапазон измерений"
@@ -587,6 +635,18 @@ function UserForm({
             fullWidth
             variant="outlined"
             size="small"
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
 
           <TextField
@@ -597,6 +657,18 @@ function UserForm({
             fullWidth
             variant="outlined"
             size="small"
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
 
           <TextField
@@ -607,6 +679,18 @@ function UserForm({
             fullWidth
             variant="outlined"
             size="small"
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
 
           <TextField
@@ -620,6 +704,18 @@ function UserForm({
             size="small"
             slotProps={{
               inputLabel: { shrink: true },
+            }}
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
             }}
           />
 
@@ -635,6 +731,18 @@ function UserForm({
             slotProps={{
               inputLabel: { shrink: true },
             }}
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
 
           <TextField
@@ -645,6 +753,18 @@ function UserForm({
             fullWidth
             variant="outlined"
             size="small"
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
 
           <TextField
@@ -656,6 +776,18 @@ function UserForm({
             fullWidth
             variant="outlined"
             size="small"
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
 
           <TextField
@@ -666,6 +798,18 @@ function UserForm({
             fullWidth
             variant="outlined"
             size="small"
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           />
           <TextField
             label="Комментарий"
@@ -681,6 +825,12 @@ function UserForm({
             sx={{
               '& .MuiInputBase-root': {
                 fontSize: '0.875rem',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
               },
               mt: 1,
             }}
@@ -780,6 +930,18 @@ function UserForm({
                         slotProps={{
                           inputLabel: { shrink: true },
                         }}
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            paddingTop: '2.5px',
+                            paddingBottom: '2.5px',
+                          },
+                          '& .MuiInputBase-input': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.8rem',
+                            letterSpacing: '0.6px',
+                            fontWeight: 500,
+                          },
+                        }}
                       />
                       <TextField
                         type="date"
@@ -797,6 +959,18 @@ function UserForm({
                         slotProps={{
                           inputLabel: { shrink: true },
                         }}
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            paddingTop: '2.5px',
+                            paddingBottom: '2.5px',
+                          },
+                          '& .MuiInputBase-input': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.8rem',
+                            letterSpacing: '0.6px',
+                            fontWeight: 500,
+                          },
+                        }}
                       />
                       <TextField
                         label="Номер свидетельства"
@@ -810,6 +984,18 @@ function UserForm({
                         }
                         fullWidth
                         size="small"
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            paddingTop: '2.5px',
+                            paddingBottom: '2.5px',
+                          },
+                          '& .MuiInputBase-input': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.8rem',
+                            letterSpacing: '0.6px',
+                            fontWeight: 500,
+                          },
+                        }}
                       />
 
                       <TextField
@@ -826,13 +1012,38 @@ function UserForm({
                         }
                         fullWidth
                         size="small"
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            paddingTop: '2.5px',
+                            paddingBottom: '2.5px',
+                          },
+                          '& .MuiInputBase-input': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.8rem',
+                            letterSpacing: '0.6px',
+                            fontWeight: 500,
+                          },
+                        }}
                       >
                         <MenuItem value="">
                           <em>Не выбрано</em>
                         </MenuItem>
                         {['Годен', 'Не годен'].map((name) => (
-                          <MenuItem key={name} value={name}>
-                            {name}
+                          <MenuItem
+                            key={name}
+                            value={name}
+                            sx={{
+                              '& .MuiInputBase-root': {
+                                paddingTop: '2.5px',
+                                paddingBottom: '2.5px',
+                              },
+                              textTransform: 'uppercase',
+                              fontSize: '0.77rem',
+                              letterSpacing: '0.55px',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {cleanSpaces(name)}
                           </MenuItem>
                         ))}
                       </TextField>
@@ -853,6 +1064,18 @@ function UserForm({
                           htmlInput: { min: 0, step: '0.01' },
                         }}
                         fullWidth
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            paddingTop: '2.5px',
+                            paddingBottom: '2.5px',
+                          },
+                          '& .MuiInputBase-input': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.8rem',
+                            letterSpacing: '0.6px',
+                            fontWeight: 500,
+                          },
+                        }}
                       />
 
                       <TextField
@@ -868,6 +1091,18 @@ function UserForm({
                         fullWidth
                         size="small"
                         disabled={true}
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            paddingTop: '2.5px',
+                            paddingBottom: '2.5px',
+                          },
+                          '& .MuiInputBase-input': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.8rem',
+                            letterSpacing: '0.6px',
+                            fontWeight: 500,
+                          },
+                        }}
                       />
 
                       <TextField
@@ -889,6 +1124,12 @@ function UserForm({
                         sx={{
                           '& .MuiInputBase-root': {
                             fontSize: '0.875rem',
+                          },
+                          '& .MuiInputBase-input': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.8rem',
+                            letterSpacing: '0.6px',
+                            fontWeight: 500,
                           },
                           mt: 1,
                         }}

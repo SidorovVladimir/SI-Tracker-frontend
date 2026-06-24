@@ -34,7 +34,7 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
-import { toCapital } from '../../utils/capitalize';
+import { cleanSpaces } from '../../utils/capitalize';
 
 export default function ScopesPage() {
   const { data, loading, refetch } = useQuery(GetScopesListDocument);
@@ -117,8 +117,17 @@ export default function ScopesPage() {
           {scopesList.map((sc) => (
             <Card key={sc.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {toCapital(sc.name)}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    letterSpacing: '0.8px',
+                    fontWeight: 700,
+                    color: 'text.primary',
+                  }}
+                >
+                  {cleanSpaces(sc.name)}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -170,8 +179,20 @@ export default function ScopesPage() {
             </TableHead>
             <TableBody>
               {scopesList.map((sc) => (
-                <TableRow key={sc.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{toCapital(sc.name)}</TableCell>
+                <TableRow
+                  key={sc.id}
+                  hover
+                  sx={{
+                    '& > td': {
+                      py: 1.5,
+                      textTransform: 'uppercase',
+                      fontSize: '0.825rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
+                >
+                  <TableCell>{cleanSpaces(sc.name)}</TableCell>
                   <TableCell>{formatDate(sc.createdAt)}</TableCell>
                   <TableCell>{formatDate(sc.updatedAt)}</TableCell>
                   <TableCell align="right">
@@ -181,15 +202,17 @@ export default function ScopesPage() {
                       justifyContent="flex-end"
                     >
                       <Tooltip title="Редактировать" arrow>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          disabled={true}
-                          // component={Link}
-                          // to={routes.admin.editProductionSite(eq.id)}
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            disabled={true}
+                            // component={Link}
+                            // to={routes.admin.editProductionSite(eq.id)}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
                         <IconButton

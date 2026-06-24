@@ -44,6 +44,9 @@ const InfoRow = ({
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
         lineHeight: 1.4,
+        textTransform: 'uppercase',
+        etterSpacing: '0.6px',
+        fontSize: '0.9rem',
       }}
     >
       {value || '-'}
@@ -219,6 +222,8 @@ export default function DeviceCard(props: {
                 sx={{
                   height: 'auto',
                   '& .MuiChip-label': {
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.55px',
                     display: 'block',
                     whiteSpace: 'normal',
                     py: 0.5,
@@ -253,10 +258,12 @@ export default function DeviceCard(props: {
                 sx={{
                   height: 'auto',
                   '& .MuiChip-label': {
+                    textTransform: 'uppercase',
                     display: 'block',
                     whiteSpace: 'normal',
                     py: 0.5,
                     fontSize: '0.75rem',
+                    letterSpacing: '0.55px',
                   },
                 }}
               />
@@ -307,10 +314,12 @@ export default function DeviceCard(props: {
               sx={{
                 height: 'auto',
                 '& .MuiChip-label': {
+                  textTransform: 'uppercase',
                   display: 'block',
                   whiteSpace: 'normal',
                   py: 0.5,
                   fontSize: '0.75rem',
+                  letterSpacing: '0.55px',
                 },
               }}
             />

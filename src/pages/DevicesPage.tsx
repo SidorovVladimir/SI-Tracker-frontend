@@ -45,7 +45,7 @@ import {
 import React from 'react';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
-import { toCapital } from '../utils/capitalize';
+import { cleanSpaces, toCapital } from '../utils/capitalize';
 
 type Device =
   GetDevicesWithRelationsListQuery['devicesWithRelations']['items'][0];
@@ -199,53 +199,6 @@ export default function DevicesPage() {
     return [...raw].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   }, [companiesData]);
 
-  // const productionSite = useMemo(() => {
-  //   const raw = productionSiteData?.productionSites || [];
-  //   return Array.from(new Set(raw.map((p) => p.name).filter(Boolean))).sort();
-  // }, [productionSiteData]);
-  // const productionSite = useMemo(() => {
-  //   const rawSites = productionSiteData?.productionSites || [];
-
-  //   // 2. Находим объект выбранного города
-  //   const selectedCityObj = cities.find(
-  //     (c) => c.name?.toLowerCase().trim() === filters.city?.toLowerCase().trim()
-  //   );
-  //   const targetCityId = selectedCityObj?.id?.toLowerCase().trim();
-
-  //   // 3. Находим объект выбранной компании
-  //   const selectedCompanyObj = companies.find(
-  //     (co) =>
-  //       co.name?.toLowerCase().trim() === filters.company?.toLowerCase().trim()
-  //   );
-  //   const targetCompanyId = selectedCompanyObj?.id?.toLowerCase().trim();
-
-  //   // 4. Последовательно фильтруем массив площадок
-  //   let filtered = rawSites;
-
-  //   // Если город выбран — оставляем только участки, привязанные к этому cityId
-  //   if (targetCityId) {
-  //     filtered = filtered.filter(
-  //       (site) => site.cityId?.toLowerCase().trim() === targetCityId
-  //     );
-  //   }
-
-  //   // Если компания выбрана — дополнительно фильтруем по companyId
-  //   if (targetCompanyId) {
-  //     filtered = filtered.filter(
-  //       (site) => site.companyId?.toLowerCase().trim() === targetCompanyId
-  //     );
-  //   }
-
-  //   // 5. Собираем массив уникальных текстовых названий и сортируем их
-  //   const uniqueNames = Array.from(
-  //     new Set(filtered.map((p) => p.name).filter(Boolean))
-  //   );
-
-  //   return uniqueNames.sort((a, b) => a.localeCompare(b));
-
-  //   // Оставляем зависимости для мгновенного пересчета в браузере
-  // }, [productionSiteData, filters.city, filters.company, cities, companies]);
-
   const productionSite = useMemo(() => {
     const rawSites = productionSiteData?.productionSites || [];
 
@@ -308,61 +261,49 @@ export default function DevicesPage() {
       headerName: 'Город',
       flex: 1,
       minWidth: 120,
-      valueGetter: (_, row) => {
-        const name = row?.productionSite?.city?.name;
-        return name ? toCapital(name) : '—';
-      },
+      valueGetter: (_, row) => cleanSpaces(row?.productionSite?.city?.name),
     },
     {
       field: 'company',
       headerName: 'Организация',
       flex: 1,
       minWidth: 160,
-      valueGetter: (_, row) => {
-        const name = row?.productionSite?.company?.name;
-        return name ? toCapital(name) : '—';
-      },
+      valueGetter: (_, row) => cleanSpaces(row?.productionSite?.company?.name),
     },
     {
       field: 'productionSite',
       headerName: 'Подразделение',
       flex: 1,
       minWidth: 180,
-      valueGetter: (_, row) => {
-        const name = row?.productionSite?.name;
-        return name ? toCapital(name) : '—';
-      },
+      valueGetter: (_, row) => cleanSpaces(row?.productionSite?.name),
     },
     {
       field: 'name',
       headerName: 'Наименование',
       flex: 1,
       minWidth: 200,
-      valueGetter: (_, row) => {
-        return row?.name ? toCapital(row.name) : '—';
-      },
+      valueGetter: (_, row) => cleanSpaces(row?.name),
     },
     {
       field: 'model',
       headerName: 'Тип СИ',
       flex: 1,
       minWidth: 120,
-      // Модели и типы приборов (например, МП4-У, ТРМ101) лучше оставлять Капсом
-      valueGetter: (_, row) => row?.model?.toUpperCase() ?? '—',
+      valueGetter: (_, row) => cleanSpaces(row?.model),
     },
     {
       field: 'serialNumber',
       headerName: 'Заводской номер',
       flex: 1,
       minWidth: 130,
-      valueGetter: (_, row) => row?.serialNumber?.toUpperCase() ?? '—',
+      valueGetter: (_, row) => cleanSpaces(row?.serialNumber),
     },
     {
       field: 'inventoryNumber',
       headerName: 'Инвентарный номер',
       flex: 1,
       minWidth: 130,
-      valueGetter: (_, row) => row?.inventoryNumber?.toUpperCase() ?? '—',
+      valueGetter: (_, row) => cleanSpaces(row?.inventoryNumber),
     },
     {
       field: 'verificationDate',
@@ -387,27 +328,22 @@ export default function DevicesPage() {
       headerName: 'Вид контроля',
       flex: 1,
       minWidth: 140,
-      valueGetter: (_, row) => {
-        const name = row?.latestVerification?.metrologyControleType?.name;
-        return name ? toCapital(name) : '—';
-      },
+      valueGetter: (_, row) =>
+        cleanSpaces(row?.latestVerification?.metrologyControleType?.name),
     },
     {
       field: 'status',
       headerName: 'Состояние',
       flex: 1,
       minWidth: 120,
-      valueGetter: (_, row) => {
-        const name = row?.status?.name;
-        return name ? toCapital(name) : '—';
-      },
+      valueGetter: (_, row) => cleanSpaces(row?.status?.name),
     },
     {
       field: 'grsiNumber',
       headerName: 'Госреестр',
       flex: 1,
       minWidth: 130,
-      valueGetter: (_, row) => row?.grsiNumber ?? '—',
+      valueGetter: (_, row) => cleanSpaces(row?.grsiNumber),
     },
     {
       field: 'certificate',
@@ -415,7 +351,7 @@ export default function DevicesPage() {
       flex: 1,
       minWidth: 130,
       valueGetter: (_, row) =>
-        row?.latestVerification?.protocolNumber?.toUpperCase() ?? '—',
+        cleanSpaces(row?.latestVerification?.protocolNumber),
     },
     {
       field: 'releaseDate',
@@ -430,9 +366,7 @@ export default function DevicesPage() {
       headerName: 'Изготовитель',
       flex: 1,
       minWidth: 160,
-      valueGetter: (_, row) => {
-        return row?.manufacturer ? toCapital(row.manufacturer) : '—';
-      },
+      valueGetter: (_, row) => cleanSpaces(row?.manufacturer),
     },
   ];
 
@@ -541,7 +475,8 @@ export default function DevicesPage() {
             {isMobileOrLaptop ? (
               <Box
                 sx={{
-                  display: 'flex',
+                  // display: 'flex',
+                  display: viewMode ? { xs: 'none', md: 'flex' } : 'flex',
                   alignItems: 'center',
                   gap: 0.5,
                   flexWrap: 'nowrap',
@@ -588,12 +523,33 @@ export default function DevicesPage() {
                         handleFilterChange('city', e.target.value)
                       }
                       fullWidth={isMobileOrLaptop}
-                      sx={{ minWidth: 150 }}
+                      sx={{
+                        minWidth: 150,
+                        '& .MuiInputBase-root': {
+                          paddingTop: '2.5px',
+                          paddingBottom: '2.5px',
+                        },
+                        '& .MuiInputBase-input': {
+                          textTransform: 'uppercase',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.6px',
+                          fontWeight: 500,
+                        },
+                      }}
                     >
                       <option value="">Все города</option>
                       {cities.map((city: any) => (
-                        <option key={city.id || city.name} value={city.name}>
-                          {toCapital(city.name)}
+                        <option
+                          key={city.id || city.name}
+                          value={city.name}
+                          style={{
+                            textTransform: 'uppercase',
+                            fontSize: '0.77rem',
+                            letterSpacing: '0.55px',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {cleanSpaces(city.name)}
                         </option>
                       ))}
                     </TextField>
@@ -611,15 +567,33 @@ export default function DevicesPage() {
                         handleFilterChange('company', e.target.value)
                       }
                       fullWidth={isMobileOrLaptop}
-                      sx={{ minWidth: 150 }}
+                      sx={{
+                        minWidth: 150,
+                        '& .MuiInputBase-root': {
+                          paddingTop: '2.5px',
+                          paddingBottom: '2.5px',
+                        },
+                        '& .MuiInputBase-input': {
+                          textTransform: 'uppercase',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.6px',
+                          fontWeight: 500,
+                        },
+                      }}
                     >
                       <option value="">Все организации</option>
                       {companies.map((company: any) => (
                         <option
                           key={company.id || company.name}
                           value={company.name}
+                          style={{
+                            textTransform: 'uppercase',
+                            fontSize: '0.77rem',
+                            letterSpacing: '0.55px',
+                            fontWeight: 500,
+                          }}
                         >
-                          {toCapital(company.name)}
+                          {cleanSpaces(company.name)}
                         </option>
                       ))}
                     </TextField>
@@ -640,12 +614,31 @@ export default function DevicesPage() {
                       sx={{
                         minWidth: 150,
                         maxWidth: isMobileOrLaptop ? 'none' : 200,
+                        '& .MuiInputBase-root': {
+                          paddingTop: '2.5px',
+                          paddingBottom: '2.5px',
+                        },
+                        '& .MuiInputBase-input': {
+                          textTransform: 'uppercase',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.6px',
+                          fontWeight: 500,
+                        },
                       }}
                     >
                       <option value="">Все подразделения</option>
                       {productionSite.map((name) => (
-                        <option key={name} value={name}>
-                          {toCapital(name)}
+                        <option
+                          key={name}
+                          value={name}
+                          style={{
+                            textTransform: 'uppercase',
+                            fontSize: '0.77rem',
+                            letterSpacing: '0.55px',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {cleanSpaces(name)}
                         </option>
                       ))}
                     </TextField>
@@ -658,6 +651,18 @@ export default function DevicesPage() {
                       onChange={(e) =>
                         handleFilterChange('deviceName', e.target.value)
                       }
+                      sx={{
+                        '& .MuiInputBase-root': {
+                          paddingTop: '2.5px',
+                          paddingBottom: '2.5px',
+                        },
+                        '& .MuiInputBase-input': {
+                          textTransform: 'uppercase',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.6px',
+                          fontWeight: 500,
+                        },
+                      }}
                     />
                     {/* 🔢 ЗАВОДСКОЙ НОМЕР */}
                     <TextField
@@ -671,6 +676,16 @@ export default function DevicesPage() {
                       sx={{
                         minWidth: 130,
                         maxWidth: isMobileOrLaptop ? 'none' : 150,
+                        '& .MuiInputBase-root': {
+                          paddingTop: '2.5px',
+                          paddingBottom: '2.5px',
+                        },
+                        '& .MuiInputBase-input': {
+                          textTransform: 'uppercase',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.6px',
+                          fontWeight: 500,
+                        },
                       }}
                     />
                     {/* 🛡️ ВИД КОНТРОЛЯ */}
@@ -690,12 +705,31 @@ export default function DevicesPage() {
                       sx={{
                         minWidth: 130,
                         maxWidth: isMobileOrLaptop ? 'none' : 150,
+                        '& .MuiInputBase-root': {
+                          paddingTop: '2.5px',
+                          paddingBottom: '2.5px',
+                        },
+                        '& .MuiInputBase-input': {
+                          textTransform: 'uppercase',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.6px',
+                          fontWeight: 500,
+                        },
                       }}
                     >
                       <option value="">Все виды контроля</option>
                       {metrologyControleTypes.map((type: any) => (
-                        <option key={type.id || type.name} value={type.name}>
-                          {toCapital(type.name)}
+                        <option
+                          key={type.id || type.name}
+                          value={type.name}
+                          style={{
+                            textTransform: 'uppercase',
+                            fontSize: '0.77rem',
+                            letterSpacing: '0.55px',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {cleanSpaces(type.name)}
                         </option>
                       ))}
                     </TextField>
@@ -716,6 +750,16 @@ export default function DevicesPage() {
                       sx={{
                         minWidth: 130,
                         maxWidth: isMobileOrLaptop ? 'none' : 150,
+                        '& .MuiInputBase-root': {
+                          paddingTop: '2.5px',
+                          paddingBottom: '2.5px',
+                        },
+                        '& .MuiInputBase-input': {
+                          textTransform: 'uppercase',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.6px',
+                          fontWeight: 500,
+                        },
                       }}
                     >
                       <option value="">Все статусы</option>
@@ -723,8 +767,14 @@ export default function DevicesPage() {
                         <option
                           key={status.id || status.name}
                           value={status.name}
+                          style={{
+                            textTransform: 'uppercase',
+                            fontSize: '0.77rem',
+                            letterSpacing: '0.55px',
+                            fontWeight: 500,
+                          }}
                         >
-                          {toCapital(status.name)}
+                          {cleanSpaces(status.name)}
                         </option>
                       ))}
                     </TextField>
@@ -741,6 +791,18 @@ export default function DevicesPage() {
                       onChange={(e) =>
                         handleFilterChange('dateStart', e.target.value)
                       }
+                      sx={{
+                        '& .MuiInputBase-root': {
+                          paddingTop: '2.5px',
+                          paddingBottom: '2.5px',
+                        },
+                        '& .MuiInputBase-input': {
+                          textTransform: 'uppercase',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.6px',
+                          fontWeight: 500,
+                        },
+                      }}
                     />
                     {/* 📅 СРОК ДЕЙСТВИЯ ДО... */}
                     <TextField
@@ -755,6 +817,18 @@ export default function DevicesPage() {
                       onChange={(e) =>
                         handleFilterChange('dateEnd', e.target.value)
                       }
+                      sx={{
+                        '& .MuiInputBase-root': {
+                          paddingTop: '2.5px',
+                          paddingBottom: '2.5px',
+                        },
+                        '& .MuiInputBase-input': {
+                          textTransform: 'uppercase',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.6px',
+                          fontWeight: 500,
+                        },
+                      }}
                     />
                     <Button
                       color="error"
@@ -932,14 +1006,31 @@ export default function DevicesPage() {
                   select
                   value={filters.city}
                   onChange={(e) => handleFilterChange('city', e.target.value)}
-                  sx={{ minWidth: 150 }}
+                  sx={{
+                    minWidth: 150,
+                    '& .MuiInputBase-input': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
                 >
                   <MenuItem value="">
                     <em>Все города</em>
                   </MenuItem>
                   {cities.map((city: any) => (
-                    <MenuItem key={city.id || city.name} value={city.name}>
-                      {toCapital(city.name)}
+                    <MenuItem
+                      key={city.id || city.name}
+                      value={city.name}
+                      sx={{
+                        textTransform: 'uppercase',
+                        fontSize: '0.77rem',
+                        letterSpacing: '0.55px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {cleanSpaces(city.name)}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -953,7 +1044,16 @@ export default function DevicesPage() {
                   onChange={(e) =>
                     handleFilterChange('company', e.target.value)
                   }
-                  sx={{ minWidth: 160, maxWidth: 200 }} // Немного увеличили ширину, чтобы длинные названия не сжимались
+                  sx={{
+                    minWidth: 160,
+                    maxWidth: 200,
+                    '& .MuiInputBase-input': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }} // Немного увеличили ширину, чтобы длинные названия не сжимались
                 >
                   <MenuItem value="">
                     <em>Все организации</em>
@@ -962,9 +1062,14 @@ export default function DevicesPage() {
                     <MenuItem
                       key={company.id || company.name}
                       value={company.name}
+                      sx={{
+                        textTransform: 'uppercase',
+                        fontSize: '0.77rem',
+                        letterSpacing: '0.55px',
+                        fontWeight: 500,
+                      }}
                     >
-                      {/* Используем исходный вид или toCapital, чтобы уйти от тяжелого ТОЛЬКО КАПСА */}
-                      {toCapital(company.name)}
+                      {cleanSpaces(company.name)}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -978,14 +1083,32 @@ export default function DevicesPage() {
                   onChange={(e) =>
                     handleFilterChange('productionSite', e.target.value)
                   }
-                  sx={{ minWidth: 170, maxWidth: 220 }}
+                  sx={{
+                    minWidth: 170,
+                    maxWidth: 220,
+                    '& .MuiInputBase-input': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
                 >
                   <MenuItem value="">
                     <em>Все подразделения</em>
                   </MenuItem>
                   {productionSite.map((name) => (
-                    <MenuItem key={name} value={name}>
-                      {toCapital(name)}
+                    <MenuItem
+                      key={name}
+                      value={name}
+                      sx={{
+                        textTransform: 'uppercase',
+                        fontSize: '0.77rem',
+                        letterSpacing: '0.55px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {cleanSpaces(name)}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -998,7 +1121,20 @@ export default function DevicesPage() {
                   onChange={(e) =>
                     handleFilterChange('deviceName', e.target.value)
                   }
-                  sx={{ minWidth: 150, maxWidth: 180 }}
+                  sx={{
+                    minWidth: 150,
+                    maxWidth: 180,
+                    '& .MuiInputBase-root': {
+                      paddingTop: '2.5px',
+                      paddingBottom: '2.5px',
+                    },
+                    '& .MuiInputBase-input': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
                 />
 
                 {/* 🔢 ЗАВОДСКОЙ НОМЕР */}
@@ -1009,7 +1145,20 @@ export default function DevicesPage() {
                   onChange={(e) =>
                     handleFilterChange('serialNumber', e.target.value)
                   }
-                  sx={{ minWidth: 130, maxWidth: 160 }}
+                  sx={{
+                    minWidth: 130,
+                    maxWidth: 160,
+                    '& .MuiInputBase-root': {
+                      paddingTop: '2.5px',
+                      paddingBottom: '2.5px',
+                    },
+                    '& .MuiInputBase-input': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
                 />
 
                 {/* 🛡️ ВИД КОНТРОЛЯ */}
@@ -1021,14 +1170,32 @@ export default function DevicesPage() {
                   onChange={(e) =>
                     handleFilterChange('metrologyControle', e.target.value)
                   }
-                  sx={{ minWidth: 150, maxWidth: 180 }}
+                  sx={{
+                    minWidth: 150,
+                    maxWidth: 180,
+                    '& .MuiInputBase-input': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
                 >
                   <MenuItem value="">
                     <em>Все виды контроля</em>
                   </MenuItem>
                   {metrologyControleTypes.map((type: any) => (
-                    <MenuItem key={type.id || type.name} value={type.name}>
-                      {toCapital(type.name)}
+                    <MenuItem
+                      key={type.id || type.name}
+                      value={type.name}
+                      sx={{
+                        textTransform: 'uppercase',
+                        fontSize: '0.77rem',
+                        letterSpacing: '0.55px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {cleanSpaces(type.name)}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -1040,7 +1207,16 @@ export default function DevicesPage() {
                   select
                   value={filters.status}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
-                  sx={{ minWidth: 130, maxWidth: 160 }}
+                  sx={{
+                    minWidth: 130,
+                    maxWidth: 160,
+                    '& .MuiInputBase-input': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
                 >
                   <MenuItem value="">
                     <em>Все статусы</em>
@@ -1049,8 +1225,14 @@ export default function DevicesPage() {
                     <MenuItem
                       key={status.id || status.name}
                       value={status.name}
+                      sx={{
+                        textTransform: 'uppercase',
+                        fontSize: '0.77rem',
+                        letterSpacing: '0.55px',
+                        fontWeight: 500,
+                      }}
                     >
-                      {toCapital(status.name)}
+                      {cleanSpaces(status.name)}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -1067,7 +1249,19 @@ export default function DevicesPage() {
                   onChange={(e) =>
                     handleFilterChange('dateStart', e.target.value)
                   }
-                  sx={{ minWidth: 140 }}
+                  sx={{
+                    minWidth: 140,
+                    '& .MuiInputBase-root': {
+                      paddingTop: '2.5px',
+                      paddingBottom: '2.5px',
+                    },
+                    '& .MuiInputBase-input': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
                 />
 
                 {/* 📅 СРОК ДЕЙСТВИЯ ДО... */}
@@ -1082,7 +1276,19 @@ export default function DevicesPage() {
                   onChange={(e) =>
                     handleFilterChange('dateEnd', e.target.value)
                   }
-                  sx={{ minWidth: 140 }}
+                  sx={{
+                    minWidth: 140,
+                    '& .MuiInputBase-root': {
+                      paddingTop: '2.5px',
+                      paddingBottom: '2.5px',
+                    },
+                    '& .MuiInputBase-input': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
                 />
 
                 <Button color="error" onClick={resetFilters}>
@@ -1108,6 +1314,7 @@ export default function DevicesPage() {
                   sx={{
                     overflow: 'auto',
                     flex: '1 1 auto',
+                    display: viewMode ? { xs: 'none', md: 'block' } : 'block',
                   }}
                 >
                   {loading ? (
@@ -1449,6 +1656,10 @@ export default function DevicesPage() {
                   fontSize: '0.85rem',
                   '& .MuiDataGrid-cell': {
                     fontVariantNumeric: 'tabular-nums',
+                    textTransform: 'uppercase', // Автоматический верхний регистр
+                    fontSize: '0.77rem', // Компактный размер букв
+                    letterSpacing: '0.55px', // Разреженность, чтобы Капс "дышал" и легко читался
+                    fontWeight: 500,
                   },
                   '& .MuiDataGrid-columnHeaderCheckbox .MuiDataGrid-columnHeaderTitleContainer':
                     {

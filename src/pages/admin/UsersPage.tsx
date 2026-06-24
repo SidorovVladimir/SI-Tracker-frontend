@@ -205,27 +205,31 @@ export default function UsersPage() {
                       justifyContent="flex-end"
                     >
                       <Tooltip title="Редактировать" arrow>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          component={Link}
-                          to={routes.admin.editUser(u.id)}
-                          disabled={!(user?.role === 'superadmin')}
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            component={Link}
+                            to={routes.admin.editUser(u.id)}
+                            disabled={!(user?.role === 'superadmin')}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeleteClick(u.id)}
-                          disabled={
-                            user?.role !== 'superadmin' || user?.id === u.id
-                          }
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleDeleteClick(u.id)}
+                            disabled={
+                              user?.role !== 'superadmin' || user?.id === u.id
+                            }
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                     </Stack>
                   </TableCell>

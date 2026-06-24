@@ -19,7 +19,6 @@ import {
 import { useMutation, useQuery } from '@apollo/client/react';
 import { enqueueSnackbar } from 'notistack';
 import routes from '../../utils/routes';
-import { toCapital } from '../../utils/capitalize';
 
 type FieldErrors = {
   name?: string;
@@ -58,8 +57,8 @@ function UserForm({
 }) {
   const navigate = useNavigate();
   const [form, setForm] = useState<{ name: string; address: string | null }>({
-    name: company.name.toUpperCase() || '',
-    address: toCapital(company.address) || null,
+    name: company?.name || '',
+    address: company?.address || null,
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
@@ -105,9 +104,14 @@ function UserForm({
     e.preventDefault();
     setFieldErrors({});
 
+    // Очищаем данные от случайных пробелов по краям
+    const trimmedName = form.name.trim();
+    const trimmedAddress = form.address?.trim() || '';
+
     const input = {
-      name: form.name,
-      address: form.address || null,
+      name: trimmedName,
+      // Если адрес пустой или состоит только из пробелов, отправляем null
+      address: trimmedAddress === '' ? null : trimmedAddress,
     };
 
     await updateCity({
@@ -138,15 +142,39 @@ function UserForm({
               required
               error={!!fieldErrors.name}
               helperText={fieldErrors.name}
+              sx={{
+                '& .MuiInputBase-root': {
+                  paddingTop: '2.5px',
+                  paddingBottom: '2.5px',
+                },
+                '& .MuiInputBase-input': {
+                  textTransform: 'uppercase',
+                  fontSize: '0.8rem',
+                  letterSpacing: '0.6px',
+                  fontWeight: 500,
+                },
+              }}
             />
             <TextField
               label="Адрес"
               name="address"
-              value={form.address}
+              value={form.address || ''}
               onChange={handleChange}
               fullWidth
               variant="outlined"
               size="small"
+              sx={{
+                '& .MuiInputBase-root': {
+                  paddingTop: '2.5px',
+                  paddingBottom: '2.5px',
+                },
+                '& .MuiInputBase-input': {
+                  textTransform: 'uppercase',
+                  fontSize: '0.8rem',
+                  letterSpacing: '0.6px',
+                  fontWeight: 500,
+                },
+              }}
             />
 
             <Divider sx={{ my: 2 }} />

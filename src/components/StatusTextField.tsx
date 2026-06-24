@@ -2,7 +2,7 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { Box, TextField, Tooltip, IconButton, MenuItem } from '@mui/material';
 import { useState } from 'react';
 import StatusModal from './modals/StatusModal';
-import { toCapital } from '../utils/capitalize';
+import { cleanSpaces } from '../utils/capitalize';
 
 export default function StatusTextField({
   value,
@@ -22,10 +22,27 @@ export default function StatusTextField({
         onChange={onChange}
         value={value}
         required
+        sx={{
+          '& .MuiInputBase-input': {
+            textTransform: 'uppercase',
+            fontSize: '0.8rem',
+            letterSpacing: '0.6px',
+            fontWeight: 500,
+          },
+        }}
       >
         {statusesList.map(({ id, name }: { id: string; name: string }) => (
-          <MenuItem key={id} value={id}>
-            {toCapital(name)}
+          <MenuItem
+            key={id}
+            value={id}
+            sx={{
+              textTransform: 'uppercase',
+              fontSize: '0.77rem',
+              letterSpacing: '0.55px',
+              fontWeight: 500,
+            }}
+          >
+            {cleanSpaces(name)}
           </MenuItem>
         ))}
       </TextField>

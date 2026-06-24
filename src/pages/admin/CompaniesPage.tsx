@@ -34,7 +34,7 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
-import { toCapital } from '../../utils/capitalize';
+import { cleanSpaces } from '../../utils/capitalize';
 
 export default function CompaniesPage() {
   const { data, loading, refetch } = useQuery(GetCompaniesDocument);
@@ -115,11 +115,29 @@ export default function CompaniesPage() {
           {companies.map((c) => (
             <Card key={c.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {c.name.toUpperCase()}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    letterSpacing: '0.8px',
+                    fontWeight: 700,
+                    color: 'text.primary',
+                  }}
+                >
+                  {cleanSpaces(c.name)}
                 </Typography>
-                <Typography variant="subtitle1" fontWeight="normal">
-                  {toCapital(c.address) || '-'}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    letterSpacing: '0.8px',
+                    fontWeight: 400,
+                    color: 'text.primary',
+                  }}
+                >
+                  {cleanSpaces(c.address) || '-'}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -171,9 +189,21 @@ export default function CompaniesPage() {
             </TableHead>
             <TableBody>
               {companies.map((c) => (
-                <TableRow key={c.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{c.name.toUpperCase()}</TableCell>
-                  <TableCell>{toCapital(c.address) || '-'}</TableCell>
+                <TableRow
+                  key={c.id}
+                  hover
+                  sx={{
+                    '& > td': {
+                      py: 1.5,
+                      textTransform: 'uppercase',
+                      fontSize: '0.825rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
+                >
+                  <TableCell>{cleanSpaces(c.name)}</TableCell>
+                  <TableCell>{cleanSpaces(c.address) || '-'}</TableCell>
                   <TableCell>{formatDate(c.createdAt)}</TableCell>
                   <TableCell>{formatDate(c.updatedAt)}</TableCell>
                   <TableCell align="right">

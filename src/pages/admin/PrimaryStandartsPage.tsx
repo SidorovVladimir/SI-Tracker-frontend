@@ -34,6 +34,7 @@ import { Add, Delete, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
+import { cleanSpaces } from '../../utils/capitalize';
 
 export default function PrimaryStandartsPage() {
   const { data, loading, refetch } = useQuery(GetPrimaryStandartsListDocument);
@@ -117,8 +118,17 @@ export default function PrimaryStandartsPage() {
           {primaryStandartsList.map((sc) => (
             <Card key={sc.id} variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {sc.name.toUpperCase()}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem',
+                    letterSpacing: '0.8px',
+                    fontWeight: 700,
+                    color: 'text.primary',
+                  }}
+                >
+                  {cleanSpaces(sc.name)}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -170,8 +180,20 @@ export default function PrimaryStandartsPage() {
             </TableHead>
             <TableBody>
               {primaryStandartsList.map((sc) => (
-                <TableRow key={sc.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{sc.name.toUpperCase()}</TableCell>
+                <TableRow
+                  key={sc.id}
+                  hover
+                  sx={{
+                    '& > td': {
+                      py: 1.5,
+                      textTransform: 'uppercase',
+                      fontSize: '0.825rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
+                >
+                  <TableCell>{cleanSpaces(sc.name)}</TableCell>
                   <TableCell>{formatDate(sc.createdAt)}</TableCell>
                   <TableCell>{formatDate(sc.updatedAt)}</TableCell>
                   <TableCell align="right">
@@ -181,15 +203,17 @@ export default function PrimaryStandartsPage() {
                       justifyContent="flex-end"
                     >
                       <Tooltip title="Редактировать" arrow>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          disabled={true}
-                          // component={Link}
-                          // to={routes.admin.editProductionSite(eq.id)}
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            disabled={true}
+                            // component={Link}
+                            // to={routes.admin.editProductionSite(eq.id)}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
                         <IconButton

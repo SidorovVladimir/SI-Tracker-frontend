@@ -1,5 +1,5 @@
 {
- "name": "Система учета СИ «Эталон-Трекер»",
+  "name": "Система учета СИ «Эталон-Трекер»",
   "short_name": "Эталон-Трекер",
   "icons": [
     {
@@ -15,7 +15,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#3f6cb8",
+ "theme_color": "#3f6cb8",
   "background_color": "#2d6174",
   "display": "standalone",
   "start_url": "/"

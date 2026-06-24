@@ -72,19 +72,21 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
             WebkitOverflowScrolling: 'touch',
           }}
         >
-          {viewMode === 'create' ? (
+          {viewMode === 'create' && (
             <CreateDevicePage
               closeDetails={closeDetails}
               refetchDevice={refetchTable}
             />
-          ) : viewMode === 'edit' ? (
+          )}
+          {viewMode === 'edit' && (
             <EditDevicePage
               deviceId={selectedDeviceId!}
               closeDetails={() => setViewMode('info')}
               close={closeDetails}
               refetchDevice={refetchTable}
             />
-          ) : (
+          )}
+          {viewMode === 'info' && (
             <DeviceCard
               deviceId={selectedDeviceId!}
               closeDetails={closeDetails}

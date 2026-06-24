@@ -1,111 +1,26 @@
-// export function toCapital(name: string | null | undefined) {
-//   if (!name || !name.trim()) return '';
-
-//   const trimmed = name.trim();
-//   const [first, ...rest] = trimmed;
-
-//   return first.toUpperCase() + rest.join('').toLowerCase();
-// }
-export function toCapital(name: string | null | undefined): string {
+export function toCapital(name: string | null | undefined) {
   if (!name || !name.trim()) return '';
 
-  // 1. СЛОВАРЬ МЕТРОЛОГИЧЕСКИХ И КОРПОРАТИВНЫХ АББРЕВИАТУР (в нижнем регистре)
-  // Ключ — слово из базы, значение — как оно должно правильно писаться в интерфейсе
-  const dictionary: Record<string, string> = {
-    // Организационно-правовые формы
-    ооо: 'ООО',
-    оао: 'ОАО',
-    зао: 'ЗАО',
-    рмц: 'РМЦ',
-    пао: 'ПАO',
-    ао: 'АО',
-    ип: 'ИП',
-    фбу: 'ФБУ',
-    фгуп: 'ФГУП',
-    фгау: 'ФГАУ',
-    гнмц: 'ГНМЦ',
-    цсм: 'ЦСМ',
+  const trimmed = name.trim();
+  const [first, ...rest] = trimmed;
 
-    // Главные метрологические понятия
-    си: 'СИ', // Средство измерений
-    ик: 'ИК', // Измерительный канал
-    иис: 'ИИС', // Измерительная информационная система
-    асутп: 'АСУ ТП', // Автоматизированная система управления тех. процессами
-    гпэ: 'ГПЭ', // Государственный первичный эталон
-    гсв: 'ГСВ', // Государственная служба времени
-    ск: 'СК',
-    ио: 'ИО',
-    во: 'ВО',
+  return first.toUpperCase() + rest.join('').toLowerCase();
+}
 
-    // Службы, цеха и автоматика
-    кип: 'КИП',
-    кипиа: 'КИПиА', // Специфический регистр для автоматики
-    асу: 'АСУ',
-    огм: 'ОГМ', // Отдел главного метролога (или механика)
-    отк: 'ОТК', // Отдел технического контроля
-    итр: 'ИТР', // Инженерно-технические работники
-    электролаборатория: 'ЭТЛ',
-    ил: 'ИЛ',
-    кто: 'КТО',
-    ахо: 'АХО',
-    цжи: 'ЦЖИ',
-    зц: 'ЗЦ',
+export function formatSentenceCase(name: string | null | undefined): string {
+  if (!name || !name.trim()) return '—';
 
-    // Институты и ведомства (метрологические институты России)
-    вниим: 'ВНИИМ', // им. Д.И. Менделеева
-    вниифтри: 'ВНИИФТРИ',
-    вниимс: 'ВНИИМС',
-    сниим: 'СНИИМ', // Сибирский институт метрологии
-    униим: 'УНИИМ',
-    внииофи: 'ВНИИОФИ',
-    ростест: 'Ростест',
-    росстандарт: 'Росстандарт',
+  const trimmed = name.trim().replace(/\s+/g, ' ');
 
-    // Нормативная документация
-    гост: 'ГОСТ',
-    ост: 'ОСТ',
-    ту: 'ТУ',
-    ми: 'МИ', // Методика измерений / Методические инструкции
-    рд: 'РД', // Руководящий документ
-    мп: 'МП', // Методика поверки
-    рэ: 'РЭ', // Руководство по эксплуатации
-    паспорт: 'ПС',
-  };
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
 
-  return name
-    .trim()
-    .toLowerCase()
-    .split(/\s+/)
-    .map((word) => {
-      // Очищаем слово от знаков препинания (например, "ооо," или "(цсм)") для сверки со словарем
-      const cleanWord = word.replace(/[^а-яёa-z0-9]/gi, '');
+export function formatStrictUpper(name: string | null | undefined): string {
+  if (!name || !name.trim()) return '—';
+  return name.trim().toUpperCase().replace(/\s+/g, ' ');
+}
 
-      // 1. Ищем точное совпадение в нашем словаре аббревиатур
-      if (dictionary[cleanWord]) {
-        return word.replace(cleanWord, dictionary[cleanWord]);
-      }
-
-      // 2. Обработка сложных слов через дефис (например, "ростов-на-дону" -> "Ростов-на-Дону")
-      if (word.includes('-')) {
-        return word
-          .split('-')
-          .map((part, index, arr) => {
-            // Служебные слова в названиях городов оставляем маленькими ("на", "де")
-            if (
-              (part === 'на' || part === 'де') &&
-              index > 0 &&
-              index < arr.length - 1
-            ) {
-              return part;
-            }
-            return part.replace(/([а-яёa-z])/i, (match) => match.toUpperCase());
-          })
-          .join('-');
-      }
-
-      // 3. Стандартное правило: первая буква заглавная
-      if (word.length === 0) return '';
-      return word.replace(/([а-яёa-z])/i, (match) => match.toUpperCase());
-    })
-    .join(' ');
+export function cleanSpaces(name: string | null | undefined): string {
+  if (!name || !name.trim()) return '—';
+  return name.trim().replace(/\s+/g, ' ');
 }
