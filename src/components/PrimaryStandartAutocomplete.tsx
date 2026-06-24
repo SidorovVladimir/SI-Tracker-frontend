@@ -42,11 +42,11 @@ export default function PrimaryStandartAutocomplete({
           paper: {
             sx: {
               // 1. Ограничение для внешней обертки окна
-              maxHeight: { xs: 250, md: 'none' },
+              maxHeight: { xs: 250, md: 500 },
 
               // 2. Ограничение для внутреннего списка элементов
               '& .MuiAutocomplete-listbox': {
-                maxHeight: { xs: 250, md: 'none' }, // 'none' убирает лимиты на ПК, 'auto' вернет дефолт MUI
+                maxHeight: { xs: 250, md: 500 }, // 'none' убирает лимиты на ПК, 'auto' вернет дефолт MUI
               },
 
               // Опционально: делаем кастомный тонкий скроллбар на мобилке
