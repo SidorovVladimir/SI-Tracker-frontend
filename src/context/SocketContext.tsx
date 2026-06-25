@@ -6,6 +6,7 @@ import { API_BASE_URL } from '../config';
 import { useApolloClient } from '@apollo/client/react';
 import {
   GetChatDialogsDocument,
+  GetPricelistsDocument,
   GetSystemNotificationsDocument,
   GetTotalUnreadCountDocument,
   GetUnreadNotificationsCountDocument,
@@ -21,7 +22,7 @@ interface OnlineUserPayload {
 interface JobProgressData {
   jobId: string;
   batchId?: string;
-  name: 'arshin-sync' | 'device-import' | 'db-restore';
+  name: 'arshin-sync' | 'device-import' | 'db-restore' | 'pricelist-import';
   current: number;
   total: number;
   percentage: number;
@@ -41,7 +42,7 @@ interface SocketContextType {
   isMaintenance: boolean;
   addRunningJob: (
     jobId: string,
-    name: 'db-restore' | 'arshin-sync' | 'device-import'
+    name: 'db-restore' | 'arshin-sync' | 'device-import' | 'pricelist-import'
   ) => void;
 }
 
@@ -54,6 +55,7 @@ const SocketContext = createContext<SocketContextType>({
   setUnreadChatCount: () => {},
   runningJobs: {},
   isMaintenance: false,
+  // addRunningJob: () => {},
   addRunningJob: () => {},
 });
 
@@ -77,7 +79,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const addRunningJob = (
     jobId: string,
-    name: 'db-restore' | 'arshin-sync' | 'device-import'
+    name: 'db-restore' | 'arshin-sync' | 'device-import' | 'pricelist-import'
   ) => {
     setRunningJobs((prev) => ({
       ...prev,
@@ -269,6 +271,41 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           {
             variant: 'error',
             key: 'db-import-toast',
+          }
+        );
+      }
+
+      if (data.name === 'pricelist-import' && data.status === 'completed') {
+        // Принудительно просим Apollo обновить список прейскурантов на экранах
+        // Кодогенератор создаст имя "GetPricelists" на основе вашего query GetPricelists
+        await client
+          .refetchQueries({
+            include: [GetPricelistsDocument],
+          })
+          .catch(() => {});
+
+        const { importedCount, total } = data.result || {
+          importedCount: 0,
+          total: 0,
+        };
+
+        // Переключаем уведомление на плашку успеха с точными цифрами из фонового воркера
+        enqueueSnackbar(
+          `✅ Прейскурант успешно импортирован! Загружено позиций: ${importedCount} из ${total}. Прайс доступен для расчета бюджетов.`,
+          {
+            variant: 'success',
+            autoHideDuration: 6000,
+          }
+        );
+      }
+
+      if (data.name === 'pricelist-import' && data.status === 'failed') {
+        enqueueSnackbar(
+          `❌ Фоновый импорт прейскуранта завершился ошибкой: ${
+            data.error || 'Неизвестный сбой'
+          }`,
+          {
+            variant: 'error',
           }
         );
       }

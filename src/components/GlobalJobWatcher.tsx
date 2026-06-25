@@ -85,6 +85,8 @@ export const GlobalJobWatcher: React.FC<GlobalJobWatcherProps> = ({
                 {isRestore && '🛠️ Восстановление базы данных...'}
                 {job.name === 'arshin-sync' && '🔬 Синхронизация с ФГИС Аршин'}
                 {job.name === 'device-import' && '📦 Импорт приборов из Excel'}
+                {job.name === 'pricelist-import' &&
+                  '💰 Импорт прейскуранта ЦСМ'}
               </Typography>
               <Typography
                 variant="caption"
@@ -111,8 +113,18 @@ export const GlobalJobWatcher: React.FC<GlobalJobWatcherProps> = ({
                 'Все операции заблокированы до окончания процесса.'
               ) : (
                 <>
-                  Обработано приборов: <strong>{job.current}</strong> из{' '}
-                  <strong>{job.total}</strong>
+                  {/* 🎯 РАЗДЕЛЯЕМ ТЕКСТ В ЗАВИСИМОСТИ ОТ ТИПА ЗАДАЧИ */}
+                  {job.name === 'pricelist-import' ? (
+                    <>
+                      Загружено позиций: <strong>{job.current}</strong> из{' '}
+                      <strong>{job.total}</strong>
+                    </>
+                  ) : (
+                    <>
+                      Обработано приборов: <strong>{job.current}</strong> из{' '}
+                      <strong>{job.total}</strong>
+                    </>
+                  )}
                 </>
               )}
             </Typography>

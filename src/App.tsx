@@ -50,6 +50,10 @@ import { useAuth } from './hooks/useAuth';
 import { GlobalJobWatcher } from './components/GlobalJobWatcher';
 import { MobileDevicePage } from './pages/MobileDevicePage';
 import { BudgetPlanningPage } from './pages/BudgetPlanningPage';
+
+import { BudgetPlanDetailPage } from './pages/BudgetPlanDetailPage';
+
+import { BudgetLayoutPage } from './pages/BudgetLayoutPage';
 // import HelpPage from './pages/HelpPage';
 // import { LicensesPage } from './pages/LicensesPage';
 
@@ -100,6 +104,12 @@ function App() {
           <Route path={routes.profile()} element={<ProfilePage />} />
           <Route path={routes.chat()} element={<ChatPage />} />
           <Route path={routes.budget()} element={<BudgetPlanningPage />} />
+          <Route path="/budget/*" element={<BudgetLayoutPage />} />
+          <Route
+            path="/budget/plans/details/:id"
+            element={<BudgetPlanDetailPage />}
+          />
+
           {/* <Route path={routes.help()} element={<HelpPage />} /> */}
           <Route path="/m/device/:id" element={<MobileDevicePage />} />
           {/* <Route path="/about/licenses" element={<LicensesPage />} /> */}
