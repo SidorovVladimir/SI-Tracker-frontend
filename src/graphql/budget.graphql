@@ -25,3 +25,133 @@ query GetBudgetMatrix(
     }
   }
 }
+
+query GetBudgetPlans {
+  budgetPlans {
+    id
+    year
+    status
+    comment
+    createdAt
+  }
+}
+
+# 2. Получить конкретный план по ID
+query GetBudgetPlan($id: ID!) {
+  budgetPlan(id: $id) {
+    id
+    year
+    status
+    comment
+  }
+}
+
+# 3. Получить строки бюджета с пагинацией, фильтрами и вложенным прибором
+query GetBudgetPlanItems(
+  $budgetId: ID!
+  $limit: Int!
+  $offset: Int!
+  $filter: BudgetPlanFilterInput
+) {
+  budgetPlanItems(
+    budgetId: $budgetId
+    limit: $limit
+    offset: $offset
+    filter: $filter
+  ) {
+    items {
+      id
+      budgetPlanId
+      deviceId
+      deviceName
+      deviceModel
+      matchMethod
+      basePrice
+      vatAmount
+      totalCost
+      # Запрашиваем вложенный прибор, который бэкенд собрал через with.device
+      device {
+        id
+        serialNumber
+        grsiNumber
+        inventoryNumber
+      }
+    }
+    totalCount
+  }
+}
+
+# 4. Получить список всех загруженных прейскурантов ЦСМ с вложенной организацией
+query GetPricelists {
+  pricelists {
+    id
+    verificationOrganizationId
+    title
+    year
+    isRegulated
+    createdAt
+    # Запрашиваем связанную организацию (собрана бэкендом через with.verificationOrganization)
+    verificationOrganization {
+      id
+      name
+    }
+  }
+}
+
+# 5. Получить один прейскурант по ID
+query GetPricelist($id: ID!) {
+  pricelist(id: $id) {
+    id
+    title
+    year
+    isRegulated
+  }
+}
+
+# --- МУТАЦИИ (MUTATIONS) ---
+
+# 1. Запустить каскадный расчет годового бюджета
+mutation CreateBudgetPlan($input: CreateBudgetPlanInput!) {
+  createBudgetPlan(input: $input) {
+    id
+    year
+    status
+  }
+}
+
+# 2. Обновить плановую цену прибора вручную (Inline-редактирование)
+mutation UpdateBudgetPlanItemPrice($input: UpdateBudgetPlanItemPriceInput!) {
+  updateBudgetPlanItemPrice(input: $input) {
+    id
+    basePrice
+    vatAmount
+    totalCost
+    matchMethod
+  }
+}
+
+# 3. Утвердить и заморозить бюджет на год
+mutation ApproveBudgetPlan($id: ID!) {
+  approveBudgetPlan(id: $id) {
+    id
+    status
+  }
+}
+
+# 4. Удалить план бюджета
+mutation DeleteBudgetPlan($id: ID!) {
+  deleteBudgetPlan(id: $id)
+}
+
+mutation CreatePricelist($input: CreatePricelistInput!) {
+  createPricelist(input: $input) {
+    jobId
+    itemCount
+    message
+  }
+}
+
+# 6. Удалить прейскурант ЦСМ
+mutation DeletePricelist($id: ID!) {
+  deletePricelist(id: $id)
+}

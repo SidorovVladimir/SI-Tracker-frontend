@@ -90,6 +90,46 @@ export type BudgetMonthData = {
   totalCost: Scalars['Int']['output'];
 };
 
+export type BudgetPlan = {
+  __typename: 'BudgetPlan';
+  comment: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  matchedCount: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+  totalCost: Scalars['Float']['output'];
+  totalCount: Scalars['Int']['output'];
+  updatedAt: Scalars['String']['output'];
+  year: Scalars['Int']['output'];
+};
+
+export type BudgetPlanFilterInput = {
+  matchMethod?: InputMaybe<Scalars['String']['input']>;
+  productionSiteId?: InputMaybe<Scalars['ID']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type BudgetPlanItem = {
+  __typename: 'BudgetPlanItem';
+  basePrice: Scalars['Float']['output'];
+  budgetPlanId: Scalars['ID']['output'];
+  device: Device;
+  deviceId: Scalars['ID']['output'];
+  deviceModel: Scalars['String']['output'];
+  deviceName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  matchMethod: Scalars['String']['output'];
+  matchedPricelistItemId: Maybe<Scalars['ID']['output']>;
+  totalCost: Scalars['Float']['output'];
+  vatAmount: Scalars['Float']['output'];
+};
+
+export type BudgetPlanItemsResponse = {
+  __typename: 'BudgetPlanItemsResponse';
+  items: Array<BudgetPlanItem>;
+  totalCount: Scalars['Int']['output'];
+};
+
 export type BudgetRow = {
   __typename: 'BudgetRow';
   months: Array<BudgetMonthData>;
@@ -142,6 +182,12 @@ export type CreateBatchInput = {
   verificationOrganizationId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type CreateBudgetPlanInput = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  pricelistIds: Array<Scalars['ID']['input']>;
+  year: Scalars['Int']['input'];
+};
+
 export type CreateCityInput = {
   name: Scalars['String']['input'];
 };
@@ -185,6 +231,14 @@ export type CreateMeasurementTypeInput = {
 
 export type CreateMetrologyControlTypeInput = {
   name: Scalars['String']['input'];
+};
+
+export type CreatePricelistInput = {
+  isRegulated: Scalars['Boolean']['input'];
+  items: Array<PricelistItemInput>;
+  title: Scalars['String']['input'];
+  verificationOrganizationId: Scalars['ID']['input'];
+  year: Scalars['Int']['input'];
 };
 
 export type CreatePrimaryStandartInput = {
@@ -459,12 +513,15 @@ export type MonthlySummary = {
 export type Mutation = {
   __typename: 'Mutation';
   addDevicesToBatch: Scalars['Boolean']['output'];
+  approveBudgetPlan: BudgetPlan;
+  createBudgetPlan: BudgetPlan;
   createCity: City;
   createCompany: Company;
   createDevice: Device;
   createEquipmentType: EquipmentType;
   createMeasurementType: MeasurementType;
   createMetrologyControlType: MetrologyControlType;
+  createPricelist: QueuedJobResponse;
   createPrimaryStandart: PrimaryStandart;
   createProductionSite: ProductionSite;
   createScope: Scope;
@@ -473,6 +530,7 @@ export type Mutation = {
   createVerification: VerificationModal;
   createVerificationBatch: VerificationBatch;
   createVerificationOrganization: VerificationOrganization;
+  deleteBudgetPlan: Scalars['Boolean']['output'];
   deleteCity: Scalars['Boolean']['output'];
   deleteCompany: Scalars['Boolean']['output'];
   deleteDevice: Scalars['Boolean']['output'];
@@ -480,6 +538,7 @@ export type Mutation = {
   deleteLog: Scalars['Boolean']['output'];
   deleteMeasurementType: Scalars['Boolean']['output'];
   deleteMetrologyControlType: Scalars['Boolean']['output'];
+  deletePricelist: Scalars['Boolean']['output'];
   deletePrimaryStandart: Scalars['Boolean']['output'];
   deleteProductionSite: Scalars['Boolean']['output'];
   deleteScope: Scalars['Boolean']['output'];
@@ -498,6 +557,7 @@ export type Mutation = {
   syncBatchWithArshin: QueuedJobResponse;
   syncDeviceWithArshin: Device;
   updateBatchStatus: VerificationBatch;
+  updateBudgetPlanItemPrice: BudgetPlanItem;
   updateCity: City;
   updateCompany: Company;
   updateDevice: Device;
@@ -515,6 +575,14 @@ export type Mutation = {
 export type MutationAddDevicesToBatchArgs = {
   batchId: Scalars['ID']['input'];
   deviceIds: Array<Scalars['ID']['input']>;
+};
+
+export type MutationApproveBudgetPlanArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type MutationCreateBudgetPlanArgs = {
+  input: CreateBudgetPlanInput;
 };
 
 export type MutationCreateCityArgs = {
@@ -539,6 +607,10 @@ export type MutationCreateMeasurementTypeArgs = {
 
 export type MutationCreateMetrologyControlTypeArgs = {
   input: CreateMetrologyControlTypeInput;
+};
+
+export type MutationCreatePricelistArgs = {
+  input: CreatePricelistInput;
 };
 
 export type MutationCreatePrimaryStandartArgs = {
@@ -573,6 +645,10 @@ export type MutationCreateVerificationOrganizationArgs = {
   input: CreateVerificationOrganizationInput;
 };
 
+export type MutationDeleteBudgetPlanArgs = {
+  id: Scalars['ID']['input'];
+};
+
 export type MutationDeleteCityArgs = {
   id: Scalars['ID']['input'];
 };
@@ -598,6 +674,10 @@ export type MutationDeleteMeasurementTypeArgs = {
 };
 
 export type MutationDeleteMetrologyControlTypeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type MutationDeletePricelistArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -665,6 +745,10 @@ export type MutationSyncDeviceWithArshinArgs = {
 export type MutationUpdateBatchStatusArgs = {
   id: Scalars['ID']['input'];
   status: Scalars['String']['input'];
+};
+
+export type MutationUpdateBudgetPlanItemPriceArgs = {
+  input: UpdateBudgetPlanItemPriceInput;
 };
 
 export type MutationUpdateCityArgs = {
@@ -759,6 +843,25 @@ export type PoolMetaTypeCounts = {
   typeName: Scalars['String']['output'];
 };
 
+export type Pricelist = {
+  __typename: 'Pricelist';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isRegulated: Scalars['Boolean']['output'];
+  title: Scalars['String']['output'];
+  verificationOrganization: VerificationOrganizationRelation;
+  verificationOrganizationId: Scalars['ID']['output'];
+  year: Scalars['Int']['output'];
+};
+
+export type PricelistItemInput = {
+  csmCode?: InputMaybe<Scalars['String']['input']>;
+  grsiNumber?: InputMaybe<Scalars['String']['input']>;
+  modelOrType?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  price: Scalars['Float']['input'];
+};
+
 export type PrimaryStandart = {
   __typename: 'PrimaryStandart';
   createdAt: Scalars['String']['output'];
@@ -813,6 +916,9 @@ export type QuantitiveItem = {
 
 export type Query = {
   __typename: 'Query';
+  budgetPlan: Maybe<BudgetPlan>;
+  budgetPlanItems: BudgetPlanItemsResponse;
+  budgetPlans: Array<BudgetPlan>;
   cities: Array<City>;
   city: City;
   companies: Array<Company>;
@@ -845,6 +951,8 @@ export type Query = {
   measurementTypes: Array<MeasurementType>;
   metrologyControlType: MetrologyControlType;
   metrologyControlTypes: Array<MetrologyControlType>;
+  pricelist: Maybe<Pricelist>;
+  pricelists: Array<Pricelist>;
   primaryStandart: PrimaryStandart;
   primaryStandarts: Array<PrimaryStandart>;
   productionSite: ProductionSiteSelectOption;
@@ -857,6 +965,17 @@ export type Query = {
   users: Array<User>;
   verificationOrganization: VerificationOrganization;
   verificationOrganizations: Array<VerificationOrganization>;
+};
+
+export type QueryBudgetPlanArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type QueryBudgetPlanItemsArgs = {
+  budgetId: Scalars['ID']['input'];
+  filter?: InputMaybe<BudgetPlanFilterInput>;
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
 };
 
 export type QueryCityArgs = {
@@ -953,6 +1072,10 @@ export type QueryMetrologyControlTypeArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type QueryPricelistArgs = {
+  id: Scalars['ID']['input'];
+};
+
 export type QueryPrimaryStandartArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1030,6 +1153,11 @@ export type SystemNotification = {
   title: Scalars['String']['output'];
   type: Scalars['String']['output'];
   userId: Maybe<Scalars['ID']['output']>;
+};
+
+export type UpdateBudgetPlanItemPriceInput = {
+  itemId: Scalars['ID']['input'];
+  manualPrice: Scalars['Float']['input'];
 };
 
 export type UpdateCityInput = {
@@ -1184,6 +1312,12 @@ export type VerificationOrganization = {
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+};
+
+export type VerificationOrganizationRelation = {
+  __typename: 'VerificationOrganizationRelation';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type VerificationRelation = {
@@ -1385,6 +1519,160 @@ export type GetBudgetMatrixQuery = {
     }>;
   };
 };
+
+export type GetBudgetPlansQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetBudgetPlansQuery = {
+  budgetPlans: Array<{
+    __typename: 'BudgetPlan';
+    id: string;
+    year: number;
+    status: string;
+    comment: string | null;
+    createdAt: string;
+  }>;
+};
+
+export type GetBudgetPlanQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type GetBudgetPlanQuery = {
+  budgetPlan: {
+    __typename: 'BudgetPlan';
+    id: string;
+    year: number;
+    status: string;
+    comment: string | null;
+  } | null;
+};
+
+export type GetBudgetPlanItemsQueryVariables = Exact<{
+  budgetId: Scalars['ID']['input'];
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+  filter?: InputMaybe<BudgetPlanFilterInput>;
+}>;
+
+export type GetBudgetPlanItemsQuery = {
+  budgetPlanItems: {
+    __typename: 'BudgetPlanItemsResponse';
+    totalCount: number;
+    items: Array<{
+      __typename: 'BudgetPlanItem';
+      id: string;
+      budgetPlanId: string;
+      deviceId: string;
+      deviceName: string;
+      deviceModel: string;
+      matchMethod: string;
+      basePrice: number;
+      vatAmount: number;
+      totalCost: number;
+      device: {
+        __typename: 'Device';
+        id: string;
+        serialNumber: string;
+        grsiNumber: string | null;
+        inventoryNumber: string | null;
+      };
+    }>;
+  };
+};
+
+export type GetPricelistsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetPricelistsQuery = {
+  pricelists: Array<{
+    __typename: 'Pricelist';
+    id: string;
+    verificationOrganizationId: string;
+    title: string;
+    year: number;
+    isRegulated: boolean;
+    createdAt: string;
+    verificationOrganization: {
+      __typename: 'VerificationOrganizationRelation';
+      id: string;
+      name: string;
+    };
+  }>;
+};
+
+export type GetPricelistQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type GetPricelistQuery = {
+  pricelist: {
+    __typename: 'Pricelist';
+    id: string;
+    title: string;
+    year: number;
+    isRegulated: boolean;
+  } | null;
+};
+
+export type CreateBudgetPlanMutationVariables = Exact<{
+  input: CreateBudgetPlanInput;
+}>;
+
+export type CreateBudgetPlanMutation = {
+  createBudgetPlan: {
+    __typename: 'BudgetPlan';
+    id: string;
+    year: number;
+    status: string;
+  };
+};
+
+export type UpdateBudgetPlanItemPriceMutationVariables = Exact<{
+  input: UpdateBudgetPlanItemPriceInput;
+}>;
+
+export type UpdateBudgetPlanItemPriceMutation = {
+  updateBudgetPlanItemPrice: {
+    __typename: 'BudgetPlanItem';
+    id: string;
+    basePrice: number;
+    vatAmount: number;
+    totalCost: number;
+    matchMethod: string;
+  };
+};
+
+export type ApproveBudgetPlanMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type ApproveBudgetPlanMutation = {
+  approveBudgetPlan: { __typename: 'BudgetPlan'; id: string; status: string };
+};
+
+export type DeleteBudgetPlanMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type DeleteBudgetPlanMutation = { deleteBudgetPlan: boolean };
+
+export type CreatePricelistMutationVariables = Exact<{
+  input: CreatePricelistInput;
+}>;
+
+export type CreatePricelistMutation = {
+  createPricelist: {
+    __typename: 'QueuedJobResponse';
+    jobId: string;
+    itemCount: number | null;
+    message: string;
+  };
+};
+
+export type DeletePricelistMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type DeletePricelistMutation = { deletePricelist: boolean };
 
 export type GetChatHistoryQueryVariables = Exact<{
   recipientId: Scalars['ID']['input'];
@@ -3281,6 +3569,653 @@ export const GetBudgetMatrixDocument = {
 } as unknown as DocumentNode<
   GetBudgetMatrixQuery,
   GetBudgetMatrixQueryVariables
+>;
+export const GetBudgetPlansDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetBudgetPlans' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'budgetPlans' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'year' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetBudgetPlansQuery, GetBudgetPlansQueryVariables>;
+export const GetBudgetPlanDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetBudgetPlan' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'budgetPlan' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'year' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetBudgetPlanQuery, GetBudgetPlanQueryVariables>;
+export const GetBudgetPlanItemsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetBudgetPlanItems' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'budgetId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'offset' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'filter' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'BudgetPlanFilterInput' },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'budgetPlanItems' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'budgetId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'budgetId' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'offset' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'offset' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'filter' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'filter' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'budgetPlanId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deviceId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deviceName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deviceModel' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'matchMethod' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'basePrice' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'vatAmount' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'totalCost' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'device' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'grsiNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'inventoryNumber' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetBudgetPlanItemsQuery,
+  GetBudgetPlanItemsQueryVariables
+>;
+export const GetPricelistsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetPricelists' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'pricelists' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'verificationOrganizationId' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'year' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'isRegulated' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'verificationOrganization' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetPricelistsQuery, GetPricelistsQueryVariables>;
+export const GetPricelistDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetPricelist' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'pricelist' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'year' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'isRegulated' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetPricelistQuery, GetPricelistQueryVariables>;
+export const CreateBudgetPlanDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateBudgetPlan' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'CreateBudgetPlanInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createBudgetPlan' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'year' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CreateBudgetPlanMutation,
+  CreateBudgetPlanMutationVariables
+>;
+export const UpdateBudgetPlanItemPriceDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateBudgetPlanItemPrice' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'UpdateBudgetPlanItemPriceInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateBudgetPlanItemPrice' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'basePrice' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'vatAmount' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCost' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'matchMethod' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  UpdateBudgetPlanItemPriceMutation,
+  UpdateBudgetPlanItemPriceMutationVariables
+>;
+export const ApproveBudgetPlanDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'ApproveBudgetPlan' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'approveBudgetPlan' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  ApproveBudgetPlanMutation,
+  ApproveBudgetPlanMutationVariables
+>;
+export const DeleteBudgetPlanDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteBudgetPlan' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteBudgetPlan' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  DeleteBudgetPlanMutation,
+  DeleteBudgetPlanMutationVariables
+>;
+export const CreatePricelistDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreatePricelist' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'CreatePricelistInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createPricelist' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'jobId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'itemCount' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CreatePricelistMutation,
+  CreatePricelistMutationVariables
+>;
+export const DeletePricelistDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeletePricelist' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deletePricelist' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  DeletePricelistMutation,
+  DeletePricelistMutationVariables
 >;
 export const GetChatHistoryDocument = {
   kind: 'Document',

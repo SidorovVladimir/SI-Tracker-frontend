@@ -294,6 +294,21 @@ export default function NavBar() {
 
                     <MenuItem
                       component={Link}
+                      to="/budget"
+                      onClick={handleAdminMenuClose}
+                    >
+                      <ListItemIcon sx={{ color: 'primary.main' }}>
+                        <AccountBalanceWallet fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText
+                        slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
+                      >
+                        💰 Планирование бюджета поверок2
+                      </ListItemText>
+                    </MenuItem>
+
+                    <MenuItem
+                      component={Link}
                       to={routes.productionAnalytics()}
                       onClick={handleAdminMenuClose}
                     >
