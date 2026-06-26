@@ -41,6 +41,7 @@ import {
   IconButton,
   MenuItem,
   Stack,
+  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -518,17 +519,18 @@ function UserForm({
 
   return (
     <Box>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 1.5, // Небольшой отступ до тумблера архива
+        }}
       >
         <Typography
           variant="h6"
-          gutterBottom
           color="primary"
-          sx={{ fontFamily: '"Inter", sans-serif', fontWeight: 700 }}
+          sx={{ fontFamily: '"Inter", sans-serif', fontWeight: 700, mb: 0 }}
         >
           Редактировать СИ
         </Typography>
@@ -537,7 +539,47 @@ function UserForm({
             <Close />
           </IconButton>
         </Tooltip>
-      </Stack>
+      </Box>
+
+      {/* Вторая строка: 🎯 ТУМБЛЕР АРХИВАЦИИ СТРОГО ПОД ЗАГОЛОВКОМ ДЛЯ ВСЕХ ЭКРАНОВ */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          mb: 3, // Стандартный отступ перед началом полей формы
+          p: 1,
+          bgcolor: 'grey.50', // Легкая аккуратная подложка, чтобы выделить статус СИ
+          borderRadius: 1.5,
+          width: 'fit-content', // Плашка облегает текст и не растягивается на весь экран
+        }}
+      >
+        <Switch
+          size="small"
+          checked={form.archived}
+          onChange={(e) => {
+            handleChange({
+              target: {
+                name: 'archived',
+                value: e.target.checked,
+              },
+            } as any);
+          }}
+          color="error"
+        />
+        <Typography
+          variant="caption"
+          sx={{
+            textTransform: 'uppercase',
+            fontSize: '0.7rem',
+            letterSpacing: '0.6px',
+            fontWeight: 700,
+            color: form.archived ? 'error.main' : 'text.secondary',
+          }}
+        >
+          {form.archived ? '📦 В архиве' : '🟢 Активен в системе'}
+        </Typography>
+      </Box>
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>
           <TextField

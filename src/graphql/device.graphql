@@ -67,7 +67,7 @@ query GetDevicesWithRelationsList(
       receiptDate
       manufacturer
       # verificationInterval
-      # archived
+      archived
       # nomenclature
       # comment
       status {
