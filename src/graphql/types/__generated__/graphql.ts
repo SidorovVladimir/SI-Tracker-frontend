@@ -103,9 +103,20 @@ export type BudgetPlan = {
   year: Scalars['Int']['output'];
 };
 
+export type BudgetPlanDistributionRow = {
+  __typename: 'BudgetPlanDistributionRow';
+  baseSubtotal: Scalars['Float']['output'];
+  count: Scalars['Int']['output'];
+  groupId: Scalars['ID']['output'];
+  groupName: Scalars['String']['output'];
+  totalCost: Scalars['Float']['output'];
+};
+
 export type BudgetPlanFilterInput = {
+  city?: InputMaybe<Scalars['ID']['input']>;
+  company?: InputMaybe<Scalars['ID']['input']>;
   matchMethod?: InputMaybe<Scalars['String']['input']>;
-  productionSiteId?: InputMaybe<Scalars['ID']['input']>;
+  productionSite?: InputMaybe<Scalars['ID']['input']>;
   searchQuery?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -127,6 +138,7 @@ export type BudgetPlanItem = {
 export type BudgetPlanItemsResponse = {
   __typename: 'BudgetPlanItemsResponse';
   items: Array<BudgetPlanItem>;
+  totalCostAll: Scalars['Float']['output'];
   totalCount: Scalars['Int']['output'];
 };
 
@@ -328,12 +340,16 @@ export type DeviceBatchSyncResult = {
 
 export type DeviceFilterInput = {
   city?: InputMaybe<Scalars['String']['input']>;
+  cityId?: InputMaybe<Scalars['ID']['input']>;
   company?: InputMaybe<Scalars['String']['input']>;
+  companyId?: InputMaybe<Scalars['ID']['input']>;
   dateEnd?: InputMaybe<Scalars['String']['input']>;
   dateStart?: InputMaybe<Scalars['String']['input']>;
   deviceName?: InputMaybe<Scalars['String']['input']>;
+  matchMethod?: InputMaybe<Scalars['String']['input']>;
   metrologyControle?: InputMaybe<Scalars['String']['input']>;
   productionSite?: InputMaybe<Scalars['String']['input']>;
+  productionSiteId?: InputMaybe<Scalars['ID']['input']>;
   serialNumber?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
 };
@@ -931,6 +947,7 @@ export type Query = {
   equipmentTypes: Array<EquipmentType>;
   executeRawSql: RawSqlResponse;
   getBudgetMatrix: BudgetMatrixResponse;
+  getBudgetPlanDistribution: Array<BudgetPlanDistributionRow>;
   getChatDialogs: Array<ChatDialog>;
   getChatHistory: Array<ChatMessage>;
   getChatUsers: Array<User>;
@@ -1016,6 +1033,11 @@ export type QueryGetBudgetMatrixArgs = {
   groupBy: BudgetGroupBy;
   siteId?: InputMaybe<Scalars['ID']['input']>;
   targetYear: Scalars['Int']['input'];
+};
+
+export type QueryGetBudgetPlanDistributionArgs = {
+  budgetId: Scalars['ID']['input'];
+  groupBy: Scalars['String']['input'];
 };
 
 export type QueryGetChatHistoryArgs = {
@@ -1558,11 +1580,10 @@ export type GetBudgetPlanItemsQuery = {
   budgetPlanItems: {
     __typename: 'BudgetPlanItemsResponse';
     totalCount: number;
+    totalCostAll: number;
     items: Array<{
       __typename: 'BudgetPlanItem';
       id: string;
-      budgetPlanId: string;
-      deviceId: string;
       deviceName: string;
       deviceModel: string;
       matchMethod: string;
@@ -1574,7 +1595,6 @@ export type GetBudgetPlanItemsQuery = {
         id: string;
         serialNumber: string;
         grsiNumber: string | null;
-        inventoryNumber: string | null;
       };
     }>;
   };
@@ -1673,6 +1693,22 @@ export type DeletePricelistMutationVariables = Exact<{
 }>;
 
 export type DeletePricelistMutation = { deletePricelist: boolean };
+
+export type GetBudgetPlanDistributionQueryVariables = Exact<{
+  budgetId: Scalars['ID']['input'];
+  groupBy: Scalars['String']['input'];
+}>;
+
+export type GetBudgetPlanDistributionQuery = {
+  getBudgetPlanDistribution: Array<{
+    __typename: 'BudgetPlanDistributionRow';
+    groupId: string;
+    groupName: string;
+    count: number;
+    baseSubtotal: number;
+    totalCost: number;
+  }>;
+};
 
 export type GetChatHistoryQueryVariables = Exact<{
   recipientId: Scalars['ID']['input'];
@@ -3752,14 +3788,6 @@ export const GetBudgetPlanItemsDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'budgetPlanId' },
-                      },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'deviceId' },
-                      },
-                      {
-                        kind: 'Field',
                         name: { kind: 'Name', value: 'deviceName' },
                       },
                       {
@@ -3800,10 +3828,6 @@ export const GetBudgetPlanItemsDocument = {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'grsiNumber' },
                             },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'inventoryNumber' },
-                            },
                           ],
                         },
                       },
@@ -3811,6 +3835,10 @@ export const GetBudgetPlanItemsDocument = {
                   },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'totalCostAll' },
+                },
               ],
             },
           },
@@ -4216,6 +4244,86 @@ export const DeletePricelistDocument = {
 } as unknown as DocumentNode<
   DeletePricelistMutation,
   DeletePricelistMutationVariables
+>;
+export const GetBudgetPlanDistributionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetBudgetPlanDistribution' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'budgetId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'groupBy' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getBudgetPlanDistribution' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'budgetId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'budgetId' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'groupBy' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'groupBy' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'groupId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'groupName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'count' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'baseSubtotal' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCost' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetBudgetPlanDistributionQuery,
+  GetBudgetPlanDistributionQueryVariables
 >;
 export const GetChatHistoryDocument = {
   kind: 'Document',
