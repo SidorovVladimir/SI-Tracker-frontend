@@ -406,7 +406,7 @@ function UserForm({
         close();
       },
       onError: (error) => {
-        enqueueSnackbar(`Ошибка создания: ${error.message}`, {
+        enqueueSnackbar(`Ошибка удаления: ${error.message}`, {
           variant: 'error',
         });
       },

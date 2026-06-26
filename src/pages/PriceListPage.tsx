@@ -20,6 +20,7 @@ import {
   GetPricelistsDocument,
   DeletePricelistDocument,
 } from '../graphql/types/__generated__/graphql';
+import { formatDate } from '../utils/date';
 
 export const PricelistListPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -119,9 +120,7 @@ export const PricelistListPage: React.FC = () => {
                       sx={{ fontWeight: 'bold' }}
                     />
                   </TableCell>
-                  <TableCell>
-                    {new Date(list.createdAt).toLocaleDateString('ru-RU')}
-                  </TableCell>
+                  <TableCell>{formatDate(list.createdAt)}</TableCell>
                   <TableCell align="right">
                     <Button
                       variant="outlined"

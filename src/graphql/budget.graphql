@@ -61,23 +61,20 @@ query GetBudgetPlanItems(
   ) {
     items {
       id
-      budgetPlanId
-      deviceId
       deviceName
       deviceModel
       matchMethod
       basePrice
       vatAmount
       totalCost
-      # Запрашиваем вложенный прибор, который бэкенд собрал через with.device
       device {
         id
         serialNumber
         grsiNumber
-        inventoryNumber
       }
     }
     totalCount
+    totalCostAll # 🎯 ДОБАВЛЕНО: Забираем общую сумму отфильтрованного города/компании со всей базы!
   }
 }
 
@@ -154,4 +151,14 @@ mutation CreatePricelist($input: CreatePricelistInput!) {
 # 6. Удалить прейскурант ЦСМ
 mutation DeletePricelist($id: ID!) {
   deletePricelist(id: $id)
+}
+
+query GetBudgetPlanDistribution($budgetId: ID!, $groupBy: String!) {
+  getBudgetPlanDistribution(budgetId: $budgetId, groupBy: $groupBy) {
+    groupId # 🎯 Забираем UUID из базы
+    groupName
+    count
+    baseSubtotal
+    totalCost
+  }
 }

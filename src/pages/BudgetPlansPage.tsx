@@ -21,9 +21,14 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
-import { GetBudgetPlansDocument } from '../graphql/types/__generated__/graphql';
-import { useQuery } from '@apollo/client/react';
+import {
+  DeleteBudgetPlanDocument,
+  GetBudgetPlansDocument,
+} from '../graphql/types/__generated__/graphql';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { CreateBudgetPlanModal } from '../components/modals/CreateBudgetPlanModal';
+import { enqueueSnackbar } from 'notistack';
+import { formatDate } from '../utils/date';
 
 export const BudgetPlansPage: React.FC = () => {
   const navigate = useNavigate();
@@ -35,6 +40,33 @@ export const BudgetPlansPage: React.FC = () => {
   const { data, loading, error } = useQuery(GetBudgetPlansDocument, {
     fetchPolicy: 'network-only',
   });
+
+  const [deleteBudgetPlan, { loading: deleting }] = useMutation(
+    DeleteBudgetPlanDocument,
+    {
+      // После удаления заставляем Apollo обновить список бюджетов на экране
+      refetchQueries: [{ query: GetBudgetPlansDocument }],
+    }
+  );
+
+  const handleDeletePlan = async (id: string, year: number) => {
+    if (
+      window.confirm(
+        `Вы уверены, что хотите полностью удалить план бюджета на ${year} год? Это действие сотрет все сохраненные плановые цены для приборов.`
+      )
+    ) {
+      try {
+        await deleteBudgetPlan({ variables: { id } });
+        enqueueSnackbar(`План бюджета на ${year} год успешно удален`, {
+          variant: 'success',
+        });
+      } catch (err: any) {
+        enqueueSnackbar(`Ошибка удаления бюджета: ${err.message}`, {
+          variant: 'error',
+        });
+      }
+    }
+  };
 
   if (loading)
     return (
@@ -141,20 +173,37 @@ export const BudgetPlansPage: React.FC = () => {
                   <TableCell sx={{ color: 'text.secondary' }}>
                     {plan.comment || '—'}
                   </TableCell>
-                  <TableCell>
-                    {new Date(plan.createdAt).toLocaleDateString('ru-RU')}
-                  </TableCell>
+                  <TableCell>{formatDate(plan.createdAt)}</TableCell>
                   <TableCell align="right">
-                    {/* Переход на страницу детализации конкретного бюджета, которую мы проектировали ранее */}
-                    <IconButton
-                      color="primary"
-                      onClick={() =>
-                        navigate(`/budget/plans/details/${plan.id}`)
-                      }
-                      title="Открыть детализацию"
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: 1,
+                      }}
                     >
-                      <ArrowForwardIcon />
-                    </IconButton>
+                      {/* 🎯 НОВАЯ КНОПКА УДАЛЕНИЯ БЮДЖЕТА */}
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        disabled={deleting}
+                        onClick={() => handleDeletePlan(plan.id, plan.year)}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        Удалить
+                      </Button>
+
+                      <IconButton
+                        color="primary"
+                        onClick={() =>
+                          navigate(`/budget/plans/details/${plan.id}`)
+                        }
+                        title="Открыть детализацию"
+                      >
+                        <ArrowForwardIcon />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))
