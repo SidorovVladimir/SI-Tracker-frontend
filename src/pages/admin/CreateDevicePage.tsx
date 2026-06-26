@@ -314,7 +314,7 @@ export default function CreateDevicePage(props: {
             autoFocus={true}
           />
           <TextField
-            label="Модель"
+            label="Тип"
             name="model"
             value={form.model}
             onChange={handleChange}

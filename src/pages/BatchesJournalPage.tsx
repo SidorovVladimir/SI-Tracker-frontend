@@ -813,7 +813,8 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                   disabled={
                                     !!batchJobs[batch.id] ||
                                     isSyncing ||
-                                    isBatchSyncing
+                                    isBatchSyncing ||
+                                    isDeviceVerified
                                   }
                                   onClick={() =>
                                     handleOpenVerificationModal(

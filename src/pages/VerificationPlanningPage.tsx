@@ -27,6 +27,7 @@ import { enqueueSnackbar } from 'notistack';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import { QrCode } from '@mui/icons-material';
+import { formatSentenceCase } from '../utils/capitalize';
 
 export const VerificationPlanningPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'info' | 'create' | 'edit' | null>(
@@ -441,7 +442,7 @@ export const VerificationPlanningPage: React.FC = () => {
                     <Tab
                       key={type.id}
                       value={type.id}
-                      label={`${type.name} (${count})`}
+                      label={`${formatSentenceCase(type.name)} (${count})`}
                       sx={{ textTransform: 'none', fontWeight: 'medium' }}
                     />
                   );

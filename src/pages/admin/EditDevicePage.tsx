@@ -563,7 +563,7 @@ function UserForm({
             }}
           />
           <TextField
-            label="Модель"
+            label="Тип"
             name="model"
             value={form.model}
             onChange={handleChange}

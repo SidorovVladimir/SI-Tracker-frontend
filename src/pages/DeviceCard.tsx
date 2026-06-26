@@ -172,7 +172,7 @@ export default function DeviceCard(props: {
       <Divider sx={{ mb: 2 }} />
 
       <Stack spacing={0.5} mb={3}>
-        <InfoRow label="Модель" value={device.model} />
+        <InfoRow label="Тип" value={device.model} />
 
         <InfoRow label="Зав. №" value={device.serialNumber} />
         <InfoRow label="Инвентарный номер" value={device.inventoryNumber} />

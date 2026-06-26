@@ -17,6 +17,7 @@ import {
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import AndroidIcon from '@mui/icons-material/Android';
 import PushPinIcon from '@mui/icons-material/PushPin';
+import { formatSentenceCase, formatStrictUpper } from '../utils/capitalize';
 
 interface PlanningPoolTableProps {
   devices: any[];
@@ -78,7 +79,7 @@ export const PlanningPoolTable: React.FC<PlanningPoolTableProps> = ({
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">Выбор</TableCell>
-              <TableCell>Наименование / Модель</TableCell>
+              <TableCell>Наименование / Тип</TableCell>
               <TableCell>Заводской №</TableCell>
               <TableCell>Тип Контроля</TableCell>
               <TableCell>Годен до</TableCell>
@@ -116,7 +117,7 @@ export const PlanningPoolTable: React.FC<PlanningPoolTableProps> = ({
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                        {device.name}
+                        {formatSentenceCase(device.name)}
                       </Typography>
                       {device.isOverdue && !device.isManualPlacement && (
                         <Tooltip
@@ -131,7 +132,7 @@ export const PlanningPoolTable: React.FC<PlanningPoolTableProps> = ({
                       )}
                     </Box>
                     <Typography variant="caption" color="text.secondary">
-                      {device.model}
+                      {formatStrictUpper(device.model)}
                     </Typography>
                   </TableCell>
                   <TableCell
@@ -286,14 +287,14 @@ export const PlanningPoolTable: React.FC<PlanningPoolTableProps> = ({
 
               {/* Паспортные данные в центре */}
               <Typography variant="body1" sx={{ fontWeight: 'bold', mt: 0.5 }}>
-                {device.name}
+                {formatSentenceCase(device.name)}
               </Typography>
               <Typography
                 variant="body2"
                 color="text.secondary"
                 sx={{ mb: 1.5 }}
               >
-                Модель: {device.model}
+                Тип: {formatStrictUpper(device.model)}
               </Typography>
 
               {/* Нижняя строчка с датами и маркером расчета */}
