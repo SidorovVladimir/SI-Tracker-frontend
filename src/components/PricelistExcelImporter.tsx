@@ -23,15 +23,14 @@ import {
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useMutation, useQuery } from '@apollo/client/react';
-// Импортируйте ваши сгенерированные документы из кодогенератора
 import {
   CreatePricelistDocument,
   GetPricelistsDocument,
   GetVerificationOrganizationsListDocument,
 } from '../graphql/types/__generated__/graphql';
 import { useSocketApp } from '../context/SocketContext';
+import { formatStrictUpper } from '../utils/capitalize';
 
-// Поля прейскуранта ЦСМ для сопоставления с Excel
 const PRICELIST_FIELDS = [
   { key: 'name', label: 'Наименование СИ из прайса *', required: true },
   { key: 'price', label: 'Цена без НДС *', required: true },
@@ -87,7 +86,6 @@ export const PricelistExcelImporter: React.FC = () => {
           autoHideDuration: 10000,
         });
 
-        // 🔥 МАГИЯ СОКЕТОВ: Регистрируем задачу в глобальном виджете GlobalJobWatcher!
         if (jobId) {
           addRunningJob(jobId, 'pricelist-import');
         }
@@ -118,7 +116,6 @@ export const PricelistExcelImporter: React.FC = () => {
     setFileName(file.name);
     setIsFileReading(true);
 
-    // Код для фонового потока (Парсинг Excel)
     const workerCode = `
       importScripts("${window.location.origin}/xlsx.full.min.js");
       self.addEventListener('message', (e) => {
@@ -195,7 +192,6 @@ export const PricelistExcelImporter: React.FC = () => {
       );
       setExcelHeaders(headers);
 
-      // Автоматический маппинг полей прайса
       const initialMapping: Record<string, string> = {};
       PRICELIST_FIELDS.forEach((sys) => {
         const exactMatch = headers.find((h: any) => {
@@ -233,7 +229,6 @@ export const PricelistExcelImporter: React.FC = () => {
     setMapping((prev) => ({ ...prev, [sysKey]: excelHeader }));
   };
   const handleStartImport = async () => {
-    // 1. Валидация метаданных
     if (!title.trim() || !verificationOrganizationId) {
       enqueueSnackbar(
         'Заполните название прейскуранта и выберите организацию ЦСМ',
@@ -265,21 +260,17 @@ export const PricelistExcelImporter: React.FC = () => {
 
     const dataStartShift = isTechnicalRow ? 2 : 1;
 
-    // 3. Трансформация строк Excel в JSON-объекты для мутации
     const itemsPayload = excelRows
       .slice(headerRowIndex + dataStartShift)
       .map((row) => {
-        // Находим индекс колонки наименования СИ и вытаскиваем имя
         const nameHeader = mapping['name'];
         const nameIndex = excelHeaders.indexOf(nameHeader);
         const nameValue = nameIndex !== -1 ? row[nameIndex] : null;
 
-        // Находим индекс колонки цены и вытаскиваем сырое значение
         const priceHeader = mapping['price'];
         const priceIndex = excelHeaders.indexOf(priceHeader);
         const rawPrice = priceIndex !== -1 ? row[priceIndex] : null;
 
-        // Очищаем цену от пробелов, букв и валютных знаков (₽, руб)
         let cleanPrice = 0;
         if (typeof rawPrice === 'string') {
           cleanPrice =
@@ -289,7 +280,6 @@ export const PricelistExcelImporter: React.FC = () => {
           cleanPrice = rawPrice;
         }
 
-        // Вытаскиваем опциональные поля прейскуранта
         const grsiHeader = mapping['grsiNumber'];
         const grsiIndex = excelHeaders.indexOf(grsiHeader);
         const grsiValue = grsiIndex !== -1 ? row[grsiIndex] : undefined;
@@ -334,8 +324,6 @@ export const PricelistExcelImporter: React.FC = () => {
               : undefined,
         };
       })
-      // Отсекаем пустые строчки в Excel, объединенные строки-рубрики разделов и мусор
-      // Позиция валидна, только если имя длиннее 3 символов и цена строго больше нуля
       .filter((item) => item.name && item.name.length > 3 && item.price > 0);
 
     if (itemsPayload.length === 0) {
@@ -424,10 +412,9 @@ export const PricelistExcelImporter: React.FC = () => {
               ) : organizations.length === 0 ? (
                 <MenuItem disabled>Список организаций пуст</MenuItem>
               ) : (
-                // ДИНАМИЧЕСКИЙ ВЫВОД ИЗ БАЗЫ ДАННЫХ
                 organizations.map((org) => (
                   <MenuItem key={org.id} value={org.id}>
-                    {org.name}
+                    {formatStrictUpper(org.name)}
                   </MenuItem>
                 ))
               )}

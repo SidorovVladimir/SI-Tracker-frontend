@@ -195,8 +195,11 @@ export type CreateBatchInput = {
 };
 
 export type CreateBudgetPlanInput = {
+  cityId?: InputMaybe<Scalars['ID']['input']>;
   comment?: InputMaybe<Scalars['String']['input']>;
+  companyId?: InputMaybe<Scalars['ID']['input']>;
   pricelistIds: Array<Scalars['ID']['input']>;
+  productionSiteId?: InputMaybe<Scalars['ID']['input']>;
   year: Scalars['Int']['input'];
 };
 
@@ -339,6 +342,7 @@ export type DeviceBatchSyncResult = {
 };
 
 export type DeviceFilterInput = {
+  archived?: InputMaybe<Scalars['Boolean']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   cityId?: InputMaybe<Scalars['ID']['input']>;
   company?: InputMaybe<Scalars['String']['input']>;
@@ -346,6 +350,7 @@ export type DeviceFilterInput = {
   dateEnd?: InputMaybe<Scalars['String']['input']>;
   dateStart?: InputMaybe<Scalars['String']['input']>;
   deviceName?: InputMaybe<Scalars['String']['input']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']['input']>;
   matchMethod?: InputMaybe<Scalars['String']['input']>;
   metrologyControle?: InputMaybe<Scalars['String']['input']>;
   productionSite?: InputMaybe<Scalars['String']['input']>;
@@ -365,6 +370,7 @@ export type DeviceInBatch = {
 
 export type DeviceTableItem = {
   __typename: 'DeviceTableItem';
+  archived: Maybe<Scalars['Boolean']['output']>;
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inventoryNumber: Maybe<Scalars['String']['output']>;
@@ -1957,6 +1963,7 @@ export type GetDevicesWithRelationsListQuery = {
       inventoryNumber: string | null;
       receiptDate: string | null;
       manufacturer: string | null;
+      archived: boolean | null;
       status: { __typename: 'Status'; name: string };
       productionSite: {
         __typename: 'ProductionSiteRelation';
@@ -5284,6 +5291,10 @@ export const GetDevicesWithRelationsListDocument = {
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'manufacturer' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'archived' },
                       },
                       {
                         kind: 'Field',

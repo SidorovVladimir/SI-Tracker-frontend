@@ -60,6 +60,7 @@ interface FilterState {
   metrologyControle: string;
   dateStart: string | null;
   dateEnd: string | null;
+  archivedStatus: 'active' | 'archived' | 'all';
 }
 
 const initialFilters: FilterState = {
@@ -72,6 +73,7 @@ const initialFilters: FilterState = {
   metrologyControle: '',
   dateStart: null,
   dateEnd: null,
+  archivedStatus: 'active',
 };
 
 const loadFilters = (): FilterState => {
@@ -155,6 +157,8 @@ export default function DevicesPage() {
           metrologyControle: filters.metrologyControle || undefined,
           dateStart: filters.dateStart || undefined,
           dateEnd: filters.dateEnd || undefined,
+          includeArchived: filters.archivedStatus === 'all',
+          archived: filters.archivedStatus === 'archived' ? true : false,
         },
       },
       fetchPolicy: 'network-only',
@@ -778,6 +782,63 @@ export default function DevicesPage() {
                         </option>
                       ))}
                     </TextField>
+
+                    <TextField
+                      label="Отображение"
+                      slotProps={{
+                        select: { native: true },
+                        inputLabel: { shrink: true },
+                      }}
+                      size="small"
+                      select
+                      value={filters.archivedStatus}
+                      onChange={(e) =>
+                        handleFilterChange('archivedStatus', e.target.value)
+                      }
+                      sx={{
+                        minWidth: 140,
+                        '& .MuiInputBase-input': {
+                          textTransform: 'uppercase',
+                          fontSize: '0.77rem',
+                          letterSpacing: '0.55px',
+                          fontWeight: 500,
+                        },
+                      }}
+                    >
+                      <option
+                        value="active"
+                        style={{
+                          textTransform: 'uppercase',
+                          fontSize: '0.77rem',
+                          letterSpacing: '0.55px',
+                          fontWeight: 500,
+                        }}
+                      >
+                        АКТИВНЫЕ СИ
+                      </option>
+                      <option
+                        value="archived"
+                        style={{
+                          textTransform: 'uppercase',
+                          fontSize: '0.77rem',
+                          letterSpacing: '0.55px',
+                          fontWeight: 500,
+                        }}
+                      >
+                        ТОЛЬКО АРХИВ
+                      </option>
+                      <option
+                        value="all"
+                        style={{
+                          textTransform: 'uppercase',
+                          fontSize: '0.77rem',
+                          letterSpacing: '0.55px',
+                          fontWeight: 500,
+                        }}
+                      >
+                        ВСЕ ПРИБОРЫ
+                      </option>
+                    </TextField>
                     {/* 📅 СРОК ДЕЙСТВИЯ С... */}
                     <TextField
                       label="Срок действия с..."
@@ -1235,6 +1296,59 @@ export default function DevicesPage() {
                       {cleanSpaces(status.name)}
                     </MenuItem>
                   ))}
+                </TextField>
+
+                <TextField
+                  label="Отображение"
+                  size="small"
+                  select
+                  value={filters.archivedStatus}
+                  onChange={(e) =>
+                    handleFilterChange('archivedStatus', e.target.value)
+                  }
+                  sx={{
+                    minWidth: 140,
+                    '& .MuiInputBase-input': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.77rem',
+                      letterSpacing: '0.55px',
+                      fontWeight: 500,
+                    },
+                  }}
+                >
+                  <MenuItem
+                    value="active"
+                    sx={{
+                      textTransform: 'uppercase',
+                      fontSize: '0.77rem',
+                      letterSpacing: '0.55px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    АКТИВНЫЕ СИ
+                  </MenuItem>
+                  <MenuItem
+                    value="archived"
+                    sx={{
+                      textTransform: 'uppercase',
+                      fontSize: '0.77rem',
+                      letterSpacing: '0.55px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    ТОЛЬКО АРХИВ
+                  </MenuItem>
+                  <MenuItem
+                    value="all"
+                    sx={{
+                      textTransform: 'uppercase',
+                      fontSize: '0.77rem',
+                      letterSpacing: '0.55px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    ВСЕ ПРИБОРЫ
+                  </MenuItem>
                 </TextField>
 
                 {/* 📅 СРОК ДЕЙСТВИЯ С... */}
