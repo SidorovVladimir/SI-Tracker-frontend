@@ -113,6 +113,9 @@ mutation CreateBudgetPlan($input: CreateBudgetPlanInput!) {
     id
     year
     status
+    comment
+    createdAt
+    updatedAt
   }
 }
 
