@@ -34,6 +34,8 @@ export const MatchMethodChip: React.FC<MatchMethodChipProps> = ({ method }) => {
           variant="outlined"
         />
       );
+    case 'historical':
+      return <Chip label="По истории" color="info" size="small" />;
     case 'manual':
       return <Chip label="Ручной ввод" color="secondary" size="small" />;
     case 'not_found':
