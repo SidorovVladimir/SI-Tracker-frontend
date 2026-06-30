@@ -242,7 +242,22 @@ export default function NavBar() {
                     sx={{ mt: 1 }}
                     slotProps={{
                       paper: {
-                        sx: { borderRadius: 2, boxShadow: 4, minWidth: 250 },
+                        sx: {
+                          borderRadius: 2,
+                          boxShadow: 4,
+                          // На десктопе ширина 250px, на мобильных подгоняем под экран смартфона
+                          minWidth: { xs: 'calc(100vw - 32px)', sm: 250 },
+                          maxWidth: { xs: 'calc(100vw - 32px)', sm: 350 },
+                          // ✅ РАЗРЕШАЕМ ПЕРЕНОС СЛОВ ДЛЯ МОБИЛОК:
+                          '& .MuiMenuItem-root': {
+                            whiteSpace: 'normal',
+                            py: 1.2, // Немного увеличиваем вертикальные отступы для удобного тапа
+                            alignItems: 'flex-start', // Иконки останутся сверху при переносе текста
+                          },
+                          '& .MuiTypography-root': {
+                            whiteSpace: 'normal',
+                          },
+                        },
                       },
                     }}
                     transformOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -288,7 +303,7 @@ export default function NavBar() {
                       <ListItemText
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
-                        💰 Планирование бюджета поверок
+                        📊 Матрица затрат и планирование СИ
                       </ListItemText>
                     </MenuItem>
 
@@ -303,7 +318,7 @@ export default function NavBar() {
                       <ListItemText
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
-                        💰 Планирование бюджета поверок2
+                        💰 Планирование бюджета поверок
                       </ListItemText>
                     </MenuItem>
 

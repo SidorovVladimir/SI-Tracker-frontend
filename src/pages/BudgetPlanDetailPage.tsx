@@ -21,6 +21,8 @@ import {
   Stack,
   useMediaQuery,
   useTheme,
+  Divider,
+  Dialog,
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -30,12 +32,14 @@ import { MatchMethodChip } from '../components/MatchMethodChip';
 import { InlinePriceEdit } from '../components/InlinePriceEdit';
 import {
   ApproveBudgetPlanDocument,
-  GetBudgetPlanItemsDocument,
   UpdateBudgetPlanItemPriceDocument,
   GetCompaniesDocument,
   GetSitiesDocument,
   GetProductionSitesDocument,
+  GetBudgetPlanDetailsDocument,
 } from '../graphql/types/__generated__/graphql';
+import { ConfirmationDialog } from '../components/modals/ConfirmationDialog';
+import { PriceHistoryTrend } from '../components/PriceHistoryTrend';
 
 // 🎯 Переводим стейт фильтров на ID
 interface BudgetFilterState {
@@ -58,11 +62,15 @@ export const BudgetPlanDetailPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+
   const [filters, setFilters] = useState<BudgetFilterState>(initialFilters);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10,
   });
+
+  const [trendSku, setTrendSku] = useState<string | null>(null);
 
   const [inputValue, setInputValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -79,6 +87,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
   const { data: citiesData } = useQuery(GetSitiesDocument);
   const { data: companiesData } = useQuery(GetCompaniesDocument);
   const { data: productionSiteData } = useQuery(GetProductionSitesDocument);
+
   // 1. Мемоизация базовых справочников
   const cities = useMemo(() => {
     const raw = citiesData?.cities || [];
@@ -93,7 +102,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
   // 2. СТРОГИЙ КАСКАД ПО ID: Фильтруем участки по выбранным cityId и companyId
   const filteredProductionSites = useMemo(() => {
     const rawSites = productionSiteData?.productionSites || [];
-
     let filtered = rawSites;
     if (filters.cityId) {
       filtered = filtered.filter((site) => site.cityId === filters.cityId);
@@ -103,7 +111,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
         (site) => site.companyId === filters.companyId
       );
     }
-
     return [...filtered].sort((a, b) =>
       (a.name || '').localeCompare(b.name || '')
     );
@@ -116,8 +123,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
   ) => {
     setFilters((prev) => {
       const updated = { ...prev, [field]: value };
-
-      // Сбрасываем зависимые участки, если поменялся город или компания холдинга
       if (field === 'cityId' || field === 'companyId') {
         updated.productionSiteId = '';
       }
@@ -128,7 +133,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
 
   // 4. Основной запрос строк бюджета на основе UUID-инпутов
   const { data, loading, error, refetch } = useQuery(
-    GetBudgetPlanItemsDocument,
+    GetBudgetPlanDetailsDocument,
     {
       variables: {
         budgetId: id || '',
@@ -150,7 +155,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
   const [updatePrice] = useMutation(UpdateBudgetPlanItemPriceDocument);
   const [approveBudget] = useMutation(ApproveBudgetPlanDocument);
 
-  // Мемоизация результатов строго от бэкенда
   const planItems = useMemo(() => data?.budgetPlanItems.items || [], [data]);
   const totalCount = useMemo(
     () => data?.budgetPlanItems.totalCount || 0,
@@ -161,6 +165,9 @@ export const BudgetPlanDetailPage: React.FC = () => {
     [data]
   );
 
+  const budgetStatus = useMemo(() => data?.budgetPlan?.status || '', [data]);
+  const isApproved = budgetStatus === 'approved';
+
   const handleUpdatePrice = async (itemId: string, newPrice: number) => {
     await updatePrice({
       variables: { input: { itemId, manualPrice: newPrice } },
@@ -168,14 +175,13 @@ export const BudgetPlanDetailPage: React.FC = () => {
     refetch();
   };
 
-  const handleApproveBudget = async () => {
-    if (
-      window.confirm(
-        'Вы уверены, что хотите утвердить бюджет? Это действие заморозит цены прошлых лет намертво.'
-      )
-    ) {
+  const handleConfirmApprove = async () => {
+    try {
       await approveBudget({ variables: { id: id || '' } });
+      setApproveDialogOpen(false);
       navigate('/budget/plans');
+    } catch (err: any) {
+      console.error(err);
     }
   };
 
@@ -187,7 +193,10 @@ export const BudgetPlanDetailPage: React.FC = () => {
     );
   }
   return (
-    <Container maxWidth="xl" sx={{ mt: { xs: 2, md: 4 }, mb: 4 }}>
+    <Container
+      maxWidth="xl"
+      sx={{ mt: { xs: 2, md: 4 }, mb: 4, px: { xs: 1, sm: 2 } }}
+    >
       {/* Шапка с живым динамическим расчетом бюджета от Postgres */}
       <Paper
         variant="outlined"
@@ -196,9 +205,9 @@ export const BudgetPlanDetailPage: React.FC = () => {
           mb: 2,
           borderRadius: 2,
           display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
+          flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between',
-          alignItems: isMobile ? 'stretch' : 'center',
+          alignItems: { xs: 'stretch', sm: 'center' },
           gap: 2,
           bgcolor: 'background.paper',
         }}
@@ -218,7 +227,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
           </IconButton>
           <Box>
             <Typography
-              variant={isMobile ? 'subtitle1' : 'h6'}
+              variant="subtitle1"
               sx={{ fontWeight: 'bold', lineHeight: 1.2 }}
             >
               🎯 Планирование бюджета
@@ -234,10 +243,10 @@ export const BudgetPlanDetailPage: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 3,
+            gap: { xs: 2, sm: 3 },
           }}
         >
-          <Box sx={{ textAlign: isMobile ? 'left' : 'right' }}>
+          <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
             <Typography
               variant="caption"
               color="text.secondary"
@@ -247,8 +256,12 @@ export const BudgetPlanDetailPage: React.FC = () => {
               ПЛАНОВАЯ СУММА С НДС:
             </Typography>
             <Typography
-              variant={isMobile ? 'h6' : 'h5'}
-              sx={{ fontWeight: 'black', color: 'primary.main' }}
+              variant={isMobile ? 'subtitle1' : 'h5'}
+              sx={{
+                fontWeight: 'black',
+                color: 'primary.main',
+                whiteSpace: 'nowrap',
+              }}
             >
               {totalCostFiltered.toLocaleString('ru-RU', {
                 style: 'currency',
@@ -258,13 +271,15 @@ export const BudgetPlanDetailPage: React.FC = () => {
           </Box>
           <Button
             variant="contained"
-            color="success"
+            color={isApproved ? 'success' : 'primary'}
             size={isMobile ? 'medium' : 'large'}
             startIcon={<LockIcon />}
-            onClick={handleApproveBudget}
+            // Кнопка блокируется, если бюджет уже утвержден или идет загрузка
+            disabled={isApproved || loading}
+            onClick={() => setApproveDialogOpen(true)}
             sx={{ fontWeight: 'bold', textTransform: 'none', borderRadius: 2 }}
           >
-            Утвердить
+            {isApproved ? 'Утвержден' : 'Утвердить'}
           </Button>
         </Box>
       </Paper>
@@ -275,7 +290,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
         sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: 'grey.50' }}
       >
         <Stack
-          direction={isMobile ? 'column' : 'row'}
+          direction={{ xs: 'column', md: 'row' }}
           spacing={1.5}
           flexWrap="wrap"
           useFlexGap
@@ -287,7 +302,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
             select
             value={filters.cityId}
             onChange={(e) => handleFilterChange('cityId', e.target.value)}
-            sx={{ minWidth: isMobile ? '100%' : 140, flex: 1 }}
+            sx={{ minWidth: { xs: '100%', md: 140 }, flex: 1 }}
           >
             <MenuItem value="">
               <em>Все города</em>
@@ -306,7 +321,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
             select
             value={filters.companyId}
             onChange={(e) => handleFilterChange('companyId', e.target.value)}
-            sx={{ minWidth: isMobile ? '100%' : 160, flex: 1 }}
+            sx={{ minWidth: { xs: '100%', md: 160 }, flex: 1 }}
           >
             <MenuItem value="">
               <em>Все организации</em>
@@ -328,7 +343,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
               handleFilterChange('productionSiteId', e.target.value)
             }
             disabled={filteredProductionSites.length === 0}
-            sx={{ minWidth: isMobile ? '100%' : 180, flex: 1 }}
+            sx={{ minWidth: { xs: '100%', md: 180 }, flex: 1 }}
           >
             <MenuItem value="">
               <em>Все участки</em>
@@ -346,7 +361,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
             size="small"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            sx={{ minWidth: isMobile ? '100%' : 220, flex: 1.5 }}
+            sx={{ minWidth: { xs: '100%', md: 220 }, flex: 1.5 }}
           />
 
           {/* 📊 ФИЛЬТР МЕТОДА МЭТЧИНГА */}
@@ -356,7 +371,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
             size="small"
             value={filters.matchMethod}
             onChange={(e) => handleFilterChange('matchMethod', e.target.value)}
-            sx={{ minWidth: isMobile ? '100%' : 150, flex: 1 }}
+            sx={{ minWidth: { xs: '100%', md: 150 }, flex: 1 }}
           >
             <MenuItem key="all" value="">
               Все статусы
@@ -397,7 +412,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
               sx={{
                 textTransform: 'none',
                 fontWeight: 'bold',
-                minWidth: isMobile ? '100%' : 'auto',
+                minWidth: { xs: '100%', md: 'auto' },
               }}
             >
               ❌ Сбросить
@@ -405,8 +420,22 @@ export const BudgetPlanDetailPage: React.FC = () => {
           )}
         </Stack>
       </Paper>
-      {/* Рабочая область таблицы с оверлеем загрузки */}
-      <Box sx={{ position: 'relative' }}>
+      {/* Рабочая область с изолированным скроллом и фиксированной пагинацией */}
+      <Box
+        sx={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          // На десктопе задаем фиксированную высоту контейнера для изоляции скролла
+          height: { xs: 'auto', md: 'calc(100vh - 320px)' },
+          minHeight: { md: 450 },
+          bgcolor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 2,
+          overflow: 'hidden',
+        }}
+      >
         {/* Матовый мягкий оверлей во время дозагрузки данных пагинации */}
         {loading && (
           <Box
@@ -422,110 +451,403 @@ export const BudgetPlanDetailPage: React.FC = () => {
               justifyContent: 'center',
               alignItems: 'center',
               backdropFilter: 'blur(1px)',
-              borderRadius: 2,
             }}
           >
             <CircularProgress size={40} />
           </Box>
         )}
 
-        <TableContainer
-          component={Paper}
-          variant="outlined"
-          sx={{ borderRadius: 2 }}
+        {/* 1. КОНТЕНТНАЯ ЗОНА С СОБСТВЕННЫМ СКРОЛЛОМ */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            // На десктопе контент скроллится внутри своего окна. На мобильных — обычный ленточный скролл страницы.
+            overflowY: { xs: 'visible', md: 'auto' },
+            p: { xs: 1.5, md: 0 },
+          }}
         >
-          <Table size="small" stickyHeader>
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
-                <TableCell sx={{ fontWeight: 'bold' }}>
-                  Наименование оборудования
-                </TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Модель / Тип</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>
-                  Заводской № / ГРСИ
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                  Статус мэтчинга
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                  Цена без НДС
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                  Итого с НДС (20%)
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {planItems.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    align="center"
-                    sx={{ py: 4, color: 'text.secondary', fontStyle: 'italic' }}
+          {/* 🖥️ ДЕСКТОПНАЯ ВЕРСИЯ ТАБЛИЦЫ: Показывается только на md+ */}
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <TableContainer component={Box} sx={{ maxHeight: '100%' }}>
+              <Table
+                size="small"
+                stickyHeader
+                aria-label="budget details table"
+              >
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>
+                      Наименование оборудования
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>
+                      Модель / Тип
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>
+                      Заводской № / ГРСИ
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}
+                    >
+                      Статус мэтчинга
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}
+                    >
+                      Цена без НДС
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}
+                    >
+                      Итого с НДС (20%)
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {planItems.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={6}
+                        align="center"
+                        sx={{
+                          py: 6,
+                          color: 'text.secondary',
+                          fontStyle: 'italic',
+                        }}
+                      >
+                        Приборы по выбранным фильтрам не найдены.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    planItems.map((item: any) => (
+                      <TableRow key={item.id} hover>
+                        <TableCell
+                          sx={{
+                            fontWeight: 'medium',
+                            // Делаем ячейку кликабельной
+                            cursor: 'pointer',
+                            '&:hover': {
+                              color: 'primary.main',
+                              textDecoration: 'underline',
+                            },
+                          }}
+                          // 🎯 При тапе передаем сгенерированный ключ в модальное окно
+                          onClick={() => {
+                            setTrendSku(
+                              item.matchHistorySku ||
+                                `TEXT-${item.deviceName.replace(/\s+/g, '-')}`
+                            );
+                          }}
+                        >
+                          {item.deviceName}
+                        </TableCell>
+                        <TableCell>{item.deviceModel}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            С/Н: {item.device?.serialNumber || '—'}
+                          </Typography>
+                          <Typography variant="caption" display="block">
+                            ГРСИ: {item.device?.grsiNumber || '—'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <MatchMethodChip method={item.matchMethod} />
+                        </TableCell>
+                        <TableCell align="right">
+                          <InlinePriceEdit
+                            itemId={item.id}
+                            initialPrice={Number(item.basePrice)}
+                            // ✅ Теперь инпут заблокируется автоматически, если бюджет утвержден
+                            disabled={isApproved}
+                            onSave={(newPrice) =>
+                              handleUpdatePrice(item.id, newPrice)
+                            }
+                          />
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          sx={{ fontWeight: 'bold', color: 'primary.main' }}
+                        >
+                          {Number(item.totalCost).toLocaleString('ru-RU', {
+                            style: 'currency',
+                            currency: 'RUB',
+                          })}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+
+          {/* 📱 МОБИЛЬНАЯ ВЕРСИЯ: Список карточек приборов вместо таблицы */}
+          <Box
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              flexDirection: 'column',
+              gap: 1.5,
+              pb: 7,
+            }}
+          >
+            {planItems.length === 0 ? (
+              <Paper
+                variant="elevation"
+                sx={{
+                  p: 4,
+                  textAlign: 'center',
+                  color: 'text.secondary',
+                  fontStyle: 'italic',
+                  bgcolor: 'transparent',
+                }}
+              >
+                Приборы по выбранным фильтрам не найдены.
+              </Paper>
+            ) : (
+              planItems.map((item: any) => (
+                <Paper
+                  key={item.id}
+                  variant="outlined"
+                  sx={{ p: 2, borderRadius: 2, bgcolor: 'background.paper' }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      gap: 1,
+                      mb: 1.5,
+                    }}
                   >
-                    Приборы по выбранным фильтрам не найдены.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                planItems.map((item: any) => (
-                  <TableRow key={item.id} hover>
-                    <TableCell sx={{ fontWeight: 'medium' }}>
+                    {/* Превращаем текст в интерактивную кнопку-ссылку для вызова графика */}
+                    <Typography
+                      variant="subtitle2"
+                      onClick={() => {
+                        setTrendSku(
+                          item.matchHistorySku ||
+                            `TEXT-${item.deviceName.replace(/\s+/g, '-')}`
+                        );
+                      }}
+                      sx={{
+                        fontWeight: 'bold',
+                        lineHeight: 1.3,
+                        flexGrow: 1,
+                        cursor: 'pointer',
+                        color: 'text.primary',
+                        '&:hover': {
+                          color: 'primary.main',
+                          textDecoration: 'underline',
+                        },
+                      }}
+                    >
                       {item.deviceName}
-                    </TableCell>
-                    <TableCell>{item.deviceModel}</TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        С/Н: {item.device?.serialNumber || '—'}
+                    </Typography>
+                    <MatchMethodChip method={item.matchMethod} />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      mb: 1.5,
+                      bgcolor: 'grey.50',
+                      p: 1,
+                      borderRadius: 1.5,
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                    >
+                      Модель: <strong>{item.deviceModel || '—'}</strong>
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                    >
+                      Заводской №:{' '}
+                      <strong>{item.device?.serialNumber || '—'}</strong>
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                    >
+                      Номер ГРСИ:{' '}
+                      <strong>{item.device?.grsiNumber || '—'}</strong>
+                    </Typography>
+                  </Box>
+
+                  <Divider sx={{ my: 1.5, borderStyle: 'dashed' }} />
+
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: 1,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 0.5,
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ fontWeight: 'bold' }}
+                      >
+                        ЦЕНА БЕЗ НДС:
                       </Typography>
-                      <Typography variant="caption" display="block">
-                        ГРСИ: {item.device?.grsiNumber || '—'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <MatchMethodChip method={item.matchMethod} />
-                    </TableCell>
-                    <TableCell align="right">
                       <InlinePriceEdit
                         itemId={item.id}
                         initialPrice={Number(item.basePrice)}
-                        disabled={false}
+                        // ✅ Точно так же блокируем и в мобильной версии карточки
+                        disabled={isApproved}
                         onSave={(newPrice) =>
                           handleUpdatePrice(item.id, newPrice)
                         }
                       />
-                    </TableCell>
-                    <TableCell
-                      align="right"
-                      sx={{ fontWeight: 'bold', color: 'primary.main' }}
-                    >
-                      {Number(item.totalCost).toLocaleString('ru-RU', {
-                        style: 'currency',
-                        currency: 'RUB',
-                      })}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          <TablePagination
-            rowsPerPageOptions={[10, 25, 50]}
-            component="div"
-            count={totalCount}
-            rowsPerPage={paginationModel.pageSize}
-            page={paginationModel.page}
-            onPageChange={(_, newPage) =>
-              setPaginationModel((prev) => ({ ...prev, page: newPage }))
-            }
-            onRowsPerPageChange={(e) =>
-              setPaginationModel({
-                page: 0,
-                pageSize: parseInt(e.target.value, 10),
-              })
-            }
-          />
-        </TableContainer>
+                    </Box>
+
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ fontWeight: 'bold', display: 'block' }}
+                      >
+                        ИТОГО С НДС (20%):
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ fontWeight: 'bold', color: 'primary.main' }}
+                      >
+                        {Number(item.totalCost).toLocaleString('ru-RU', {
+                          style: 'currency',
+                          currency: 'RUB',
+                        })}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Paper>
+              ))
+            )}
+          </Box>
+        </Box>
+
+        {/* 2. ПАНЕЛЬ ПАГИНАЦИИ (Статичная под окном на десктопе, липкая снизу на мобильном) */}
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 50]}
+          component="div"
+          count={totalCount}
+          rowsPerPage={paginationModel.pageSize}
+          page={paginationModel.page}
+          onPageChange={(_, newPage) =>
+            setPaginationModel((prev) => ({ ...prev, page: newPage }))
+          }
+          onRowsPerPageChange={(e) =>
+            setPaginationModel({
+              page: 0,
+              pageSize: parseInt(e.target.value, 10),
+            })
+          }
+          // Текстовая адаптация под тип экрана:
+          labelRowsPerPage={isMobile ? 'Рядов:' : 'Строк на странице:'}
+          labelDisplayedRows={({ from, to, count }) =>
+            isMobile ? `${from}-${to}/${count}` : `${from}–${to} из ${count}`
+          }
+          sx={{
+            bgcolor: 'background.paper',
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            zIndex: 5,
+            // На мобилках прижимаем плашку пагинации намертво к нижнему краю экрана поверх карточек
+            position: { xs: 'fixed', md: 'static' },
+            bottom: { xs: 0, md: 'auto' },
+            left: { xs: 0, md: 'auto' },
+            right: { xs: 0, md: 'auto' },
+            boxShadow: { xs: '0px -2px 10px rgba(0,0,0,0.05)', md: 'none' },
+
+            '& .MuiTablePagination-toolbar': {
+              px: { xs: 1, md: 2 },
+              flexWrap: 'nowrap',
+              justifyContent: 'flex-end',
+              minHeight: 52,
+            },
+            '& .MuiTablePagination-selectLabel': {
+              display: { xs: 'none', sm: 'block' },
+              fontSize: '0.875rem',
+              color: 'text.secondary',
+            },
+            '& .MuiTablePagination-select': {
+              fontSize: '0.875rem',
+            },
+            '& .MuiTablePagination-displayedRows': {
+              fontSize: '0.875rem',
+              mx: { xs: 1, md: 2 },
+            },
+            '& .MuiTablePagination-actions': {
+              '& button': {
+                p: { xs: 0.8, md: 1.2 },
+                color: 'primary.main',
+              },
+            },
+          }}
+        />
       </Box>
+      <ConfirmationDialog
+        open={approveDialogOpen}
+        title="Утверждение годового бюджета"
+        description="Вы уверены, что хотите утвердить бюджет? Это действие окончательно заморозит плановые цены, и их нельзя будет случайно изменить."
+        confirmLabel="Утвердить"
+        onClose={() => setApproveDialogOpen(false)}
+        onConfirm={handleConfirmApprove}
+      />
+      <Dialog
+        open={Boolean(trendSku)}
+        onClose={() => setTrendSku(null)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: { borderRadius: 3, p: 1 }, // Скругления под общий дизайн-код
+          },
+        }}
+      >
+        <Box sx={{ bgcolor: 'background.paper' }}>
+          {/* ✅ Исправление: передаем trendSku в проп siteId */}
+          {trendSku && <PriceHistoryTrend siteId={trendSku} />}
+
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              p: 1,
+              pr: 2,
+              pb: 1.5,
+            }}
+          >
+            <Button
+              onClick={() => setTrendSku(null)}
+              variant="outlined"
+              size="small"
+              sx={{
+                textTransform: 'none',
+                fontWeight: 'bold',
+                borderRadius: 1.5,
+              }}
+            >
+              Закрыть
+            </Button>
+          </Box>
+        </Box>
+      </Dialog>
     </Container>
   );
 };

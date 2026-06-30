@@ -1,4 +1,3 @@
-// // src/modules/budget/pages/BudgetLayoutPage.tsx
 import React from 'react';
 import {
   useLocation,
@@ -36,13 +35,21 @@ export const BudgetLayoutPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+    // Уменьшаем отступы на мобильных (xs: 2, sm: 4), чтобы не тратить место экрана
+    <Container
+      maxWidth="xl"
+      sx={{ mt: { xs: 2, sm: 4 }, mb: 4, px: { xs: 1, sm: 2 } }}
+    >
       {/* Главный заголовок модуля */}
       <Box sx={{ mb: 3 }}>
         <Typography
           variant="h4"
           component="h1"
-          sx={{ fontWeight: 'bold', mb: 0.5 }}
+          sx={{
+            fontWeight: 'bold',
+            mb: 0.5,
+            fontSize: { xs: '1.5rem', sm: '2.125rem' }, // Адаптивный размер шрифта
+          }}
         >
           Финансовый учет и бюджетирование
         </Typography>
@@ -52,35 +59,62 @@ export const BudgetLayoutPage: React.FC = () => {
         </Typography>
       </Box>
 
-      {/* Панель вкладок верхнего уровня (теперь их 3) */}
+      {/* Панель вкладок верхнего уровня */}
       <Paper
         variant="outlined"
-        sx={{ borderRadius: 2, mb: 4, bgcolor: 'background.paper' }}
+        sx={{
+          borderRadius: 2,
+          mb: 4,
+          bgcolor: 'background.paper',
+          overflow: 'hidden',
+        }}
       >
         <Tabs
           value={getActiveTab()}
           onChange={handleTabChange}
           indicatorColor="primary"
           textColor="primary"
-          // variant="contained"
+          // 📱 ВКЛЮЧАЕМ МОБИЛЬНЫЙ СКРОЛЛ ТАБОВ:
+          variant="scrollable" // Табы будут плавно скроллиться пальцем на мобилках
+          scrollButtons="auto" // Стрелочки появятся сами, если табы не влезут в экран
+          allowScrollButtonsMobile // Стрелочки будут кликабельными и видимыми на смартфонах
+          sx={{
+            // Стилизуем стрелочки прокрутки, чтобы они выглядели аккуратно
+            '& .MuiTabs-scrollButtons.Mui-disabled': { opacity: 0.3 },
+          }}
         >
           <Tab
             icon={<AccountBalanceWalletIcon fontSize="small" />}
             iconPosition="start"
             label="Годовые планы бюджетов"
-            sx={{ fontWeight: 'bold', textTransform: 'none', minHeight: 48 }}
+            sx={{
+              fontWeight: 'bold',
+              textTransform: 'none',
+              minHeight: 48,
+              whiteSpace: 'nowrap',
+            }}
           />
           <Tab
             icon={<ListAltIcon fontSize="small" />}
             iconPosition="start"
             label="Архив прейскурантов ЦСМ"
-            sx={{ fontWeight: 'bold', textTransform: 'none', minHeight: 48 }}
+            sx={{
+              fontWeight: 'bold',
+              textTransform: 'none',
+              minHeight: 48,
+              whiteSpace: 'nowrap',
+            }}
           />
           <Tab
             icon={<UploadFileIcon fontSize="small" />}
             iconPosition="start"
             label="Загрузка прейскурантов из Excel"
-            sx={{ fontWeight: 'bold', textTransform: 'none', minHeight: 48 }}
+            sx={{
+              fontWeight: 'bold',
+              textTransform: 'none',
+              minHeight: 48,
+              whiteSpace: 'nowrap',
+            }}
           />
         </Tabs>
       </Paper>
@@ -90,13 +124,11 @@ export const BudgetLayoutPage: React.FC = () => {
         <Routes>
           <Route path="/" element={<Navigate to="plans" replace />} />
           <Route path="plans" element={<BudgetPlansPage />} />
-          <Route path="pricelists" element={<PricelistListPage />} />{' '}
-          {/* Вкладка 2 */}
+          <Route path="pricelists" element={<PricelistListPage />} />
           <Route
             path="pricelists/upload"
             element={<PricelistExcelImporter />}
-          />{' '}
-          {/* Вкладка 3 */}
+          />
         </Routes>
       </Box>
     </Container>
