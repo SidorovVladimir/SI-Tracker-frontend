@@ -78,6 +78,47 @@ query GetBudgetPlanItems(
   }
 }
 
+query GetBudgetPlanDetails(
+  $budgetId: ID!
+  $limit: Int!
+  $offset: Int!
+  $filter: BudgetPlanFilterInput
+) {
+  # 1. Запрос метаданных самого плана (из него берем статус и год)
+  budgetPlan(id: $budgetId) {
+    id
+    year
+    status
+    comment
+  }
+
+  # 2. Запрос отфильтрованных строк приборов для таблицы/карточек
+  budgetPlanItems(
+    budgetId: $budgetId
+    limit: $limit
+    offset: $offset
+    filter: $filter
+  ) {
+    items {
+      id
+      deviceName
+      deviceModel
+      matchMethod
+      basePrice
+      vatAmount
+      totalCost
+      matchHistorySku
+      device {
+        id
+        serialNumber
+        grsiNumber
+      }
+    }
+    totalCount
+    totalCostAll
+  }
+}
+
 # 4. Получить список всех загруженных прейскурантов ЦСМ с вложенной организацией
 query GetPricelists {
   pricelists {
@@ -163,5 +204,45 @@ query GetBudgetPlanDistribution($budgetId: ID!, $groupBy: String!) {
     count
     baseSubtotal
     totalCost
+  }
+}
+
+query GetCsmTariffTrend($siteId: String!) {
+  getCsmTariffTrend(siteId: $siteId) {
+    serviceName
+    timeline {
+      year
+      price
+      csmName
+    }
+  }
+}
+
+query GetVerificationRisks {
+  getVerificationRisks {
+    cities {
+      id
+      name
+      status
+      totalCount
+      expiredCount
+      warningCount
+      companies {
+        id
+        name
+        status
+        totalCount
+        expiredCount
+        warningCount
+        sites {
+          id
+          name
+          status
+          totalCount
+          expiredCount
+          warningCount
+        }
+      }
+    }
   }
 }

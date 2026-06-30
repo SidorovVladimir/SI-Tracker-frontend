@@ -13,21 +13,25 @@
 //   Box,
 //   CircularProgress,
 //   Alert,
-//   Divider,
 //   MenuItem,
 //   Stack,
+//   Tabs,
+//   Tab,
 // } from '@mui/material';
 // import { useMutation, useQuery } from '@apollo/client/react';
+// import HistoryIcon from '@mui/icons-material/History';
+// import PriceChangeIcon from '@mui/icons-material/PriceChange';
+
 // import {
 //   CreateBudgetPlanDocument,
 //   GetPricelistsDocument,
 //   GetCompaniesDocument,
 //   GetSitiesDocument,
 //   GetProductionSitesDocument,
+//   GetBudgetPlansDocument,
 // } from '../../graphql/types/__generated__/graphql';
 // import { formatStrictUpper } from '../../utils/capitalize';
 
-// // Структура стейта локации для рамок расчета
 // interface ModalFilterState {
 //   cityId: string;
 //   companyId: string;
@@ -52,22 +56,26 @@
 //   const currentYear = new Date().getFullYear();
 //   const [year, setYear] = useState<number>(currentYear + 1);
 //   const [comment, setComment] = useState<string>('');
+
+//   // 🎯 СТЕЙТ МЕТОДА РАСЧЕТА: 'pricelist' (Прайсы ЦСМ) или 'history' (Ретроспектива по базе)
+//   const [calculationMethod, setCalculationMethod] = useState<
+//     'pricelist' | 'history'
+//   >('pricelist');
+
 //   const [selectedPricelistIds, setSelectedPricelistIds] = useState<string[]>(
 //     []
 //   );
 //   const [submitting, setSubmitting] = useState(false);
 //   const [submitError, setSubmitError] = useState<string | null>(null);
-
-//   // 🎯 СТЕЙТ КАСКАДНЫХ ФИЛЬТРОВ ГРАНИЦЫ БЮДЖЕТА
 //   const [locationFilters, setLocationFilters] =
 //     useState<ModalFilterState>(initialModalFilters);
-//   // 1. Загружаем доступные в базе прейскуранты ЦСМ (Ваш родной рабочий хук)
+
+//   // Запрос прайс-листов (активен только если выбран метод 'pricelist')
 //   const { data, loading, error } = useQuery(GetPricelistsDocument, {
-//     skip: !open,
+//     skip: !open || calculationMethod !== 'pricelist',
 //     fetchPolicy: 'network-only',
 //   });
 
-//   // Загружаем глобальные UUID справочники для каскада
 //   const { data: citiesData } = useQuery(GetSitiesDocument, { skip: !open });
 //   const { data: companiesData } = useQuery(GetCompaniesDocument, {
 //     skip: !open,
@@ -76,14 +84,15 @@
 //     skip: !open,
 //   });
 
-//   // 2. Мутация создания бюджета
+//   // Мутация создания плана с авто-обновлением кэша таблицы на главной странице
 //   const [createBudgetPlan] = useMutation(CreateBudgetPlanDocument, {
-//     refetchQueries: [{ query: GetPricelistsDocument }],
+//     refetchQueries: [{ query: GetBudgetPlansDocument }],
 //   });
 
-//   const pricelists = data?.pricelists || [];
-
-//   // Мемоизация и каскадный отбор справочников локаций строго по ID
+//   const pricelists = useMemo(() => {
+//     return data?.pricelists || [];
+//   }, [data]);
+//   // 1. Мемоизация и каскадный отбор справочников локаций строго по ID
 //   const cities = useMemo(() => {
 //     const raw = citiesData?.cities || [];
 //     return [...raw].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -110,6 +119,7 @@
 //     );
 //   }, [productionSiteData, locationFilters.cityId, locationFilters.companyId]);
 
+//   // 2. Хэндлеры изменения состояния
 //   const handleLocationChange = (
 //     field: keyof ModalFilterState,
 //     value: string
@@ -117,7 +127,7 @@
 //     setLocationFilters((prev) => {
 //       const updated = { ...prev, [field]: value };
 //       if (field === 'cityId' || field === 'companyId') {
-//         updated.siteId = ''; // Сбрасываем участок при изменении родителя
+//         updated.siteId = ''; // Автоматически сбрасываем участок при смене родителя
 //       }
 //       return updated;
 //     });
@@ -129,9 +139,12 @@
 //     );
 //   };
 
-//   // Хэндлер отправки формы с передачей UUID на бэкенд
+//   // 3. Главная функция отправки мутации на бэкенд
 //   const handleSubmit = async () => {
-//     if (selectedPricelistIds.length === 0) {
+//     if (
+//       calculationMethod === 'pricelist' &&
+//       selectedPricelistIds.length === 0
+//     ) {
 //       setSubmitError(
 //         'Необходимо выбрать хотя бы один прейскурант ЦСМ для расчета цен.'
 //       );
@@ -147,40 +160,57 @@
 //           input: {
 //             year,
 //             comment: comment || undefined,
-//             pricelistIds: selectedPricelistIds,
+//             // 🎯 Приводим строку к верхнему регистру для соответствия GraphQL Enum ('PRICELIST' / 'HISTORY')
+//             calculationMethod: calculationMethod,
+//             // Передаем массив прайсов только если считаем по прайсам ЦСМ
+//             pricelistIds:
+//               calculationMethod === 'pricelist'
+//                 ? selectedPricelistIds
+//                 : undefined,
 //             cityId: locationFilters.cityId || undefined,
 //             companyId: locationFilters.companyId || undefined,
 //             productionSiteId: locationFilters.siteId || undefined,
 //           },
 //         },
 //       });
+
+//       // Сброс формы при успешном создании
 //       setComment('');
 //       setSelectedPricelistIds([]);
-//       setLocationFilters(initialModalFilters); // Очищаем каскад
+//       setCalculationMethod('pricelist');
+//       setLocationFilters(initialModalFilters);
 //       onClose();
 //     } catch (err: any) {
-//       setSubmitError(err.message || 'Произошла ошибка при генерации бюджета.');
+//       setSubmitError(
+//         err.message || 'Произошла ошибка при генерации годового бюджета.'
+//       );
 //     } finally {
 //       setSubmitting(false);
 //     }
 //   };
+
+//   // 4. Умный валидатор разблокировки кнопки отправки формы
+//   const isSubmitDisabled = useMemo(() => {
+//     if (submitting) return true;
+//     if (calculationMethod === 'pricelist') {
+//       return pricelists.length === 0 || selectedPricelistIds.length === 0;
+//     }
+//     return false; // Для исторического режима чекбоксы прайсов не нужны, кнопка доступна сразу
+//   }, [submitting, calculationMethod, pricelists, selectedPricelistIds]);
 //   return (
 //     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-//       <DialogTitle
-//         sx={{ fontWeight: 'bold', fontFamily: '"Inter", sans-serif' }}
-//       >
+//       <DialogTitle sx={{ fontWeight: 'bold' }}>
 //         Создание годового бюджета
 //       </DialogTitle>
 
-//       <DialogContent dividers>
+//       <DialogContent dividers sx={{ p: 2.5 }}>
 //         {submitError && (
-//           <Alert severity="error" sx={{ mb: 2 }}>
+//           <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2 }}>
 //             {submitError}
 //           </Alert>
 //         )}
 
-//         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1 }}>
-//           {/* Поле выбора года */}
+//         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 //           <TextField
 //             label="Год планирования"
 //             type="number"
@@ -193,7 +223,6 @@
 //             fullWidth
 //           />
 
-//           {/* Поле комментария */}
 //           <TextField
 //             label="Примечание / Комментарий"
 //             multiline
@@ -204,6 +233,57 @@
 //             disabled={submitting}
 //             fullWidth
 //           />
+
+//           {/* 💵 ПАНЕЛЬ ВЫБОРА МЕТОДА КАЛЬКУЛЯЦИИ ЦЕН */}
+//           <Box
+//             sx={{
+//               border: '1px solid #e0e0e0',
+//               borderRadius: 2,
+//               overflow: 'hidden',
+//             }}
+//           >
+//             <Box
+//               sx={{
+//                 bgcolor: 'grey.100',
+//                 px: 2,
+//                 py: 1,
+//                 borderBottom: '1px solid #e0e0e0',
+//               }}
+//             >
+//               <Typography
+//                 variant="caption"
+//                 sx={{
+//                   fontWeight: 'bold',
+//                   color: 'text.secondary',
+//                   letterSpacing: '0.5px',
+//                 }}
+//               >
+//                 💵 ИСТОЧНИК ПОДБОРА СТОИМОСТИ УСЛУГ
+//               </Typography>
+//             </Box>
+//             <Tabs
+//               value={calculationMethod === 'pricelist' ? 0 : 1}
+//               onChange={(_, value) => {
+//                 setCalculationMethod(value === 0 ? 'pricelist' : 'history');
+//                 setSubmitError(null);
+//               }}
+//               variant="fullWidth"
+//               // disabled={submitting}
+//             >
+//               <Tab
+//                 icon={<PriceChangeIcon />}
+//                 iconPosition="start"
+//                 label="По прайс-листам"
+//                 sx={{ textTransform: 'none', fontWeight: 'bold' }}
+//               />
+//               <Tab
+//                 icon={<HistoryIcon />}
+//                 iconPosition="start"
+//                 label="По прошлым ценам"
+//                 sx={{ textTransform: 'none', fontWeight: 'bold' }}
+//               />
+//             </Tabs>
+//           </Box>
 
 //           {/* 🎯 СЕКЦИЯ: Выбор границ расчета бюджета (ЦФО) */}
 //           <Box
@@ -229,7 +309,6 @@
 //             </Typography>
 
 //             <Stack spacing={2}>
-//               {/* 🏙️ СЕЛЕКТОР ГОРОДА */}
 //               <TextField
 //                 label="Ограничить по городу"
 //                 size="small"
@@ -249,7 +328,6 @@
 //                 ))}
 //               </TextField>
 
-//               {/* 🏢 СЕЛЕКТОР ОРГАНИЗАЦИИ */}
 //               <TextField
 //                 label="Ограничить по организации"
 //                 size="small"
@@ -271,7 +349,6 @@
 //                 ))}
 //               </TextField>
 
-//               {/* 🏭 КАСКАДНЫЙ СЕЛЕКТОР УЧАСТКА */}
 //               <TextField
 //                 label="Ограничить по участку / цеху"
 //                 size="small"
@@ -293,82 +370,113 @@
 //             </Stack>
 //           </Box>
 
-//           <Divider />
-//           {/* Секция выбора прайсов (Ваша родная рабочая верстка) */}
-//           <Box>
-//             <Typography
-//               variant="subtitle2"
-//               color="textSecondary"
-//               sx={{ mb: 1, fontWeight: 'bold' }}
-//             >
-//               Выберите прейскуранты ЦСМ для каскадного расчета:
-//             </Typography>
-
-//             {loading ? (
-//               <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-//                 <CircularProgress size={24} />
-//               </Box>
-//             ) : error ? (
-//               <Alert severity="warning">
-//                 Не удалось загрузить прейскуранты: {error.message}
-//               </Alert>
-//             ) : pricelists.length === 0 ? (
-//               <Typography variant="body2" color="error" sx={{ my: 1 }}>
-//                 В базе данных нет загруженных прейскурантов. Сначала загрузите
-//                 Excel-файлы прайсов.
+//           {/* ДИНАМИЧЕСКИЙ БЛОК: Списки прайсов (Только для метода "pricelist") */}
+//           {calculationMethod === 'pricelist' && (
+//             <Box sx={{ mt: 0.5 }}>
+//               <Typography
+//                 variant="subtitle2"
+//                 color="textSecondary"
+//                 sx={{ mb: 1, fontWeight: 'bold' }}
+//               >
+//                 Выберите прейскуранты ЦСМ для каскадного расчета:
 //               </Typography>
-//             ) : (
-//               <FormGroup sx={{ maxHeight: 180, overflowY: 'auto', pl: 1 }}>
-//                 {pricelists.map((list) => (
-//                   <FormControlLabel
-//                     key={list.id}
-//                     control={
-//                       <Checkbox
-//                         checked={selectedPricelistIds.includes(list.id)}
-//                         onChange={() => handleTogglePricelist(list.id)}
-//                         disabled={submitting}
-//                         size="small"
-//                       />
-//                     }
-//                     label={
-//                       <Box>
-//                         <Typography
-//                           variant="body2"
-//                           sx={{ fontWeight: 'medium' }}
-//                         >
-//                           {list.title} ({list.year} г.)
-//                         </Typography>
-//                         <Typography
-//                           variant="caption"
-//                           color="textSecondary"
-//                           display="block"
-//                         >
-//                           Организация:{' '}
-//                           {formatStrictUpper(
-//                             list.verificationOrganization.name
-//                           )}{' '}
-//                           | {list.isRegulated ? 'Регулируемый' : 'Договорной'}
-//                         </Typography>
-//                       </Box>
-//                     }
-//                     sx={{ mb: 1, alignItems: 'flex-start' }}
-//                   />
-//                 ))}
-//               </FormGroup>
-//             )}
-//           </Box>
+
+//               {loading ? (
+//                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+//                   <CircularProgress size={24} />
+//                 </Box>
+//               ) : error ? (
+//                 <Alert severity="warning">
+//                   Не удалось загрузить прейскуранты: {error.message}
+//                 </Alert>
+//               ) : pricelists.length === 0 ? (
+//                 <Typography
+//                   variant="body2"
+//                   color="error"
+//                   sx={{ my: 1, fontStyle: 'italic' }}
+//                 >
+//                   В базе данных нет загруженных прейскурантов. Сначала загрузите
+//                   Excel-файлы прайсов.
+//                 </Typography>
+//               ) : (
+//                 <FormGroup
+//                   sx={{
+//                     maxHeight: 180,
+//                     overflowY: 'auto',
+//                     pl: 1,
+//                     border: '1px solid #e0e0e0',
+//                     p: 1,
+//                     borderRadius: 2,
+//                     bgcolor: 'background.paper',
+//                   }}
+//                 >
+//                   {pricelists.map((list) => (
+//                     <FormControlLabel
+//                       key={list.id}
+//                       control={
+//                         <Checkbox
+//                           checked={selectedPricelistIds.includes(list.id)}
+//                           onChange={() => handleTogglePricelist(list.id)}
+//                           disabled={submitting}
+//                           size="small"
+//                         />
+//                       }
+//                       label={
+//                         <Box>
+//                           <Typography
+//                             variant="body2"
+//                             sx={{ fontWeight: 'medium' }}
+//                           >
+//                             {list.title} ({list.year} г.)
+//                           </Typography>
+//                           <Typography
+//                             variant="caption"
+//                             color="textSecondary"
+//                             display="block"
+//                           >
+//                             Организация:{' '}
+//                             {formatStrictUpper(
+//                               list.verificationOrganization?.name || ''
+//                             )}{' '}
+//                             | {list.isRegulated ? 'Регулируемый' : 'Договорной'}
+//                           </Typography>
+//                         </Box>
+//                       }
+//                       sx={{ mb: 1, alignItems: 'flex-start' }}
+//                     />
+//                   ))}
+//                 </FormGroup>
+//               )}
+//             </Box>
+//           )}
+
+//           {/* ИНФОРМАЦИОННЫЙ БЛОК: Подсказка (Только для метода "history") */}
+//           {calculationMethod === 'history' && (
+//             <Alert severity="info" sx={{ borderRadius: 2 }}>
+//               Расчет сформируется на основе цен прошлых фактических поверок для
+//               каждого активного прибора холдинга. Если прибор новый и истории
+//               цен нет, позиция запишется со стоимостью 0.00 ₽ (ее можно будет
+//               скорректировать вручную в таблице).
+//             </Alert>
+//           )}
 //         </Box>
 //       </DialogContent>
 
-//       <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
-//         <Button onClick={onClose} disabled={submitting} color="inherit">
+//       <DialogActions sx={{ p: 2, px: 3, justifyContent: 'space-between' }}>
+//         <Button
+//           onClick={onClose}
+//           disabled={submitting}
+//           color="inherit"
+//           sx={{ textTransform: 'none', fontWeight: 'bold' }}
+//         >
 //           Отмена
 //         </Button>
 //         <Button
 //           onClick={handleSubmit}
 //           variant="contained"
 //           color="primary"
-//           disabled={submitting || pricelists.length === 0}
+//           disabled={isSubmitDisabled}
+//           sx={{ textTransform: 'none', fontWeight: 'bold', minWidth: 150 }}
 //         >
 //           {submitting ? (
 //             <CircularProgress size={24} color="inherit" />
@@ -400,6 +508,8 @@ import {
   Stack,
   Tabs,
   Tab,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { useMutation, useQuery } from '@apollo/client/react';
 import HistoryIcon from '@mui/icons-material/History';
@@ -412,7 +522,6 @@ import {
   GetSitiesDocument,
   GetProductionSitesDocument,
   GetBudgetPlansDocument,
-  BudgetCalculationMethod,
 } from '../../graphql/types/__generated__/graphql';
 import { formatStrictUpper } from '../../utils/capitalize';
 
@@ -437,15 +546,17 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
   open,
   onClose,
 }) => {
+  const theme = useTheme();
+  // 📱 АВТО-ПЕРЕКЛЮЧЕНИЕ НА ПОЛНЫЙ ЭКРАН: На смартфонах модалка откроется во весь экран
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState<number>(currentYear + 1);
   const [comment, setComment] = useState<string>('');
 
-  // 🎯 СТЕЙТ МЕТОДА РАСЧЕТА: 'pricelist' (Прайсы ЦСМ) или 'history' (Ретроспектива по базе)
   const [calculationMethod, setCalculationMethod] = useState<
     'pricelist' | 'history'
   >('pricelist');
-
   const [selectedPricelistIds, setSelectedPricelistIds] = useState<string[]>(
     []
   );
@@ -454,7 +565,6 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
   const [locationFilters, setLocationFilters] =
     useState<ModalFilterState>(initialModalFilters);
 
-  // Запрос прайс-листов (активен только если выбран метод 'pricelist')
   const { data, loading, error } = useQuery(GetPricelistsDocument, {
     skip: !open || calculationMethod !== 'pricelist',
     fetchPolicy: 'network-only',
@@ -468,15 +578,12 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
     skip: !open,
   });
 
-  // Мутация создания плана с авто-обновлением кэша таблицы на главной странице
   const [createBudgetPlan] = useMutation(CreateBudgetPlanDocument, {
     refetchQueries: [{ query: GetBudgetPlansDocument }],
   });
 
-  const pricelists = useMemo(() => {
-    return data?.pricelists || [];
-  }, [data]);
-  // 1. Мемоизация и каскадный отбор справочников локаций строго по ID
+  const pricelists = useMemo(() => data?.pricelists || [], [data]);
+
   const cities = useMemo(() => {
     const raw = citiesData?.cities || [];
     return [...raw].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -503,16 +610,13 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
     );
   }, [productionSiteData, locationFilters.cityId, locationFilters.companyId]);
 
-  // 2. Хэндлеры изменения состояния
   const handleLocationChange = (
     field: keyof ModalFilterState,
     value: string
   ) => {
     setLocationFilters((prev) => {
       const updated = { ...prev, [field]: value };
-      if (field === 'cityId' || field === 'companyId') {
-        updated.siteId = ''; // Автоматически сбрасываем участок при смене родителя
-      }
+      if (field === 'cityId' || field === 'companyId') updated.siteId = '';
       return updated;
     });
   };
@@ -523,7 +627,6 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
     );
   };
 
-  // 3. Главная функция отправки мутации на бэкенд
   const handleSubmit = async () => {
     if (
       calculationMethod === 'pricelist' &&
@@ -544,9 +647,7 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
           input: {
             year,
             comment: comment || undefined,
-            // 🎯 Приводим строку к верхнему регистру для соответствия GraphQL Enum ('PRICELIST' / 'HISTORY')
-            calculationMethod: calculationMethod as BudgetCalculationMethod,
-            // Передаем массив прайсов только если считаем по прайсам ЦСМ
+            calculationMethod: calculationMethod,
             pricelistIds:
               calculationMethod === 'pricelist'
                 ? selectedPricelistIds
@@ -558,7 +659,6 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
         },
       });
 
-      // Сброс формы при успешном создании
       setComment('');
       setSelectedPricelistIds([]);
       setCalculationMethod('pricelist');
@@ -573,39 +673,108 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
     }
   };
 
-  // 4. Умный валидатор разблокировки кнопки отправки формы
   const isSubmitDisabled = useMemo(() => {
     if (submitting) return true;
     if (calculationMethod === 'pricelist') {
       return pricelists.length === 0 || selectedPricelistIds.length === 0;
     }
-    return false; // Для исторического режима чекбоксы прайсов не нужны, кнопка доступна сразу
+    return false;
   }, [submitting, calculationMethod, pricelists, selectedPricelistIds]);
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ fontWeight: 'bold' }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      // 📱 НА СМАРТФОНАХ: Включаем полноэкранный режим, чтобы формы заполнения были удобными
+      fullScreen={isMobile}
+    >
+      <DialogTitle sx={{ fontWeight: 'bold', px: { xs: 2, sm: 3 }, py: 2 }}>
         Создание годового бюджета
       </DialogTitle>
 
-      <DialogContent dividers sx={{ p: 2.5 }}>
+      <DialogContent
+        dividers
+        sx={{
+          p: { xs: 2, sm: 2.5 },
+          // Защита от переполнения: контент скроллится независимо от кнопок футера
+          overflowY: 'auto',
+        }}
+      >
         {submitError && (
           <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2 }}>
             {submitError}
           </Alert>
         )}
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <TextField
-            label="Год планирования"
-            type="number"
-            size="small"
-            value={year}
-            onChange={(e) =>
-              setYear(parseInt(e.target.value, 10) || currentYear)
-            }
-            disabled={submitting}
-            fullWidth
-          />
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <Box>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                display: 'block',
+                mb: 1,
+                fontWeight: 'bold',
+                letterSpacing: '0.5px',
+              }}
+            >
+              ГОД ПЛАНИРОВАНИЯ БЮДЖЕТА
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'divider',
+                p: 0.5,
+                height: 40,
+              }}
+            >
+              <Button
+                size="small"
+                disabled={submitting}
+                onClick={() => setYear((prev) => prev - 1)}
+                sx={{
+                  minWidth: 40,
+                  p: 0,
+                  height: '100%',
+                  borderRadius: 1.5,
+                  color: 'text.secondary',
+                  fontSize: '1.2rem',
+                }}
+              >
+                −
+              </Button>
+              <Typography
+                sx={{
+                  flexGrow: 1,
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '0.95rem',
+                }}
+              >
+                {year} год
+              </Typography>
+              <Button
+                size="small"
+                disabled={submitting}
+                onClick={() => setYear((prev) => prev + 1)}
+                sx={{
+                  minWidth: 40,
+                  p: 0,
+                  height: '100%',
+                  borderRadius: 1.5,
+                  color: 'text.secondary',
+                  fontSize: '1.2rem',
+                }}
+              >
+                +
+              </Button>
+            </Box>
+          </Box>
 
           <TextField
             label="Примечание / Комментарий"
@@ -624,6 +793,7 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
               border: '1px solid #e0e0e0',
               borderRadius: 2,
               overflow: 'hidden',
+              bgcolor: 'background.paper',
             }}
           >
             <Box
@@ -652,19 +822,28 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
                 setSubmitError(null);
               }}
               variant="fullWidth"
-              // disabled={submitting}
             >
               <Tab
-                icon={<PriceChangeIcon />}
+                icon={<PriceChangeIcon fontSize="small" />}
                 iconPosition="start"
                 label="По прайс-листам"
-                sx={{ textTransform: 'none', fontWeight: 'bold' }}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  minHeight: 44,
+                  fontSize: { xs: '0.85rem', sm: '0.875rem' },
+                }}
               />
               <Tab
-                icon={<HistoryIcon />}
+                icon={<HistoryIcon fontSize="small" />}
                 iconPosition="start"
                 label="По прошлым ценам"
-                sx={{ textTransform: 'none', fontWeight: 'bold' }}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  minHeight: 44,
+                  fontSize: { xs: '0.85rem', sm: '0.875rem' },
+                }}
               />
             </Tabs>
           </Box>
@@ -785,9 +964,8 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
               ) : (
                 <FormGroup
                   sx={{
-                    maxHeight: 180,
+                    maxHeight: { xs: 140, sm: 180 },
                     overflowY: 'auto',
-                    pl: 1,
                     border: '1px solid #e0e0e0',
                     p: 1,
                     borderRadius: 2,
@@ -806,10 +984,10 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
                         />
                       }
                       label={
-                        <Box>
+                        <Box sx={{ pr: 1 }}>
                           <Typography
                             variant="body2"
-                            sx={{ fontWeight: 'medium' }}
+                            sx={{ fontWeight: 'medium', lineHeight: 1.3 }}
                           >
                             {list.title} ({list.year} г.)
                           </Typography>
@@ -817,16 +995,17 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
                             variant="caption"
                             color="textSecondary"
                             display="block"
+                            sx={{ mt: 0.2 }}
                           >
                             Организация:{' '}
                             {formatStrictUpper(
                               list.verificationOrganization?.name || ''
                             )}{' '}
-                            | {list.isRegulated ? 'Регулируемый' : 'Договорной'}
+                            | {list.isRegulated ? 'Рег.' : 'Дог.'}
                           </Typography>
                         </Box>
                       }
-                      sx={{ mb: 1, alignItems: 'flex-start' }}
+                      sx={{ mb: 1, alignItems: 'flex-start', mx: 0 }}
                     />
                   ))}
                 </FormGroup>
@@ -836,7 +1015,13 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
 
           {/* ИНФОРМАЦИОННЫЙ БЛОК: Подсказка (Только для метода "history") */}
           {calculationMethod === 'history' && (
-            <Alert severity="info" sx={{ borderRadius: 2 }}>
+            <Alert
+              severity="info"
+              sx={{
+                borderRadius: 2,
+                fontSize: { xs: '0.85rem', sm: '0.875rem' },
+              }}
+            >
               Расчет сформируется на основе цен прошлых фактических поверок для
               каждого активного прибора холдинга. Если прибор новый и истории
               цен нет, позиция запишется со стоимостью 0.00 ₽ (ее можно будет
@@ -846,7 +1031,17 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, px: 3, justifyContent: 'space-between' }}>
+      <DialogActions
+        sx={{
+          p: 2,
+          px: { xs: 2, sm: 3 },
+          justifyContent: 'space-between',
+          bgcolor: 'background.paper',
+          // Закрепляем футер на мобилках снизу жестко, чтобы кнопки всегда были под рукой
+          borderTop: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
         <Button
           onClick={onClose}
           disabled={submitting}
@@ -860,12 +1055,17 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
           variant="contained"
           color="primary"
           disabled={isSubmitDisabled}
-          sx={{ textTransform: 'none', fontWeight: 'bold', minWidth: 150 }}
+          sx={{
+            textTransform: 'none',
+            fontWeight: 'bold',
+            minWidth: { xs: 130, sm: 150 },
+            fontSize: { xs: '0.85rem', sm: '0.875rem' },
+          }}
         >
           {submitting ? (
-            <CircularProgress size={24} color="inherit" />
+            <CircularProgress size={20} color="inherit" />
           ) : (
-            'Запустить расчет бюджета'
+            'Запустить расчет'
           )}
         </Button>
       </DialogActions>
