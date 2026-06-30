@@ -83,7 +83,30 @@ export const PriceHistoryTrend: React.FC<PriceHistoryTrendProps> = ({
   }
 
   if (timeline.length === 0) {
-    return null; // Если истории цен по прибору нет, просто скрываем пустой виджет
+    return (
+      <Card
+        variant="outlined"
+        sx={{
+          p: 3,
+          borderRadius: 3,
+          bgcolor: 'grey.50',
+          borderStyle: 'dashed',
+          textAlign: 'center',
+          my: 1,
+        }}
+      >
+        <Typography variant="h6" sx={{ fontSize: '1.5rem', mb: 1 }}>
+          📊
+        </Typography>
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+          История тарифов отсутствует
+        </Typography>
+        <Typography variant="caption" color="text.secondary" display="block">
+          По данному объекту холдинга или прибору нет истории поверок в
+          загруженных прайс-листах ЦСМ за прошлые периоды.
+        </Typography>
+      </Card>
+    );
   }
 
   return (

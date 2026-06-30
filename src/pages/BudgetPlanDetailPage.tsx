@@ -742,64 +742,90 @@ export const BudgetPlanDetailPage: React.FC = () => {
         </Box>
 
         {/* 2. ПАНЕЛЬ ПАГИНАЦИИ (Статичная под окном на десктопе, липкая снизу на мобильном) */}
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 50]}
-          component="div"
-          count={totalCount}
-          rowsPerPage={paginationModel.pageSize}
-          page={paginationModel.page}
-          onPageChange={(_, newPage) =>
-            setPaginationModel((prev) => ({ ...prev, page: newPage }))
-          }
-          onRowsPerPageChange={(e) =>
-            setPaginationModel({
-              page: 0,
-              pageSize: parseInt(e.target.value, 10),
-            })
-          }
-          // Текстовая адаптация под тип экрана:
-          labelRowsPerPage={isMobile ? 'Рядов:' : 'Строк на странице:'}
-          labelDisplayedRows={({ from, to, count }) =>
-            isMobile ? `${from}-${to}/${count}` : `${from}–${to} из ${count}`
-          }
+        <Box
           sx={{
-            bgcolor: 'background.paper',
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            zIndex: 5,
-            // На мобилках прижимаем плашку пагинации намертво к нижнему краю экрана поверх карточек
+            width: '100%',
             position: { xs: 'fixed', md: 'static' },
             bottom: { xs: 0, md: 'auto' },
             left: { xs: 0, md: 'auto' },
             right: { xs: 0, md: 'auto' },
-            boxShadow: { xs: '0px -2px 10px rgba(0,0,0,0.05)', md: 'none' },
+            zIndex: 1000,
+            bgcolor: 'background.paper',
+            boxShadow: { xs: '0px -4px 16px rgba(0,0,0,0.08)', md: 'none' },
+            borderTop: '1px solid',
+            borderColor: 'divider',
 
-            '& .MuiTablePagination-toolbar': {
-              px: { xs: 1, md: 2 },
-              flexWrap: 'nowrap',
-              justifyContent: 'flex-end',
-              minHeight: 52,
+            // Отступ снизу для безопасной зоны телефонов (iOS/Android) + 16px буфера
+            pb: {
+              xs: 'calc(16px + env(safe-area-inset-bottom, 0px))',
+              md: 0,
             },
-            '& .MuiTablePagination-selectLabel': {
-              display: { xs: 'none', sm: 'block' },
-              fontSize: '0.875rem',
-              color: 'text.secondary',
-            },
-            '& .MuiTablePagination-select': {
-              fontSize: '0.875rem',
-            },
-            '& .MuiTablePagination-displayedRows': {
-              fontSize: '0.875rem',
-              mx: { xs: 1, md: 2 },
-            },
-            '& .MuiTablePagination-actions': {
-              '& button': {
-                p: { xs: 0.8, md: 1.2 },
-                color: 'primary.main',
-              },
-            },
+            pt: { xs: 0.5, md: 0 },
           }}
-        />
+        >
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 50]}
+            component="div"
+            count={totalCount}
+            rowsPerPage={paginationModel.pageSize}
+            page={paginationModel.page}
+            onPageChange={(_, newPage) =>
+              setPaginationModel((prev) => ({ ...prev, page: newPage }))
+            }
+            onRowsPerPageChange={(e) =>
+              setPaginationModel({
+                page: 0,
+                pageSize: parseInt(e.target.value, 10),
+              })
+            }
+            labelRowsPerPage={isMobile ? 'Рядов:' : 'Строк на странице:'}
+            labelDisplayedRows={({ from, to, count }) =>
+              isMobile ? `${from}-${to}/${count}` : `${from}–${to} из ${count}`
+            }
+            sx={{
+              bgcolor: 'transparent',
+              borderTop: 'none',
+              width: '100%',
+
+              '& .MuiTablePagination-toolbar': {
+                px: { xs: 1.5, md: 2 },
+                flexWrap: 'nowrap',
+                // 🎯 ЖЕСТКОЕ ЦЕНТРИРОВАНИЕ ТУЛБАРА НА МОБИЛКАХ
+                justifyContent: { xs: 'center', md: 'flex-end' },
+                minHeight: 52,
+                width: '100%',
+              },
+
+              // 🎯 ВОТ ОН, ГЛАВНЫЙ СЕКРЕТ ЦЕНТРИРОВАНИЯ:
+              // Скрываем внутренний распорщик MUI, который заставлял всё улетать вправо
+              '& .MuiTablePagination-spacer': {
+                display: { xs: 'none', md: 'block' },
+              },
+
+              '& .MuiTablePagination-selectLabel': {
+                display: { xs: 'none', sm: 'block' },
+                fontSize: '0.875rem',
+                color: 'text.secondary',
+              },
+              '& .MuiTablePagination-select': {
+                fontSize: '0.875rem',
+              },
+              '& .MuiTablePagination-displayedRows': {
+                fontSize: '0.875rem',
+                // Убираем лишние внешние отступы на мобилках для плотной посадки по центру
+                mx: { xs: 0.5, md: 2 },
+              },
+              '& .MuiTablePagination-actions': {
+                // Минимизируем левый отступ кнопок на мобильных
+                ml: { xs: 0.5, md: 2 },
+                '& button': {
+                  p: { xs: 0.8, md: 1.2 },
+                  color: 'primary.main',
+                },
+              },
+            }}
+          />
+        </Box>
       </Box>
       <ConfirmationDialog
         open={approveDialogOpen}

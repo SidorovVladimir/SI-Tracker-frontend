@@ -1016,6 +1016,19 @@ export default function AnalyticsPage() {
                     value={activeSiteId || ''}
                     label="Цех / Участок завода"
                     onChange={(e) => setActiveSiteId(e.target.value)}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          maxHeight: 280, // Фиксированная высота окна в пикселях
+                          borderRadius: 2, // Скругления под дизайн-код
+                          boxShadow: 3,
+                          '& .MuiMenuItem-root': {
+                            fontSize: '0.85rem', // Чуть компактнее шрифт на мобилках
+                            py: 1.2,
+                          },
+                        },
+                      },
+                    }}
                   >
                     {topServicesList.map((site: any) => (
                       <MenuItem key={site.siteId} value={site.siteId}>
