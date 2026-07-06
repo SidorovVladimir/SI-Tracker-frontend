@@ -207,6 +207,7 @@ function UserForm({
     serialNumber: string;
     releaseDate: string;
     grsiNumber: string;
+    csmCode: string;
     measurementRange: string;
     accuracy: string;
     inventoryNumber: string;
@@ -235,6 +236,7 @@ function UserForm({
           .split('T')[0]
       : '',
     grsiNumber: device.grsiNumber || '',
+    csmCode: device.csmCode || '',
     measurementRange: device?.measurementRange || '',
     accuracy: device?.accuracy?.toUpperCase() ?? '',
     inventoryNumber: device?.inventoryNumber || '',
@@ -476,6 +478,7 @@ function UserForm({
     const data = {
       ...form,
       grsiNumber: form.grsiNumber || null,
+      csmCode: form.csmCode || null,
       releaseDate: form.releaseDate || null,
       measurementRange: form.measurementRange || null,
       accuracy: form.accuracy || null,
@@ -652,6 +655,28 @@ function UserForm({
             label="Номер ГРСИ"
             name="grsiNumber"
             value={form.grsiNumber}
+            onChange={handleChange}
+            fullWidth
+            variant="outlined"
+            size="small"
+            sx={{
+              '& .MuiInputBase-root': {
+                paddingTop: '2.5px',
+                paddingBottom: '2.5px',
+              },
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
+          />
+
+          <TextField
+            label="Код СИ из прайса ЦСМ (договорной)"
+            name="csmCode"
+            value={form.csmCode}
             onChange={handleChange}
             fullWidth
             variant="outlined"

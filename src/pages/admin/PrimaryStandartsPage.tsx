@@ -126,9 +126,25 @@ export default function PrimaryStandartsPage() {
                     letterSpacing: '0.8px',
                     fontWeight: 700,
                     color: 'text.primary',
+                    mb: 0.5,
                   }}
                 >
                   {cleanSpaces(sc.name)}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    textTransform: 'none',
+                    whiteSpace: 'normal',
+                    wordBreak: 'break-word',
+                    fontSize: '0.775rem',
+                    letterSpacing: '0.3px',
+                    fontWeight: 400,
+                    color: 'text.secondary',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {cleanSpaces(sc.description)}
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -173,6 +189,7 @@ export default function PrimaryStandartsPage() {
                 }}
               >
                 <TableCell>Название</TableCell>
+                <TableCell>Описание</TableCell>
                 <TableCell>Дата создания</TableCell>
                 <TableCell>Дата обновления</TableCell>
                 <TableCell align="right">Действия</TableCell>
@@ -194,6 +211,15 @@ export default function PrimaryStandartsPage() {
                   }}
                 >
                   <TableCell>{cleanSpaces(sc.name)}</TableCell>
+                  <TableCell
+                    sx={{
+                      maxWidth: '400px',
+                      whiteSpace: 'normal',
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {cleanSpaces(sc.description)}
+                  </TableCell>
                   <TableCell>{formatDate(sc.createdAt)}</TableCell>
                   <TableCell>{formatDate(sc.updatedAt)}</TableCell>
                   <TableCell align="right">

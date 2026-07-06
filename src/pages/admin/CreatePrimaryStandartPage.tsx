@@ -26,6 +26,7 @@ export default function CreatePrimaryStandartPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '',
+    description: '',
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
@@ -88,7 +89,7 @@ export default function CreatePrimaryStandartPage() {
         sx={{ p: 4, borderRadius: 3, bgcolor: 'background.paper' }}
       >
         <form onSubmit={handleSubmit}>
-          <Stack>
+          <Stack spacing={3}>
             <TextField
               label="Название"
               name="name"
@@ -101,6 +102,25 @@ export default function CreatePrimaryStandartPage() {
               error={!!fieldErrors.name}
               helperText={fieldErrors.name}
               autoFocus={true}
+            />
+
+            <TextField
+              label="Описание"
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+              multiline
+              minRows={2}
+              maxRows={5}
+              variant="outlined"
+              sx={{
+                '& .MuiInputBase-root': {
+                  fontSize: '0.875rem',
+                },
+                mt: 1,
+              }}
             />
 
             <Divider sx={{ my: 2 }} />

@@ -73,6 +73,7 @@ export default function CreateDevicePage(props: {
     inventoryNumber: string;
     receiptDate: string;
     manufacturer: string;
+    csmCode: string;
     verificationInterval: number | string;
     archived: boolean;
     nomenclature: string;
@@ -91,6 +92,7 @@ export default function CreateDevicePage(props: {
     grsiNumber: '',
     measurementRange: '',
     accuracy: '',
+    csmCode: '',
     inventoryNumber: '',
     receiptDate: '',
     manufacturer: '',
@@ -251,6 +253,7 @@ export default function CreateDevicePage(props: {
       ...form,
       grsiNumber: form.grsiNumber || null,
       releaseDate: form.releaseDate || null,
+      csmCode: form.csmCode || null,
       measurementRange: form.measurementRange || null,
       accuracy: form.accuracy || null,
       receiptDate: form.receiptDate || null,
@@ -337,6 +340,15 @@ export default function CreateDevicePage(props: {
             label="Номер ГРСИ"
             name="grsiNumber"
             value={form.grsiNumber}
+            onChange={handleChange}
+            fullWidth
+            variant="outlined"
+            size="small"
+          />
+          <TextField
+            label="Код СИ из прайса ЦСМ (договорной)"
+            name="csmCode"
+            value={form.csmCode}
             onChange={handleChange}
             fullWidth
             variant="outlined"

@@ -8,6 +8,7 @@ mutation CreateDevice($input: CreateDeviceInput!) {
     grsiNumber
     measurementRange
     accuracy
+    csmCode
     inventoryNumber
     receiptDate
     manufacturer
@@ -132,6 +133,7 @@ query GetDeviceWithRelation($id: ID!) {
     grsiNumber
     measurementRange
     accuracy
+    csmCode
     inventoryNumber
     receiptDate
     manufacturer
@@ -208,6 +210,7 @@ mutation UpdateDevice($id: ID!, $input: UpdateDeviceInput!) {
     grsiNumber
     measurementRange
     accuracy
+    csmCode
     inventoryNumber
     receiptDate
     manufacturer

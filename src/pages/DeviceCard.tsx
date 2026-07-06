@@ -177,6 +177,7 @@ export default function DeviceCard(props: {
         <InfoRow label="Зав. №" value={device.serialNumber} />
         <InfoRow label="Инвентарный номер" value={device.inventoryNumber} />
         <InfoRow label="ГРСИ" value={device.grsiNumber} />
+        <InfoRow label="Код СИ" value={device.csmCode} />
 
         <InfoRow label="Изготовитель" value={device.manufacturer} />
         <InfoRow label="Номенклатура" value={device.nomenclature} />

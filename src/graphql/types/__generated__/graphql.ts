@@ -218,6 +218,7 @@ export type CreateDeviceInput = {
   accuracy?: InputMaybe<Scalars['String']['input']>;
   archived: Scalars['Boolean']['input'];
   comment?: InputMaybe<Scalars['String']['input']>;
+  csmCode?: InputMaybe<Scalars['String']['input']>;
   equipmentTypeId?: InputMaybe<Scalars['ID']['input']>;
   grsiNumber?: InputMaybe<Scalars['String']['input']>;
   inventoryNumber?: InputMaybe<Scalars['String']['input']>;
@@ -259,6 +260,7 @@ export type CreatePricelistInput = {
 };
 
 export type CreatePrimaryStandartInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
 };
 
@@ -320,6 +322,7 @@ export type Device = {
   archived: Scalars['Boolean']['output'];
   comment: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
+  csmCode: Maybe<Scalars['String']['output']>;
   equipmentTypeId: Maybe<Scalars['ID']['output']>;
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -413,6 +416,7 @@ export type DeviceWithRelations = {
   accuracy: Maybe<Scalars['String']['output']>;
   archived: Scalars['Boolean']['output'];
   comment: Maybe<Scalars['String']['output']>;
+  csmCode: Maybe<Scalars['String']['output']>;
   equipmentType: Maybe<EquipmentType>;
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -902,6 +906,7 @@ export type PricelistItemInput = {
 export type PrimaryStandart = {
   __typename: 'PrimaryStandart';
   createdAt: Scalars['String']['output'];
+  description: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
@@ -1254,6 +1259,7 @@ export type UpdateDeviceInput = {
   accuracy?: InputMaybe<Scalars['String']['input']>;
   archived: Scalars['Boolean']['input'];
   comment?: InputMaybe<Scalars['String']['input']>;
+  csmCode?: InputMaybe<Scalars['String']['input']>;
   equipmentTypeId?: InputMaybe<Scalars['ID']['input']>;
   grsiNumber?: InputMaybe<Scalars['String']['input']>;
   inventoryNumber?: InputMaybe<Scalars['String']['input']>;
@@ -1287,6 +1293,7 @@ export type UpdateMetrologyControlTypeInput = {
 };
 
 export type UpdatePrimaryStandartInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
 };
 
@@ -2053,6 +2060,7 @@ export type CreateDeviceMutation = {
     grsiNumber: string | null;
     measurementRange: string | null;
     accuracy: string | null;
+    csmCode: string | null;
     inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
@@ -2155,6 +2163,7 @@ export type GetDeviceWithRelationQuery = {
     grsiNumber: string | null;
     measurementRange: string | null;
     accuracy: string | null;
+    csmCode: string | null;
     inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
@@ -2234,6 +2243,7 @@ export type UpdateDeviceMutation = {
     grsiNumber: string | null;
     measurementRange: string | null;
     accuracy: string | null;
+    csmCode: string | null;
     inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
@@ -2658,6 +2668,7 @@ export type GetPrimaryStandartsListQuery = {
     __typename: 'PrimaryStandart';
     id: string;
     name: string;
+    description: string | null;
     createdAt: string;
     updatedAt: string;
   }>;
@@ -2672,6 +2683,7 @@ export type GetPrimaryStandartQuery = {
     __typename: 'PrimaryStandart';
     id: string;
     name: string;
+    description: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -2686,6 +2698,7 @@ export type CreatePrimaryStandartMutation = {
     __typename: 'PrimaryStandart';
     id: string;
     name: string;
+    description: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -5619,6 +5632,7 @@ export const CreateDeviceDocument = {
                   name: { kind: 'Name', value: 'measurementRange' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'accuracy' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'csmCode' } },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'inventoryNumber' },
@@ -6000,6 +6014,7 @@ export const GetDeviceWithRelationDocument = {
                   name: { kind: 'Name', value: 'measurementRange' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'accuracy' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'csmCode' } },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'inventoryNumber' },
@@ -6321,6 +6336,7 @@ export const UpdateDeviceDocument = {
                   name: { kind: 'Name', value: 'measurementRange' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'accuracy' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'csmCode' } },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'inventoryNumber' },
@@ -8048,6 +8064,7 @@ export const GetPrimaryStandartsListDocument = {
               selections: [
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
               ],
@@ -8099,6 +8116,7 @@ export const GetPrimaryStandartDocument = {
               selections: [
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
               ],
@@ -8156,6 +8174,7 @@ export const CreatePrimaryStandartDocument = {
               selections: [
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
               ],

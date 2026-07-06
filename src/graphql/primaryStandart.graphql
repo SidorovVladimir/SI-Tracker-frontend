@@ -2,6 +2,7 @@ query GetPrimaryStandartsList {
   primaryStandarts {
     id
     name
+    description
     createdAt
     updatedAt
   }
@@ -11,6 +12,7 @@ query GetPrimaryStandart($id: ID!) {
   primaryStandart(id: $id) {
     id
     name
+    description
     createdAt
     updatedAt
   }
@@ -20,6 +22,7 @@ mutation CreatePrimaryStandart($input: CreatePrimaryStandartInput!) {
   createPrimaryStandart(input: $input) {
     id
     name
+    description
     createdAt
     updatedAt
   }
