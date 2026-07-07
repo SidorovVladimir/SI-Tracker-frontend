@@ -7,14 +7,12 @@ import {
 import {
   Box,
   Button,
-  Card,
-  CardContent,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
   IconButton,
   Paper,
   Stack,
@@ -113,49 +111,117 @@ export default function UsersPage() {
       </Stack>
 
       {isMobile ? (
-        // Мобильная версия: Список карточек
-        <Stack spacing={2}>
-          {users.map((u) => (
-            <Card key={u.id} variant="outlined" sx={{ borderRadius: 2 }}>
-              <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {toCapital(u.firstName)} {toCapital(u.lastName)}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {u.email}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {u.role === 'superadmin'
-                    ? 'Суперадминистратор'
-                    : u.role === 'admin'
-                    ? 'Администратор'
-                    : 'Пользователь'}
-                </Typography>
-                <Divider sx={{ my: 1.5 }} />
-                <Stack direction="row" spacing={1} justifyContent="flex-end">
+        // 📱 МОБИЛЬНАЯ ВЕРСИЯ: Компактный список учетных записей сотрудников
+        <Stack spacing={1}>
+          {users.map((u) => {
+            // Логика определения цвета чипа роли для быстрого визуального контроля
+            const roleLabel =
+              u.role === 'superadmin'
+                ? 'Суперадмин'
+                : u.role === 'admin'
+                ? 'Админ'
+                : 'Пользователь';
+            const roleColor =
+              u.role === 'superadmin'
+                ? 'error'
+                : u.role === 'admin'
+                ? 'info'
+                : 'default';
+
+            return (
+              <Paper
+                key={u.id}
+                variant="outlined"
+                sx={{
+                  p: 1.5, // Сжали внутренние отступы для максимальной плотности контента
+                  borderRadius: 2,
+                  bgcolor: 'background.paper',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center', // Центрируем текст сотрудника и кнопки по одной оси
+                  gap: 1.5,
+                }}
+              >
+                {/* Левая часть: ФИО, Email и Чип роли */}
+                <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 700,
+                      color: 'text.primary',
+                      lineHeight: 1.2,
+                      mb: 0.2,
+                    }}
+                  >
+                    {toCapital(u.firstName)} {toCapital(u.lastName)}
+                  </Typography>
+
+                  <Typography
+                    variant="caption"
+                    display="block"
+                    sx={{
+                      color: 'text.secondary',
+                      fontSize: '0.75rem',
+                      lineHeight: 1.2,
+                      mb: 0.5,
+                      wordBreak: 'break-all', // Защита от длинных корпоративных email-адресов
+                    }}
+                  >
+                    {u.login}
+                  </Typography>
+
+                  <Chip
+                    label={roleLabel}
+                    size="small"
+                    color={roleColor}
+                    variant={u.role === 'user' ? 'outlined' : 'filled'}
+                    sx={{
+                      height: 18,
+                      fontSize: '0.65rem',
+                      fontWeight: 'bold',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                    }}
+                  />
+                </Box>
+
+                {/* Правая часть: Кнопки действий — перенесены в один ряд с текстом без разделителей */}
+                <Stack direction="row" spacing={1} flexShrink={0}>
                   <IconButton
                     size="small"
                     color="primary"
-                    sx={{ border: '1px solid', borderColor: 'primary.light' }}
                     component={Link}
                     to={routes.admin.editUser(u.id)}
                     disabled={!(user?.role === 'superadmin')}
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'grey.200',
+                      width: 32,
+                      height: 32,
+                    }}
                   >
-                    <Edit fontSize="small" />
+                    <Edit fontSize="small" sx={{ fontSize: '1.1rem' }} />
                   </IconButton>
+
                   <IconButton
                     size="small"
                     color="error"
-                    sx={{ border: '1px solid', borderColor: 'error.light' }}
                     onClick={() => handleDeleteClick(u.id)}
                     disabled={user?.role !== 'superadmin' || user?.id === u.id}
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'error.light',
+                      width: 32,
+                      height: 32,
+                      bgcolor: 'rgba(211, 47, 47, 0.02)',
+                    }}
                   >
-                    <Delete fontSize="small" />
+                    <Delete fontSize="small" sx={{ fontSize: '1.1rem' }} />
                   </IconButton>
                 </Stack>
-              </CardContent>
-            </Card>
-          ))}
+              </Paper>
+            );
+          })}
         </Stack>
       ) : (
         // Десктопная версия: Таблица
@@ -174,34 +240,83 @@ export default function UsersPage() {
                   },
                 }}
               >
-                <TableCell>Имя</TableCell>
-                <TableCell>Фамилия</TableCell>
-                <TableCell>Почта</TableCell>
-                <TableCell>Роль</TableCell>
-                <TableCell>Дата регистрации</TableCell>
-                <TableCell>Дата обновления</TableCell>
+                <TableCell>Сотрудник (ФИО)</TableCell>
+                <TableCell>Логин</TableCell>
+                <TableCell>Роль доступа</TableCell>
+                <TableCell>Активность (Создан / Изменен)</TableCell>
                 <TableCell align="right">Действия</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {users.map((u) => (
-                <TableRow key={u.id} hover sx={{ '& > td': { py: 1.5 } }}>
-                  <TableCell>{toCapital(u.firstName)}</TableCell>
-                  <TableCell>{toCapital(u.lastName)}</TableCell>
-                  <TableCell>{u.email}</TableCell>
-                  <TableCell>
-                    {u.role === 'superadmin'
-                      ? 'Суперадминистратор'
-                      : u.role === 'admin'
-                      ? 'Администратор'
-                      : 'Пользователь'}
+                <TableRow
+                  key={u.id}
+                  hover
+                  sx={{
+                    '& > td': {
+                      py: 1, // Немного уплотнили вертикальный отступ для аккуратности
+                      fontSize: '0.85rem',
+                    },
+                  }}
+                >
+                  {/* 1. ОБЪЕДИНЕННАЯ ЯЧЕЙКА: Имя и Фамилия в одной колонке */}
+                  <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    {toCapital(u.lastName)} {toCapital(u.firstName)}
                   </TableCell>
-                  <TableCell>{formatDate(u.createdAt)}</TableCell>
-                  <TableCell>{formatDate(u.updatedAt)}</TableCell>
+
+                  {/* 2. ОПТИМИЗИРОВАННАЯ ЯЧЕЙКА EMAIL: Защита от растягивания таблицы вширь */}
+                  <TableCell
+                    sx={{
+                      maxWidth: 180,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      color: 'text.secondary',
+                      fontFamily: 'monospace', // Моноширинный шрифт для email выглядит компактнее
+                    }}
+                    title={u.login} // При наведении мышки покажется полный email
+                  >
+                    {u.login}
+                  </TableCell>
+
+                  {/* 3. ЯЧЕЙКА РОЛИ: Лаконичный вывод */}
+                  <TableCell>
+                    {u.role === 'superadmin' ? (
+                      <Box sx={{ color: 'error.main', fontWeight: 'bold' }}>
+                        Суперадмин
+                      </Box>
+                    ) : u.role === 'admin' ? (
+                      <Box sx={{ color: 'info.main', fontWeight: 'medium' }}>
+                        Админ
+                      </Box>
+                    ) : (
+                      <Box sx={{ color: 'text.secondary' }}>Пользователь</Box>
+                    )}
+                  </TableCell>
+
+                  {/* 4. ОБЪЕДИНЕННАЯ ЯЧЕЙКА ДАТ: Создание и Обновление друг под другом */}
+                  <TableCell>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontSize: '0.8rem', fontWeight: 'medium' }}
+                    >
+                      ➕ {formatDate(u.createdAt)}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                      sx={{ fontSize: '0.75rem' }}
+                    >
+                      🔄 {formatDate(u.updatedAt)}
+                    </Typography>
+                  </TableCell>
+
+                  {/* 5. ДЕЙСТВИЯ: Чистые кнопки */}
                   <TableCell align="right">
                     <Stack
                       direction="row"
-                      spacing={1}
+                      spacing={0.5}
                       justifyContent="flex-end"
                     >
                       <Tooltip title="Редактировать" arrow>
@@ -217,6 +332,7 @@ export default function UsersPage() {
                           </IconButton>
                         </Box>
                       </Tooltip>
+
                       <Tooltip title="Удалить" arrow>
                         <Box component="span" sx={{ display: 'inline-block' }}>
                           <IconButton

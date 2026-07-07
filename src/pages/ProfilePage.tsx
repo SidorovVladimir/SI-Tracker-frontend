@@ -11,10 +11,10 @@ import {
   Container,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import EmailIcon from '@mui/icons-material/Email';
 import BadgeIcon from '@mui/icons-material/Badge';
 import { useAuth } from '../hooks/useAuth';
 import { toCapital } from '../utils/capitalize';
+import { PersonOutline } from '@mui/icons-material';
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -123,13 +123,13 @@ export default function ProfilePage() {
                       <Divider sx={{ my: 2 }} />
 
                       <Stack direction="row" spacing={2} alignItems="center">
-                        <EmailIcon color="action" />
+                        <PersonOutline color="action" />
                         <Box>
                           <Typography variant="body2" color="text.secondary">
-                            Электронная почта
+                            Логин
                           </Typography>
                           <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                            {user?.email}
+                            {user?.login}
                           </Typography>
                         </Box>
                       </Stack>

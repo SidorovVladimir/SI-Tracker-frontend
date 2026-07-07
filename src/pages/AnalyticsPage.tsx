@@ -24,6 +24,7 @@ import {
 } from '../graphql/types/__generated__/graphql';
 import { RiskHeatMap } from '../components/RiskHeatMap';
 import { PriceHistoryTrend } from '../components/PriceHistoryTrend';
+import PageHelpButton from '../components/PageHelpButton';
 
 // Константа текстовых меток месяцев для графика трендов
 const MONTHS_LABELS = [
@@ -173,16 +174,28 @@ export default function AnalyticsPage() {
           gap: 2,
         }}
       >
-        <Typography
-          variant="h5"
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
           sx={{
-            fontWeight: 700,
-            fontSize: { xs: '1.25rem', sm: '1.5rem' },
-            textAlign: { xs: 'center', sm: 'left' },
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: { xs: 'space-between', sm: 'flex-start' },
           }}
         >
-          📊 Финансовая аналитика затрат на СИ
-        </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 700,
+
+              fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              textAlign: 'left',
+            }}
+          >
+            📊 Финансовая аналитика затрат на СИ
+          </Typography>
+          <PageHelpButton />
+        </Stack>
 
         <Stack
           direction="row"

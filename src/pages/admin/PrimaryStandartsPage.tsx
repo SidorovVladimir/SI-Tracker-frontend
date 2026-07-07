@@ -7,14 +7,11 @@ import { Link } from 'react-router';
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
   IconButton,
   Paper,
   Stack,
@@ -113,62 +110,89 @@ export default function PrimaryStandartsPage() {
       </Stack>
 
       {isMobile ? (
-        // Мобильная версия: Список карточек
-        <Stack spacing={2}>
+        // 📱 МОБИЛЬНАЯ ВЕРСИЯ: Компактный двухстрочный список эталонов ГЭТ
+        <Stack spacing={1}>
           {primaryStandartsList.map((sc) => (
-            <Card key={sc.id} variant="outlined" sx={{ borderRadius: 2 }}>
-              <CardContent>
+            <Paper
+              key={sc.id}
+              variant="outlined"
+              sx={{
+                p: 1.5, // Плотные отступы для экономии высоты экрана
+                borderRadius: 2,
+                bgcolor: 'background.paper',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center', // Центрируем контент и кнопки по одной оси
+                gap: 2,
+              }}
+            >
+              {/* Левая часть: Шифр и описание эталона */}
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                 <Typography
-                  variant="subtitle1"
+                  variant="subtitle2"
                   sx={{
                     textTransform: 'uppercase',
-                    fontSize: '0.875rem',
-                    letterSpacing: '0.8px',
+                    fontSize: '0.825rem',
+                    letterSpacing: '0.6px',
                     fontWeight: 700,
                     color: 'text.primary',
-                    mb: 0.5,
+                    lineHeight: 1.2,
+                    mb: 0.3,
                   }}
                 >
                   {cleanSpaces(sc.name)}
                 </Typography>
-                <Typography
-                  variant="body2"
+
+                {sc.description && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      textTransform: 'none',
+                      display: 'block',
+                      wordBreak: 'break-word', // Защита от длинных слов в описании
+                      fontSize: '0.75rem',
+                      fontWeight: 400,
+                      color: 'text.secondary',
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {cleanSpaces(sc.description)}
+                  </Typography>
+                )}
+              </Box>
+
+              {/* Правая часть: Кнопки действий без лишних Divider */}
+              <Stack direction="row" spacing={1} flexShrink={0}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  disabled={true}
                   sx={{
-                    textTransform: 'none',
-                    whiteSpace: 'normal',
-                    wordBreak: 'break-word',
-                    fontSize: '0.775rem',
-                    letterSpacing: '0.3px',
-                    fontWeight: 400,
-                    color: 'text.secondary',
-                    lineHeight: 1.4,
+                    border: '1px solid',
+                    borderColor: 'grey.200',
+                    width: 32,
+                    height: 32,
                   }}
                 >
-                  {cleanSpaces(sc.description)}
-                </Typography>
-                <Divider sx={{ my: 1.5 }} />
-                <Stack direction="row" spacing={1} justifyContent="flex-end">
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    disabled={true}
-                    sx={{ border: '1px solid', borderColor: 'primary.light' }}
-                    // component={Link}
-                    // to={routes.admin.editProductionSite(p.id)}
-                  >
-                    <Edit fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    sx={{ border: '1px solid', borderColor: 'error.light' }}
-                    onClick={() => handleDeleteClick(sc.id)}
-                  >
-                    <Delete fontSize="small" />
-                  </IconButton>
-                </Stack>
-              </CardContent>
-            </Card>
+                  <Edit fontSize="small" sx={{ fontSize: '1.1rem' }} />
+                </IconButton>
+
+                <IconButton
+                  size="small"
+                  color="error"
+                  sx={{
+                    border: '1px solid',
+                    borderColor: 'error.light',
+                    width: 32,
+                    height: 32,
+                    bgcolor: 'rgba(211, 47, 47, 0.02)',
+                  }}
+                  onClick={() => handleDeleteClick(sc.id)}
+                >
+                  <Delete fontSize="small" sx={{ fontSize: '1.1rem' }} />
+                </IconButton>
+              </Stack>
+            </Paper>
           ))}
         </Stack>
       ) : (

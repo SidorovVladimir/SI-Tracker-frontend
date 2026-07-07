@@ -40,6 +40,7 @@ import {
 } from '../graphql/types/__generated__/graphql';
 import { ConfirmationDialog } from '../components/modals/ConfirmationDialog';
 import { PriceHistoryTrend } from '../components/PriceHistoryTrend';
+import PageHelpButton from '../components/PageHelpButton';
 
 // 🎯 Переводим стейт фильтров на ID
 interface BudgetFilterState {
@@ -195,7 +196,12 @@ export const BudgetPlanDetailPage: React.FC = () => {
   return (
     <Container
       maxWidth="xl"
-      sx={{ mt: { xs: 2, md: 4 }, mb: 4, px: { xs: 1, sm: 2 } }}
+      sx={{
+        mt: { xs: 2, md: 4 },
+        mb: 4,
+        px: { xs: 1, sm: 2 },
+        position: 'relative',
+      }}
     >
       {/* Шапка с живым динамическим расчетом бюджета от Postgres */}
       <Paper
@@ -212,31 +218,48 @@ export const BudgetPlanDetailPage: React.FC = () => {
           bgcolor: 'background.paper',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <IconButton
-            onClick={() => navigate('/budget/plans')}
-            color="inherit"
-            sx={{
-              border: '1px solid',
-              borderColor: 'divider',
-              borderRadius: 2,
-              p: 0.8,
-            }}
-          >
-            <ArrowBackIcon fontSize="small" />
-          </IconButton>
-          <Box>
-            <Typography
-              variant="subtitle1"
-              sx={{ fontWeight: 'bold', lineHeight: 1.2 }}
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          sx={{
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: { xs: 'space-between', sm: 'flex-start' },
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <IconButton
+              onClick={() => navigate('/budget/plans')}
+              color="inherit"
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 2,
+                p: 0.8,
+              }}
             >
-              🎯 Планирование бюджета
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Выбрано позиций: <strong>{totalCount} шт.</strong>
-            </Typography>
+              <ArrowBackIcon fontSize="small" />
+            </IconButton>
+            <Box>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 'bold',
+                  lineHeight: 1.2,
+                  fontSize: { xs: '1rem', sm: '1.25rem' },
+                }}
+              >
+                🎯 Планирование бюджета
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Выбрано позиций: <strong>{totalCount} шт.</strong>
+              </Typography>
+            </Box>
           </Box>
-        </Box>
+
+          {/* 💻 ДЕСКТОПНАЯ КНОПКА ПОМОЩИ: Будет видна только на ПК */}
+          {!isMobile && <PageHelpButton />}
+        </Stack>
 
         <Box
           sx={{
@@ -754,12 +777,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
             boxShadow: { xs: '0px -4px 16px rgba(0,0,0,0.08)', md: 'none' },
             borderTop: '1px solid',
             borderColor: 'divider',
-
-            // Отступ снизу для безопасной зоны телефонов (iOS/Android) + 16px буфера
-            pb: {
-              xs: 'calc(16px + env(safe-area-inset-bottom, 0px))',
-              md: 0,
-            },
+            pb: { xs: 'calc(16px + env(safe-area-inset-bottom, 0px))', md: 0 },
             pt: { xs: 0.5, md: 0 },
           }}
         >
@@ -786,42 +804,32 @@ export const BudgetPlanDetailPage: React.FC = () => {
               bgcolor: 'transparent',
               borderTop: 'none',
               width: '100%',
-
               '& .MuiTablePagination-toolbar': {
                 px: { xs: 1.5, md: 2 },
                 flexWrap: 'nowrap',
-                // 🎯 ЖЕСТКОЕ ЦЕНТРИРОВАНИЕ ТУЛБАРА НА МОБИЛКАХ
                 justifyContent: { xs: 'center', md: 'flex-end' },
                 minHeight: 52,
                 width: '100%',
               },
-
-              // 🎯 ВОТ ОН, ГЛАВНЫЙ СЕКРЕТ ЦЕНТРИРОВАНИЯ:
-              // Скрываем внутренний распорщик MUI, который заставлял всё улетать вправо
+              // Скрываем распорщик на мобилках для центрирования
               '& .MuiTablePagination-spacer': {
                 display: { xs: 'none', md: 'block' },
               },
-
               '& .MuiTablePagination-selectLabel': {
                 display: { xs: 'none', sm: 'block' },
                 fontSize: '0.875rem',
                 color: 'text.secondary',
               },
-              '& .MuiTablePagination-select': {
-                fontSize: '0.875rem',
-              },
+              '& .MuiTablePagination-select': { fontSize: '0.875rem' },
               '& .MuiTablePagination-displayedRows': {
                 fontSize: '0.875rem',
-                // Убираем лишние внешние отступы на мобилках для плотной посадки по центру
                 mx: { xs: 0.5, md: 2 },
               },
               '& .MuiTablePagination-actions': {
-                // Минимизируем левый отступ кнопок на мобильных
                 ml: { xs: 0.5, md: 2 },
-                '& button': {
-                  p: { xs: 0.8, md: 1.2 },
-                  color: 'primary.main',
-                },
+                // 🎯 ВАЖНО: Сдвигаем стрелочки влево на мобилках, освобождая угол под парящую кнопку справки
+                mr: { xs: '64px', sm: 0 },
+                '& button': { p: { xs: 0.8, md: 1.2 }, color: 'primary.main' },
               },
             }}
           />
@@ -874,6 +882,11 @@ export const BudgetPlanDetailPage: React.FC = () => {
           </Box>
         </Box>
       </Dialog>
+      {isMobile && (
+        <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1100 }}>
+          <PageHelpButton />
+        </Box>
+      )}
     </Container>
   );
 };

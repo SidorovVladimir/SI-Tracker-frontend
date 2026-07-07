@@ -18,14 +18,16 @@ import {
   Visibility,
   VisibilityOff,
   Lock,
-  MailOutline,
+  PersonOutline, // 🌟 Заменили иконку почты на иконку пользователя
 } from '@mui/icons-material';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const client = useApolloClient();
+
+  // 🌟 ИСПРАВЛЕНО: Заменили email на login в стейте формы
   const [form, setForm] = useState({
-    email: '',
+    login: '',
     password: '',
   });
 
@@ -46,16 +48,25 @@ export default function LoginPage() {
   });
 
   const handleSubmit = async () => {
-    const { email, password } = form;
-    if (!email || !password) {
+    const { login: userLogin, password } = form;
+    if (!userLogin.trim() || !password) {
       return;
     }
 
-    await login({ variables: { input: form } });
+    // Отправляем очищенный логин на бэкенд
+    await login({
+      variables: {
+        input: {
+          login: userLogin.trim(),
+          password,
+        },
+      },
+    });
   };
 
   return (
     <>
+      {/* ЛОГОТИП И ШАПКА СИСТЕМЫ */}
       <Box sx={{ mb: 3, textAlign: 'center' }}>
         <Typography
           variant="h3"
@@ -64,6 +75,7 @@ export default function LoginPage() {
             fontWeight: 900,
             letterSpacing: '.2rem',
             color: '#1a1a1a',
+            fontSize: { xs: '2rem', sm: '3rem' }, // Сжали размер логотипа для мобилок
           }}
         >
           ЭТАЛОН
@@ -81,32 +93,34 @@ export default function LoginPage() {
         </Typography>
         <Typography
           variant="caption"
-          display="block" // Чтобы перенеслось на новую строку
+          display="block"
           sx={{ color: 'text.secondary', letterSpacing: '.05rem', mt: 0.5 }}
         >
           система учета средств измерений
         </Typography>
       </Box>
 
-      <Paper sx={{ p: 3, width: '100%' }} variant="outlined">
+      {/* ФОРМА ВХОДА */}
+      <Paper sx={{ p: 3, width: '100%', borderRadius: 3 }} variant="outlined">
         <Stack spacing={3}>
+          {/* 🌟 ИСПРАВЛЕНО: Текстовое поле Логина вместо Электронной почты */}
           <TextField
-            name="email"
-            type="email"
-            label="Электронная почта"
+            name="login"
+            type="text" // 🔒 Строго текстовое поле, чтобы браузер не требовал символ "@"
+            label="Логин / Табельный номер"
             required
             fullWidth
-            autoComplete="email"
+            autoComplete="username"
             autoFocus={true}
-            value={form.email}
+            value={form.login}
             size="small"
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            onChange={(e) => setForm({ ...form, login: e.target.value })}
             variant="outlined"
             slotProps={{
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <MailOutline color="action" />
+                    <PersonOutline color="action" />
                   </InputAdornment>
                 ),
               },
@@ -146,21 +160,31 @@ export default function LoginPage() {
             }}
           />
         </Stack>
-        {/* <Typography sx={{ mt: 2 }}>
-          Нет аккаунта? <Link to={routes.register()}>Зарегистрироваться</Link>
-        </Typography> */}
+
         <Box sx={{ mt: 3 }}>
           <Button
             variant="contained"
             fullWidth
             onClick={handleSubmit}
-            disabled={!form.email || !form.password}
+            // Кнопка активна только если заполнены оба поля
+            disabled={!form.login.trim() || !form.password}
+            sx={{
+              fontWeight: 'bold',
+              textTransform: 'none',
+              height: 40,
+              borderRadius: 2,
+            }}
           >
-            Войти
+            Войти в систему
           </Button>
         </Box>
-        <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
+
+        <Box sx={{ mt: 2.5, textAlign: 'center' }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ fontSize: '0.75rem', fontWeight: 500 }}
+          >
             Локальный сервер предприятия • Версия 1.0.0
           </Typography>
         </Box>

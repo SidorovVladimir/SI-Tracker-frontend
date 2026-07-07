@@ -7,14 +7,11 @@ import { Link } from 'react-router';
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
   IconButton,
   Paper,
   Stack,
@@ -111,46 +108,70 @@ export default function EquipmentTypesPage() {
       </Stack>
 
       {isMobile ? (
-        // Мобильная версия: Список карточек
-        <Stack spacing={2}>
+        // 📱 МОБИЛЬНАЯ ВЕРСИЯ: Компактный плотный список вместо громоздких карточек
+        <Stack spacing={1}>
           {equipmentTypes.map((eq) => (
-            <Card key={eq.id} variant="outlined" sx={{ borderRadius: 2 }}>
-              <CardContent>
-                <Typography
-                  variant="subtitle1"
+            <Paper
+              key={eq.id}
+              variant="outlined"
+              sx={{
+                p: 1.5, // Уменьшили отступы для плотной посадки
+                borderRadius: 2,
+                bgcolor: 'background.paper',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center', // Выравниваем текст и кнопки по одной линии
+                gap: 2,
+              }}
+            >
+              {/* Текстовый блок названия типа оборудования */}
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  textTransform: 'uppercase',
+                  fontSize: '0.825rem',
+                  letterSpacing: '0.6px',
+                  fontWeight: 700,
+                  color: 'text.primary',
+                  wordBreak: 'break-word', // Защита от длинных слов
+                  lineHeight: 1.3,
+                }}
+              >
+                {cleanSpaces(eq.name)}
+              </Typography>
+
+              {/* Кнопки управления — перенесены в один ряд с текстом, без Divider */}
+              <Stack direction="row" spacing={1} flexShrink={0}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  disabled={true}
                   sx={{
-                    textTransform: 'uppercase',
-                    fontSize: '0.875rem',
-                    letterSpacing: '0.8px',
-                    fontWeight: 700,
-                    color: 'text.primary',
+                    border: '1px solid',
+                    borderColor: 'grey.200',
+                    width: 32,
+                    height: 32,
                   }}
                 >
-                  {cleanSpaces(eq.name)}
-                </Typography>
-                <Divider sx={{ my: 1.5 }} />
-                <Stack direction="row" spacing={1} justifyContent="flex-end">
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    disabled={true}
-                    sx={{ border: '1px solid', borderColor: 'primary.light' }}
-                    // component={Link}
-                    // to={routes.admin.editProductionSite(p.id)}
-                  >
-                    <Edit fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    sx={{ border: '1px solid', borderColor: 'error.light' }}
-                    onClick={() => handleDeleteClick(eq.id)}
-                  >
-                    <Delete fontSize="small" />
-                  </IconButton>
-                </Stack>
-              </CardContent>
-            </Card>
+                  <Edit fontSize="small" sx={{ fontSize: '1.1rem' }} />
+                </IconButton>
+
+                <IconButton
+                  size="small"
+                  color="error"
+                  sx={{
+                    border: '1px solid',
+                    borderColor: 'error.light',
+                    width: 32,
+                    height: 32,
+                    bgcolor: 'rgba(211, 47, 47, 0.02)',
+                  }}
+                  onClick={() => handleDeleteClick(eq.id)}
+                >
+                  <Delete fontSize="small" sx={{ fontSize: '1.1rem' }} />
+                </IconButton>
+              </Stack>
+            </Paper>
           ))}
         </Stack>
       ) : (

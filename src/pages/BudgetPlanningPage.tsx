@@ -18,6 +18,7 @@ import {
   CardContent,
   Divider,
   CircularProgress,
+  Stack,
 } from '@mui/material';
 import { useQuery } from '@apollo/client/react';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -29,6 +30,7 @@ import {
   GetProductionSitesDocument,
   GetSitiesDocument,
 } from '../graphql/types/__generated__/graphql';
+import PageHelpButton from '../components/PageHelpButton';
 
 const MONTH_NAMES = [
   'Янв',
@@ -117,26 +119,38 @@ export const BudgetPlanningPage: React.FC = () => {
       <Box
         sx={{
           display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: { xs: 'stretch', sm: 'center' },
           mb: 2,
-          flexWrap: 'wrap',
           gap: 2,
         }}
       >
-        <Typography
-          variant="h5"
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
           sx={{
-            fontWeight: 800,
-            color: 'text.primary',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            fontSize: { xs: '1.25rem', sm: '1.5rem' },
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: { xs: 'space-between', sm: 'flex-start' },
           }}
         >
-          <AccountBalanceWalletIcon color="primary" /> Матрица годовых затрат СИ
-        </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
+              color: 'text.primary',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              fontSize: { xs: '1.2rem', sm: '1.5rem' },
+            }}
+          >
+            <AccountBalanceWalletIcon color="primary" /> Матрица годовых затрат
+            СИ
+          </Typography>
+          <PageHelpButton />
+        </Stack>
 
         <FormControl size="small" sx={{ width: { xs: '100%', sm: 160 } }}>
           <InputLabel>Год планирования</InputLabel>

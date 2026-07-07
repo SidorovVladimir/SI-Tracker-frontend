@@ -29,6 +29,38 @@ export type Scalars = {
   JSON: { input: unknown; output: unknown };
 };
 
+export type AdminAnomalies = {
+  __typename: 'AdminAnomalies';
+  missingControlType: Array<AnomalyDevice>;
+  missingHistory: Array<AnomalyDevice>;
+  missingMpi: Array<AnomalyDevice>;
+  statusMismatch: Array<AnomalyDevice>;
+};
+
+export type AdminDashboardResponse = {
+  __typename: 'AdminDashboardResponse';
+  anomalies: AdminAnomalies;
+  stats: AdminStats;
+};
+
+export type AdminStats = {
+  __typename: 'AdminStats';
+  companies: Scalars['Int']['output'];
+  devices: Scalars['Int']['output'];
+  sites: Scalars['Int']['output'];
+  standards: Scalars['Int']['output'];
+  tariffs: Scalars['Int']['output'];
+  users: Scalars['Int']['output'];
+};
+
+export type AnomalyDevice = {
+  __typename: 'AnomalyDevice';
+  id: Scalars['ID']['output'];
+  model: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  serialNumber: Scalars['String']['output'];
+};
+
 export type AuditAction =
   | 'assign_batch'
   | 'create'
@@ -279,9 +311,9 @@ export type CreateStatusInput = {
 };
 
 export type CreateUserInput = {
-  email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
+  login: Scalars['String']['input'];
   password: Scalars['String']['input'];
   role: Scalars['String']['input'];
 };
@@ -524,7 +556,7 @@ export type JobStatusResponse = {
 };
 
 export type LoginUserInput = {
-  email: Scalars['String']['input'];
+  login: Scalars['String']['input'];
   password: Scalars['String']['input'];
 };
 
@@ -972,6 +1004,7 @@ export type Query = {
   equipmentType: EquipmentType;
   equipmentTypes: Array<EquipmentType>;
   executeRawSql: RawSqlResponse;
+  getAdminDashboardStats: AdminDashboardResponse;
   getBudgetMatrix: BudgetMatrixResponse;
   getBudgetPlanDistribution: Array<BudgetPlanDistributionRow>;
   getChatDialogs: Array<ChatDialog>;
@@ -1324,10 +1357,10 @@ export type UpdateVerificationOrganizationInput = {
 export type User = {
   __typename: 'User';
   createdAt: Scalars['String']['output'];
-  email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
+  login: Scalars['String']['output'];
   role: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
 };
@@ -1473,6 +1506,56 @@ export type GetFinancialAnalyticsQuery = {
   };
 };
 
+export type GetAdminDashboardStatsQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type GetAdminDashboardStatsQuery = {
+  getAdminDashboardStats: {
+    __typename: 'AdminDashboardResponse';
+    stats: {
+      __typename: 'AdminStats';
+      devices: number;
+      users: number;
+      companies: number;
+      sites: number;
+      standards: number;
+      tariffs: number;
+    };
+    anomalies: {
+      __typename: 'AdminAnomalies';
+      missingMpi: Array<{
+        __typename: 'AnomalyDevice';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+      }>;
+      missingControlType: Array<{
+        __typename: 'AnomalyDevice';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+      }>;
+      missingHistory: Array<{
+        __typename: 'AnomalyDevice';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+      }>;
+      statusMismatch: Array<{
+        __typename: 'AnomalyDevice';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+      }>;
+    };
+  };
+};
+
 export type SyncDeviceWithArshinMutationVariables = Exact<{
   input: SyncDeviceWithArshinInput;
 }>;
@@ -1519,7 +1602,7 @@ export type GetDeviceAuditLogsQuery = {
         firstName: string;
         lastName: string;
         role: string;
-        email: string;
+        login: string;
       } | null;
     }>;
   };
@@ -1539,7 +1622,7 @@ export type GetMeQuery = {
     id: string;
     firstName: string;
     lastName: string;
-    email: string;
+    login: string;
     role: string;
   } | null;
 };
@@ -1557,7 +1640,7 @@ export type LoginMutation = {
       id: string;
       firstName: string;
       lastName: string;
-      email: string;
+      login: string;
       role: string;
     } | null;
   };
@@ -1576,7 +1659,7 @@ export type RegisterMutation = {
       id: string;
       firstName: string;
       lastName: string;
-      email: string;
+      login: string;
       role: string;
     } | null;
   };
@@ -2887,7 +2970,7 @@ export type GetUsersQuery = {
     id: string;
     firstName: string;
     lastName: string;
-    email: string;
+    login: string;
     role: string;
     createdAt: string;
     updatedAt: string;
@@ -2902,7 +2985,7 @@ export type GetChatUsersQuery = {
     id: string;
     firstName: string;
     lastName: string;
-    email: string;
+    login: string;
     role: string;
   }>;
 };
@@ -2917,7 +3000,7 @@ export type GetUserQuery = {
     id: string;
     firstName: string;
     lastName: string;
-    email: string;
+    login: string;
     role: string;
   };
 };
@@ -3142,6 +3225,169 @@ export const GetFinancialAnalyticsDocument = {
 } as unknown as DocumentNode<
   GetFinancialAnalyticsQuery,
   GetFinancialAnalyticsQueryVariables
+>;
+export const GetAdminDashboardStatsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetAdminDashboardStats' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getAdminDashboardStats' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'stats' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'devices' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'users' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'companies' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'sites' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'standards' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'tariffs' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'anomalies' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'missingMpi' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'missingControlType' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'missingHistory' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'statusMismatch' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetAdminDashboardStatsQuery,
+  GetAdminDashboardStatsQueryVariables
 >;
 export const SyncDeviceWithArshinDocument = {
   kind: 'Document',
@@ -3377,7 +3623,7 @@ export const GetDeviceAuditLogsDocument = {
                             },
                             {
                               kind: 'Field',
-                              name: { kind: 'Name', value: 'email' },
+                              name: { kind: 'Name', value: 'login' },
                             },
                           ],
                         },
@@ -3455,7 +3701,7 @@ export const GetMeDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'login' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'role' } },
               ],
             },
@@ -3523,7 +3769,7 @@ export const LoginDocument = {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'lastName' },
                       },
-                      { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'login' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'role' } },
                     ],
                   },
@@ -3594,7 +3840,7 @@ export const RegisterDocument = {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'lastName' },
                       },
-                      { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'login' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'role' } },
                     ],
                   },
@@ -8864,7 +9110,7 @@ export const GetUsersDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'login' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'role' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
@@ -8895,7 +9141,7 @@ export const GetChatUsersDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'login' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'role' } },
               ],
             },
@@ -8944,7 +9190,7 @@ export const GetUserDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'login' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'role' } },
               ],
             },

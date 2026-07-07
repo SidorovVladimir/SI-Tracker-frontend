@@ -7,14 +7,11 @@ import { Link } from 'react-router';
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
   IconButton,
   Paper,
   Stack,
@@ -113,46 +110,70 @@ export default function MeasurementTypesPage() {
       </Stack>
 
       {isMobile ? (
-        // Мобильная версия: Список карточек
-        <Stack spacing={2}>
+        // 📱 МОБИЛЬНАЯ ВЕРСИЯ: Компактный однострочный список видов измерений
+        <Stack spacing={1}>
           {measurementTypes.map((m) => (
-            <Card key={m.id} variant="outlined" sx={{ borderRadius: 2 }}>
-              <CardContent>
-                <Typography
-                  variant="subtitle1"
+            <Paper
+              key={m.id}
+              variant="outlined"
+              sx={{
+                p: 1.5, // Минимальные плотные отступы
+                borderRadius: 2,
+                bgcolor: 'background.paper',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center', // Текст и кнопки строго по одной оси
+                gap: 2,
+              }}
+            >
+              {/* Наименование вида измерения */}
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  textTransform: 'uppercase',
+                  fontSize: '0.825rem',
+                  letterSpacing: '0.6px',
+                  fontWeight: 700,
+                  color: 'text.primary',
+                  wordBreak: 'break-word', // Защита от излома верстки длинными словами
+                  lineHeight: 1.3,
+                }}
+              >
+                {cleanSpaces(m.name)}
+              </Typography>
+
+              {/* Кнопки управления в одну линию без Divider */}
+              <Stack direction="row" spacing={1} flexShrink={0}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  disabled={true}
                   sx={{
-                    textTransform: 'uppercase',
-                    fontSize: '0.875rem',
-                    letterSpacing: '0.8px',
-                    fontWeight: 700,
-                    color: 'text.primary',
+                    border: '1px solid',
+                    borderColor: 'grey.200',
+                    width: 32,
+                    height: 32,
                   }}
                 >
-                  {cleanSpaces(m.name)}
-                </Typography>
-                <Divider sx={{ my: 1.5 }} />
-                <Stack direction="row" spacing={1} justifyContent="flex-end">
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    disabled={true}
-                    sx={{ border: '1px solid', borderColor: 'primary.light' }}
-                    // component={Link}
-                    // to={routes.admin.editProductionSite(p.id)}
-                  >
-                    <Edit fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    sx={{ border: '1px solid', borderColor: 'error.light' }}
-                    onClick={() => handleDeleteClick(m.id)}
-                  >
-                    <Delete fontSize="small" />
-                  </IconButton>
-                </Stack>
-              </CardContent>
-            </Card>
+                  <Edit fontSize="small" sx={{ fontSize: '1.1rem' }} />
+                </IconButton>
+
+                <IconButton
+                  size="small"
+                  color="error"
+                  sx={{
+                    border: '1px solid',
+                    borderColor: 'error.light',
+                    width: 32,
+                    height: 32,
+                    bgcolor: 'rgba(211, 47, 47, 0.02)',
+                  }}
+                  onClick={() => handleDeleteClick(m.id)}
+                >
+                  <Delete fontSize="small" sx={{ fontSize: '1.1rem' }} />
+                </IconButton>
+              </Stack>
+            </Paper>
           ))}
         </Stack>
       ) : (

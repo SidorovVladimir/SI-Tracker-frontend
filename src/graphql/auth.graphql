@@ -3,7 +3,7 @@ query getMe {
     id
     firstName
     lastName
-    email
+    login
     role
   }
 }
@@ -15,7 +15,7 @@ mutation Login($input: LoginUserInput!) {
       id
       firstName
       lastName
-      email
+      login
       role
     }
   }
@@ -28,7 +28,7 @@ mutation Register($input: CreateUserInput!) {
       id
       firstName
       lastName
-      email
+      login
       role
     }
   }

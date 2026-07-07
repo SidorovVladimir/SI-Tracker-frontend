@@ -20,3 +20,42 @@ query GetFinancialAnalytics($year: Int!, $month: Int) {
     }
   }
 }
+
+query GetAdminDashboardStats {
+  getAdminDashboardStats {
+    stats {
+      devices
+      users
+      companies
+      sites
+      standards
+      tariffs
+    }
+    anomalies {
+      missingMpi {
+        id
+        name
+        model
+        serialNumber
+      }
+      missingControlType {
+        id
+        name
+        model
+        serialNumber
+      }
+      missingHistory {
+        id
+        name
+        model
+        serialNumber
+      }
+      statusMismatch {
+        id
+        name
+        model
+        serialNumber
+      }
+    }
+  }
+}

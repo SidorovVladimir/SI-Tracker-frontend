@@ -485,7 +485,45 @@ export const VerificationPlanningPage: React.FC = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
           rowsPerPageOptions={[10, 20, 50, 100]}
           labelRowsPerPage="Строк на странице:"
-          sx={{ borderTop: 1, borderColor: 'divider', mt: 'auto' }}
+          sx={{
+            borderTop: 1,
+            borderColor: 'divider',
+            mt: 'auto',
+
+            '& .MuiTablePagination-toolbar': {
+              px: { xs: 1, sm: 2 },
+              minHeight: 48,
+
+              justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+            },
+
+            // 1. Убираем текст "Строк на странице:" на смартфонах
+            '& .MuiTablePagination-selectLabel': {
+              display: { xs: 'none', sm: 'block' },
+            },
+
+            // 2. Убираем выпадающий список выбора количества строк на смартфонах
+            '& .MuiTablePagination-selectRoot': {
+              display: { xs: 'none', sm: 'inline-flex' },
+            },
+
+            // 3. Сжимаем отступы у счетчика страниц (например: 1–20 из 145)
+            '& .MuiTablePagination-displayedRows': {
+              fontSize: { xs: '0.8rem', sm: '0.875rem' },
+              fontWeight: 'medium',
+              ml: { xs: 0, sm: 'auto' },
+            },
+
+            // 4. Защитный отступ справа для стрелочек переключения на мобилках
+            '& .MuiTablePagination-actions': {
+              ml: 1,
+              // 🎯 Сдвигаем стрелочки левее на 56px, чтобы они не перекрывались парящей кнопкой помощи!
+              mr: { xs: '56px', sm: 0 },
+              '& .MuiIconButton-root': {
+                p: { xs: 0.5, sm: 1 }, // Делаем стрелочки чуть компактнее для удобного нажатия
+              },
+            },
+          }}
         />
       </Box>
 

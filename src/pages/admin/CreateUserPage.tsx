@@ -22,7 +22,7 @@ import {
 type FieldErrors = {
   firstName?: string;
   lastName?: string;
-  email?: string;
+  login?: string;
   password?: string;
 };
 
@@ -31,7 +31,7 @@ export default function CreateUserPage() {
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    login: '',
     password: '',
     role: '',
   });
@@ -58,8 +58,8 @@ export default function CreateUserPage() {
             if (err.path.includes('lastName')) {
               errors.lastName = err.message;
             }
-            if (err.path.includes('email')) {
-              errors.email = err.message;
+            if (err.path.includes('login')) {
+              errors.login = err.message;
             }
             if (err.path.includes('password')) {
               errors.password = err.message;
@@ -131,16 +131,16 @@ export default function CreateUserPage() {
               helperText={fieldErrors.lastName}
             />
             <TextField
-              label="Почта"
-              name="email"
-              value={form.email}
+              label="Логин"
+              name="login"
+              value={form.login}
               onChange={handleChange}
               fullWidth
               variant="outlined"
               size="small"
               required
-              error={!!fieldErrors.email}
-              helperText={fieldErrors.email}
+              error={!!fieldErrors.login}
+              helperText={fieldErrors.login}
             />
             <TextField
               type="password"
@@ -166,9 +166,13 @@ export default function CreateUserPage() {
               onChange={handleChange}
               value={form.role}
             >
-              {['admin', 'user'].map((name) => (
+              {['superadmin', 'admin', 'user'].map((name) => (
                 <MenuItem key={name} value={name}>
-                  {name === 'admin' ? 'Администратор' : 'Пользователь'}
+                  {name === 'superadmin'
+                    ? 'Суперадминистратор'
+                    : name === 'admin'
+                    ? 'Администратор'
+                    : 'Пользователь'}
                 </MenuItem>
               ))}
             </TextField>

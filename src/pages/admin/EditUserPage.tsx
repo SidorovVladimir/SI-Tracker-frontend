@@ -129,9 +129,9 @@ function UserForm({
         <form onSubmit={handleSubmit}>
           <Stack spacing={3}>
             <TextField
-              label="Email"
-              name="email"
-              value={user?.email || ''}
+              label="Логин"
+              name="login"
+              value={user?.login || ''}
               disabled
               fullWidth
               variant="outlined"
@@ -171,15 +171,27 @@ function UserForm({
               name="role"
               size="small"
               fullWidth
-              disabled={userContext.id === user.id}
+              // 🌟 ИСПРАВЛЕНО: Блокируем, если правит сам себя ИЛИ если текущий юзер НЕ суперадмин
+              disabled={
+                userContext.id === user.id || userContext.role !== 'superadmin'
+              }
               onChange={handleChange}
               value={form.role}
             >
-              {['admin', 'user'].map((name) => (
-                <MenuItem key={name} value={name}>
-                  {name === 'admin' ? 'Администратор' : 'Пользователь'}
-                </MenuItem>
-              ))}
+              {['superadmin', 'admin', 'user']
+                .filter(
+                  (name) =>
+                    name !== 'superadmin' || userContext.role === 'superadmin'
+                )
+                .map((name) => (
+                  <MenuItem key={name} value={name}>
+                    {name === 'superadmin'
+                      ? 'Суперадминистратор'
+                      : name === 'admin'
+                      ? 'Администратор'
+                      : 'Пользователь'}
+                  </MenuItem>
+                ))}
             </TextField>
 
             <Divider sx={{ my: 2 }} />

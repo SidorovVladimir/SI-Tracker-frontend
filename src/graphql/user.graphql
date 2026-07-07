@@ -3,7 +3,8 @@ query GetUsers {
     id
     firstName
     lastName
-    email
+    # email
+    login
     role
     createdAt
     updatedAt
@@ -15,7 +16,8 @@ query GetChatUsers {
     id
     firstName
     lastName
-    email
+    login
+    # email
     role
   }
 }
@@ -25,7 +27,8 @@ query GetUser($id: ID!) {
     id
     firstName
     lastName
-    email
+    login
+    # email
     role
   }
 }

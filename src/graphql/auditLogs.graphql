@@ -13,7 +13,7 @@ query GetDeviceAuditLogs($filter: AuditLogFilter, $limit: Int, $offset: Int) {
         firstName
         lastName
         role
-        email
+        login
       }
     }
     totalCount

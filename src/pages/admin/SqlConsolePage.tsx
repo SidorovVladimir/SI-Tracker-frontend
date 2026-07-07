@@ -13,6 +13,9 @@ import {
   TableRow,
   Alert,
   CircularProgress,
+  useTheme,
+  useMediaQuery,
+  Stack,
 } from '@mui/material';
 
 import { ExecuteRawSqlDocument } from '../../graphql/types/__generated__/graphql';
@@ -21,11 +24,15 @@ import { useLazyQuery } from '@apollo/client/react';
 import { useSnackbar } from 'notistack';
 import { API_ROUTES } from '../../config';
 import { useSocketApp } from '../../context/SocketContext';
+import PageHelpButton from '../../components/PageHelpButton';
 
 export const SqlConsolePage: React.FC = () => {
   const [queryText, setQueryText] = useState<string>(
     'SELECT * FROM devices LIMIT 5;'
   );
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const { addRunningJob } = useSocketApp();
 
@@ -146,6 +153,7 @@ export const SqlConsolePage: React.FC = () => {
         bgcolor: 'background.paper',
         borderRadius: 2,
         height: '100%',
+        position: 'relative',
       }}
     >
       <Box
@@ -155,22 +163,49 @@ export const SqlConsolePage: React.FC = () => {
           borderColor: 'divider',
           pb: 2,
           display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
+          alignItems: { xs: 'stretch', sm: 'center' },
           gap: 2,
         }}
       >
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-            💻 Терминал сырых SQL запросов
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Инструмент прямого взаимодействия с PostgreSQL. Будьте осторожны с
-            командами UPDATE и DELETE.
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="flex-start"
+          sx={{
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: { xs: 'space-between', sm: 'flex-start' },
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 'bold',
+                mb: 0.5,
+                fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              }}
+            >
+              💻 Терминал сырых SQL запросов
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Инструмент прямого взаимодействия с PostgreSQL. Будьте осторожны с
+              командами UPDATE и DELETE.
+            </Typography>
+          </Box>
+
+          {/* На десктопе рендерим кнопку помощи прямо в шапке */}
+          {!isMobile && <PageHelpButton />}
+        </Stack>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            flexWrap: 'wrap',
+            width: { xs: '100%', sm: 'auto' },
+          }}
+        >
           <Button
             variant="contained"
             color="warning"
@@ -348,6 +383,11 @@ export const SqlConsolePage: React.FC = () => {
               DELETE команд).
             </Typography>
           )}
+        </Box>
+      )}
+      {isMobile && (
+        <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1100 }}>
+          <PageHelpButton />
         </Box>
       )}
     </Box>

@@ -54,6 +54,7 @@ import { BudgetPlanningPage } from './pages/BudgetPlanningPage';
 import { BudgetPlanDetailPage } from './pages/BudgetPlanDetailPage';
 
 import { BudgetLayoutPage } from './pages/BudgetLayoutPage';
+import { AdminDashboard } from './pages/admin/AdminDashboard';
 // import HelpPage from './pages/HelpPage';
 // import { LicensesPage } from './pages/LicensesPage';
 
@@ -133,6 +134,7 @@ function App() {
             />
             <Route element={<MainLayout />}>
               <Route path={routes.admin.root()} element={<AdminPage />}>
+                <Route index element={<AdminDashboard />} />
                 <Route path={routes.admin.users()} element={<UsersPage />} />
 
                 <Route

@@ -19,6 +19,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { GetProductionAnalyticsDocument } from '../graphql/types/__generated__/graphql';
+import PageHelpButton from '../components/PageHelpButton';
 
 // Полный массив месяцев для выпадающего списка фильтрации
 const MONTHS_SELECT_OPTIONS = [
@@ -109,9 +110,30 @@ export default function ProductionAnalyticsPage() {
           gap: 2,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          📋 Производственный мониторинг и объемы СИ
-        </Typography>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          sx={{
+            width: isMobile ? '100%' : 'auto',
+            justifyContent: isMobile ? 'space-between' : 'flex-start',
+          }}
+        >
+          <Typography
+            sx={{
+              fontWeight: 700,
+
+              fontSize: {
+                xs: '1.15rem',
+                md: '1.5rem',
+              },
+              lineHeight: 1.3,
+            }}
+          >
+            📋 Производственный мониторинг и объемы СИ
+          </Typography>
+          <PageHelpButton />
+        </Stack>
 
         <Stack
           direction="row"

@@ -17,11 +17,15 @@ import {
   TableRow,
   Paper,
   CircularProgress,
+  Stack,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 // import * as XLSX from 'xlsx';
 import { useSnackbar } from 'notistack';
 import { ImportDevicesFromExcelDocument } from '../graphql/types/__generated__/graphql';
 import { useMutation } from '@apollo/client/react';
+import PageHelpButton from './PageHelpButton';
 
 // Поля нашей системы, которые обязательно или опционально нужно заполнить
 const SYSTEM_FIELDS = [
@@ -80,6 +84,9 @@ const SYSTEM_FIELDS = [
 
 export const ExcelImporter: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Состояния для хранения распарсенных данных Excel
   const [excelHeaders, setExcelHeaders] = useState<string[]>([]);
@@ -342,19 +349,57 @@ export const ExcelImporter: React.FC = () => {
 
   return (
     <Box
-      sx={{ p: { xs: 2, md: 3 }, bgcolor: 'background.paper', borderRadius: 2 }}
+      sx={{
+        p: { xs: 2, md: 3 },
+        bgcolor: 'background.paper',
+        borderRadius: 2,
+        position: 'relative',
+      }}
     >
-      {/* Шапка страницы импорта в стиле панели администратора */}
+      {/* ================= ВЕРХНЯЯ ШАПКА С АДАПТИВНОЙ КНОПКОЙ ПОМОЩИ ================= */}
       <Box
-        sx={{ mb: 3, borderBottom: '1px solid', borderColor: 'divider', pb: 2 }}
+        sx={{
+          mb: 3,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          pb: 2,
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'flex-start' },
+          gap: 2,
+        }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-          📥 Пакетный импорт оборудования
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Загрузите файл Excel (.xlsx), сопоставьте колонки таблицы с полями
-          паспорта прибора и запустите автоматическое наполнение реестра.
-        </Typography>
+        {/* 🌟 ОБЪЕДИНЯЕМ ЗАГОЛОВОК, ПОДПИСЬ И КНОПКУ ПОМОЩИ В ОДИН АДАПТИВНЫЙ СТЭК */}
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="flex-start"
+          sx={{
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: { xs: 'space-between', sm: 'flex-start' },
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 'bold',
+                mb: 0.5,
+                fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              }}
+            >
+              📥 Пакетный импорт оборудования
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Загрузите файл Excel (.xlsx), сопоставьте колонки таблицы с полями
+              паспорта прибора и запустите автоматическое наполнение реестра.
+            </Typography>
+          </Box>
+
+          {/* На десктопе рендерим кнопку помощи прямо в шапке */}
+          {!isMobile && <PageHelpButton />}
+        </Stack>
       </Box>
 
       {/* Зона загрузки файла */}
@@ -523,6 +568,11 @@ export const ExcelImporter: React.FC = () => {
             </TableContainer>
           </Grid>
         </Grid>
+      )}
+      {isMobile && (
+        <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1100 }}>
+          <PageHelpButton />
+        </Box>
       )}
     </Box>
   );
