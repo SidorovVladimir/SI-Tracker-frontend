@@ -586,6 +586,11 @@ function UserForm({
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>
           <TextField
+            id="device-name"
+            autoComplete="off"
+            slotProps={{
+              input: { id: 'device-name' },
+            }}
             label="Название"
             name="name"
             value={form.name}
@@ -608,6 +613,11 @@ function UserForm({
             }}
           />
           <TextField
+            id="device-model"
+            autoComplete="off"
+            slotProps={{
+              input: { id: 'device-model' },
+            }}
             label="Тип"
             name="model"
             value={form.model}
@@ -630,6 +640,11 @@ function UserForm({
             }}
           />
           <TextField
+            id="device-serialNumber"
+            autoComplete="off"
+            slotProps={{
+              input: { id: 'device-serialNumber' },
+            }}
             label="Заводской номер"
             name="serialNumber"
             value={form.serialNumber}

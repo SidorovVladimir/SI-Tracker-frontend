@@ -53,8 +53,37 @@ export const AdminDashboard: React.FC = () => {
 
   const response = data?.getAdminDashboardStats || ({} as any);
   const stats = response?.stats;
-  const anomalies = response?.anomalies;
+  const rawAnomalies = response?.anomalies || {};
 
+  const anomalies = {
+    missingMpi: Array.from(
+      new Map(
+        (rawAnomalies.missingMpi || []).map((d: any) => [d.id, d])
+      ).values()
+    ),
+    missingControlType: Array.from(
+      new Map(
+        (rawAnomalies.missingControlType || []).map((d: any) => [d.id, d])
+      ).values()
+    ),
+    missingHistory: Array.from(
+      new Map(
+        (rawAnomalies.missingHistory || []).map((d: any) => [d.id, d])
+      ).values()
+    ),
+    statusMismatch: Array.from(
+      new Map(
+        (rawAnomalies.statusMismatch || []).map((d: any) => [d.id, d])
+      ).values()
+    ),
+  };
+
+  const handleDeviceClick = (e: React.MouseEvent<HTMLElement>, id: string) => {
+    if (e.currentTarget) {
+      e.currentTarget.blur(); // Убираем фокус с элемента бэкграунда
+    }
+    setEditingDeviceId(id);
+  };
   return (
     <Box
       sx={{
@@ -280,7 +309,7 @@ export const AdminDashboard: React.FC = () => {
                       {anomalies?.missingMpi?.map((dev: any) => (
                         <ListItemButton
                           key={dev.id}
-                          onClick={() => setEditingDeviceId(dev.id)}
+                          onClick={(e) => handleDeviceClick(e, dev.id)}
                           sx={{
                             borderBottom: '1px solid',
                             borderColor: 'grey.200',
@@ -365,7 +394,7 @@ export const AdminDashboard: React.FC = () => {
                       {anomalies?.missingControlType?.map((dev: any) => (
                         <ListItemButton
                           key={dev.id}
-                          onClick={() => setEditingDeviceId(dev.id)}
+                          onClick={(e) => handleDeviceClick(e, dev.id)}
                           sx={{
                             borderBottom: '1px solid',
                             borderColor: 'grey.200',
@@ -447,7 +476,7 @@ export const AdminDashboard: React.FC = () => {
                       {anomalies?.missingHistory?.map((dev: any) => (
                         <ListItemButton
                           key={dev.id}
-                          onClick={() => setEditingDeviceId(dev.id)}
+                          onClick={(e) => handleDeviceClick(e, dev.id)}
                           sx={{
                             borderBottom: '1px solid',
                             borderColor: 'grey.200',
@@ -530,7 +559,7 @@ export const AdminDashboard: React.FC = () => {
                       {anomalies?.statusMismatch?.map((dev: any) => (
                         <ListItemButton
                           key={dev.id}
-                          onClick={() => setEditingDeviceId(dev.id)}
+                          onClick={(e) => handleDeviceClick(e, dev.id)}
                           sx={{
                             borderBottom: '1px solid',
                             borderColor: 'grey.200',
@@ -563,6 +592,7 @@ export const AdminDashboard: React.FC = () => {
       <Dialog
         open={Boolean(editingDeviceId)}
         onClose={() => setEditingDeviceId(null)}
+        disableEnforceFocus
         maxWidth="sm"
         fullWidth
         slotProps={{
