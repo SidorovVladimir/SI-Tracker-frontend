@@ -15,15 +15,10 @@ import {
   Alert,
   Stack,
   LinearProgress,
-  Divider,
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts';
-import {
-  GetFinancialAnalyticsDocument,
-  GetVerificationRisksDocument,
-} from '../graphql/types/__generated__/graphql';
-import { RiskHeatMap } from '../components/RiskHeatMap';
-import { PriceHistoryTrend } from '../components/PriceHistoryTrend';
+import { GetFinancialAnalyticsDocument } from '../graphql/types/__generated__/graphql';
+
 import PageHelpButton from '../components/PageHelpButton';
 
 // Константа текстовых меток месяцев для графика трендов
@@ -73,25 +68,12 @@ export default function AnalyticsPage() {
     fetchPolicy: 'network-only',
   });
 
-  const { data: riskData } = useQuery(GetVerificationRisksDocument, {
-    fetchPolicy: 'network-only',
-  });
-
-  const [activeSiteId, setActiveSiteId] = useState<string | null>(null);
+  // const { data: riskData } = useQuery(GetVerificationRisksDocument, {
+  //   fetchPolicy: 'network-only',
+  // });
 
   const response = data?.getFinancialAnalytics;
   const totalSpent = response?.totalSpent || 0;
-  const topServicesList = useMemo(() => {
-    // Извлекаем массив цехов из РЕАЛЬНОГО ответа вашего сервера
-    const sites = response?.byProductionSites || [];
-
-    // Автоматически выбираем первый цех, чтобы график не был пустым при загрузке
-    if (sites.length > 0 && !activeSiteId) {
-      setActiveSiteId(sites[0].siteId);
-    }
-
-    return sites;
-  }, [response, activeSiteId]);
 
   // --- 📈 1. Маппинг месяцев для линейного тренда полного года ---
   const lineChartData = useMemo(() => {
@@ -247,9 +229,9 @@ export default function AnalyticsPage() {
         </Box>
       ) : (
         <Grid container spacing={3}>
-          <Grid size={{ xs: 12 }}>
+          {/* <Grid size={{ xs: 12 }}>
             <RiskHeatMap data={riskData} />
-          </Grid>
+          </Grid> */}
           {/* ================= КАРТОЧКИ KPI (ФИЛЬТРУЮТСЯ ПО ГОДУ ИЛИ МЕСЯЦУ) ================= */}
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Card
@@ -465,88 +447,6 @@ export default function AnalyticsPage() {
                   total={totalSpent}
                   isFullWidth={true}
                 />
-              )}
-            </Card>
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <Card
-              sx={{
-                boxShadow: 2,
-                p: { xs: 2, sm: 3 },
-                borderRadius: 2,
-                bgcolor: 'background.paper',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: { xs: 'stretch', sm: 'center' },
-                  flexDirection: { xs: 'column', sm: 'row' },
-                  gap: 2,
-                  mb: 2,
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                    📈 Анализ изменения стоимости обслуживания объектов
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Выберите цех холдинга для просмотра тренда затрат по годам и
-                    ЦСМ
-                  </Typography>
-                </Box>
-
-                {/* Селектор выбора площадки — работает строго на ваших типах */}
-                <FormControl
-                  size="small"
-                  sx={{ minWidth: { xs: '100%', sm: 320 } }}
-                >
-                  <InputLabel id="inflation-site-label">
-                    Цех / Участок завода
-                  </InputLabel>
-                  <Select
-                    labelId="inflation-site-label"
-                    value={activeSiteId || ''}
-                    label="Цех / Участок завода"
-                    onChange={(e) => setActiveSiteId(e.target.value)}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          maxHeight: 280, // Фиксированная высота окна в пикселях
-                          borderRadius: 2, // Скругления под дизайн-код
-                          boxShadow: 3,
-                          '& .MuiMenuItem-root': {
-                            fontSize: '0.85rem', // Чуть компактнее шрифт на мобилках
-                            py: 1.2,
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    {topServicesList.map((site: any) => (
-                      <MenuItem key={site.siteId} value={site.siteId}>
-                        {site.fullSiteLabel}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-
-              <Divider sx={{ mb: 2, borderStyle: 'dashed' }} />
-
-              {/* Рендерим график инфляции по выбранной площадке */}
-              {activeSiteId ? (
-                // ✅ Исправление: передаем siteId вместо старого matchHistorySku
-                <PriceHistoryTrend siteId={activeSiteId} />
-              ) : (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ fontStyle: 'italic', textAlign: 'center', py: 4 }}
-                >
-                  Нет доступных объектов для анализа затрат за этот период
-                </Typography>
               )}
             </Card>
           </Grid>

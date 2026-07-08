@@ -405,11 +405,8 @@ export const BudgetPlanDetailPage: React.FC = () => {
             <MenuItem key="csm_code" value="csm_code">
               По коду СИ
             </MenuItem>
-            <MenuItem key="model_exact" value="model_exact">
-              По модели
-            </MenuItem>
-            <MenuItem key="text_fuzzy" value="text_fuzzy">
-              Полнотекстовый
+            <MenuItem key="historical" value="historical">
+              По истории
             </MenuItem>
             <MenuItem key="manual" value="manual">
               Ручной ввод
@@ -550,19 +547,19 @@ export const BudgetPlanDetailPage: React.FC = () => {
                           sx={{
                             fontWeight: 'medium',
                             // Делаем ячейку кликабельной
-                            cursor: 'pointer',
-                            '&:hover': {
-                              color: 'primary.main',
-                              textDecoration: 'underline',
-                            },
+                            // cursor: 'pointer',
+                            // '&:hover': {
+                            //   color: 'primary.main',
+                            //   textDecoration: 'underline',
+                            // },
                           }}
                           // 🎯 При тапе передаем сгенерированный ключ в модальное окно
-                          onClick={() => {
-                            setTrendSku(
-                              item.matchHistorySku ||
-                                `TEXT-${item.deviceName.replace(/\s+/g, '-')}`
-                            );
-                          }}
+                          // onClick={() => {
+                          //   setTrendSku(
+                          //     item.matchHistorySku ||
+                          //       `TEXT-${item.deviceName.replace(/\s+/g, '-')}`
+                          //   );
+                          // }}
                         >
                           {item.deviceName}
                         </TableCell>
@@ -647,22 +644,22 @@ export const BudgetPlanDetailPage: React.FC = () => {
                     {/* Превращаем текст в интерактивную кнопку-ссылку для вызова графика */}
                     <Typography
                       variant="subtitle2"
-                      onClick={() => {
-                        setTrendSku(
-                          item.matchHistorySku ||
-                            `TEXT-${item.deviceName.replace(/\s+/g, '-')}`
-                        );
-                      }}
+                      // onClick={() => {
+                      //   setTrendSku(
+                      //     item.matchHistorySku ||
+                      //       `TEXT-${item.deviceName.replace(/\s+/g, '-')}`
+                      //   );
+                      // }}
                       sx={{
                         fontWeight: 'bold',
                         lineHeight: 1.3,
                         flexGrow: 1,
-                        cursor: 'pointer',
+                        // cursor: 'pointer',
                         color: 'text.primary',
-                        '&:hover': {
-                          color: 'primary.main',
-                          textDecoration: 'underline',
-                        },
+                        // '&:hover': {
+                        //   color: 'primary.main',
+                        //   textDecoration: 'underline',
+                        // },
                       }}
                     >
                       {item.deviceName}

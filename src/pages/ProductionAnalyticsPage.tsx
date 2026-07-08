@@ -63,6 +63,7 @@ export default function ProductionAnalyticsPage() {
   const totalVerified = response?.totalVerified || 0;
   const totalRejected = response?.totalRejected || 0;
   const totalCalibrated = response?.totalCalibrated || 0;
+  const totalInspected = response?.totalInspected || 0;
 
   // --- 📐 1. Маппинг и фильтрация Цехов (Сразу отсекаем нули) ---
   const siteProgressData = useMemo(() => {
@@ -191,103 +192,209 @@ export default function ProductionAnalyticsPage() {
         </Box>
       ) : (
         <Grid container spacing={3}>
-          {/* ================= КОЛИЧЕСТВЕННЫЕ КАРТОЧКИ KPI (ШТУКИ СИ) ================= */}
-          <Grid size={{ xs: 12, md: 4 }}>
+          {/* ================= 📊 КОЛИЧЕСТВЕННЫЕ КАРТОЧКИ KPI (ШТУКИ СИ) ================= */}
+          {/* 1. УСПЕШНО ПОВЕРЕНО */}
+          <Grid size={{ xs: 6, md: 3 }}>
             <Card
               sx={{
-                boxShadow: 3,
+                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
                 borderLeft: '6px solid',
                 borderColor: 'success.main',
+                borderRadius: 2,
+                height: '100%',
               }}
             >
-              <CardContent>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                 <Typography
                   color="text.secondary"
                   variant="caption"
-                  sx={{ fontWeight: 600 }}
+                  sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
                 >
-                  УСПЕШНО ПОВЕРЕНО (ГОДЕН)
+                  УСПЕШНО ПОВЕРЕНО
                 </Typography>
                 <Typography
                   variant="h4"
-                  sx={{ fontWeight: 700, mt: 1, color: 'success.main' }}
+                  sx={{
+                    fontWeight: 800,
+                    mt: 1,
+                    color: 'success.main',
+                    fontSize: { xs: '1.4rem', sm: '2rem' },
+                  }}
                 >
-                  {totalVerified.toLocaleString('ru-RU')} шт.
+                  {totalVerified.toLocaleString('ru-RU')}{' '}
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: '0.9rem',
+                      fontWeight: 500,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    шт.
+                  </Box>
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          <Grid size={{ xs: 12, md: 4 }}>
+          {/* 2. ПРОШЛИ КАЛИБРОВКУ */}
+          <Grid size={{ xs: 6, md: 3 }}>
             <Card
               sx={{
-                boxShadow: 3,
-                borderLeft: '6px solid',
-                borderColor: 'error.main',
-              }}
-            >
-              <CardContent>
-                <Typography
-                  color="text.secondary"
-                  variant="caption"
-                  sx={{ fontWeight: 600 }}
-                >
-                  ЗАБРАКОВАНО (НЕ ГОДЕН)
-                </Typography>
-                <Typography
-                  variant="h4"
-                  sx={{ fontWeight: 700, mt: 1, color: 'error.main' }}
-                >
-                  {totalRejected.toLocaleString('ru-RU')} шт.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Card
-              sx={{
-                boxShadow: 3,
+                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
                 borderLeft: '6px solid',
                 borderColor: 'info.main',
+                borderRadius: 2,
+                height: '100%',
               }}
             >
-              <CardContent>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                 <Typography
                   color="text.secondary"
                   variant="caption"
-                  sx={{ fontWeight: 600 }}
+                  sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
                 >
                   ПРОШЛИ КАЛИБРОВКУ
                 </Typography>
                 <Typography
                   variant="h4"
-                  sx={{ fontWeight: 700, mt: 1, color: 'info.main' }}
+                  sx={{
+                    fontWeight: 800,
+                    mt: 1,
+                    color: 'info.main',
+                    fontSize: { xs: '1.4rem', sm: '2rem' },
+                  }}
                 >
-                  {totalCalibrated.toLocaleString('ru-RU')} шт.
+                  {totalCalibrated.toLocaleString('ru-RU')}{' '}
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: '0.9rem',
+                      fontWeight: 500,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    шт.
+                  </Box>
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* ================= ГОРИЗОНТАЛЬНЫЕ РЕЙТИНГИ ОБЪЕМОВ В ШТУКАХ ================= */}
+          {/* 3. ПРОШЛИ ОСМОТР */}
+          <Grid size={{ xs: 6, md: 3 }}>
+            <Card
+              sx={{
+                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
+                borderLeft: '6px solid',
+                borderColor: 'warning.main', // Метрологический янтарный цвет для внутреннего контроля
+                borderRadius: 2,
+                height: '100%',
+              }}
+            >
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                <Typography
+                  color="text.secondary"
+                  variant="caption"
+                  sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
+                >
+                  ВНУТРЕННИЙ ОСМОТР
+                </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 800,
+                    mt: 1,
+                    color: 'warning.dark',
+                    fontSize: { xs: '1.4rem', sm: '2rem' },
+                  }}
+                >
+                  {totalInspected.toLocaleString('ru-RU')}{' '}
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: '0.9rem',
+                      fontWeight: 500,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    шт.
+                  </Box>
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* 4. ЗАБРАКОВАНО */}
+          <Grid size={{ xs: 6, md: 3 }}>
+            <Card
+              sx={{
+                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
+                borderLeft: '6px solid',
+                borderColor: 'error.main',
+                borderRadius: 2,
+                height: '100%',
+              }}
+            >
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                <Typography
+                  color="text.secondary"
+                  variant="caption"
+                  sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
+                >
+                  ЗАБРАКОВАНО (БРАК)
+                </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 800,
+                    mt: 1,
+                    color: 'error.main',
+                    fontSize: { xs: '1.4rem', sm: '2rem' },
+                  }}
+                >
+                  {totalRejected.toLocaleString('ru-RU')}{' '}
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: '0.9rem',
+                      fontWeight: 500,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    шт.
+                  </Box>
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* ================= 🗺️ ГОРИЗОНТАЛЬНЫЕ РЕЙТИНГИ ОБЪЕМОВ В ШТУКАХ ================= */}
 
           {/* СРЕЗ 1: ГОРОДА */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Card
               sx={{
-                boxShadow: 3,
-                p: 3,
+                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
+                p: { xs: 2, md: 3 },
+                borderRadius: 2,
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
               }}
             >
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>
-                🗺️ Объемы выполненных поверок по Географии (Городам)
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 800,
+                  mb: 2,
+                  color: 'text.primary',
+                  letterSpacing: '0.3px',
+                }}
+              >
+                🗺️ Метрологический объем по Географии (Городам)
               </Typography>
-              <Box sx={{ flexGrow: 1 }}>
-                {/* 🎯 ИСПРАВЛЕНО: Считаем сумму штук СТРОГО внутри этого массива. Математика сойдется в 100%! */}
+              <Box sx={{ flexGrow: 1, width: '100%' }}>
                 <QuantitiveProgressList
                   data={cityProgressData}
                   total={cityProgressData.reduce(
@@ -303,18 +410,26 @@ export default function ProductionAnalyticsPage() {
           <Grid size={{ xs: 12, md: 6 }}>
             <Card
               sx={{
-                boxShadow: 3,
-                p: 3,
+                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
+                p: { xs: 2, md: 3 },
+                borderRadius: 2,
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
               }}
             >
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>
-                🏢 Объемы выполненных поверок по Организациям (ЮЛ)
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 800,
+                  mb: 2,
+                  color: 'text.primary',
+                  letterSpacing: '0.3px',
+                }}
+              >
+                🏢 Метрологический объем по Организациям (ЮЛ)
               </Typography>
-              <Box sx={{ flexGrow: 1 }}>
-                {/* 🎯 ИСПРАВЛЕНО: То же самое для организаций */}
+              <Box sx={{ flexGrow: 1, width: '100%' }}>
                 <QuantitiveProgressList
                   data={companyProgressData}
                   total={companyProgressData.reduce(
@@ -326,12 +441,12 @@ export default function ProductionAnalyticsPage() {
             </Card>
           </Grid>
 
-          {/* СРЕЗ 3: ПОЛНЫЙ РЕЙТИНГ ЦЕХОВ */}
+          {/* СРЕЗ 3: ПОЛНЫЙ РЕЙТИНГ ЦЕХОВ ЗАВОДА */}
           <Grid size={{ xs: 12 }}>
-            <Card sx={{ boxShadow: 3, p: 3 }}>
+            <Card sx={{ boxShadow: 3, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
               <Box
                 sx={{
-                  mb: 2,
+                  mb: 3,
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -339,16 +454,28 @@ export default function ProductionAnalyticsPage() {
                   gap: 1,
                 }}
               >
-                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                  🏭 Производственный рейтинг Цехов завода (по количеству
-                  поверенных приборов)
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 800,
+                    color: 'text.primary',
+                    letterSpacing: '0.3px',
+                  }}
+                >
+                  🏭 Производственная выработка цехов холдинга
                 </Typography>
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ fontWeight: 600 }}
+                  sx={{
+                    fontWeight: 700,
+                    bgcolor: 'grey.100',
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 1.5,
+                  }}
                 >
-                  Всего участков с активностью: {siteProgressData.length} шт.
+                  Активных участков: {siteProgressData.length} шт.
                 </Typography>
               </Box>
 
@@ -359,11 +486,10 @@ export default function ProductionAnalyticsPage() {
                     color="text.secondary"
                     sx={{ fontStyle: 'italic' }}
                   >
-                    Нет данных о поверках за выбранный период
+                    Нет данных о метрологических операциях за выбранный период
                   </Typography>
                 </Box>
               ) : (
-                // 🎯 ИСПРАВЛЕНО: И для цехов считаем сумму по их массиву
                 <QuantitiveProgressList
                   data={siteProgressData}
                   total={siteProgressData.reduce(

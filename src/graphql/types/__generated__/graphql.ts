@@ -32,6 +32,8 @@ export type Scalars = {
 export type AdminAnomalies = {
   __typename: 'AdminAnomalies';
   missingControlType: Array<AnomalyDevice>;
+  missingCsmCode: Array<AnomalyDevice>;
+  missingEquipmentType: Array<AnomalyDevice>;
   missingHistory: Array<AnomalyDevice>;
   missingMpi: Array<AnomalyDevice>;
   statusMismatch: Array<AnomalyDevice>;
@@ -930,8 +932,6 @@ export type Pricelist = {
 export type PricelistItemInput = {
   csmCode?: InputMaybe<Scalars['String']['input']>;
   grsiNumber?: InputMaybe<Scalars['String']['input']>;
-  modelOrType?: InputMaybe<Scalars['String']['input']>;
-  name: Scalars['String']['input'];
   price: Scalars['Float']['input'];
 };
 
@@ -950,6 +950,7 @@ export type ProductionAnalyticsResponse = {
   byCompanies: Array<QuantitiveItem>;
   byProductionSites: Array<QuantitiveItem>;
   totalCalibrated: Scalars['Int']['output'];
+  totalInspected: Scalars['Int']['output'];
   totalRejected: Scalars['Int']['output'];
   totalVerified: Scalars['Int']['output'];
 };
@@ -1546,6 +1547,20 @@ export type GetAdminDashboardStatsQuery = {
         serialNumber: string;
       }>;
       statusMismatch: Array<{
+        __typename: 'AnomalyDevice';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+      }>;
+      missingEquipmentType: Array<{
+        __typename: 'AnomalyDevice';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+      }>;
+      missingCsmCode: Array<{
         __typename: 'AnomalyDevice';
         id: string;
         name: string;
@@ -2804,6 +2819,7 @@ export type GetProductionAnalyticsQuery = {
     totalVerified: number;
     totalRejected: number;
     totalCalibrated: number;
+    totalInspected: number;
     byProductionSites: Array<{
       __typename: 'QuantitiveItem';
       label: string;
@@ -3353,6 +3369,56 @@ export const GetAdminDashboardStatsDocument = {
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'statusMismatch' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'missingEquipmentType' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'missingCsmCode' },
                         selectionSet: {
                           kind: 'SelectionSet',
                           selections: [
@@ -8539,6 +8605,10 @@ export const GetProductionAnalyticsDocument = {
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'totalCalibrated' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'totalInspected' },
                 },
                 {
                   kind: 'Field',

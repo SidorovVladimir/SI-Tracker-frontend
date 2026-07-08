@@ -76,6 +76,18 @@ export const AdminDashboard: React.FC = () => {
         (rawAnomalies.statusMismatch || []).map((d: any) => [d.id, d])
       ).values()
     ),
+
+    missingEquipmentType: Array.from(
+      new Map(
+        (rawAnomalies.missingEquipmentType || []).map((d: any) => [d.id, d])
+      ).values()
+    ),
+
+    missingCsmCode: Array.from(
+      new Map(
+        (rawAnomalies.missingCsmCode || []).map((d: any) => [d.id, d])
+      ).values()
+    ),
   };
 
   const handleDeviceClick = (e: React.MouseEvent<HTMLElement>, id: string) => {
@@ -307,6 +319,171 @@ export const AdminDashboard: React.FC = () => {
                   >
                     <List dense disablePadding>
                       {anomalies?.missingMpi?.map((dev: any) => (
+                        <ListItemButton
+                          key={dev.id}
+                          onClick={(e) => handleDeviceClick(e, dev.id)}
+                          sx={{
+                            borderBottom: '1px solid',
+                            borderColor: 'grey.200',
+                            py: 1.2,
+                          }}
+                        >
+                          <ListItemIcon sx={{ minWidth: 36 }}>
+                            <BuildIcon fontSize="small" color="disabled" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={dev.name}
+                            secondary={`Модель: ${dev.model} | Зав. №: ${dev.serialNumber}`}
+                            slotProps={{
+                              primary: { fontWeight: 600, variant: 'body2' },
+                              secondary: { variant: 'caption' },
+                            }}
+                          />
+                        </ListItemButton>
+                      ))}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+
+                <Accordion
+                  disableGutters
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 2.5,
+                    p: 0.5,
+                    borderColor:
+                      (anomalies?.missingEquipmentType?.length || 0) > 0
+                        ? 'warning.light'
+                        : 'divider',
+                    boxShadow: 'none',
+                  }}
+                >
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        pr: { xs: 1, sm: 3 },
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 700,
+                          color: 'text.primary',
+                          fontSize: { xs: '0.825rem', sm: '0.875rem' },
+                        }}
+                      >
+                        ⚠️ Тип оборудования пропущен (NULL)
+                      </Typography>
+                      <Chip
+                        label={`${
+                          anomalies?.missingEquipmentType?.length || 0
+                        } СИ`}
+                        size="small"
+                        color={
+                          (anomalies?.missingEquipmentType?.length || 0) > 0
+                            ? 'warning'
+                            : 'default'
+                        }
+                        sx={{ fontWeight: 'bold' }}
+                      />
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails
+                    sx={{
+                      p: 0,
+                      bgcolor: 'grey.50',
+                      borderTop: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <List dense disablePadding>
+                      {anomalies?.missingEquipmentType?.map((dev: any) => (
+                        <ListItemButton
+                          key={dev.id}
+                          onClick={(e) => handleDeviceClick(e, dev.id)}
+                          sx={{
+                            borderBottom: '1px solid',
+                            borderColor: 'grey.200',
+                            py: 1.2,
+                          }}
+                        >
+                          <ListItemIcon sx={{ minWidth: 36 }}>
+                            <BuildIcon fontSize="small" color="disabled" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={dev.name}
+                            secondary={`Модель: ${dev.model} | Зав. №: ${dev.serialNumber}`}
+                            slotProps={{
+                              primary: { fontWeight: 600, variant: 'body2' },
+                              secondary: { variant: 'caption' },
+                            }}
+                          />
+                        </ListItemButton>
+                      ))}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+
+                {/* 6. 🌟 НОВАЯ АНОМАЛИЯ: Не указан код СИ из прайса ЦСМ */}
+                <Accordion
+                  disableGutters
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 2.5,
+                    p: 0.5,
+                    borderColor:
+                      (anomalies?.missingCsmCode?.length || 0) > 0
+                        ? 'warning.light'
+                        : 'divider',
+                    boxShadow: 'none',
+                  }}
+                >
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        pr: { xs: 1, sm: 3 },
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 700,
+                          color: 'text.primary',
+                          fontSize: { xs: '0.825rem', sm: '0.875rem' },
+                        }}
+                      >
+                        ⚠️ Код СИ из прайс-листа ЦСМ отсутствует
+                      </Typography>
+                      <Chip
+                        label={`${anomalies?.missingCsmCode?.length || 0} СИ`}
+                        size="small"
+                        color={
+                          (anomalies?.missingCsmCode?.length || 0) > 0
+                            ? 'warning'
+                            : 'default'
+                        }
+                        sx={{ fontWeight: 'bold' }}
+                      />
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails
+                    sx={{
+                      p: 0,
+                      bgcolor: 'grey.50',
+                      borderTop: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <List dense disablePadding>
+                      {anomalies?.missingCsmCode?.map((dev: any) => (
                         <ListItemButton
                           key={dev.id}
                           onClick={(e) => handleDeviceClick(e, dev.id)}

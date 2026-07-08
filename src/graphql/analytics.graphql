@@ -56,6 +56,19 @@ query GetAdminDashboardStats {
         model
         serialNumber
       }
+
+      missingEquipmentType {
+        id
+        name
+        model
+        serialNumber
+      }
+      missingCsmCode {
+        id
+        name
+        model
+        serialNumber
+      }
     }
   }
 }

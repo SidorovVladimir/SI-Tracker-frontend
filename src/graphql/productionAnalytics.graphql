@@ -4,6 +4,7 @@ query GetProductionAnalytics($year: Int!, $month: Int) {
     totalVerified
     totalRejected
     totalCalibrated
+    totalInspected
     byProductionSites {
       label
       count
