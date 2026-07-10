@@ -43,27 +43,20 @@ export const PriceHistoryTrend: React.FC<PriceHistoryTrendProps> = ({
   const chartSeries = useMemo(() => {
     if (timeline.length === 0 || yearsLabels.length === 0) return [];
 
-    // Находим уникальные названия ЦСМ
-    const csmNames = Array.from(new Set(timeline.map((t: any) => t.csmName)));
-
-    return csmNames.map((csm, idx) => {
-      // Для каждого года вытаскиваем цену этого ЦСМ (или null, если данных нет)
-      const dataPoints = yearsLabels.map((year) => {
-        const found = timeline.find(
-          (t: any) => t.csmName === csm && Number(t.year) === year
-        );
-        return found ? found.price : null;
-      });
-
-      return {
-        data: dataPoints,
-        label: String(csm),
-        // Синий для первой линии (Ростест), Зеленый для второй (Новосибирск) и т.д.
-        color:
-          idx === 0 ? theme.palette.primary.main : theme.palette.success.main,
-        connectNulls: true, // Плавно соединяем точки, если за какой-то год данных нет
-      };
+    // Для каждого года из оси X вытаскиваем финальную цену прибора (неважно, из какого источника)
+    const dataPoints = yearsLabels.map((year) => {
+      const found = timeline.find((t: any) => Number(t.year) === year);
+      return found ? found.price : null;
     });
+
+    return [
+      {
+        data: dataPoints,
+        label: 'Стоимость обслуживания СИ', // Единое понятное название для легенды
+        color: theme.palette.primary.main, // Наш фирменный красивый синий цвет
+        connectNulls: true, // Намертво склеивает точки без разрывов
+      },
+    ];
   }, [timeline, yearsLabels, theme]);
 
   if (loading) {
@@ -159,9 +152,7 @@ export const PriceHistoryTrend: React.FC<PriceHistoryTrendProps> = ({
             },
           ]}
           series={chartSeries}
-          // ✅ Ваши проверенные безопасные отступы, которые не обрезают края графиков
-          margin={{ top: 20, bottom: 40, left: 60, right: 25 }}
-          // Включаем легенду в безопасном режиме: только направление и позиция
+          margin={{ top: 20, bottom: 40, left: 10, right: 25 }}
           slotProps={{
             legend: {
               direction: 'horizontal' as const,

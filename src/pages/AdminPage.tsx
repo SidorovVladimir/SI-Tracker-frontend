@@ -136,7 +136,6 @@ import {
 } from '@mui/material';
 import { Link, Outlet, useLocation } from 'react-router';
 import routes from '../utils/routes';
-import PageHelpButton from '../components/PageHelpButton'; // 🌟 Импортируем кнопку помощи
 
 const SIDEBAR_WIDTH = 240;
 const menu = [
@@ -216,7 +215,6 @@ export default function AdminPage() {
             >
               АДМИН-ПАНЕЛЬ
             </Typography>
-            <PageHelpButton />{' '}
           </Stack>
         )}
 
@@ -285,13 +283,6 @@ export default function AdminPage() {
       >
         <Outlet />
       </Box>
-
-      {/* 📱 МОБИЛЬНАЯ КНОПКА ПОМОЩИ: Автоматически парит в правом нижнем углу экрана поверх любой таблицы каталога */}
-      {isMobile && (
-        <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1100 }}>
-          <PageHelpButton />
-        </Box>
-      )}
     </Box>
   );
 }

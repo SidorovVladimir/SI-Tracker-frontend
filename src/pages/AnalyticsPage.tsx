@@ -19,8 +19,6 @@ import {
 import { LineChart } from '@mui/x-charts';
 import { GetFinancialAnalyticsDocument } from '../graphql/types/__generated__/graphql';
 
-import PageHelpButton from '../components/PageHelpButton';
-
 // Константа текстовых меток месяцев для графика трендов
 const MONTHS_LABELS = [
   'Янв',
@@ -176,7 +174,6 @@ export default function AnalyticsPage() {
           >
             📊 Финансовая аналитика затрат на СИ
           </Typography>
-          <PageHelpButton />
         </Stack>
 
         <Stack
@@ -356,8 +353,7 @@ export default function AnalyticsPage() {
                       area: true,
                     },
                   ]}
-                  // ✅ Безопасные отступы: расширяем margin слева/справа, чтобы "Янв" и "Дек" не обрезались на смартфонах
-                  margin={{ top: 20, bottom: 30, left: 55, right: 25 }}
+                  margin={{ top: 20, bottom: 40, left: 10, right: 25 }}
                 />
               </Box>
             </Card>

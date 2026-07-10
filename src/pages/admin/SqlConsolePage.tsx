@@ -13,8 +13,6 @@ import {
   TableRow,
   Alert,
   CircularProgress,
-  useTheme,
-  useMediaQuery,
   Stack,
 } from '@mui/material';
 
@@ -24,15 +22,11 @@ import { useLazyQuery } from '@apollo/client/react';
 import { useSnackbar } from 'notistack';
 import { API_ROUTES } from '../../config';
 import { useSocketApp } from '../../context/SocketContext';
-import PageHelpButton from '../../components/PageHelpButton';
 
 export const SqlConsolePage: React.FC = () => {
   const [queryText, setQueryText] = useState<string>(
     'SELECT * FROM devices LIMIT 5;'
   );
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const { addRunningJob } = useSocketApp();
 
@@ -194,9 +188,6 @@ export const SqlConsolePage: React.FC = () => {
               командами UPDATE и DELETE.
             </Typography>
           </Box>
-
-          {/* На десктопе рендерим кнопку помощи прямо в шапке */}
-          {!isMobile && <PageHelpButton />}
         </Stack>
         <Box
           sx={{
@@ -383,11 +374,6 @@ export const SqlConsolePage: React.FC = () => {
               DELETE команд).
             </Typography>
           )}
-        </Box>
-      )}
-      {isMobile && (
-        <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1100 }}>
-          <PageHelpButton />
         </Box>
       )}
     </Box>

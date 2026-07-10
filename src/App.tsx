@@ -55,6 +55,8 @@ import { BudgetPlanDetailPage } from './pages/BudgetPlanDetailPage';
 
 import { BudgetLayoutPage } from './pages/BudgetLayoutPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
+// import { UniversalRealTimeSync } from './components/UniversalRealTimeSync';
+
 // import HelpPage from './pages/HelpPage';
 // import { LicensesPage } from './pages/LicensesPage';
 
@@ -62,7 +64,6 @@ function App() {
   const { isMaintenance } = useSocketApp();
   const { user } = useAuth();
 
-  // 🔥 Корневой перехват: гасит всё приложение, включая NavBar
   if (isMaintenance && user?.role !== 'superadmin') {
     return (
       <Box
@@ -249,6 +250,7 @@ function App() {
         <Route path={'*'} element={<NotFoundPage />} />
       </Routes>
       <GlobalJobWatcher />
+      {/* <UniversalRealTimeSync /> */}
     </>
   );
 }

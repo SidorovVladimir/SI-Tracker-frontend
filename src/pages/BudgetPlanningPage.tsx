@@ -30,7 +30,6 @@ import {
   GetProductionSitesDocument,
   GetSitiesDocument,
 } from '../graphql/types/__generated__/graphql';
-import PageHelpButton from '../components/PageHelpButton';
 
 const MONTH_NAMES = [
   'Янв',
@@ -149,7 +148,6 @@ export const BudgetPlanningPage: React.FC = () => {
             <AccountBalanceWalletIcon color="primary" /> Матрица годовых затрат
             СИ
           </Typography>
-          <PageHelpButton />
         </Stack>
 
         <FormControl size="small" sx={{ width: { xs: '100%', sm: 160 } }}>

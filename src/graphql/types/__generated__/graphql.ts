@@ -1797,7 +1797,6 @@ export type GetBudgetPlanDetailsQuery = {
       basePrice: number;
       vatAmount: number;
       totalCost: number;
-      matchHistorySku: string | null;
       device: {
         __typename: 'Device';
         id: string;
@@ -4485,10 +4484,6 @@ export const GetBudgetPlanDetailsDocument = {
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'totalCost' },
-                      },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'matchHistorySku' },
                       },
                       {
                         kind: 'Field',

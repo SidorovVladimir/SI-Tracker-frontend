@@ -17,9 +17,14 @@ import {
   LinearProgress,
   useMediaQuery,
   useTheme,
+  Tabs,
+  Tab,
 } from '@mui/material';
-import { GetProductionAnalyticsDocument } from '../graphql/types/__generated__/graphql';
-import PageHelpButton from '../components/PageHelpButton';
+import {
+  GetProductionAnalyticsDocument,
+  GetVerificationRisksDocument, // 🌟 Добавлено для подтягивания светофоров рисков
+} from '../graphql/types/__generated__/graphql';
+import { RiskHeatMap } from '../components/RiskHeatMap';
 
 // Полный массив месяцев для выпадающего списка фильтрации
 const MONTHS_SELECT_OPTIONS = [
@@ -39,22 +44,34 @@ const MONTHS_SELECT_OPTIONS = [
 ];
 
 export default function ProductionAnalyticsPage() {
+  // 🌟 Состояние активного таба (0 - Выработка, 1 - Карта рисков)
+  const [activeTab, setActiveTab] = useState<number>(0);
+
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
   );
   const [selectedMonth, setSelectedMonth] = useState<number>(0);
 
-  // Адаптивный хук определения размеров экрана
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Сетевой GraphQL-запрос количественного учета в штуках
+  // Сетевой GraphQL-запрос количественного учета в штуках (Вкладка 1)
   const { data, loading, error } = useQuery(GetProductionAnalyticsDocument, {
     variables: {
       year: selectedYear,
       month: selectedMonth === 0 ? null : selectedMonth,
     },
     fetchPolicy: 'network-only',
+    skip: activeTab !== 0, // Пропускаем запрос, если открыт таб рисков
+  });
+
+  const {
+    data: risksData,
+    loading: risksLoading,
+    error: risksError,
+  } = useQuery(GetVerificationRisksDocument, {
+    fetchPolicy: 'network-only',
+    skip: activeTab !== 1,
   });
 
   const response = data?.getProductionAnalytics;
@@ -65,48 +82,50 @@ export default function ProductionAnalyticsPage() {
   const totalCalibrated = response?.totalCalibrated || 0;
   const totalInspected = response?.totalInspected || 0;
 
-  // --- 📐 1. Маппинг и фильтрация Цехов (Сразу отсекаем нули) ---
+  // --- 📐 1. Маппинг и фильтрация Цехов ---
   const siteProgressData = useMemo(() => {
     return (response?.byProductionSites || [])
       .map((item, idx) => ({ id: idx, value: item.count, label: item.label }))
       .filter((item) => item.value > 0);
   }, [response]);
 
-  // --- 📐 2. Маппинг и фильтрация ЮРЛИЦ (Организаций) ---
+  // --- 📐 2. Маппинг и фильтрация ЮРЛИЦ ---
   const companyProgressData = useMemo(() => {
     return (response?.byCompanies || [])
       .map((item, idx) => ({ id: idx, value: item.count, label: item.label }))
       .filter((item) => item.value > 0);
   }, [response]);
 
-  // --- 📐 3. Маппинг и фильтрация Географии (Городов) ---
+  // --- 📐 3. Маппинг и фильтрация Географии ---
   const cityProgressData = useMemo(() => {
     return (response?.byCities || [])
       .map((item, idx) => ({ id: idx, value: item.count, label: item.label }))
       .filter((item) => item.value > 0);
   }, [response]);
 
-  if (error) {
+  if (error || (activeTab === 1 && risksError)) {
     return (
       <Container sx={{ mt: 4 }}>
         <Alert severity="error">
-          Ошибка сбора производственной аналитики: {error.message}
+          Ошибка сбора производственной аналитики:{' '}
+          {error?.message || risksError?.message}
         </Alert>
       </Container>
     );
   }
+
   return (
     <Container
       maxWidth="xl"
       sx={{ py: 3, height: 'calc(100dvh - 100px)', overflowY: 'auto' }}
     >
-      {/* ================= ВЕРХНЯЯ ШАПКА И ДВА СЕЛЕКТОРОВ (ГОД + МЕСЯЦ) ================= */}
+      {/* ================= ВЕРХНЯЯ ШАПКА НАЗВАНИЯ СТРАНИЦЫ ================= */}
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: 3,
+          mb: 2,
           flexWrap: 'wrap',
           gap: 2,
         }}
@@ -115,401 +134,470 @@ export default function ProductionAnalyticsPage() {
           direction="row"
           spacing={1.5}
           alignItems="center"
-          sx={{
-            width: isMobile ? '100%' : 'auto',
-            justifyContent: isMobile ? 'space-between' : 'flex-start',
-          }}
+          sx={{ width: isMobile ? '100%' : 'auto' }}
         >
           <Typography
             sx={{
-              fontWeight: 700,
-
-              fontSize: {
-                xs: '1.15rem',
-                md: '1.5rem',
-              },
+              fontWeight: 800,
+              fontSize: { xs: '1.2rem', md: '1.5rem' },
               lineHeight: 1.3,
             }}
           >
             📋 Производственный мониторинг и объемы СИ
           </Typography>
-          <PageHelpButton />
         </Stack>
 
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{ width: isMobile ? '100%' : 'auto' }}
-        >
-          {/* Селектор месяца */}
-          <FormControl
-            size="small"
-            sx={{ minWidth: 160, flexGrow: isMobile ? 1 : 0 }}
+        {/* 🌟 СУЖЕНИЕ ФИЛЬТРОВ: Селекторы периодов горят только на первом табе! */}
+        {activeTab === 0 && (
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ width: isMobile ? '100%' : 'auto' }}
           >
-            <InputLabel id="prod-month-select-label">Период</InputLabel>
-            <Select
-              labelId="prod-month-select-label"
-              value={selectedMonth}
-              label="Период"
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            <FormControl
+              size="small"
+              sx={{ minWidth: 160, flexGrow: isMobile ? 1 : 0 }}
             >
-              {MONTHS_SELECT_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Селектор календарного года */}
-          <FormControl
-            size="small"
-            sx={{ minWidth: 120, flexGrow: isMobile ? 1 : 0 }}
-          >
-            <InputLabel id="prod-year-select-label">Год</InputLabel>
-            <Select
-              labelId="prod-year-select-label"
-              value={selectedYear}
-              label="Год"
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-            >
-              {[0, 1, 2, 3].map((offset) => {
-                const y = new Date().getFullYear() - offset;
-                return (
-                  <MenuItem key={y} value={y}>
-                    {y} год
+              <InputLabel id="prod-month-select-label">Период</InputLabel>
+              <Select
+                labelId="prod-month-select-label"
+                value={selectedMonth}
+                label="Период"
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              >
+                {MONTHS_SELECT_OPTIONS.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.label}
                   </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-        </Stack>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl
+              size="small"
+              sx={{ minWidth: 120, flexGrow: isMobile ? 1 : 0 }}
+            >
+              <InputLabel id="prod-year-select-label">Год</InputLabel>
+              <Select
+                labelId="prod-year-select-label"
+                value={selectedYear}
+                label="Год"
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+              >
+                {[0, 1, 2, 3].map((offset) => {
+                  const y = new Date().getFullYear() - offset;
+                  return (
+                    <MenuItem key={y} value={y}>
+                      {y} год
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </Stack>
+        )}
       </Box>
 
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 10 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Grid container spacing={3}>
-          {/* ================= 📊 КОЛИЧЕСТВЕННЫЕ КАРТОЧКИ KPI (ШТУКИ СИ) ================= */}
-          {/* 1. УСПЕШНО ПОВЕРЕНО */}
-          <Grid size={{ xs: 6, md: 3 }}>
-            <Card
-              sx={{
-                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
-                borderLeft: '6px solid',
-                borderColor: 'success.main',
-                borderRadius: 2,
-                height: '100%',
-              }}
-            >
-              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                <Typography
-                  color="text.secondary"
-                  variant="caption"
-                  sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
-                >
-                  УСПЕШНО ПОВЕРЕНО
-                </Typography>
-                <Typography
-                  variant="h4"
+      {/* 🌟 ВНЕДРЕНИЕ СЕТКИ ВКЛАДОК (TABS) */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
+        <Tabs
+          value={activeTab}
+          onChange={(_, newValue) => setActiveTab(newValue)}
+          textColor="primary"
+          indicatorColor="primary"
+        >
+          <Tab
+            label="📊 Выработка и объемы работ"
+            sx={{ fontWeight: 700, textTransform: 'none' }}
+          />
+          <Tab
+            label="🚦 Светофор и карта рисков просрочек"
+            sx={{ fontWeight: 700, textTransform: 'none' }}
+          />
+        </Tabs>
+      </Box>
+
+      {/* ========================================================================= */}
+      {/* 📊 ВКЛАДКА 1: ВЫРАБОТКА И КОЛИЧЕСТВЕННЫЕ СЧЕТЧИКИ (ОБЪЕМЫ)              */}
+      {/* ========================================================================= */}
+      {activeTab === 0 && (
+        <>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 10 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Grid container spacing={3}>
+              {/* ================= КАРТОЧКИ KPI (ШТУКИ СИ) ================= */}
+              {/* 1. УСПЕШНО ПОВЕРЕНО */}
+              <Grid size={{ xs: 6, md: 3 }}>
+                <Card
                   sx={{
-                    fontWeight: 800,
-                    mt: 1,
-                    color: 'success.main',
-                    fontSize: { xs: '1.4rem', sm: '2rem' },
+                    boxShadow: 3,
+                    borderLeft: '6px solid',
+                    borderColor: 'success.main',
+                    borderRadius: 2,
+                    height: '100%',
                   }}
                 >
-                  {totalVerified.toLocaleString('ru-RU')}{' '}
-                  <Box
-                    component="span"
-                    sx={{
-                      fontSize: '0.9rem',
-                      fontWeight: 500,
-                      color: 'text.secondary',
-                    }}
-                  >
-                    шт.
-                  </Box>
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+                  <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                    <Typography
+                      color="text.secondary"
+                      variant="caption"
+                      sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
+                    >
+                      УСПЕШНО ПОВЕРЕНО
+                    </Typography>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 800,
+                        mt: 1,
+                        color: 'success.main',
+                        fontSize: { xs: '1.4rem', sm: '2rem' },
+                      }}
+                    >
+                      {totalVerified.toLocaleString('ru-RU')}{' '}
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        шт.
+                      </Box>
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
 
-          {/* 2. ПРОШЛИ КАЛИБРОВКУ */}
-          <Grid size={{ xs: 6, md: 3 }}>
-            <Card
-              sx={{
-                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
-                borderLeft: '6px solid',
-                borderColor: 'info.main',
-                borderRadius: 2,
-                height: '100%',
-              }}
-            >
-              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                <Typography
-                  color="text.secondary"
-                  variant="caption"
-                  sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
-                >
-                  ПРОШЛИ КАЛИБРОВКУ
-                </Typography>
-                <Typography
-                  variant="h4"
+              {/* 2. ПРОШЛИ КАЛИБРОВКУ */}
+              <Grid size={{ xs: 6, md: 3 }}>
+                <Card
                   sx={{
-                    fontWeight: 800,
-                    mt: 1,
-                    color: 'info.main',
-                    fontSize: { xs: '1.4rem', sm: '2rem' },
+                    boxShadow: 3,
+                    borderLeft: '6px solid',
+                    borderColor: 'info.main',
+                    borderRadius: 2,
+                    height: '100%',
                   }}
                 >
-                  {totalCalibrated.toLocaleString('ru-RU')}{' '}
-                  <Box
-                    component="span"
-                    sx={{
-                      fontSize: '0.9rem',
-                      fontWeight: 500,
-                      color: 'text.secondary',
-                    }}
-                  >
-                    шт.
-                  </Box>
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+                  <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                    <Typography
+                      color="text.secondary"
+                      variant="caption"
+                      sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
+                    >
+                      ПРОШЛИ КАЛИБРОВКУ
+                    </Typography>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 800,
+                        mt: 1,
+                        color: 'info.main',
+                        fontSize: { xs: '1.4rem', sm: '2rem' },
+                      }}
+                    >
+                      {totalCalibrated.toLocaleString('ru-RU')}{' '}
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        шт.
+                      </Box>
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
 
-          {/* 3. ПРОШЛИ ОСМОТР */}
-          <Grid size={{ xs: 6, md: 3 }}>
-            <Card
-              sx={{
-                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
-                borderLeft: '6px solid',
-                borderColor: 'warning.main', // Метрологический янтарный цвет для внутреннего контроля
-                borderRadius: 2,
-                height: '100%',
-              }}
-            >
-              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                <Typography
-                  color="text.secondary"
-                  variant="caption"
-                  sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
-                >
-                  ВНУТРЕННИЙ ОСМОТР
-                </Typography>
-                <Typography
-                  variant="h4"
+              {/* 3. ПРОШЛИ ОСМОТР */}
+              <Grid size={{ xs: 6, md: 3 }}>
+                <Card
                   sx={{
-                    fontWeight: 800,
-                    mt: 1,
-                    color: 'warning.dark',
-                    fontSize: { xs: '1.4rem', sm: '2rem' },
+                    boxShadow: 3,
+                    borderLeft: '6px solid',
+                    borderColor: 'warning.main',
+                    borderRadius: 2,
+                    height: '100%',
                   }}
                 >
-                  {totalInspected.toLocaleString('ru-RU')}{' '}
-                  <Box
-                    component="span"
-                    sx={{
-                      fontSize: '0.9rem',
-                      fontWeight: 500,
-                      color: 'text.secondary',
-                    }}
-                  >
-                    шт.
-                  </Box>
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+                  <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                    <Typography
+                      color="text.secondary"
+                      variant="caption"
+                      sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
+                    >
+                      ВНУТРЕННИЙ ОСМОТР
+                    </Typography>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 800,
+                        mt: 1,
+                        color: 'warning.dark',
+                        fontSize: { xs: '1.4rem', sm: '2rem' },
+                      }}
+                    >
+                      {totalInspected.toLocaleString('ru-RU')}{' '}
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        шт.
+                      </Box>
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
 
-          {/* 4. ЗАБРАКОВАНО */}
-          <Grid size={{ xs: 6, md: 3 }}>
-            <Card
-              sx={{
-                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
-                borderLeft: '6px solid',
-                borderColor: 'error.main',
-                borderRadius: 2,
-                height: '100%',
-              }}
-            >
-              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                <Typography
-                  color="text.secondary"
-                  variant="caption"
-                  sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
-                >
-                  ЗАБРАКОВАНО (БРАК)
-                </Typography>
-                <Typography
-                  variant="h4"
+              {/* 4. ЗАБРАКОВАНО */}
+              <Grid size={{ xs: 6, md: 3 }}>
+                <Card
                   sx={{
-                    fontWeight: 800,
-                    mt: 1,
-                    color: 'error.main',
-                    fontSize: { xs: '1.4rem', sm: '2rem' },
+                    boxShadow: 3,
+                    borderLeft: '6px solid',
+                    borderColor: 'error.main',
+                    borderRadius: 2,
+                    height: '100%',
                   }}
                 >
-                  {totalRejected.toLocaleString('ru-RU')}{' '}
-                  <Box
-                    component="span"
-                    sx={{
-                      fontSize: '0.9rem',
-                      fontWeight: 500,
-                      color: 'text.secondary',
-                    }}
-                  >
-                    шт.
-                  </Box>
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* ================= 🗺️ ГОРИЗОНТАЛЬНЫЕ РЕЙТИНГИ ОБЪЕМОВ В ШТУКАХ ================= */}
-
-          {/* СРЕЗ 1: ГОРОДА */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card
-              sx={{
-                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
-                p: { xs: 2, md: 3 },
-                borderRadius: 2,
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 800,
-                  mb: 2,
-                  color: 'text.primary',
-                  letterSpacing: '0.3px',
-                }}
-              >
-                🗺️ Метрологический объем по Географии (Городам)
-              </Typography>
-              <Box sx={{ flexGrow: 1, width: '100%' }}>
-                <QuantitiveProgressList
-                  data={cityProgressData}
-                  total={cityProgressData.reduce(
-                    (sum, item) => sum + item.value,
-                    0
-                  )}
-                />
-              </Box>
-            </Card>
-          </Grid>
-
-          {/* СРЕЗ 2: ОРГАНИЗАЦИИ (ЮРЛИЦА) */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card
-              sx={{
-                boxShadow: 3, // 🔥 Вернули глубокую выразительную тень
-                p: { xs: 2, md: 3 },
-                borderRadius: 2,
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 800,
-                  mb: 2,
-                  color: 'text.primary',
-                  letterSpacing: '0.3px',
-                }}
-              >
-                🏢 Метрологический объем по Организациям (ЮЛ)
-              </Typography>
-              <Box sx={{ flexGrow: 1, width: '100%' }}>
-                <QuantitiveProgressList
-                  data={companyProgressData}
-                  total={companyProgressData.reduce(
-                    (sum, item) => sum + item.value,
-                    0
-                  )}
-                />
-              </Box>
-            </Card>
-          </Grid>
-
-          {/* СРЕЗ 3: ПОЛНЫЙ РЕЙТИНГ ЦЕХОВ ЗАВОДА */}
-          <Grid size={{ xs: 12 }}>
-            <Card sx={{ boxShadow: 3, p: { xs: 2, md: 3 }, borderRadius: 2 }}>
-              <Box
-                sx={{
-                  mb: 3,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: 1,
-                }}
-              >
-                <Typography
-                  variant="subtitle2"
+                  <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                    <Typography
+                      color="text.secondary"
+                      variant="caption"
+                      sx={{ fontWeight: 700, letterSpacing: '0.5px' }}
+                    >
+                      ЗАБРАКОВАНО (БРАК)
+                    </Typography>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 800,
+                        mt: 1,
+                        color: 'error.main',
+                        fontSize: { xs: '1.4rem', sm: '2rem' },
+                      }}
+                    >
+                      {totalRejected.toLocaleString('ru-RU')}{' '}
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          color: 'text.secondary',
+                        }}
+                      >
+                        шт.
+                      </Box>
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              {/* ================= 🗺️ ГОРИЗОНТАЛЬНЫЕ РЕЙТИНГИ ОБЪЕМОВ В ШТУКАХ ================= */}
+              {/* СРЕЗ 1: ГОРОДА */}
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Card
                   sx={{
-                    fontWeight: 800,
-                    color: 'text.primary',
-                    letterSpacing: '0.3px',
+                    boxShadow: 3,
+                    p: { xs: 2, md: 3 },
+                    borderRadius: 2,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
                   }}
                 >
-                  🏭 Производственная выработка цехов холдинга
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{
-                    fontWeight: 700,
-                    bgcolor: 'grey.100',
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: 1.5,
-                  }}
-                >
-                  Активных участков: {siteProgressData.length} шт.
-                </Typography>
-              </Box>
-
-              {siteProgressData.length === 0 ? (
-                <Box sx={{ py: 6, display: 'flex', justifyContent: 'center' }}>
                   <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ fontStyle: 'italic' }}
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 800,
+                      mb: 2,
+                      color: 'text.primary',
+                      letterSpacing: '0.3px',
+                    }}
                   >
-                    Нет данных о метрологических операциях за выбранный период
+                    🗺️ Метрологический объем по Географии (Городам)
                   </Typography>
-                </Box>
-              ) : (
-                <QuantitiveProgressList
-                  data={siteProgressData}
-                  total={siteProgressData.reduce(
-                    (sum, item) => sum + item.value,
-                    0
+                  <Box sx={{ flexGrow: 1, width: '100%' }}>
+                    <QuantitiveProgressList
+                      data={cityProgressData}
+                      total={cityProgressData.reduce(
+                        (sum, item) => sum + item.value,
+                        0
+                      )}
+                    />
+                  </Box>
+                </Card>
+              </Grid>
+
+              {/* СРЕЗ 2: ОРГАНИЗАЦИИ (ЮРЛИЦА) */}
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Card
+                  sx={{
+                    boxShadow: 3,
+                    p: { xs: 2, md: 3 },
+                    borderRadius: 2,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 800,
+                      mb: 2,
+                      color: 'text.primary',
+                      letterSpacing: '0.3px',
+                    }}
+                  >
+                    🏢 Метрологический объем по Организациям (ЮЛ)
+                  </Typography>
+                  <Box sx={{ flexGrow: 1, width: '100%' }}>
+                    <QuantitiveProgressList
+                      data={companyProgressData}
+                      total={companyProgressData.reduce(
+                        (sum, item) => sum + item.value,
+                        0
+                      )}
+                    />
+                  </Box>
+                </Card>
+              </Grid>
+
+              {/* СРЕЗ 3: ПОЛНЫЙ РЕЙТИНГ ЦЕХОВ ЗАВОДА */}
+              <Grid size={{ xs: 12 }}>
+                <Card
+                  sx={{ boxShadow: 3, p: { xs: 2, md: 3 }, borderRadius: 2 }}
+                >
+                  <Box
+                    sx={{
+                      mb: 3,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: 1,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 800,
+                        color: 'text.primary',
+                        letterSpacing: '0.3px',
+                      }}
+                    >
+                      🏭 Производственная выработка цехов холдинга
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        fontWeight: 700,
+                        bgcolor: 'grey.100',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 1.5,
+                      }}
+                    >
+                      Активных участков: {siteProgressData.length} шт.
+                    </Typography>
+                  </Box>
+
+                  {siteProgressData.length === 0 ? (
+                    <Box
+                      sx={{ py: 6, display: 'flex', justifyContent: 'center' }}
+                    >
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontStyle: 'italic' }}
+                      >
+                        Нет данных о метрологических операциях за выбранный
+                        период
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <QuantitiveProgressList
+                      data={siteProgressData}
+                      total={siteProgressData.reduce(
+                        (sum, item) => sum + item.value,
+                        0
+                      )}
+                      isFullWidth={true}
+                    />
                   )}
-                  isFullWidth={true}
-                />
-              )}
-            </Card>
-          </Grid>
-        </Grid>
+                </Card>
+              </Grid>
+            </Grid>
+          )}
+        </>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 🚦 ВКЛАДКА 2: ОПЕРАТИВНАЯ КАРТА РИСКОВ И СВЕТОФОР ПРОСРОЧЕК               */}
+      {/* ========================================================================= */}
+      {activeTab === 1 && (
+        <Box sx={{ width: '100%' }}>
+          <Card
+            sx={{
+              boxShadow: 3,
+              p: { xs: 2, md: 3 },
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 800,
+                  color: 'text.primary',
+                  letterSpacing: '0.3px',
+                }}
+              >
+                🚦 Оперативный мониторинг надежности и просрочек парка СИ
+              </Typography>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: 'block', mt: 0.5, lineHeight: 1.4 }}
+              >
+                Данные отображают текущий статус приборов на сегодняшний день.
+                Красная зона — поверка просрочена, Желтая зона — до окончания
+                поверки осталось менее 30 дней. Месячные фильтры выработки здесь
+                не применяются.
+              </Typography>
+            </Box>
+
+            {risksLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 8 }}>
+                <CircularProgress color="primary" />
+              </Box>
+            ) : (
+              <Box sx={{ mt: 2 }}>
+                <RiskHeatMap data={risksData} />
+              </Box>
+            )}
+          </Card>
+        </Box>
       )}
     </Container>
   );
 }
 
-// =========================================================================
-// 🌟 КОМПОНЕНТ РЕНДЕРИНГА ПОЛОСОК PROGRESS BAR ДЛЯ КОЛИЧЕСТВЕННОГО УЧЕТА СИ
-// =========================================================================
 function QuantitiveProgressList({
   data = [],
   total = 0,
@@ -543,7 +631,6 @@ function QuantitiveProgressList({
       }}
     >
       {data.map((item) => {
-        // Процентная доля штук СИ этого цеха от общего объема работы лаборатории
         const percentage = total > 0 ? (item.value / total) * 100 : 0;
         return (
           <Box key={item.id} sx={{ width: '100%' }}>
@@ -582,7 +669,6 @@ function QuantitiveProgressList({
                 {item.value} шт. ({percentage.toFixed(1)}%)
               </Typography>
             </Box>
-            {/* Полоска прогресса штук СИ */}
             <LinearProgress
               variant="determinate"
               value={percentage}

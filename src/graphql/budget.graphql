@@ -107,7 +107,6 @@ query GetBudgetPlanDetails(
       basePrice
       vatAmount
       totalCost
-      matchHistorySku
       device {
         id
         serialNumber

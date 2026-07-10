@@ -32,6 +32,7 @@ import {
 import { HeaderNotificationsBell } from './HeaderNotificationsBell';
 import { HeaderChatButton } from './HeaderChatButton';
 import { useSocketApp } from '../context/SocketContext';
+import PageHelpButton from './PageHelpButton'; // 🌟 Импортируем нашу очищенную кнопку-поповер
 
 const pulseKeyframes = {
   '0%': { transform: 'scale(1)' },
@@ -42,10 +43,9 @@ const pulseKeyframes = {
 export default function NavBar() {
   const { isAuthenticated, user } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
   const { socket } = useSocketApp();
 
-  // 🎯 Новое состояние для админ-меню
+  // Состояние для админ-меню "Управление"
   const [adminAnchorEl, setAdminAnchorEl] = useState<null | HTMLElement>(null);
 
   const [logout] = useMutation(LogoutDocument);
@@ -67,7 +67,6 @@ export default function NavBar() {
     setAnchorEl(null);
   };
 
-  // 🎯 Функции для админ-меню
   const handleAdminMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAdminAnchorEl(event.currentTarget);
   };
@@ -75,35 +74,6 @@ export default function NavBar() {
   const handleAdminMenuClose = () => {
     setAdminAnchorEl(null);
   };
-
-  // const handleLogout = async () => {
-  //   setAnchorEl(null);
-  //   setAdminAnchorEl(null);
-  //   try {
-  //     await logout();
-  //   } catch (error) {
-  //     console.warn('Logout failed', error);
-  //   } finally {
-  //     // try {
-  //     //   if (socket) {
-  //     //     socket.disconnect();
-  //     //   }
-  //     //   // client.stop();
-
-  //     //   await client.clearStore();
-  //     //   client.writeQuery({
-  //     //     query: GetMeDocument,
-  //     //     data: { me: null },
-  //     //   });
-  //     // } catch (clearError) {}
-  //     // navigate(routes.login());
-  //     if (socket) {
-  //       socket.disconnect();
-  //     }
-
-  //     window.location.href = routes.login();
-  //   }
-  // };
 
   const handleLogout = async () => {
     setAnchorEl(null);
@@ -124,7 +94,6 @@ export default function NavBar() {
       navigate(routes.login());
     }
   };
-
   return (
     <AppBar
       position="sticky"
@@ -151,7 +120,6 @@ export default function NavBar() {
               component={Link}
               to={routes.home()}
               sx={{
-                flexGrow: 1,
                 textDecoration: 'none',
                 color: 'inherit',
                 fontWeight: 800,
@@ -190,12 +158,30 @@ export default function NavBar() {
             </Typography>
           </Tooltip>
 
+          {/* ========================================================================= */}
+          {/* 🌟 ИДЕАЛЬНОЕ ВНЕДРЕНИЕ: Кнопка помощи изолирована в левой части хедера!   */}
+          {/* ========================================================================= */}
+          {isAuthenticated && (
+            <Box
+              sx={{
+                ml: { xs: 1.5, sm: 2.5 },
+                display: 'inline-flex',
+                alignItems: 'center',
+                lineHeight: 0,
+              }}
+            >
+              <PageHelpButton />
+            </Box>
+          )}
+
+          {/* ================= ⚙️ ПРАВАЯ ЗОНА: СИСТЕМНЫЕ КНОПКИ ДЕЙСТВИЙ КИПиА ================= */}
           {isAuthenticated && (
             <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: { xs: 0.5, sm: 1.5 },
+                ml: 'auto', // 🌟 Прижимает весь блок вправо, освобождая центр хедера!
               }}
             >
               {/* 🎯 КНОПКА «УПРАВЛЕНИЕ» ДЛЯ АДМИНОВ И МЕТРОЛОГОВ */}
@@ -245,14 +231,12 @@ export default function NavBar() {
                         sx: {
                           borderRadius: 2,
                           boxShadow: 4,
-                          // На десктопе ширина 250px, на мобильных подгоняем под экран смартфона
                           minWidth: { xs: 'calc(100vw - 32px)', sm: 250 },
                           maxWidth: { xs: 'calc(100vw - 32px)', sm: 350 },
-                          // ✅ РАЗРЕШАЕМ ПЕРЕНОС СЛОВ ДЛЯ МОБИЛОК:
                           '& .MuiMenuItem-root': {
                             whiteSpace: 'normal',
-                            py: 1.2, // Немного увеличиваем вертикальные отступы для удобного тапа
-                            alignItems: 'flex-start', // Иконки останутся сверху при переносе текста
+                            py: 1.2,
+                            alignItems: 'flex-start',
                           },
                           '& .MuiTypography-root': {
                             whiteSpace: 'normal',
@@ -338,7 +322,6 @@ export default function NavBar() {
                     </MenuItem>
 
                     {user?.role === 'superadmin' && [
-                      // 1. Разделительная линия
                       <Box
                         key="superadmin-divider"
                         sx={{
@@ -348,7 +331,6 @@ export default function NavBar() {
                         }}
                       />,
 
-                      // 2. Пункт импорта
                       <MenuItem
                         key="superadmin-import"
                         component={Link}
@@ -367,7 +349,6 @@ export default function NavBar() {
                         </ListItemText>
                       </MenuItem>,
 
-                      // 3. Пункт SQL консоли
                       <MenuItem
                         key="superadmin-sql"
                         component={Link}
@@ -391,11 +372,12 @@ export default function NavBar() {
                   </Menu>
                 </Box>
               )}
+              {/* Системные кнопки связи и алертов */}
               <HeaderChatButton />
 
               <HeaderNotificationsBell />
 
-              {/* МЕНЮ ПРОФИЛЯ ПОЛЬЗОВАТЕЛЯ */}
+              {/* Кнопка вызова пользовательского меню профиля */}
               <IconButton
                 onClick={handleMenu}
                 sx={{
@@ -407,7 +389,6 @@ export default function NavBar() {
               >
                 <Avatar sx={{ width: 32, height: 32 }} />
               </IconButton>
-
               <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
@@ -433,20 +414,6 @@ export default function NavBar() {
                     <ListItemText>Панель администратора</ListItemText>
                   </MenuItem>
                 )}
-                {/* <MenuItem
-                  component={Link}
-                  to={routes.help()}
-                  onClick={handleClose}
-                >
-                  <ListItemText>Справка</ListItemText>
-                </MenuItem> */}
-                {/* <MenuItem
-                  component={Link}
-                  to={routes.about()}
-                  onClick={handleClose}
-                >
-                  <ListItemText>О программе</ListItemText>
-                </MenuItem> */}
 
                 <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
                   <ListItemText>Выход</ListItemText>

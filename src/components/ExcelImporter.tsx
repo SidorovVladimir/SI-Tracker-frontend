@@ -18,14 +18,11 @@ import {
   Paper,
   CircularProgress,
   Stack,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material';
 // import * as XLSX from 'xlsx';
 import { useSnackbar } from 'notistack';
 import { ImportDevicesFromExcelDocument } from '../graphql/types/__generated__/graphql';
 import { useMutation } from '@apollo/client/react';
-import PageHelpButton from './PageHelpButton';
 
 // Поля нашей системы, которые обязательно или опционально нужно заполнить
 const SYSTEM_FIELDS = [
@@ -84,9 +81,6 @@ const SYSTEM_FIELDS = [
 
 export const ExcelImporter: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Состояния для хранения распарсенных данных Excel
   const [excelHeaders, setExcelHeaders] = useState<string[]>([]);
@@ -396,9 +390,6 @@ export const ExcelImporter: React.FC = () => {
               паспорта прибора и запустите автоматическое наполнение реестра.
             </Typography>
           </Box>
-
-          {/* На десктопе рендерим кнопку помощи прямо в шапке */}
-          {!isMobile && <PageHelpButton />}
         </Stack>
       </Box>
 
@@ -568,11 +559,6 @@ export const ExcelImporter: React.FC = () => {
             </TableContainer>
           </Grid>
         </Grid>
-      )}
-      {isMobile && (
-        <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1100 }}>
-          <PageHelpButton />
-        </Box>
       )}
     </Box>
   );

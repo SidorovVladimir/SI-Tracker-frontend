@@ -150,8 +150,6 @@ import {
   Tab,
   Paper,
   Stack,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -161,14 +159,10 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import { BudgetPlansPage } from './BudgetPlansPage';
 import { PricelistListPage } from './PriceListPage';
 import { PricelistExcelImporter } from '../components/PricelistExcelImporter';
-import PageHelpButton from '../components/PageHelpButton'; // 🌟 Импортируем кнопку помощи
 
 export const BudgetLayoutPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // Определяем мобильный экран
 
   // Логика определения активной вкладки по текущему пути URL
   const getActiveTab = () => {
@@ -232,9 +226,6 @@ export const BudgetLayoutPage: React.FC = () => {
               затрат на поверку СИ.
             </Typography>
           </Box>
-
-          {/* 💻 На десктопе кнопка помощи рендерится строго в шапке */}
-          {!isMobile && <PageHelpButton />}
         </Stack>
       </Box>
 
@@ -310,11 +301,6 @@ export const BudgetLayoutPage: React.FC = () => {
       </Box>
 
       {/* 📱 МОБИЛЬНАЯ КНОПКА ПОМОЩИ: Парит в правом нижнем углу экрана поверх всех дочерних таблиц */}
-      {isMobile && (
-        <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1100 }}>
-          <PageHelpButton />
-        </Box>
-      )}
     </Container>
   );
 };

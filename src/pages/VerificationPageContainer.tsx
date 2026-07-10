@@ -81,21 +81,16 @@
 //   );
 // };
 import React, { useState } from 'react';
-import { Box, Tabs, Tab, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Tabs, Tab } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 import { VerificationPlanningPage } from './VerificationPlanningPage';
 import { BatchesJournalPage } from './BatchesJournalPage';
-import PageHelpButton from '../components/PageHelpButton';
 
 export const VerificationPageContainer: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [locallyVerifiedIds, setLocallyVerifiedIds] = useState<string[]>([]);
-
-  // Адаптивные хуки для определения мобильной версии
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -151,13 +146,6 @@ export const VerificationPageContainer: React.FC = () => {
             />
           </Tabs>
         </Box>
-
-        {/* 💻 ДЕСКТОПНАЯ КНОПКА ПОМОЩИ: Рендерится в шапке только на ПК (md и выше) */}
-        {!isMobile && (
-          <Box sx={{ py: 0.5 }}>
-            <PageHelpButton />
-          </Box>
-        )}
       </Box>
 
       {/* Рабочая область табов */}
@@ -179,20 +167,6 @@ export const VerificationPageContainer: React.FC = () => {
           />
         )}
       </Box>
-
-      {/* 📱 МОБИЛЬНАЯ КНОПКА ПОМОЩИ: Парит в правом нижнем углу экрана */}
-      {isMobile && (
-        <Box
-          sx={{
-            position: 'fixed', // Фиксируем поверх всего контента приложения
-            bottom: 24, // Отступ снизу
-            right: 24, // Отступ справа
-            zIndex: 1100, // Накладываем поверх таблиц и аккордеонов
-          }}
-        >
-          <PageHelpButton />
-        </Box>
-      )}
     </Box>
   );
 };

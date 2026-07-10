@@ -40,7 +40,6 @@ import {
 } from '../graphql/types/__generated__/graphql';
 import { ConfirmationDialog } from '../components/modals/ConfirmationDialog';
 import { PriceHistoryTrend } from '../components/PriceHistoryTrend';
-import PageHelpButton from '../components/PageHelpButton';
 
 // 🎯 Переводим стейт фильтров на ID
 interface BudgetFilterState {
@@ -71,6 +70,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
     pageSize: 10,
   });
 
+  // 🌟 СТЕЙТ ГРАФИКА ТРЕНДА: Принимает либо UUID прибора, либо UUID цеха
   const [trendSku, setTrendSku] = useState<string | null>(null);
 
   const [inputValue, setInputValue] = useState('');
@@ -256,9 +256,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
               </Typography>
             </Box>
           </Box>
-
-          {/* 💻 ДЕСКТОПНАЯ КНОПКА ПОМОЩИ: Будет видна только на ПК */}
-          {!isMobile && <PageHelpButton />}
         </Stack>
 
         <Box
@@ -297,7 +294,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
             color={isApproved ? 'success' : 'primary'}
             size={isMobile ? 'medium' : 'large'}
             startIcon={<LockIcon />}
-            // Кнопка блокируется, если бюджет уже утвержден или идет загрузка
             disabled={isApproved || loading}
             onClick={() => setApproveDialogOpen(true)}
             sx={{ fontWeight: 'bold', textTransform: 'none', borderRadius: 2 }}
@@ -307,7 +303,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
         </Box>
       </Paper>
 
-      {/* Компактная панель фильтров ЦФО строго на UUID */}
+      {/* Панель фильтров ЦФО строго на UUID */}
       <Paper
         variant="outlined"
         sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: 'grey.50' }}
@@ -416,37 +412,57 @@ export const BudgetPlanDetailPage: React.FC = () => {
             </MenuItem>
           </TextField>
 
-          {(filters.cityId ||
-            filters.companyId ||
-            filters.productionSiteId ||
-            filters.matchMethod ||
-            inputValue) && (
-            <Button
-              variant="text"
-              color="inherit"
-              size="small"
-              onClick={() => {
-                setFilters(initialFilters);
-                setInputValue('');
-              }}
-              sx={{
-                textTransform: 'none',
-                fontWeight: 'bold',
-                minWidth: { xs: '100%', md: 'auto' },
-              }}
-            >
-              ❌ Сбросить
-            </Button>
-          )}
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            sx={{ minWidth: { xs: '100%', md: 'auto' } }}
+          >
+            {/* 🌟 ВНЕДРЕНИЕ: Кнопка вызова инфляции УЧАСТКА. Горит, если выбран конкретный цех! */}
+            {filters.productionSiteId && (
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={() => setTrendSku(filters.productionSiteId)}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  height: 38,
+                  borderRadius: 1.5,
+                }}
+              >
+                📊 Инфляция участка
+              </Button>
+            )}
+
+            {(filters.cityId ||
+              filters.companyId ||
+              filters.productionSiteId ||
+              filters.matchMethod ||
+              searchQuery) && (
+              <Button
+                variant="text"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setFilters(initialFilters);
+                  setInputValue('');
+                  setTrendSku(null);
+                }}
+                sx={{ textTransform: 'none', fontWeight: 'bold', height: 38 }}
+              >
+                ❌ Сбросить
+              </Button>
+            )}
+          </Stack>
         </Stack>
       </Paper>
-      {/* Рабочая область с изолированным скроллом и фиксированной пагинацией */}
       <Box
         sx={{
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
-          // На десктопе задаем фиксированную высоту контейнера для изоляции скролла
           height: { xs: 'auto', md: 'calc(100vh - 320px)' },
           minHeight: { md: 450 },
           bgcolor: 'background.paper',
@@ -456,7 +472,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Матовый мягкий оверлей во время дозагрузки данных пагинации */}
         {loading && (
           <Box
             sx={{
@@ -477,16 +492,14 @@ export const BudgetPlanDetailPage: React.FC = () => {
           </Box>
         )}
 
-        {/* 1. КОНТЕНТНАЯ ЗОНА С СОБСТВЕННЫМ СКРОЛЛОМ */}
         <Box
           sx={{
             flexGrow: 1,
-            // На десктопе контент скроллится внутри своего окна. На мобильных — обычный ленточный скролл страницы.
             overflowY: { xs: 'visible', md: 'auto' },
             p: { xs: 1.5, md: 0 },
           }}
         >
-          {/* 🖥️ ДЕСКТОПНАЯ ВЕРСИЯ ТАБЛИЦЫ: Показывается только на md+ */}
+          {/* 🖥️ ДЕСКТОПНАЯ ВЕРСИЯ ТАБЛИЦЫ */}
           <Box sx={{ display: { xs: 'none', md: 'block' } }}>
             <TableContainer component={Box} sx={{ maxHeight: '100%' }}>
               <Table
@@ -541,69 +554,66 @@ export const BudgetPlanDetailPage: React.FC = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    planItems.map((item: any) => (
-                      <TableRow key={item.id} hover>
-                        <TableCell
-                          sx={{
-                            fontWeight: 'medium',
-                            // Делаем ячейку кликабельной
-                            // cursor: 'pointer',
-                            // '&:hover': {
-                            //   color: 'primary.main',
-                            //   textDecoration: 'underline',
-                            // },
-                          }}
-                          // 🎯 При тапе передаем сгенерированный ключ в модальное окно
-                          // onClick={() => {
-                          //   setTrendSku(
-                          //     item.matchHistorySku ||
-                          //       `TEXT-${item.deviceName.replace(/\s+/g, '-')}`
-                          //   );
-                          // }}
-                        >
-                          {item.deviceName}
-                        </TableCell>
-                        <TableCell>{item.deviceModel}</TableCell>
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            С/Н: {item.device?.serialNumber || '—'}
-                          </Typography>
-                          <Typography variant="caption" display="block">
-                            ГРСИ: {item.device?.grsiNumber || '—'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <MatchMethodChip method={item.matchMethod} />
-                        </TableCell>
-                        <TableCell align="right">
-                          <InlinePriceEdit
-                            itemId={item.id}
-                            initialPrice={Number(item.basePrice)}
-                            // ✅ Теперь инпут заблокируется автоматически, если бюджет утвержден
-                            disabled={isApproved}
-                            onSave={(newPrice) =>
-                              handleUpdatePrice(item.id, newPrice)
-                            }
-                          />
-                        </TableCell>
-                        <TableCell
-                          align="right"
-                          sx={{ fontWeight: 'bold', color: 'primary.main' }}
-                        >
-                          {Number(item.totalCost).toLocaleString('ru-RU', {
-                            style: 'currency',
-                            currency: 'RUB',
-                          })}
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    planItems.map((item: any) => {
+                      return (
+                        <TableRow key={item.id} hover>
+                          <TableCell
+                            onClick={() => {
+                              if (item.device.id) {
+                                setTrendSku(item.device.id);
+                              }
+                            }}
+                            sx={{
+                              fontWeight: 'medium',
+                              cursor: 'pointer',
+                              '&:hover': {
+                                color: 'primary.main',
+                                textDecoration: 'underline',
+                              },
+                            }}
+                          >
+                            {item.deviceName}
+                          </TableCell>
+
+                          <TableCell>{item.deviceModel}</TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              С/Н: {item.device?.serialNumber || '—'}
+                            </Typography>
+                            <Typography variant="caption" display="block">
+                              ГРСИ: {item.device?.grsiNumber || '—'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <MatchMethodChip method={item.matchMethod} />
+                          </TableCell>
+                          <TableCell align="right">
+                            <InlinePriceEdit
+                              itemId={item.id}
+                              initialPrice={Number(item.basePrice)}
+                              disabled={isApproved}
+                              onSave={(newPrice) =>
+                                handleUpdatePrice(item.id, newPrice)
+                              }
+                            />
+                          </TableCell>
+                          <TableCell
+                            align="right"
+                            sx={{ fontWeight: 'bold', color: 'primary.main' }}
+                          >
+                            {Number(item.totalCost).toLocaleString('ru-RU', {
+                              style: 'currency',
+                              currency: 'RUB',
+                            })}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
             </TableContainer>
           </Box>
-
-          {/* 📱 МОБИЛЬНАЯ ВЕРСИЯ: Список карточек приборов вместо таблицы */}
           <Box
             sx={{
               display: { xs: 'flex', md: 'none' },
@@ -641,25 +651,23 @@ export const BudgetPlanDetailPage: React.FC = () => {
                       mb: 1.5,
                     }}
                   >
-                    {/* Превращаем текст в интерактивную кнопку-ссылку для вызова графика */}
                     <Typography
                       variant="subtitle2"
-                      // onClick={() => {
-                      //   setTrendSku(
-                      //     item.matchHistorySku ||
-                      //       `TEXT-${item.deviceName.replace(/\s+/g, '-')}`
-                      //   );
-                      // }}
+                      onClick={() => {
+                        if (item.device.id) {
+                          setTrendSku(item.device.id);
+                        }
+                      }}
                       sx={{
                         fontWeight: 'bold',
                         lineHeight: 1.3,
                         flexGrow: 1,
-                        // cursor: 'pointer',
+                        cursor: 'pointer',
                         color: 'text.primary',
-                        // '&:hover': {
-                        //   color: 'primary.main',
-                        //   textDecoration: 'underline',
-                        // },
+                        '&:hover': {
+                          color: 'primary.main',
+                          textDecoration: 'underline',
+                        },
                       }}
                     >
                       {item.deviceName}
@@ -728,7 +736,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
                       <InlinePriceEdit
                         itemId={item.id}
                         initialPrice={Number(item.basePrice)}
-                        // ✅ Точно так же блокируем и в мобильной версии карточки
                         disabled={isApproved}
                         onSave={(newPrice) =>
                           handleUpdatePrice(item.id, newPrice)
@@ -761,7 +768,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
           </Box>
         </Box>
 
-        {/* 2. ПАНЕЛЬ ПАГИНАЦИИ (Статичная под окном на десктопе, липкая снизу на мобильном) */}
+        {/* 2. ПАНЕЛЬ ПАГИНАЦИИ */}
         <Box
           sx={{
             width: '100%',
@@ -808,7 +815,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
                 minHeight: 52,
                 width: '100%',
               },
-              // Скрываем распорщик на мобилках для центрирования
               '& .MuiTablePagination-spacer': {
                 display: { xs: 'none', md: 'block' },
               },
@@ -824,7 +830,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
               },
               '& .MuiTablePagination-actions': {
                 ml: { xs: 0.5, md: 2 },
-                // 🎯 ВАЖНО: Сдвигаем стрелочки влево на мобилках, освобождая угол под парящую кнопку справки
                 mr: { xs: '64px', sm: 0 },
                 '& button': { p: { xs: 0.8, md: 1.2 }, color: 'primary.main' },
               },
@@ -832,6 +837,8 @@ export const BudgetPlanDetailPage: React.FC = () => {
           />
         </Box>
       </Box>
+
+      {/* Диалог заморозки годового плана */}
       <ConfirmationDialog
         open={approveDialogOpen}
         title="Утверждение годового бюджета"
@@ -840,6 +847,8 @@ export const BudgetPlanDetailPage: React.FC = () => {
         onClose={() => setApproveDialogOpen(false)}
         onConfirm={handleConfirmApprove}
       />
+
+      {/* 📋 ОРИГИНАЛЬНОЕ УНИВЕРСАЛЬНОЕ ОКНО ДИАЛОГА (ГРАФИК ИНФЛЯЦИИ) */}
       <Dialog
         open={Boolean(trendSku)}
         onClose={() => setTrendSku(null)}
@@ -847,12 +856,12 @@ export const BudgetPlanDetailPage: React.FC = () => {
         fullWidth
         slotProps={{
           paper: {
-            sx: { borderRadius: 3, p: 1 }, // Скругления под общий дизайн-код
+            sx: { borderRadius: 3, p: 1 },
           },
         }}
       >
         <Box sx={{ bgcolor: 'background.paper' }}>
-          {/* ✅ Исправление: передаем trendSku в проп siteId */}
+          {/* 🌟 ВАШ ОРИГИНАЛЬНЫЙ КОМПОНЕНТ: Бэкенд на лету поймет, что пришло в trendSku: UUID цеха или артикул прибора */}
           {trendSku && <PriceHistoryTrend siteId={trendSku} />}
 
           <Box
@@ -879,11 +888,6 @@ export const BudgetPlanDetailPage: React.FC = () => {
           </Box>
         </Box>
       </Dialog>
-      {isMobile && (
-        <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1100 }}>
-          <PageHelpButton />
-        </Box>
-      )}
     </Container>
   );
 };
