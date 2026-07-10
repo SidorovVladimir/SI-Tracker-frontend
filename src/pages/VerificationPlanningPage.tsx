@@ -425,6 +425,10 @@ export const VerificationPlanningPage: React.FC = () => {
                 scrollButtons="auto"
                 textColor="primary"
                 indicatorColor="primary"
+                allowScrollButtonsMobile
+                sx={{
+                  '& .MuiTabs-scrollButtons.Mui-disabled': { opacity: 0.3 },
+                }}
               >
                 <Tab
                   value="ALL"

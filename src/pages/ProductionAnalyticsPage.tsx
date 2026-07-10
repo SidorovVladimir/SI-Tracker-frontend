@@ -205,6 +205,12 @@ export default function ProductionAnalyticsPage() {
           onChange={(_, newValue) => setActiveTab(newValue)}
           textColor="primary"
           indicatorColor="primary"
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{
+            '& .MuiTabs-scrollButtons.Mui-disabled': { opacity: 0.3 },
+          }}
         >
           <Tab
             label="📊 Выработка и объемы работ"
