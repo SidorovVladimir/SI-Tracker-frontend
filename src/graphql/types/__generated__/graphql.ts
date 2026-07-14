@@ -167,7 +167,7 @@ export type BudgetPlanItem = {
   matchMethod: Scalars['String']['output'];
   matchedPricelistItemId: Maybe<Scalars['ID']['output']>;
   totalCost: Scalars['Float']['output'];
-  vatAmount: Scalars['Float']['output'];
+  vatRate: Scalars['Float']['output'];
 };
 
 export type BudgetPlanItemsResponse = {
@@ -236,6 +236,7 @@ export type CreateBudgetPlanInput = {
   companyId?: InputMaybe<Scalars['ID']['input']>;
   pricelistIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   productionSiteId?: InputMaybe<Scalars['ID']['input']>;
+  vatRate: Scalars['Float']['input'];
   year: Scalars['Int']['input'];
 };
 
@@ -1757,7 +1758,7 @@ export type GetBudgetPlanItemsQuery = {
       deviceModel: string;
       matchMethod: string;
       basePrice: number;
-      vatAmount: number;
+      vatRate: number;
       totalCost: number;
       device: {
         __typename: 'Device';
@@ -1795,7 +1796,7 @@ export type GetBudgetPlanDetailsQuery = {
       deviceModel: string;
       matchMethod: string;
       basePrice: number;
-      vatAmount: number;
+      vatRate: number;
       totalCost: number;
       device: {
         __typename: 'Device';
@@ -1865,7 +1866,7 @@ export type UpdateBudgetPlanItemPriceMutation = {
     __typename: 'BudgetPlanItem';
     id: string;
     basePrice: number;
-    vatAmount: number;
+    vatRate: number;
     totalCost: number;
     matchMethod: string;
   };
@@ -4289,7 +4290,7 @@ export const GetBudgetPlanItemsDocument = {
                       },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'vatAmount' },
+                        name: { kind: 'Name', value: 'vatRate' },
                       },
                       {
                         kind: 'Field',
@@ -4479,7 +4480,7 @@ export const GetBudgetPlanDetailsDocument = {
                       },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'vatAmount' },
+                        name: { kind: 'Name', value: 'vatRate' },
                       },
                       {
                         kind: 'Field',
@@ -4720,7 +4721,7 @@ export const UpdateBudgetPlanItemPriceDocument = {
               selections: [
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'basePrice' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'vatAmount' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'vatRate' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'totalCost' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'matchMethod' } },
               ],

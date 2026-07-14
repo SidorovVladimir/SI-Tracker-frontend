@@ -32,7 +32,7 @@ import {
   GetProductionSitesDocument,
   GetBudgetPlansDocument,
 } from '../../graphql/types/__generated__/graphql';
-import { formatStrictUpper } from '../../utils/capitalize';
+import { cleanSpaces, formatStrictUpper } from '../../utils/capitalize';
 
 interface ModalFilterState {
   cityId: string;
@@ -62,6 +62,8 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState<number>(currentYear + 1);
   const [comment, setComment] = useState<string>('');
+
+  const [vatRateInput, setVatRateInput] = useState<string>('22');
 
   const [calculationMethod, setCalculationMethod] = useState<
     'pricelist' | 'history'
@@ -147,6 +149,14 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
       return;
     }
 
+    const parsedVat = parseFloat(vatRateInput.replace(',', '.'));
+    if (isNaN(parsedVat) || parsedVat < 0) {
+      setSubmitError(
+        'Пожалуйста, введите корректную ставку НДС (число от 0 и выше).'
+      );
+      return;
+    }
+
     setSubmitting(true);
     setSubmitError(null);
 
@@ -155,6 +165,7 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
         variables: {
           input: {
             year,
+            vatRate: parsedVat / 100,
             comment: comment || undefined,
             calculationMethod: calculationMethod,
             pricelistIds:
@@ -169,6 +180,7 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
       });
 
       setComment('');
+      setVatRateInput('22');
       setSelectedPricelistIds([]);
       setCalculationMethod('pricelist');
       setLocationFilters(initialModalFilters);
@@ -286,6 +298,38 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
           </Box>
 
           <TextField
+            label="Ставка НДС для расчета, %"
+            size="small"
+            placeholder="Например: 20 или 10"
+            value={vatRateInput}
+            onChange={(e) => {
+              const val = e.target.value.replace(/[^0-9.,]/g, '');
+              setVatRateInput(val);
+            }}
+            disabled={submitting}
+            fullWidth
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontWeight: 'bold', ml: 1 }}
+                  >
+                    %
+                  </Typography>
+                ),
+              },
+            }}
+            sx={{
+              '& .MuiInputBase-input': {
+                fontSize: '0.875rem',
+                fontWeight: 'bold',
+              },
+            }}
+          />
+
+          <TextField
             label="Примечание / Комментарий"
             multiline
             rows={2}
@@ -388,14 +432,31 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
                 fullWidth
                 value={locationFilters.cityId}
                 disabled={submitting}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textTransform: 'uppercase',
+                    fontSize: '0.8rem',
+                    letterSpacing: '0.6px',
+                    fontWeight: 500,
+                  },
+                }}
                 onChange={(e) => handleLocationChange('cityId', e.target.value)}
               >
                 <MenuItem value="">
                   <em>Все регионы / Без ограничений</em>
                 </MenuItem>
                 {cities.map((city: any) => (
-                  <MenuItem key={city.id} value={city.id}>
-                    {city.name}
+                  <MenuItem
+                    key={city.id}
+                    value={city.id}
+                    sx={{
+                      textTransform: 'uppercase',
+                      fontSize: '0.77rem',
+                      letterSpacing: '0.55px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {cleanSpaces(city.name)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -410,13 +471,30 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
                 onChange={(e) =>
                   handleLocationChange('companyId', e.target.value)
                 }
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textTransform: 'uppercase',
+                    fontSize: '0.8rem',
+                    letterSpacing: '0.6px',
+                    fontWeight: 500,
+                  },
+                }}
               >
                 <MenuItem value="">
                   <em>Все юрлица / Без ограничений</em>
                 </MenuItem>
                 {companies.map((co: any) => (
-                  <MenuItem key={co.id} value={co.id}>
-                    {co.name}
+                  <MenuItem
+                    key={co.id}
+                    value={co.id}
+                    sx={{
+                      textTransform: 'uppercase',
+                      fontSize: '0.77rem',
+                      letterSpacing: '0.55px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {cleanSpaces(co.name)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -427,6 +505,14 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
                 select
                 fullWidth
                 value={locationFilters.siteId}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textTransform: 'uppercase',
+                    fontSize: '0.8rem',
+                    letterSpacing: '0.6px',
+                    fontWeight: 500,
+                  },
+                }}
                 disabled={submitting || filteredProductionSites.length === 0}
                 onChange={(e) => handleLocationChange('siteId', e.target.value)}
               >
@@ -434,8 +520,17 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
                   <em>Все подразделения / Без ограничений</em>
                 </MenuItem>
                 {filteredProductionSites.map((site: any) => (
-                  <MenuItem key={site.id} value={site.id}>
-                    {site.name}
+                  <MenuItem
+                    key={site.id}
+                    value={site.id}
+                    sx={{
+                      textTransform: 'uppercase',
+                      fontSize: '0.77rem',
+                      letterSpacing: '0.55px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {cleanSpaces(site.name)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -498,7 +593,7 @@ export const CreateBudgetPlanModal: React.FC<CreateBudgetPlanModalProps> = ({
                             variant="body2"
                             sx={{ fontWeight: 'medium', lineHeight: 1.3 }}
                           >
-                            {list.title} ({list.year} г.)
+                            {formatStrictUpper(list.title)} ({list.year} г.)
                           </Typography>
                           <Typography
                             variant="caption"

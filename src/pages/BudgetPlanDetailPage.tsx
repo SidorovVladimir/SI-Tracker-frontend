@@ -40,6 +40,7 @@ import {
 } from '../graphql/types/__generated__/graphql';
 import { ConfirmationDialog } from '../components/modals/ConfirmationDialog';
 import { PriceHistoryTrend } from '../components/PriceHistoryTrend';
+import { cleanSpaces, formatStrictUpper } from '../utils/capitalize';
 
 // 🎯 Переводим стейт фильтров на ID
 interface BudgetFilterState {
@@ -321,14 +322,32 @@ export const BudgetPlanDetailPage: React.FC = () => {
             select
             value={filters.cityId}
             onChange={(e) => handleFilterChange('cityId', e.target.value)}
-            sx={{ minWidth: { xs: '100%', md: 140 }, flex: 1 }}
+            sx={{
+              minWidth: { xs: '100%', md: 140 },
+              flex: 1,
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           >
             <MenuItem value="">
               <em>Все города</em>
             </MenuItem>
             {cities.map((city: any) => (
-              <MenuItem key={city.id} value={city.id}>
-                {city.name}
+              <MenuItem
+                key={city.id}
+                value={city.id}
+                sx={{
+                  textTransform: 'uppercase',
+                  fontSize: '0.77rem',
+                  letterSpacing: '0.55px',
+                  fontWeight: 500,
+                }}
+              >
+                {cleanSpaces(city.name)}
               </MenuItem>
             ))}
           </TextField>
@@ -340,14 +359,32 @@ export const BudgetPlanDetailPage: React.FC = () => {
             select
             value={filters.companyId}
             onChange={(e) => handleFilterChange('companyId', e.target.value)}
-            sx={{ minWidth: { xs: '100%', md: 160 }, flex: 1 }}
+            sx={{
+              minWidth: { xs: '100%', md: 160 },
+              flex: 1,
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           >
             <MenuItem value="">
               <em>Все организации</em>
             </MenuItem>
             {companies.map((co: any) => (
-              <MenuItem key={co.id} value={co.id}>
-                {co.name}
+              <MenuItem
+                key={co.id}
+                value={co.id}
+                sx={{
+                  textTransform: 'uppercase',
+                  fontSize: '0.77rem',
+                  letterSpacing: '0.55px',
+                  fontWeight: 500,
+                }}
+              >
+                {cleanSpaces(co.name)}
               </MenuItem>
             ))}
           </TextField>
@@ -362,14 +399,32 @@ export const BudgetPlanDetailPage: React.FC = () => {
               handleFilterChange('productionSiteId', e.target.value)
             }
             disabled={filteredProductionSites.length === 0}
-            sx={{ minWidth: { xs: '100%', md: 180 }, flex: 1 }}
+            sx={{
+              minWidth: { xs: '100%', md: 180 },
+              flex: 1,
+              '& .MuiInputBase-input': {
+                textTransform: 'uppercase',
+                fontSize: '0.8rem',
+                letterSpacing: '0.6px',
+                fontWeight: 500,
+              },
+            }}
           >
             <MenuItem value="">
               <em>Все участки</em>
             </MenuItem>
             {filteredProductionSites.map((site: any) => (
-              <MenuItem key={site.id} value={site.id}>
-                {site.name}
+              <MenuItem
+                key={site.id}
+                value={site.id}
+                sx={{
+                  textTransform: 'uppercase',
+                  fontSize: '0.77rem',
+                  letterSpacing: '0.55px',
+                  fontWeight: 500,
+                }}
+              >
+                {cleanSpaces(site.name)}
               </MenuItem>
             ))}
           </TextField>
@@ -513,7 +568,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
                       Наименование оборудования
                     </TableCell>
                     <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>
-                      Модель / Тип
+                      Тип
                     </TableCell>
                     <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>
                       Заводской № / ГРСИ
@@ -534,7 +589,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
                       align="right"
                       sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}
                     >
-                      Итого с НДС (20%)
+                      Итого с НДС
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -570,12 +625,17 @@ export const BudgetPlanDetailPage: React.FC = () => {
                                 color: 'primary.main',
                                 textDecoration: 'underline',
                               },
+                              whiteSpace: 'pre-wrap',
+                              wordBreak: 'break-word',
+                              width: '400px',
                             }}
                           >
-                            {item.deviceName}
+                            {formatStrictUpper(item.deviceName)}
                           </TableCell>
 
-                          <TableCell>{item.deviceModel}</TableCell>
+                          <TableCell>
+                            {formatStrictUpper(item.deviceModel)}
+                          </TableCell>
                           <TableCell>
                             <Typography variant="body2" color="text.secondary">
                               С/Н: {item.device?.serialNumber || '—'}
@@ -668,9 +728,11 @@ export const BudgetPlanDetailPage: React.FC = () => {
                           color: 'primary.main',
                           textDecoration: 'underline',
                         },
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
                       }}
                     >
-                      {item.deviceName}
+                      {formatStrictUpper(item.deviceName)}
                     </Typography>
                     <MatchMethodChip method={item.matchMethod} />
                   </Box>
@@ -688,7 +750,8 @@ export const BudgetPlanDetailPage: React.FC = () => {
                       color="text.secondary"
                       display="block"
                     >
-                      Модель: <strong>{item.deviceModel || '—'}</strong>
+                      Тип:{' '}
+                      <strong>{formatStrictUpper(item.deviceModel)}</strong>
                     </Typography>
                     <Typography
                       variant="caption"
@@ -749,7 +812,7 @@ export const BudgetPlanDetailPage: React.FC = () => {
                         color="text.secondary"
                         sx={{ fontWeight: 'bold', display: 'block' }}
                       >
-                        ИТОГО С НДС (20%):
+                        ИТОГО С НДС:
                       </Typography>
                       <Typography
                         variant="subtitle1"

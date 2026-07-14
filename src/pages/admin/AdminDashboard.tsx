@@ -19,6 +19,8 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  Pagination,
+  TextField,
 } from '@mui/material';
 import StorageIcon from '@mui/icons-material/Storage';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
@@ -27,9 +29,18 @@ import BuildIcon from '@mui/icons-material/Build';
 
 import { GetAdminDashboardStatsDocument } from '../../graphql/types/__generated__/graphql';
 import EditDevicePage from './EditDevicePage';
+import { Search } from '@mui/icons-material';
 
 export const AdminDashboard: React.FC = () => {
   const [editingDeviceId, setEditingDeviceId] = useState<string | null>(null);
+
+  const [visibleLimits, setVisibleLimits] = useState<Record<string, number>>(
+    {}
+  );
+
+  const [searchQueries, setSearchQueries] = useState<Record<string, string>>(
+    {}
+  );
 
   const { data, loading, error, refetch } = useQuery(
     GetAdminDashboardStatsDocument,
@@ -76,13 +87,11 @@ export const AdminDashboard: React.FC = () => {
         (rawAnomalies.statusMismatch || []).map((d: any) => [d.id, d])
       ).values()
     ),
-
     missingEquipmentType: Array.from(
       new Map(
         (rawAnomalies.missingEquipmentType || []).map((d: any) => [d.id, d])
       ).values()
     ),
-
     missingCsmCode: Array.from(
       new Map(
         (rawAnomalies.missingCsmCode || []).map((d: any) => [d.id, d])
@@ -92,9 +101,196 @@ export const AdminDashboard: React.FC = () => {
 
   const handleDeviceClick = (e: React.MouseEvent<HTMLElement>, id: string) => {
     if (e.currentTarget) {
-      e.currentTarget.blur(); // Убираем фокус с элемента бэкграунда
+      e.currentTarget.blur();
     }
     setEditingDeviceId(id);
+  };
+
+  const renderAnomalyList = (items: any[], anomalyKey: string) => {
+    const ITEMS_PER_PAGE = 5;
+
+    const searchQuery = searchQueries[anomalyKey] || '';
+    const currentPage = visibleLimits[anomalyKey] || 1;
+
+    const filteredItems = items.filter((dev: any) => {
+      const serial = (dev.serialNumber || '').toLowerCase();
+      const name = (dev.name || '').toLowerCase();
+      const model = (dev.model || '').toLowerCase();
+      const query = searchQuery.toLowerCase().trim();
+
+      return (
+        serial.includes(query) || name.includes(query) || model.includes(query)
+      );
+    });
+
+    const totalCount = filteredItems.length;
+    const pageCount = Math.ceil(totalCount / ITEMS_PER_PAGE);
+
+    const visibleItems = filteredItems.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE
+    );
+
+    return (
+      <AccordionDetails
+        sx={{
+          p: 0,
+          bgcolor: 'grey.50',
+          borderTop: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        {items.length > 0 && (
+          <Box
+            sx={{
+              p: 1.5,
+              bgcolor: 'background.paper',
+              borderBottom: '1px solid',
+              borderColor: 'grey.100',
+            }}
+          >
+            <TextField
+              fullWidth
+              size="small"
+              variant="outlined"
+              placeholder="Поиск по зав. №, типу или названию..."
+              value={searchQuery}
+              onChange={(e) => {
+                const val = e.target.value;
+                // Записываем поисковый запрос
+                setSearchQueries((prev) => ({ ...prev, [anomalyKey]: val }));
+                // Важно: При каждом изменении поиска сбрасываем страницу на 1-ю!
+                setVisibleLimits((prev) => ({ ...prev, [anomalyKey]: 1 }));
+              }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <Search fontSize="small" color="action" sx={{ mr: 1 }} />
+                  ),
+                  sx: {
+                    borderRadius: 2,
+                    bgcolor: 'grey.50',
+                    fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                  },
+                },
+              }}
+            />
+          </Box>
+        )}
+
+        {/* СПИСОК ПРИБОРОВ */}
+        <Box
+          sx={{
+            maxHeight: 380,
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          {visibleItems.length === 0 ? (
+            <Box
+              sx={{
+                p: 4,
+                textBreak: 'center',
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontStyle: 'italic' }}
+              >
+                Ничего не найдено
+              </Typography>
+            </Box>
+          ) : (
+            <List dense disablePadding>
+              {visibleItems.map((dev: any) => (
+                <ListItemButton
+                  key={dev.id}
+                  onClick={(e) => handleDeviceClick(e, dev.id)}
+                  sx={{
+                    borderBottom: '1px solid',
+                    borderColor: 'grey.200',
+                    py: 1.2,
+                    px: { xs: 1.5, sm: 2 },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 32 }}>
+                    <BuildIcon fontSize="small" color="disabled" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={dev.name}
+                    secondary={`Модель: ${dev.model} | Зав. №: ${dev.serialNumber}`}
+                    slotProps={{
+                      primary: {
+                        fontWeight: 600,
+                        variant: 'body2',
+                        sx: { fontSize: { xs: '0.78rem', sm: '0.875rem' } },
+                      },
+                      secondary: {
+                        variant: 'caption',
+                        sx: { fontSize: { xs: '0.68rem', sm: '0.75rem' } },
+                      },
+                    }}
+                  />
+                </ListItemButton>
+              ))}
+            </List>
+          )}
+        </Box>
+
+        {/* НИЖНЯЯ ПАНЕЛЬ С УПРАВЛЕНИЕМ СТРАНИЦАМИ */}
+        <Box
+          sx={{
+            p: 1.5,
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 1.5,
+            bgcolor: 'background.paper',
+            borderTop: '1px solid',
+            borderColor: 'grey.100',
+          }}
+        >
+          {/* Текстовый информатор диапазона */}
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontWeight: 600, fontSize: '0.75rem' }}
+          >
+            {searchQuery.trim() ? 'Найдено: ' : 'Показаны '}
+            {totalCount === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}–
+            {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} из {totalCount}{' '}
+            СИ
+          </Typography>
+
+          {/* MUI Компонент Пагинации */}
+          {pageCount > 1 && (
+            <Pagination
+              count={pageCount}
+              page={currentPage}
+              onChange={(_, value) => {
+                setVisibleLimits((prev) => ({
+                  ...prev,
+                  [anomalyKey]: value,
+                }));
+              }}
+              size="small"
+              color="primary"
+              siblingCount={0}
+              boundaryCount={1}
+              sx={{
+                '& .MuiPagination-ul': {
+                  justifyContent: 'center',
+                },
+              }}
+            />
+          )}
+        </Box>
+      </AccordionDetails>
+    );
   };
   return (
     <Box
@@ -309,42 +505,10 @@ export const AdminDashboard: React.FC = () => {
                       />
                     </Box>
                   </AccordionSummary>
-                  <AccordionDetails
-                    sx={{
-                      p: 0,
-                      bgcolor: 'grey.50',
-                      borderTop: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <List dense disablePadding>
-                      {anomalies?.missingMpi?.map((dev: any) => (
-                        <ListItemButton
-                          key={dev.id}
-                          onClick={(e) => handleDeviceClick(e, dev.id)}
-                          sx={{
-                            borderBottom: '1px solid',
-                            borderColor: 'grey.200',
-                            py: 1.2,
-                          }}
-                        >
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            <BuildIcon fontSize="small" color="disabled" />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={dev.name}
-                            secondary={`Модель: ${dev.model} | Зав. №: ${dev.serialNumber}`}
-                            slotProps={{
-                              primary: { fontWeight: 600, variant: 'body2' },
-                              secondary: { variant: 'caption' },
-                            }}
-                          />
-                        </ListItemButton>
-                      ))}
-                    </List>
-                  </AccordionDetails>
+                  {renderAnomalyList(anomalies.missingMpi, 'missingMpi')}
                 </Accordion>
 
+                {/* 2. АНОМАЛИЯ: Тип оборудования пропущен */}
                 <Accordion
                   disableGutters
                   variant="outlined"
@@ -392,43 +556,13 @@ export const AdminDashboard: React.FC = () => {
                       />
                     </Box>
                   </AccordionSummary>
-                  <AccordionDetails
-                    sx={{
-                      p: 0,
-                      bgcolor: 'grey.50',
-                      borderTop: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <List dense disablePadding>
-                      {anomalies?.missingEquipmentType?.map((dev: any) => (
-                        <ListItemButton
-                          key={dev.id}
-                          onClick={(e) => handleDeviceClick(e, dev.id)}
-                          sx={{
-                            borderBottom: '1px solid',
-                            borderColor: 'grey.200',
-                            py: 1.2,
-                          }}
-                        >
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            <BuildIcon fontSize="small" color="disabled" />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={dev.name}
-                            secondary={`Модель: ${dev.model} | Зав. №: ${dev.serialNumber}`}
-                            slotProps={{
-                              primary: { fontWeight: 600, variant: 'body2' },
-                              secondary: { variant: 'caption' },
-                            }}
-                          />
-                        </ListItemButton>
-                      ))}
-                    </List>
-                  </AccordionDetails>
+                  {renderAnomalyList(
+                    anomalies.missingEquipmentType,
+                    'missingEquipmentType'
+                  )}
                 </Accordion>
 
-                {/* 6. 🌟 НОВАЯ АНОМАЛИЯ: Не указан код СИ из прайса ЦСМ */}
+                {/* 3. АНОМАЛИЯ: Не указан код СИ из прайса ЦСМ */}
                 <Accordion
                   disableGutters
                   variant="outlined"
@@ -474,43 +608,12 @@ export const AdminDashboard: React.FC = () => {
                       />
                     </Box>
                   </AccordionSummary>
-                  <AccordionDetails
-                    sx={{
-                      p: 0,
-                      bgcolor: 'grey.50',
-                      borderTop: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <List dense disablePadding>
-                      {anomalies?.missingCsmCode?.map((dev: any) => (
-                        <ListItemButton
-                          key={dev.id}
-                          onClick={(e) => handleDeviceClick(e, dev.id)}
-                          sx={{
-                            borderBottom: '1px solid',
-                            borderColor: 'grey.200',
-                            py: 1.2,
-                          }}
-                        >
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            <BuildIcon fontSize="small" color="disabled" />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={dev.name}
-                            secondary={`Модель: ${dev.model} | Зав. №: ${dev.serialNumber}`}
-                            slotProps={{
-                              primary: { fontWeight: 600, variant: 'body2' },
-                              secondary: { variant: 'caption' },
-                            }}
-                          />
-                        </ListItemButton>
-                      ))}
-                    </List>
-                  </AccordionDetails>
+                  {renderAnomalyList(
+                    anomalies.missingCsmCode,
+                    'missingCsmCode'
+                  )}
                 </Accordion>
-
-                {/* 2. АНОМАЛИЯ: Нет типа контроля */}
+                {/* 4. АНОМАЛИЯ: Нет типа контроля */}
                 <Accordion
                   disableGutters
                   variant="outlined"
@@ -559,43 +662,13 @@ export const AdminDashboard: React.FC = () => {
                       />
                     </Box>
                   </AccordionSummary>
-                  <AccordionDetails
-                    sx={{
-                      p: 0,
-                      bgcolor: 'grey.50',
-                      borderTop: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <List dense disablePadding>
-                      {anomalies?.missingControlType?.map((dev: any) => (
-                        <ListItemButton
-                          key={dev.id}
-                          onClick={(e) => handleDeviceClick(e, dev.id)}
-                          sx={{
-                            borderBottom: '1px solid',
-                            borderColor: 'grey.200',
-                            py: 1.2,
-                          }}
-                        >
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            <BuildIcon fontSize="small" color="disabled" />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={dev.name}
-                            secondary={`Модель: ${dev.model} | Зав. №: ${dev.serialNumber}`}
-                            slotProps={{
-                              primary: { fontWeight: 600, variant: 'body2' },
-                              secondary: { variant: 'caption' },
-                            }}
-                          />
-                        </ListItemButton>
-                      ))}
-                    </List>
-                  </AccordionDetails>
+                  {renderAnomalyList(
+                    anomalies.missingControlType,
+                    'missingControlType'
+                  )}
                 </Accordion>
 
-                {/* 3. АНОМАЛИЯ: Исправен, но без документов */}
+                {/* 5. АНОМАЛИЯ: Исправен, но без документов */}
                 <Accordion
                   disableGutters
                   variant="outlined"
@@ -641,43 +714,13 @@ export const AdminDashboard: React.FC = () => {
                       />
                     </Box>
                   </AccordionSummary>
-                  <AccordionDetails
-                    sx={{
-                      p: 0,
-                      bgcolor: 'grey.50',
-                      borderTop: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <List dense disablePadding>
-                      {anomalies?.missingHistory?.map((dev: any) => (
-                        <ListItemButton
-                          key={dev.id}
-                          onClick={(e) => handleDeviceClick(e, dev.id)}
-                          sx={{
-                            borderBottom: '1px solid',
-                            borderColor: 'grey.200',
-                            py: 1.2,
-                          }}
-                        >
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            <BuildIcon fontSize="small" color="disabled" />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={dev.name}
-                            secondary={`Модель: ${dev.model} | Зав. №: ${dev.serialNumber}`}
-                            slotProps={{
-                              primary: { fontWeight: 600, variant: 'body2' },
-                              secondary: { variant: 'caption' },
-                            }}
-                          />
-                        </ListItemButton>
-                      ))}
-                    </List>
-                  </AccordionDetails>
+                  {renderAnomalyList(
+                    anomalies.missingHistory,
+                    'missingHistory'
+                  )}
                 </Accordion>
 
-                {/* 4. АНОМАЛИЯ: Рассинхрон статуса */}
+                {/* 6. АНОМАЛИЯ: Рассинхрон статуса */}
                 <Accordion
                   disableGutters
                   variant="outlined"
@@ -724,40 +767,10 @@ export const AdminDashboard: React.FC = () => {
                       />
                     </Box>
                   </AccordionSummary>
-                  <AccordionDetails
-                    sx={{
-                      p: 0,
-                      bgcolor: 'grey.50',
-                      borderTop: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <List dense disablePadding>
-                      {anomalies?.statusMismatch?.map((dev: any) => (
-                        <ListItemButton
-                          key={dev.id}
-                          onClick={(e) => handleDeviceClick(e, dev.id)}
-                          sx={{
-                            borderBottom: '1px solid',
-                            borderColor: 'grey.200',
-                            py: 1.2,
-                          }}
-                        >
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            <BuildIcon fontSize="small" color="disabled" />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={dev.name}
-                            secondary={`Модель: ${dev.model} | Зав. №: ${dev.serialNumber}`}
-                            slotProps={{
-                              primary: { fontWeight: 600, variant: 'body2' },
-                              secondary: { variant: 'caption' },
-                            }}
-                          />
-                        </ListItemButton>
-                      ))}
-                    </List>
-                  </AccordionDetails>
+                  {renderAnomalyList(
+                    anomalies.statusMismatch,
+                    'statusMismatch'
+                  )}
                 </Accordion>
               </Stack>
             </CardContent>

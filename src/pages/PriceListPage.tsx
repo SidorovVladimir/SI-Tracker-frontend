@@ -172,6 +172,7 @@ import {
 } from '../graphql/types/__generated__/graphql';
 import { formatDate } from '../utils/date';
 import { ConfirmationDialog } from '../components/modals/ConfirmationDialog';
+import { formatStrictUpper } from '../utils/capitalize';
 
 export const PricelistListPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -278,10 +279,10 @@ export const PricelistListPage: React.FC = () => {
                 {pricelists.map((list: any) => (
                   <TableRow key={list.id} hover>
                     <TableCell sx={{ fontWeight: 'bold' }}>
-                      {list.title}
+                      {formatStrictUpper(list.title)}
                     </TableCell>
                     <TableCell>
-                      {list.verificationOrganization?.name || '—'}
+                      {formatStrictUpper(list.verificationOrganization?.name)}
                     </TableCell>
                     <TableCell>{list.year} г.</TableCell>
                     <TableCell>
@@ -341,7 +342,7 @@ export const PricelistListPage: React.FC = () => {
                     variant="subtitle1"
                     sx={{ fontWeight: 'bold', lineHeight: 1.2 }}
                   >
-                    {list.title}
+                    {formatStrictUpper(list.title)}
                   </Typography>
                   <Chip
                     label={list.isRegulated ? 'Рег.' : 'Дог.'}
@@ -363,8 +364,7 @@ export const PricelistListPage: React.FC = () => {
                     noWrap
                     sx={{ maxWidth: '100%' }}
                   >
-                    {list.verificationOrganization?.name ||
-                      'Организация не указана'}
+                    {formatStrictUpper(list.verificationOrganization?.name)}
                   </Typography>
                 </Box>
 
