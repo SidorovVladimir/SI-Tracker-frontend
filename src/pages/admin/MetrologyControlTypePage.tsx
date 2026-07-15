@@ -98,6 +98,7 @@ export default function MetrologyControlTypePage() {
         <Button
           aria-label="Добавить вид метрологического контроля"
           variant="contained"
+          disabled={true}
           startIcon={isMobile ? undefined : <Add />}
           sx={{
             borderRadius: isMobile ? '50%' : undefined,
@@ -166,6 +167,7 @@ export default function MetrologyControlTypePage() {
                 <IconButton
                   size="small"
                   color="error"
+                  disabled={true}
                   sx={{
                     border: '1px solid',
                     borderColor: 'error.light',
@@ -242,13 +244,16 @@ export default function MetrologyControlTypePage() {
                         </Box>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeleteClick(m.id)}
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            disabled={true}
+                            size="small"
+                            color="error"
+                            onClick={() => handleDeleteClick(m.id)}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                     </Stack>
                   </TableCell>

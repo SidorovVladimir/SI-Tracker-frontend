@@ -23,14 +23,14 @@ import ProductionSitesPage from './pages/admin/ProductionSitesPage';
 import CreateProductionSitePage from './pages/admin/CreateProductionSitePage';
 import EditProductionSitePage from './pages/admin/EditProductionSitePage';
 import EquipmentTypesPage from './pages/admin/EquipmentTypesPage';
-import CreateEquipmentTypePage from './pages/admin/CreateEquipmentTypePage';
+// import CreateEquipmentTypePage from './pages/admin/CreateEquipmentTypePage';
 import MeasurementTypesPage from './pages/admin/MeasurementTypesPage';
-import CreateMeasurementTypePage from './pages/admin/CreateMeasurementTypePage';
+// import CreateMeasurementTypePage from './pages/admin/CreateMeasurementTypePage';
 import MetrologyControlTypePage from './pages/admin/MetrologyControlTypePage';
-import CreateMetrologyControlTypePage from './pages/admin/CreateMetrologyControlTypePage';
+// import CreateMetrologyControlTypePage from './pages/admin/CreateMetrologyControlTypePage';
 import ScopesPage from './pages/admin/ScopesPage';
-import CreateScopePage from './pages/admin/CreateScopePage';
-import CreateStatusPage from './pages/admin/CreateStatusPage';
+// import CreateScopePage from './pages/admin/CreateScopePage';
+// import CreateStatusPage from './pages/admin/CreateStatusPage';
 import StatusesPage from './pages/admin/StatusesPage';
 import PrimaryStandartsPage from './pages/admin/PrimaryStandartsPage';
 import CreatePrimaryStandartPage from './pages/admin/CreatePrimaryStandartPage';
@@ -105,12 +105,6 @@ function App() {
           <Route path={routes.home()} element={<HomePage />} />
           <Route path={routes.profile()} element={<ProfilePage />} />
           <Route path={routes.chat()} element={<ChatPage />} />
-          <Route path={routes.budget()} element={<BudgetPlanningPage />} />
-          <Route path="/budget/*" element={<BudgetLayoutPage />} />
-          <Route
-            path="/budget/plans/details/:id"
-            element={<BudgetPlanDetailPage />}
-          />
 
           {/* <Route path={routes.help()} element={<HelpPage />} /> */}
           <Route path="/m/device/:id" element={<MobileDevicePage />} />
@@ -124,6 +118,12 @@ function App() {
           <Route
             element={<ProtectedRoute allowedRoles={['admin', 'superadmin']} />}
           >
+            <Route path="/budget/*" element={<BudgetLayoutPage />} />
+            <Route
+              path="/budget/plans/details/:id"
+              element={<BudgetPlanDetailPage />}
+            />
+            <Route path={routes.budget()} element={<BudgetPlanningPage />} />
             <Route
               path={routes.planning()}
               element={<VerificationPageContainer />}
@@ -184,26 +184,26 @@ function App() {
                   path={routes.admin.equipmentTypes()}
                   element={<EquipmentTypesPage />}
                 />
-                <Route
+                {/* <Route
                   path={routes.admin.createEquipmentType()}
                   element={<CreateEquipmentTypePage />}
-                />
+                /> */}
                 <Route
                   path={routes.admin.measurementTypes()}
                   element={<MeasurementTypesPage />}
                 />
-                <Route
+                {/* <Route
                   path={routes.admin.createMeasurementType()}
                   element={<CreateMeasurementTypePage />}
-                />
+                /> */}
                 <Route
                   path={routes.admin.metrologyControlTypes()}
                   element={<MetrologyControlTypePage />}
                 />
-                <Route
+                {/* <Route
                   path={routes.admin.createMetrologyControlType()}
                   element={<CreateMetrologyControlTypePage />}
-                />
+                /> */}
                 <Route path={routes.admin.scopes()} element={<ScopesPage />} />
                 <Route
                   path={routes.admin.primaryStandarts()}
@@ -213,14 +213,14 @@ function App() {
                   path={routes.admin.createPrimaryStandart()}
                   element={<CreatePrimaryStandartPage />}
                 />
-                <Route
+                {/* <Route
                   path={routes.admin.createScope()}
                   element={<CreateScopePage />}
-                />
-                <Route
+                /> */}
+                {/* <Route
                   path={routes.admin.createStatus()}
                   element={<CreateStatusPage />}
-                />
+                /> */}
                 <Route
                   path={routes.admin.statuses()}
                   element={<StatusesPage />}

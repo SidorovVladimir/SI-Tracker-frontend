@@ -1,13 +1,7 @@
-import { AddCircleOutline } from '@mui/icons-material';
-import {
-  Box,
-  TextField,
-  Tooltip,
-  IconButton,
-  Autocomplete,
-} from '@mui/material';
-import { useState } from 'react';
-import MeasurementModal from './modals/MeasurementModal';
+// import { AddCircleOutline } from '@mui/icons-material';
+import { Box, TextField, Autocomplete } from '@mui/material';
+// import { useState } from 'react';
+// import MeasurementModal from './modals/MeasurementModal';
 import { cleanSpaces } from '../utils/capitalize';
 
 export default function MeasurementAutocomplete({
@@ -15,7 +9,7 @@ export default function MeasurementAutocomplete({
   onChange,
   measurementTypesList,
 }: any) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Autocomplete
@@ -88,7 +82,7 @@ export default function MeasurementAutocomplete({
         )}
       />
 
-      <Tooltip title="Добавить вид измерений">
+      {/* <Tooltip title="Добавить вид измерений">
         <IconButton
           color="primary"
           onClick={() => setIsModalOpen(true)}
@@ -103,8 +97,8 @@ export default function MeasurementAutocomplete({
         onClose={() => setIsModalOpen(false)}
         onCreated={(newMeasurementType: string) => {
           onChange(null, [...value, newMeasurementType]);
-        }}
-      />
+        }} */}
+      {/* /> */}
     </Box>
   );
 }

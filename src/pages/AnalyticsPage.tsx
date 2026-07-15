@@ -139,7 +139,7 @@ export default function AnalyticsPage() {
       sx={{
         py: 3,
         px: { xs: 1.5, sm: 2, md: 3 },
-        height: 'auto', // ✅ Исправление: убираем жесткий 100dvh, ликвидируя двойной скролл
+        height: 'auto',
         minHeight: '100vh',
       }}
     >
@@ -157,22 +157,40 @@ export default function AnalyticsPage() {
         <Stack
           direction="row"
           spacing={1.5}
-          alignItems="center"
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
           sx={{
             width: { xs: '100%', sm: 'auto' },
             justifyContent: { xs: 'space-between', sm: 'flex-start' },
+            flexWrap: 'wrap',
+            gap: 0.5,
           }}
         >
           <Typography
             variant="h5"
             sx={{
-              fontWeight: 700,
-
+              fontWeight: 800,
+              color: 'text.primary',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
               fontSize: { xs: '1.2rem', sm: '1.5rem' },
-              textAlign: 'left',
+              lineHeight: 1.2,
             }}
           >
             📊 Финансовая аналитика затрат на СИ
+          </Typography>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              fontWeight: 500,
+              fontSize: { xs: '0.75rem', sm: '0.85rem' },
+
+              pt: { xs: '3px', sm: '4px' },
+              whiteSpace: 'nowrap',
+            }}
+          >
+            (данные указаны без НДС)
           </Typography>
         </Stack>
 

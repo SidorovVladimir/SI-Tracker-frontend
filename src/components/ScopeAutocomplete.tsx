@@ -1,13 +1,7 @@
-import { AddCircleOutline } from '@mui/icons-material';
-import {
-  Box,
-  Autocomplete,
-  TextField,
-  Tooltip,
-  IconButton,
-} from '@mui/material';
-import { useState } from 'react';
-import ScopeModal from './modals/ScopeModal';
+// import { AddCircleOutline } from '@mui/icons-material';
+import { Box, Autocomplete, TextField } from '@mui/material';
+// import { useState } from 'react';
+// import ScopeModal from './modals/ScopeModal';
 import { cleanSpaces } from '../utils/capitalize';
 
 export default function ScopeAutocomplete({
@@ -15,7 +9,7 @@ export default function ScopeAutocomplete({
   onChange,
   scopesList,
 }: any) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Autocomplete
@@ -87,7 +81,7 @@ export default function ScopeAutocomplete({
         )}
       />
 
-      <Tooltip title="Добавить сферу">
+      {/* <Tooltip title="Добавить сферу">
         <IconButton
           color="primary"
           onClick={() => setIsModalOpen(true)}
@@ -103,7 +97,7 @@ export default function ScopeAutocomplete({
         onCreated={(newScope: string) => {
           onChange(null, [...value, newScope]);
         }}
-      />
+      /> */}
     </Box>
   );
 }

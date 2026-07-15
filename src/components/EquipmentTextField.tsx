@@ -1,7 +1,7 @@
-import { AddCircleOutline } from '@mui/icons-material';
-import { Box, TextField, Tooltip, IconButton, MenuItem } from '@mui/material';
-import { useState } from 'react';
-import EquipmentModal from './modals/EquipmentModal';
+// import { AddCircleOutline } from '@mui/icons-material';
+import { Box, TextField, MenuItem } from '@mui/material';
+// import { useState } from 'react';
+// import EquipmentModal from './modals/EquipmentModal';
 import { cleanSpaces } from '../utils/capitalize';
 
 export default function EquipmentTextField({
@@ -9,7 +9,7 @@ export default function EquipmentTextField({
   onChange,
   equipmentTypesList,
 }: any) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -71,7 +71,7 @@ export default function EquipmentTextField({
         )}
       </TextField>
 
-      <Tooltip title="Добавить тип оборудования">
+      {/* <Tooltip title="Добавить тип оборудования">
         <IconButton
           color="primary"
           onClick={() => setIsModalOpen(true)}
@@ -84,7 +84,7 @@ export default function EquipmentTextField({
       <EquipmentModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-      />
+      /> */}
     </Box>
   );
 }

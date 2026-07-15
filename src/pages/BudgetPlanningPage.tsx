@@ -127,11 +127,13 @@ export const BudgetPlanningPage: React.FC = () => {
       >
         <Stack
           direction="row"
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
           spacing={1.5}
-          alignItems="center"
           sx={{
             width: { xs: '100%', sm: 'auto' },
             justifyContent: { xs: 'space-between', sm: 'flex-start' },
+            flexWrap: 'wrap',
+            rowGap: 0.5,
           }}
         >
           <Typography
@@ -143,10 +145,25 @@ export const BudgetPlanningPage: React.FC = () => {
               alignItems: 'center',
               gap: 1,
               fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              lineHeight: 1.2,
             }}
           >
             <AccountBalanceWalletIcon color="primary" /> Матрица годовых затрат
             СИ
+          </Typography>
+
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              fontWeight: 500,
+              fontSize: { xs: '0.75rem', sm: '0.85rem' },
+
+              pt: { xs: '3px', sm: '4px' },
+              whiteSpace: 'nowrap',
+            }}
+          >
+            (данные указаны без НДС)
           </Typography>
         </Stack>
 

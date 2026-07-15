@@ -92,6 +92,7 @@ export default function ScopesPage() {
         <Button
           aria-label="Добавить сферу применения"
           variant="contained"
+          disabled={true}
           startIcon={isMobile ? undefined : <Add />}
           sx={{
             borderRadius: isMobile ? '50%' : undefined,
@@ -160,6 +161,7 @@ export default function ScopesPage() {
                 <IconButton
                   size="small"
                   color="error"
+                  disabled={true}
                   sx={{
                     border: '1px solid',
                     borderColor: 'error.light',
@@ -236,13 +238,16 @@ export default function ScopesPage() {
                         </Box>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeleteClick(sc.id)}
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            disabled={true}
+                            size="small"
+                            color="error"
+                            onClick={() => handleDeleteClick(sc.id)}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                     </Stack>
                   </TableCell>

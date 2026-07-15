@@ -1,7 +1,8 @@
-import { AddCircleOutline } from '@mui/icons-material';
-import { Box, TextField, Tooltip, IconButton, MenuItem } from '@mui/material';
-import { useState } from 'react';
-import StatusModal from './modals/StatusModal';
+// import { AddCircleOutline } from '@mui/icons-material';
+// import { Box, TextField, Tooltip, IconButton, MenuItem } from '@mui/material';
+import { Box, TextField, MenuItem } from '@mui/material';
+// import { useState } from 'react';
+// import StatusModal from './modals/StatusModal';
 import { cleanSpaces } from '../utils/capitalize';
 
 export default function StatusTextField({
@@ -9,7 +10,7 @@ export default function StatusTextField({
   onChange,
   statusesList,
 }: any) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <TextField
@@ -66,7 +67,7 @@ export default function StatusTextField({
         ))}
       </TextField>
 
-      <Tooltip title="Добавить состояние">
+      {/* <Tooltip title="Добавить состояние">
         <IconButton
           color="primary"
           onClick={() => setIsModalOpen(true)}
@@ -76,7 +77,7 @@ export default function StatusTextField({
         </IconButton>
       </Tooltip>
 
-      <StatusModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <StatusModal open={isModalOpen} onClose={() => setIsModalOpen(false)} /> */}
     </Box>
   );
 }

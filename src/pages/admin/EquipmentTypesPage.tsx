@@ -92,6 +92,7 @@ export default function EquipmentTypesPage() {
           aria-label="Добавить тип оборудования"
           variant="contained"
           startIcon={isMobile ? undefined : <Add />}
+          disabled={true}
           sx={{
             borderRadius: isMobile ? '50%' : undefined,
             minWidth: isMobile ? 40 : undefined,
@@ -159,6 +160,7 @@ export default function EquipmentTypesPage() {
                 <IconButton
                   size="small"
                   color="error"
+                  disabled={true}
                   sx={{
                     border: '1px solid',
                     borderColor: 'error.light',
@@ -235,13 +237,16 @@ export default function EquipmentTypesPage() {
                         </Box>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeleteClick(eq.id)}
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            disabled={true}
+                            onClick={() => handleDeleteClick(eq.id)}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                     </Stack>
                   </TableCell>

@@ -93,6 +93,7 @@ export default function MeasurementTypesPage() {
         <Button
           aria-label="Добавить вид измерения"
           variant="contained"
+          disabled={true}
           startIcon={isMobile ? undefined : <Add />}
           sx={{
             borderRadius: isMobile ? '50%' : undefined,
@@ -161,6 +162,7 @@ export default function MeasurementTypesPage() {
                 <IconButton
                   size="small"
                   color="error"
+                  disabled={true}
                   sx={{
                     border: '1px solid',
                     borderColor: 'error.light',
@@ -237,13 +239,16 @@ export default function MeasurementTypesPage() {
                         </Box>
                       </Tooltip>
                       <Tooltip title="Удалить" arrow>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeleteClick(m.id)}
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
+                        <Box component="span" sx={{ display: 'inline-block' }}>
+                          <IconButton
+                            disabled={true}
+                            size="small"
+                            color="error"
+                            onClick={() => handleDeleteClick(m.id)}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Tooltip>
                     </Stack>
                   </TableCell>

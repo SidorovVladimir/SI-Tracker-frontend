@@ -1,7 +1,7 @@
-import { AddCircleOutline } from '@mui/icons-material';
-import { Box, TextField, Tooltip, IconButton, MenuItem } from '@mui/material';
-import { useState } from 'react';
-import MetrologyControlTypeModal from './modals/MetrologyControlTypeModal';
+// import { AddCircleOutline } from '@mui/icons-material';
+import { Box, TextField, MenuItem } from '@mui/material';
+// import { useState } from 'react';
+// import MetrologyControlTypeModal from './modals/MetrologyControlTypeModal';
 import { cleanSpaces } from '../utils/capitalize';
 
 export default function MetrologyControlTypeTextField({
@@ -9,7 +9,7 @@ export default function MetrologyControlTypeTextField({
   onChange,
   metrologyControlTypeList,
 }: any) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <TextField
@@ -70,7 +70,7 @@ export default function MetrologyControlTypeTextField({
         )}
       </TextField>
 
-      <Tooltip title="Добавить вид метрологического контроля">
+      {/* <Tooltip title="Добавить вид метрологического контроля">
         <IconButton
           color="primary"
           onClick={() => setIsModalOpen(true)}
@@ -83,7 +83,7 @@ export default function MetrologyControlTypeTextField({
       <MetrologyControlTypeModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-      />
+      /> */}
     </Box>
   );
 }
