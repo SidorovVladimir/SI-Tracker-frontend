@@ -63,7 +63,7 @@ import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocom
 import MeasurementAutocomplete from '../../components/MeasurementAutocomplete';
 import VerificationOrganizationTextField from '../../components/VerificationOrganizationTextField';
 import MetrologyControlTypeTextField from '../../components/MetrologyControlTypeTextField';
-import { cleanSpaces } from '../../utils/capitalize';
+import { cleanSpaces, toCapital } from '../../utils/capitalize';
 
 export default function EditDevicePage(props: {
   deviceId: string;
@@ -984,7 +984,25 @@ function UserForm({
             verifications.map((verification) => {
               const year = verification.date
                 ? new Date(verification.date).getFullYear()
-                : 'Новая поверка';
+                : null;
+
+              const currentControl = metrologyControlTypeList.find(
+                ({ id }) => id === verification.metrologyControleTypeId
+              );
+              const controlName = currentControl?.name
+                ? toCapital(currentControl.name)
+                : null;
+
+              let summaryTitle = 'Новая запись контроля';
+
+              if (controlName && year) {
+                summaryTitle = `${controlName} — ${year} г.`;
+              } else if (controlName) {
+                summaryTitle = controlName;
+              } else if (year) {
+                summaryTitle = `Контроль за ${year} год`;
+              }
+
               return (
                 <Accordion
                   key={verification.id}
@@ -992,7 +1010,19 @@ function UserForm({
                   onChange={() => toggleCollapse(verification.id)}
                 >
                   <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Typography>Поверка {year}</Typography>
+                    <Typography
+                      sx={{
+                        fontWeight: 400,
+
+                        color:
+                          controlName || year
+                            ? 'text.primary'
+                            : 'text.secondary',
+                        fontStyle: controlName || year ? 'normal' : 'italic',
+                      }}
+                    >
+                      {summaryTitle}
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Stack spacing={2}>
@@ -1008,6 +1038,7 @@ function UserForm({
                           )
                         }
                         fullWidth
+                        required
                         size="small"
                         slotProps={{
                           inputLabel: { shrink: true },

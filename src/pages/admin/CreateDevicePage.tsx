@@ -37,6 +37,7 @@ import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocom
 import MeasurementAutocomplete from '../../components/MeasurementAutocomplete';
 import VerificationOrganizationTextField from '../../components/VerificationOrganizationTextField';
 import MetrologyControlTypeTextField from '../../components/MetrologyControlTypeTextField';
+import { toCapital } from '../../utils/capitalize';
 
 export default function CreateDevicePage(props: {
   closeDetails: () => void;
@@ -528,7 +529,25 @@ export default function CreateDevicePage(props: {
             verifications.map((verification) => {
               const year = verification.date
                 ? new Date(verification.date).getFullYear()
-                : 'Новая поверка';
+                : null;
+
+              const currentControl = metrologyControlTypeList.find(
+                ({ id }) => id === verification.metrologyControleTypeId
+              );
+              const controlName = currentControl?.name
+                ? toCapital(currentControl.name)
+                : null;
+
+              let summaryTitle = 'Новая запись контроля';
+
+              if (controlName && year) {
+                summaryTitle = `${controlName} — ${year} г.`;
+              } else if (controlName) {
+                summaryTitle = controlName;
+              } else if (year) {
+                summaryTitle = `Контроль за ${year} год`;
+              }
+
               return (
                 <Accordion
                   key={verification.id}
@@ -536,13 +555,26 @@ export default function CreateDevicePage(props: {
                   onChange={() => toggleCollapse(verification.id)}
                 >
                   <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Typography>Поверка {year}</Typography>
+                    <Typography
+                      sx={{
+                        fontWeight: 400,
+
+                        color:
+                          controlName || year
+                            ? 'text.primary'
+                            : 'text.secondary',
+                        fontStyle: controlName || year ? 'normal' : 'italic',
+                      }}
+                    >
+                      {summaryTitle}
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Stack spacing={2}>
                       <TextField
                         type="date"
-                        label="Дата поверки"
+                        required
+                        label="Дата контроля"
                         value={verification.date}
                         onChange={(e) =>
                           handleVerificationChange(
@@ -592,6 +624,7 @@ export default function CreateDevicePage(props: {
                         label="Результат"
                         select
                         name="result"
+                        required
                         value={verification.result}
                         onChange={(e) =>
                           handleVerificationChange(
