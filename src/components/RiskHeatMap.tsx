@@ -254,7 +254,7 @@ export const RiskHeatMap: React.FC<RiskHeatMapProps> = ({ data }) => {
                             maxWidth: { xs: '100%', sm: 'calc(100% - 160px)' }, // Не дает длинному имени наехать на тег
                           }}
                         >
-                          {co.name}
+                          {co.name.toUpperCase()}
                         </Button>
 
                         {/* 🎯 НАДЕЖНОЕ ИСПРАВЛЕНИЕ КРИВИЗНЫ: Заменяем Badge на контролируемый тег-бокс */}

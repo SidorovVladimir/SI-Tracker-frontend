@@ -26,6 +26,7 @@ export default function PrimaryStandartModal({
 }: any) {
   const [form, setForm] = useState({
     name: '',
+    description: '',
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
@@ -94,6 +95,24 @@ export default function PrimaryStandartModal({
             required
             error={!!fieldErrors.name}
             helperText={fieldErrors.name}
+          />
+          <TextField
+            label="Описание"
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            multiline
+            minRows={2}
+            maxRows={5}
+            variant="outlined"
+            sx={{
+              '& .MuiInputBase-root': {
+                fontSize: '0.875rem',
+              },
+              mt: 1,
+            }}
           />
           <Divider sx={{ my: 2 }} />
         </Stack>

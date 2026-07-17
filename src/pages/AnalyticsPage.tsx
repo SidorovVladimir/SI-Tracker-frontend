@@ -115,7 +115,7 @@ export default function AnalyticsPage() {
       .map((item, idx) => ({
         id: idx,
         value: item.amount,
-        label: item.fullSiteLabel,
+        label: item.fullSiteLabel.toUpperCase(),
       }))
       .filter((item) => item.value > 0)
       .sort((a, b) => b.value - a.value);
@@ -248,20 +248,32 @@ export default function AnalyticsPage() {
             <RiskHeatMap data={riskData} />
           </Grid> */}
           {/* ================= КАРТОЧКИ KPI (ФИЛЬТРУЮТСЯ ПО ГОДУ ИЛИ МЕСЯЦУ) ================= */}
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} sx={{ display: 'flex' }}>
             <Card
               sx={{
                 boxShadow: 2,
                 borderLeft: '6px solid',
                 borderColor: 'success.main',
                 borderRadius: 2,
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <CardContent
+                sx={{
+                  p: 2,
+                  '&:last-child': { pb: 2 },
+                  flexGrow: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Typography
                   color="text.secondary"
                   variant="caption"
-                  sx={{ fontWeight: 600, letterSpacing: '0.5px' }}
+                  sx={{ fontWeight: 600, letterSpacing: '0.5px', mb: 1 }}
                 >
                   ЗАТРАТЫ ЗА ВЫБРАННЫЙ ПЕРИОД
                 </Typography>
@@ -271,7 +283,7 @@ export default function AnalyticsPage() {
                     fontWeight: 700,
                     mt: 0.5,
                     color: 'success.main',
-                    fontSize: { xs: '1.75rem', sm: '2.125rem' },
+                    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '1.85rem' },
                   }}
                 >
                   {totalSpent.toLocaleString('ru-RU')} ₽
@@ -280,31 +292,48 @@ export default function AnalyticsPage() {
             </Card>
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} sx={{ display: 'flex' }}>
             <Card
               sx={{
                 boxShadow: 2,
                 borderLeft: '6px solid',
                 borderColor: 'primary.main',
                 borderRadius: 2,
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <CardContent
+                sx={{
+                  p: 2,
+                  '&:last-child': { pb: 2 },
+                  flexGrow: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Typography
                   color="text.secondary"
                   variant="caption"
-                  sx={{ fontWeight: 600, letterSpacing: '0.5px' }}
+                  sx={{ fontWeight: 600, letterSpacing: '0.5px', mb: 1 }}
                 >
                   ЛИДЕР ПО РАСХОДАМ (ЮРЛИЦО)
                 </Typography>
                 <Typography
-                  variant="h6"
+                  variant="body1"
                   sx={{
                     fontWeight: 700,
-                    mt: 0.5,
+                    color: 'text.primary',
+                    lineHeight: 1.3,
+                    // Ограничиваем строго 2 строками, чтобы карточки не прыгали по высоте
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
+                    wordBreak: 'break-word',
                   }}
                 >
                   {topCompany}
@@ -313,34 +342,51 @@ export default function AnalyticsPage() {
             </Card>
           </Grid>
 
-          <Grid size={{ xs: 12, md: 4 }}>
+          <Grid
+            size={{ xs: 12, md: 4 }}
+            sx={{ display: 'flex', width: '100%' }}
+          >
             <Card
               sx={{
                 boxShadow: 2,
                 borderLeft: '6px solid',
                 borderColor: 'secondary.main',
                 borderRadius: 2,
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <CardContent
+                sx={{
+                  p: 2,
+                  '&:last-child': { pb: 2 },
+                  flexGrow: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Typography
                   color="text.secondary"
                   variant="caption"
-                  sx={{ fontWeight: 600, letterSpacing: '0.5px' }}
+                  sx={{ fontWeight: 600, letterSpacing: '0.5px', mb: 1 }}
                 >
                   САМЫЙ ДОРОГОЙ УЧАСТОК ЗАВОДА
                 </Typography>
                 <Typography
-                  variant="body2"
+                  variant="body1"
                   sx={{
                     fontWeight: 700,
-                    mt: 1,
                     color: 'text.primary',
+                    lineHeight: 1.3,
+                    // Ограничиваем точно так же — строго 2 строками
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 1,
-                    WebkitBoxOrient: 'vertical',
+                    wordBreak: 'break-word',
                   }}
                 >
                   {topSite}

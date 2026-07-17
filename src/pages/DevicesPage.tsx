@@ -25,6 +25,7 @@ import {
   Checkbox,
   Divider,
   MenuItem,
+  Fade,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { formatDate } from '../utils/date';
@@ -76,9 +77,26 @@ const initialFilters: FilterState = {
   archivedStatus: 'active',
 };
 
+const isFiltersApplied = (currentFilters: FilterState): boolean => {
+  return Object.keys(initialFilters).some((key) => {
+    const k = key as keyof FilterState;
+    return currentFilters[k] !== initialFilters[k];
+  });
+};
+
 const loadFilters = (): FilterState => {
   const saved = localStorage.getItem(FILTERS_STORAGE_KEY);
   return saved ? JSON.parse(saved) : initialFilters;
+};
+
+type StatusColor = 'error' | 'warning' | 'success' | 'info' | 'default';
+
+const STATUS_COLOR_MAP: Record<string, StatusColor> = {
+  исправен: 'success',
+  'длительное хранение': 'info',
+  неисправен: 'error',
+  забракован: 'error',
+  утерян: 'error',
 };
 
 export default function DevicesPage() {
@@ -102,6 +120,16 @@ export default function DevicesPage() {
     page: 0,
     pageSize: 25,
   });
+
+  const hasActiveFilters = isFiltersApplied(filters);
+
+  const activeFiltersCount = Object.keys(initialFilters).reduce(
+    (count, key) => {
+      const k = key as keyof FilterState;
+      return filters[k] !== initialFilters[k] ? count + 1 : count;
+    },
+    0
+  );
 
   const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
 
@@ -486,14 +514,27 @@ export default function DevicesPage() {
                   flexWrap: 'nowrap',
                 }}
               >
-                {/* Фильтры — иконка + Drawer (остаётся) */}
                 <Tooltip title="Фильтры">
                   <IconButton
                     color="primary"
                     size="small"
                     onClick={() => setIsDrawerOpen(true)}
                   >
-                    <FilterAlt fontSize="small" />
+                    <Badge
+                      badgeContent={activeFiltersCount}
+                      color="error"
+                      invisible={activeFiltersCount === 0}
+                      sx={{
+                        '& .MuiBadge-badge': {
+                          fontSize: '0.65rem',
+                          height: '16px',
+                          minWidth: '16px',
+                          padding: '0 4px',
+                        },
+                      }}
+                    >
+                      <FilterAlt fontSize="small" />
+                    </Badge>
                   </IconButton>
                 </Tooltip>
 
@@ -539,6 +580,12 @@ export default function DevicesPage() {
                           letterSpacing: '0.6px',
                           fontWeight: 500,
                         },
+                        backgroundColor:
+                          filters.city !== initialFilters.city
+                            ? 'action.hover'
+                            : 'transparent',
+                        transition: 'background-color 0.2s',
+                        borderRadius: 1,
                       }}
                     >
                       <option value="">Все города</option>
@@ -583,6 +630,12 @@ export default function DevicesPage() {
                           letterSpacing: '0.6px',
                           fontWeight: 500,
                         },
+                        backgroundColor:
+                          filters.company !== initialFilters.company
+                            ? 'action.hover'
+                            : 'transparent',
+                        transition: 'background-color 0.2s',
+                        borderRadius: 1,
                       }}
                     >
                       <option value="">Все организации</option>
@@ -628,6 +681,13 @@ export default function DevicesPage() {
                           letterSpacing: '0.6px',
                           fontWeight: 500,
                         },
+                        backgroundColor:
+                          filters.productionSite !==
+                          initialFilters.productionSite
+                            ? 'action.hover'
+                            : 'transparent',
+                        transition: 'background-color 0.2s',
+                        borderRadius: 1,
                       }}
                     >
                       <option value="">Все подразделения</option>
@@ -666,6 +726,12 @@ export default function DevicesPage() {
                           letterSpacing: '0.6px',
                           fontWeight: 500,
                         },
+                        backgroundColor:
+                          filters.deviceName !== initialFilters.deviceName
+                            ? 'action.hover'
+                            : 'transparent',
+                        transition: 'background-color 0.2s',
+                        borderRadius: 1,
                       }}
                     />
                     {/* 🔢 ЗАВОДСКОЙ НОМЕР */}
@@ -690,6 +756,12 @@ export default function DevicesPage() {
                           letterSpacing: '0.6px',
                           fontWeight: 500,
                         },
+                        backgroundColor:
+                          filters.serialNumber !== initialFilters.serialNumber
+                            ? 'action.hover'
+                            : 'transparent',
+                        transition: 'background-color 0.2s',
+                        borderRadius: 1,
                       }}
                     />
                     {/* 🛡️ ВИД КОНТРОЛЯ */}
@@ -719,6 +791,13 @@ export default function DevicesPage() {
                           letterSpacing: '0.6px',
                           fontWeight: 500,
                         },
+                        backgroundColor:
+                          filters.metrologyControle !==
+                          initialFilters.metrologyControle
+                            ? 'action.hover'
+                            : 'transparent',
+                        transition: 'background-color 0.2s',
+                        borderRadius: 1,
                       }}
                     >
                       <option value="">Все виды контроля</option>
@@ -764,6 +843,12 @@ export default function DevicesPage() {
                           letterSpacing: '0.6px',
                           fontWeight: 500,
                         },
+                        backgroundColor:
+                          filters.status !== initialFilters.status
+                            ? 'action.hover'
+                            : 'transparent',
+                        transition: 'background-color 0.2s',
+                        borderRadius: 1,
                       }}
                     >
                       <option value="">Все статусы</option>
@@ -803,6 +888,13 @@ export default function DevicesPage() {
                           letterSpacing: '0.55px',
                           fontWeight: 500,
                         },
+                        backgroundColor:
+                          filters.archivedStatus !==
+                          initialFilters.archivedStatus
+                            ? 'action.hover'
+                            : 'transparent',
+                        transition: 'background-color 0.2s',
+                        borderRadius: 1,
                       }}
                     >
                       <option
@@ -814,7 +906,7 @@ export default function DevicesPage() {
                           fontWeight: 500,
                         }}
                       >
-                        АКТИВНЫЕ СИ
+                        активные си
                       </option>
                       <option
                         value="archived"
@@ -825,7 +917,7 @@ export default function DevicesPage() {
                           fontWeight: 500,
                         }}
                       >
-                        ТОЛЬКО АРХИВ
+                        только архив
                       </option>
                       <option
                         value="all"
@@ -836,7 +928,7 @@ export default function DevicesPage() {
                           fontWeight: 500,
                         }}
                       >
-                        ВСЕ ПРИБОРЫ
+                        все приборы
                       </option>
                     </TextField>
                     {/* 📅 СРОК ДЕЙСТВИЯ С... */}
@@ -863,6 +955,12 @@ export default function DevicesPage() {
                           letterSpacing: '0.6px',
                           fontWeight: 500,
                         },
+                        backgroundColor:
+                          filters.dateStart !== initialFilters.dateStart
+                            ? 'action.hover'
+                            : 'transparent',
+                        transition: 'background-color 0.2s',
+                        borderRadius: 1,
                       }}
                     />
                     {/* 📅 СРОК ДЕЙСТВИЯ ДО... */}
@@ -889,15 +987,24 @@ export default function DevicesPage() {
                           letterSpacing: '0.6px',
                           fontWeight: 500,
                         },
+                        backgroundColor:
+                          filters.dateEnd !== initialFilters.dateEnd
+                            ? 'action.hover'
+                            : 'transparent',
+                        transition: 'background-color 0.2s',
+                        borderRadius: 1,
                       }}
                     />
-                    <Button
-                      color="error"
-                      onClick={resetFilters}
-                      fullWidth={isMobileOrLaptop}
-                    >
-                      Сброс
-                    </Button>
+                    <Fade in={hasActiveFilters}>
+                      <Button
+                        color="error"
+                        onClick={resetFilters}
+                        fullWidth={isMobileOrLaptop}
+                      >
+                        Сброс{' '}
+                        {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+                      </Button>
+                    </Fade>
                   </Stack>
                 </Drawer>
 
@@ -936,6 +1043,14 @@ export default function DevicesPage() {
                           <Badge
                             badgeContent={selectedDeviceIds.length}
                             color="error"
+                            sx={{
+                              '& .MuiBadge-badge': {
+                                fontSize: '0.65rem',
+                                height: '16px',
+                                minWidth: '16px',
+                                padding: '0 4px',
+                              },
+                            }}
                           >
                             <QrCode fontSize="small" />
                           </Badge>
@@ -1075,6 +1190,12 @@ export default function DevicesPage() {
                       letterSpacing: '0.6px',
                       fontWeight: 500,
                     },
+                    backgroundColor:
+                      filters.city !== initialFilters.city
+                        ? 'action.hover'
+                        : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: 1,
                   }}
                 >
                   <MenuItem value="">
@@ -1114,7 +1235,14 @@ export default function DevicesPage() {
                       letterSpacing: '0.6px',
                       fontWeight: 500,
                     },
-                  }} // Немного увеличили ширину, чтобы длинные названия не сжимались
+
+                    backgroundColor:
+                      filters.company !== initialFilters.company
+                        ? 'action.hover'
+                        : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: 1,
+                  }}
                 >
                   <MenuItem value="">
                     <em>Все организации</em>
@@ -1153,6 +1281,12 @@ export default function DevicesPage() {
                       letterSpacing: '0.6px',
                       fontWeight: 500,
                     },
+                    backgroundColor:
+                      filters.productionSite !== initialFilters.productionSite
+                        ? 'action.hover'
+                        : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: 1,
                   }}
                 >
                   <MenuItem value="">
@@ -1195,6 +1329,13 @@ export default function DevicesPage() {
                       letterSpacing: '0.6px',
                       fontWeight: 500,
                     },
+
+                    backgroundColor:
+                      filters.deviceName !== initialFilters.deviceName
+                        ? 'action.hover'
+                        : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: 1,
                   }}
                 />
 
@@ -1219,6 +1360,12 @@ export default function DevicesPage() {
                       letterSpacing: '0.6px',
                       fontWeight: 500,
                     },
+                    backgroundColor:
+                      filters.serialNumber !== initialFilters.serialNumber
+                        ? 'action.hover'
+                        : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: 1,
                   }}
                 />
 
@@ -1240,6 +1387,13 @@ export default function DevicesPage() {
                       letterSpacing: '0.6px',
                       fontWeight: 500,
                     },
+                    backgroundColor:
+                      filters.metrologyControle !==
+                      initialFilters.metrologyControle
+                        ? 'action.hover'
+                        : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: 1,
                   }}
                 >
                   <MenuItem value="">
@@ -1277,6 +1431,12 @@ export default function DevicesPage() {
                       letterSpacing: '0.6px',
                       fontWeight: 500,
                     },
+                    backgroundColor:
+                      filters.status !== initialFilters.status
+                        ? 'action.hover'
+                        : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: 1,
                   }}
                 >
                   <MenuItem value="">
@@ -1314,6 +1474,12 @@ export default function DevicesPage() {
                       letterSpacing: '0.55px',
                       fontWeight: 500,
                     },
+                    backgroundColor:
+                      filters.archivedStatus !== initialFilters.archivedStatus
+                        ? 'action.hover'
+                        : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: 1,
                   }}
                 >
                   <MenuItem
@@ -1375,6 +1541,12 @@ export default function DevicesPage() {
                       letterSpacing: '0.6px',
                       fontWeight: 500,
                     },
+                    backgroundColor:
+                      filters.dateStart !== initialFilters.dateStart
+                        ? 'action.hover'
+                        : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: 1,
                   }}
                 />
 
@@ -1402,12 +1574,20 @@ export default function DevicesPage() {
                       letterSpacing: '0.6px',
                       fontWeight: 500,
                     },
+                    backgroundColor:
+                      filters.dateEnd !== initialFilters.dateEnd
+                        ? 'action.hover'
+                        : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: 1,
                   }}
                 />
 
-                <Button color="error" onClick={resetFilters}>
-                  Сброс
-                </Button>
+                <Fade in={hasActiveFilters}>
+                  <Button color="error" onClick={resetFilters}>
+                    Сброс {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+                  </Button>
+                </Fade>
               </Stack>
             </Paper>
           )}
@@ -1450,30 +1630,9 @@ export default function DevicesPage() {
                   ) : (
                     rows.map((device) => {
                       const statusName =
-                        device?.status?.name?.toLowerCase() || '';
-                      let statusColor:
-                        | 'error'
-                        | 'warning'
-                        | 'success'
-                        | 'default' = 'default';
-                      if (
-                        statusName.includes('брак') ||
-                        statusName.includes('списан') ||
-                        statusName.includes('на замен')
-                      )
-                        statusColor = 'error';
-                      else if (
-                        statusName.includes('ремонт') ||
-                        statusName.includes('ожид') ||
-                        statusName.includes('ремон')
-                      )
-                        statusColor = 'warning';
-                      else if (
-                        statusName.includes('исправен') ||
-                        statusName.includes('эксплуатац') ||
-                        statusName.includes('годен')
-                      )
-                        statusColor = 'success';
+                        device?.status?.name?.trim().toLowerCase() || '';
+                      const statusColor =
+                        STATUS_COLOR_MAP[statusName] || 'default';
 
                       const isOverdue = device.latestVerification?.validUntil
                         ? new Date(device.latestVerification.validUntil) <

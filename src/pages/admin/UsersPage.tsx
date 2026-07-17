@@ -28,11 +28,11 @@ import {
   useTheme,
 } from '@mui/material';
 
-import { Add, Delete, Edit } from '@mui/icons-material';
+import { Add, Delete, Edit, Refresh } from '@mui/icons-material';
 import routes from '../../utils/routes';
 import { Link, useNavigate } from 'react-router';
 import { formatDate } from '../../utils/date';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { toCapital } from '../../utils/capitalize';
 
@@ -40,7 +40,31 @@ export default function UsersPage() {
   const { user } = useAuth();
   const client = useApolloClient();
   const navigate = useNavigate();
-  const { data, loading, refetch } = useQuery(GetUsersDocument);
+
+  const [lastUpdated, setLastUpdated] = useState<string>(() =>
+    new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  );
+
+  const { data, loading, refetch } = useQuery(GetUsersDocument, {
+    fetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: true,
+  });
+
+  useEffect(() => {
+    if (data && !loading) {
+      const now = new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+      setLastUpdated(now);
+    }
+  }, [data, loading]);
+
+  const handleManualRefresh = async () => {
+    await refetch();
+  };
+
   const [deleteUser] = useMutation(DeleteUserDocument, {
     onCompleted: () => {
       refetch();
@@ -84,12 +108,59 @@ export default function UsersPage() {
       <Stack
         direction="row"
         justifyContent="space-between"
-        alignItems="center"
+        alignItems="flex-start"
         sx={{ mb: 3 }}
       >
-        <Typography variant="h5" fontWeight="bold">
-          Управление пользователями
-        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Typography variant="h5" fontWeight="bold">
+            Пользователи
+          </Typography>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75,
+              color: 'text.secondary',
+              opacity: loading ? 0.6 : 1,
+              transition: 'opacity 0.2s',
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: '0.75rem',
+                whiteSpace: 'nowrap',
+                fontWeight: 500,
+              }}
+            >
+              Актуально на:{' '}
+              <span
+                style={{
+                  color: 'var(--mui-palette-text-primary)',
+                  fontWeight: 600,
+                }}
+              >
+                {lastUpdated || '--:--:--'}
+              </span>
+            </Typography>
+
+            <IconButton
+              size="small"
+              onClick={handleManualRefresh}
+              disabled={loading}
+              sx={{
+                p: '2px',
+                color: 'text.secondary',
+                '&:hover': { color: 'primary.main' },
+              }}
+              aria-label="Обновить данные"
+            >
+              <Refresh sx={{ fontSize: '1.05rem' }} />
+            </IconButton>
+          </Box>
+        </Box>
+
         <Button
           aria-label="Добавить пользователя"
           variant="contained"

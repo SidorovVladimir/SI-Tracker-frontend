@@ -658,6 +658,7 @@ function QuantitiveProgressList({
                   maxWidth: '75%',
                   fontSize: '0.76rem',
                   fontFamily: '"Inter", sans-serif',
+                  textTransform: 'uppercase',
                 }}
               >
                 {item.label}
@@ -678,7 +679,7 @@ function QuantitiveProgressList({
             <LinearProgress
               variant="determinate"
               value={percentage}
-              color={item.label.includes('ЗАБРАКОВАН') ? 'error' : 'success'}
+              color="info"
               sx={{ height: 6, borderRadius: 2, bgcolor: 'grey.100' }}
             />
           </Box>

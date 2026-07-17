@@ -239,8 +239,37 @@ export const BudgetPlanningPage: React.FC = () => {
                   value={companyId}
                   label="Компания"
                   onChange={(e) => setCompanyId(e.target.value)}
+                  sx={{
+                    '& .MuiSelect-select': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
+                  MenuProps={{
+                    slotProps: {
+                      paper: {
+                        sx: {
+                          '& .MuiMenuItem-root': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.77rem',
+                            letterSpacing: '0.55px',
+                            fontWeight: 500,
+                          },
+                          '& .MuiMenuItem-root em': {
+                            textTransform: 'none',
+                            fontStyle: 'italic ',
+                            color: 'text.secondary',
+                          },
+                        },
+                      },
+                    },
+                  }}
                 >
-                  <MenuItem value="ALL">Все компании</MenuItem>
+                  <MenuItem value="ALL">
+                    <em>Все компании</em>
+                  </MenuItem>
                   {companiesList.map((c) => (
                     <MenuItem key={c.id} value={c.id}>
                       {c.name}
@@ -262,8 +291,37 @@ export const BudgetPlanningPage: React.FC = () => {
                   value={cityId}
                   label="Город"
                   onChange={(e) => setCityId(e.target.value)}
+                  sx={{
+                    '& .MuiSelect-select': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
+                  MenuProps={{
+                    slotProps: {
+                      paper: {
+                        sx: {
+                          '& .MuiMenuItem-root': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.77rem',
+                            letterSpacing: '0.55px',
+                            fontWeight: 500,
+                          },
+                          '& .MuiMenuItem-root em': {
+                            textTransform: 'none',
+                            fontStyle: 'italic ',
+                            color: 'text.secondary',
+                          },
+                        },
+                      },
+                    },
+                  }}
                 >
-                  <MenuItem value="ALL">Все города</MenuItem>
+                  <MenuItem value="ALL">
+                    <em>Все города</em>
+                  </MenuItem>
                   {citiesList.map((cit) => (
                     <MenuItem key={cit.id} value={cit.id}>
                       {cit.name}
@@ -281,8 +339,37 @@ export const BudgetPlanningPage: React.FC = () => {
                   value={siteId}
                   label="Произв. площадка"
                   onChange={(e) => setSiteId(e.target.value)}
+                  sx={{
+                    '& .MuiSelect-select': {
+                      textTransform: 'uppercase',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.6px',
+                      fontWeight: 500,
+                    },
+                  }}
+                  MenuProps={{
+                    slotProps: {
+                      paper: {
+                        sx: {
+                          '& .MuiMenuItem-root': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.77rem',
+                            letterSpacing: '0.55px',
+                            fontWeight: 500,
+                          },
+                          '& .MuiMenuItem-root em': {
+                            textTransform: 'none',
+                            fontStyle: 'italic ',
+                            color: 'text.secondary',
+                          },
+                        },
+                      },
+                    },
+                  }}
                 >
-                  <MenuItem value="ALL">Все площадки</MenuItem>
+                  <MenuItem value="ALL">
+                    <em>Все площадки</em>
+                  </MenuItem>
                   {sitesList
                     .filter(
                       (s) => s.companyId === companyId && s.cityId === cityId

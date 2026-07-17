@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation } from 'react-router';
+import { matchPath, useLocation } from 'react-router';
 import {
   IconButton,
   Popover,
@@ -18,11 +18,18 @@ export default function PageHelpButton() {
   const currentPath = location.pathname;
 
   // Безопасный поиск конфигурации страницы по текущему URL
-  const helpData =
-    helpConfig[currentPath] ||
-    Object.entries(helpConfig).find(([key]) =>
-      currentPath.startsWith(key)
-    )?.[1];
+  // const helpData =
+  //   helpConfig[currentPath] ||
+  //   Object.entries(helpConfig).find(([key]) =>
+  //     currentPath.startsWith(key)
+  //   )?.[1];
+  const helpKey = Object.keys(helpConfig).find((configPath) =>
+    matchPath({ path: configPath, end: true }, currentPath)
+  );
+
+  const helpData = helpKey
+    ? helpConfig[helpKey as keyof typeof helpConfig]
+    : null;
 
   // Если для текущей страницы нет справки (например, главная) — кнопка полностью исчезает, не занимая место
   if (!helpData) return null;

@@ -27,15 +27,34 @@ import {
   useTheme,
 } from '@mui/material';
 import { formatDate } from '../../utils/date';
-import { Add, Delete, Edit } from '@mui/icons-material';
-import { useState } from 'react';
+import { Add, Delete, Edit, Refresh } from '@mui/icons-material';
+import { useEffect, useState } from 'react';
 import routes from '../../utils/routes';
 import { enqueueSnackbar } from 'notistack';
 import { cleanSpaces } from '../../utils/capitalize';
 
 export default function PrimaryStandartsPage() {
-  const { data, loading, refetch } = useQuery(GetPrimaryStandartsListDocument);
+  const [lastUpdated, setLastUpdated] = useState<string>(() =>
+    new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  );
+  const { data, loading, refetch } = useQuery(GetPrimaryStandartsListDocument, {
+    fetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: true,
+  });
+  useEffect(() => {
+    if (data && !loading) {
+      const now = new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+      setLastUpdated(now);
+    }
+  }, [data, loading]);
 
+  const handleManualRefresh = async () => {
+    await refetch();
+  };
   const [deletePrimaryStandart] = useMutation(DeletePrimaryStandartDocument, {
     onCompleted: () => {
       refetch();
@@ -84,12 +103,58 @@ export default function PrimaryStandartsPage() {
       <Stack
         direction="row"
         justifyContent="space-between"
-        alignItems="center"
+        alignItems="flex-start"
         sx={{ mb: 3 }}
       >
-        <Typography variant="h5" fontWeight="bold">
-          Управление первичными эталонами
-        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Typography variant="h5" fontWeight="bold">
+            Первичные эталоны
+          </Typography>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75,
+              color: 'text.secondary',
+              opacity: loading ? 0.6 : 1,
+              transition: 'opacity 0.2s',
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: '0.75rem',
+                whiteSpace: 'nowrap',
+                fontWeight: 500,
+              }}
+            >
+              Актуально на:{' '}
+              <span
+                style={{
+                  color: 'var(--mui-palette-text-primary)',
+                  fontWeight: 600,
+                }}
+              >
+                {lastUpdated || '--:--:--'}
+              </span>
+            </Typography>
+
+            <IconButton
+              size="small"
+              onClick={handleManualRefresh}
+              disabled={loading}
+              sx={{
+                p: '2px',
+                color: 'text.secondary',
+                '&:hover': { color: 'primary.main' },
+              }}
+              aria-label="Обновить данные"
+            >
+              <Refresh sx={{ fontSize: '1.05rem' }} />
+            </IconButton>
+          </Box>
+        </Box>
         <Button
           aria-label="Добавить первичный эталон"
           variant="contained"
