@@ -35,6 +35,7 @@ import {
   UpdateBatchStatusDocument,
 } from '../graphql/types/__generated__/graphql';
 import {
+  Cancel,
   CheckCircleOutline,
   Delete,
   Edit,
@@ -636,14 +637,31 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                 {/* Список приборов в партии */}
                 <List dense disablePadding sx={{ mb: 2 }}>
                   {batch.devicesToBatches.map((link) => {
-                    const isBackendVerified =
-                      link.device.verifications?.some(
-                        (v) => v.batchId === batch.id
-                      ) ?? false;
+                    // const isBackendVerified =
+                    //   link.device.verifications?.some(
+                    //     (v) => v.batchId === batch.id
+                    //   ) ?? false;
+
+                    const currentVerification = link.device.verifications?.find(
+                      (v) => v.batchId === batch.id
+                    );
+
+                    const isBackendVerified = !!currentVerification;
+
+                    const isVerificationPassed = isBackendVerified
+                      ? currentVerification?.result === 'Годен'
+                      : false;
+
+                    const isVerificationFailed = isBackendVerified
+                      ? currentVerification?.result === 'Не годен'
+                      : false;
 
                     const isLocallyVerified = locallyVerifiedIds.includes(
                       link.device.id
                     );
+
+                    const isDeviceSuccessVerified =
+                      isVerificationPassed || isLocallyVerified;
 
                     const isDeviceVerified =
                       isBackendVerified || isLocallyVerified;
@@ -678,7 +696,10 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                             placement="top"
                             arrow
                           >
-                            <span>
+                            <Box
+                              component="span"
+                              sx={{ display: 'inline-flex' }}
+                            >
                               <Checkbox
                                 size="small"
                                 checked={isChecked}
@@ -687,7 +708,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                   handleDeviceSelect(link.device.id)
                                 }
                               />
-                            </span>
+                            </Box>
                           </Tooltip>
                         )}
 
@@ -743,14 +764,29 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                 gap: 1,
                               }}
                             >
-                              {isDeviceVerified && (
+                              {isDeviceSuccessVerified &&
+                                !isVerificationFailed && (
+                                  <Tooltip
+                                    title="Прибор прошел контроль (Годен). Результаты сохранены в базу данных."
+                                    placement="top"
+                                    arrow
+                                  >
+                                    <CheckCircleOutline
+                                      color="success"
+                                      fontSize="small"
+                                      style={{ cursor: 'pointer' }}
+                                    />
+                                  </Tooltip>
+                                )}
+
+                              {isVerificationFailed && (
                                 <Tooltip
-                                  title="Результаты контроля успешно сохранены в базу данных"
+                                  title="Прибор не прошел контроль (Не годен). Результаты сохранены в базу данных."
                                   placement="top"
                                   arrow
                                 >
-                                  <CheckCircleOutline
-                                    color="success"
+                                  <Cancel
+                                    color="error"
                                     fontSize="small"
                                     style={{ cursor: 'pointer' }}
                                   />
@@ -763,7 +799,10 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                   placement="top"
                                   arrow
                                 >
-                                  <span>
+                                  <Box
+                                    component="span"
+                                    sx={{ display: 'inline-flex' }}
+                                  >
                                     <IconButton
                                       color="warning"
                                       size="small"
@@ -798,7 +837,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                         }}
                                       />
                                     </IconButton>
-                                  </span>
+                                  </Box>
                                 </Tooltip>
                               )}
 
@@ -807,25 +846,30 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                 placement="top"
                                 arrow
                               >
-                                <IconButton
-                                  color="primary"
-                                  size="small"
-                                  disabled={
-                                    !!batchJobs[batch.id] ||
-                                    isSyncing ||
-                                    isBatchSyncing ||
-                                    isDeviceVerified
-                                  }
-                                  onClick={() =>
-                                    handleOpenVerificationModal(
-                                      link.device.id,
-                                      link.device.name,
-                                      batch.id
-                                    )
-                                  }
+                                <Box
+                                  component="span"
+                                  sx={{ display: 'inline-flex' }}
                                 >
-                                  <Edit fontSize="small" />
-                                </IconButton>
+                                  <IconButton
+                                    color="primary"
+                                    size="small"
+                                    disabled={
+                                      !!batchJobs[batch.id] ||
+                                      isSyncing ||
+                                      isBatchSyncing ||
+                                      isDeviceVerified
+                                    }
+                                    onClick={() =>
+                                      handleOpenVerificationModal(
+                                        link.device.id,
+                                        link.device.name,
+                                        batch.id
+                                      )
+                                    }
+                                  >
+                                    <Edit fontSize="small" />
+                                  </IconButton>
+                                </Box>
                               </Tooltip>
                             </Box>
                           )}

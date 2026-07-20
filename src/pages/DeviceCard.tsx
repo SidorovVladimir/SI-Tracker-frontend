@@ -24,9 +24,11 @@ import { toCapital } from '../utils/capitalize';
 const InfoRow = ({
   label,
   value,
+  isLink,
 }: {
   label: string;
   value: string | null | undefined | number;
+  isLink?: boolean;
 }) => (
   <Box sx={{ mb: 1 }}>
     <Typography
@@ -39,14 +41,20 @@ const InfoRow = ({
     </Typography>
     <Typography
       variant="body2"
+      component={isLink && value ? 'a' : 'p'}
+      href={isLink && value ? String(value) : undefined}
+      target={isLink ? '_blank' : undefined}
+      rel={isLink ? 'noopener noreferrer' : undefined}
       sx={{
         fontWeight: 500,
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
         lineHeight: 1.4,
-        textTransform: 'uppercase',
-        etterSpacing: '0.6px',
+        textTransform: isLink ? undefined : 'uppercase',
         fontSize: '0.9rem',
+        color: isLink ? 'primary.main' : 'inherit',
+        textDecoration: isLink ? 'underline' : 'none',
+        display: 'block',
       }}
     >
       {value || '-'}
@@ -393,6 +401,16 @@ export default function DeviceCard(props: {
                 value={v.metrologyControleType?.name}
               />
               <InfoRow label="Результат" value={v.result} />
+
+              {v.documentUrl && (
+                <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed #eee' }}>
+                  <InfoRow
+                    label="Ссылка на документ"
+                    value={v.documentUrl}
+                    isLink
+                  />
+                </Box>
+              )}
               <InfoRow label="Стоимость" value={v.cost} />
 
               {v.comment && (

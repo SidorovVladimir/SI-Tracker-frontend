@@ -567,6 +567,13 @@ function UserForm({
     await deleteDevice({ variables: { id: selectedDeviceId } });
   };
 
+  const isValidGostUrl = (url: string | null | undefined): boolean => {
+    if (!url) return false;
+    const regex =
+      /^https:\/\/fgis\.gost\.ru\/fundmetrology\/cm\/results\/\d+-\d+$/;
+    return regex.test(url.trim());
+  };
+
   return (
     <Box>
       <Box
@@ -1326,28 +1333,29 @@ function UserForm({
                               : 'Найти в Аршине'}
                           </Button>
 
-                          {verification.documentUrl && (
-                            <Button
-                              variant="contained"
-                              size="small"
-                              color="secondary"
-                              component="a"
-                              href={verification.documentUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              startIcon={<OpenInNew fontSize="small" />}
-                              sx={{
-                                textTransform: 'none',
-                                fontSize: '0.75rem',
-                                height: 32,
-                                borderRadius: 1,
-                                px: 2,
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              Открыть сайт
-                            </Button>
-                          )}
+                          {verification.documentUrl &&
+                            isValidGostUrl(verification.documentUrl) && (
+                              <Button
+                                variant="contained"
+                                size="small"
+                                color="secondary"
+                                component="a"
+                                href={verification.documentUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                startIcon={<OpenInNew fontSize="small" />}
+                                sx={{
+                                  textTransform: 'none',
+                                  fontSize: '0.75rem',
+                                  height: 32,
+                                  borderRadius: 1,
+                                  px: 2,
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                Открыть сайт
+                              </Button>
+                            )}
                         </Stack>
                       </Stack>
 

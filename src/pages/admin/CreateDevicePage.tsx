@@ -434,6 +434,13 @@ export default function CreateDevicePage(props: {
     });
   };
 
+  const isValidGostUrl = (url: string | null | undefined): boolean => {
+    if (!url) return false;
+    const regex =
+      /^https:\/\/fgis\.gost\.ru\/fundmetrology\/cm\/results\/\d+-\d+$/;
+    return regex.test(url.trim());
+  };
+
   return (
     <Box>
       <Stack
@@ -991,28 +998,29 @@ export default function CreateDevicePage(props: {
                           </Button>
 
                           {/* 2. Кнопка "Открыть" — появляется только при наличии ссылки и занимает вторую половину */}
-                          {verification.documentUrl && (
-                            <Button
-                              variant="contained"
-                              size="small"
-                              color="secondary"
-                              component="a"
-                              href={verification.documentUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              startIcon={<OpenInNew fontSize="small" />}
-                              sx={{
-                                textTransform: 'none',
-                                fontSize: '0.75rem',
-                                height: 32,
-                                borderRadius: 1,
-                                flexGrow: 1,
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              Открыть сайт
-                            </Button>
-                          )}
+                          {verification.documentUrl &&
+                            isValidGostUrl(verification.documentUrl) && (
+                              <Button
+                                variant="contained"
+                                size="small"
+                                color="secondary"
+                                component="a"
+                                href={verification.documentUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                startIcon={<OpenInNew fontSize="small" />}
+                                sx={{
+                                  textTransform: 'none',
+                                  fontSize: '0.75rem',
+                                  height: 32,
+                                  borderRadius: 1,
+                                  flexGrow: 1,
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                Открыть сайт
+                              </Button>
+                            )}
                         </Stack>
                       </Stack>
 

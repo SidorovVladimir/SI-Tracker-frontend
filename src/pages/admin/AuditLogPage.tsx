@@ -77,7 +77,7 @@ export default function AuditLogPage() {
       maxWidth="lg"
       sx={{
         py: { xs: 1, sm: 1 },
-        height: { xs: 'calc(100dvh - 180px)', sm: 'calc(100dvh - 130px)' },
+        height: { xs: 'calc(100dvh - 230px)', sm: 'calc(100dvh - 130px)' },
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',

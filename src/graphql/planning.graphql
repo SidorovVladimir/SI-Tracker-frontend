@@ -64,6 +64,7 @@ query GetVerificationBatches($year: Int, $status: String) {
         verifications {
           id
           batchId
+          result
         }
       }
     }
