@@ -1,7 +1,8 @@
-import { useMutation, useQuery } from '@apollo/client/react';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import { useState } from 'react';
 import {
   DeleteDeviceDocument,
+  FindArshinDocumentUrlDocument,
   // GetDevicesWithRelationsListDocument,
   GetDeviceWithRelationDocument,
   GetDeviceWithRelationQuery,
@@ -53,6 +54,8 @@ import {
   Close,
   DeleteOutline,
   ExpandMore,
+  FindInPage,
+  OpenInNew,
   Save,
 } from '@mui/icons-material';
 import ScopeAutocomplete from '../../components/ScopeAutocomplete';
@@ -201,6 +204,12 @@ function UserForm({
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
 
+  const [searchingDocId, setSearchingDocId] = useState<string | null>(null);
+
+  const [findArshinDocumentUrl] = useLazyQuery(FindArshinDocumentUrlDocument, {
+    fetchPolicy: 'network-only',
+  });
+
   const [form, setForm] = useState<{
     name: string;
     model: string;
@@ -334,6 +343,44 @@ function UserForm({
 
   const removeVerification = (id: string) => {
     setVerifications((prev) => prev.filter((v) => v.id !== id));
+  };
+
+  const handleFindSingleUrl = async (id: string, protocolNumber: string) => {
+    if (!protocolNumber.trim()) {
+      enqueueSnackbar('Поле "Номер свидетельства" должно быть заполнено', {
+        variant: 'warning',
+      });
+      return;
+    }
+
+    setSearchingDocId(id);
+
+    try {
+      const { data } = await findArshinDocumentUrl({
+        variables: { protocolNumber: protocolNumber.trim() },
+      });
+
+      const url = data?.findArshinDocumentUrl;
+
+      if (url) {
+        setVerifications((prev) =>
+          prev.map((v) => (v.id === id ? { ...v, documentUrl: url } : v))
+        );
+        enqueueSnackbar('Ссылка на документ успешно получена!', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar('Документ с таким номером во ФГИС Аршин не обнаружен', {
+          variant: 'info',
+        });
+      }
+    } catch (err: any) {
+      enqueueSnackbar(`Не удалось найти документ: ${err.message}`, {
+        variant: 'error',
+      });
+    } finally {
+      setSearchingDocId(null);
+    }
   };
 
   const handleVerificationChange = (
@@ -1191,7 +1238,7 @@ function UserForm({
                         }}
                       />
 
-                      <TextField
+                      {/* <TextField
                         label="Ссылка на документ"
                         value={verification.documentUrl}
                         onChange={(e) =>
@@ -1203,7 +1250,7 @@ function UserForm({
                         }
                         fullWidth
                         size="small"
-                        disabled={true}
+                        
                         sx={{
                           '& .MuiInputBase-root': {
                             paddingTop: '2.5px',
@@ -1216,7 +1263,93 @@ function UserForm({
                             fontWeight: 500,
                           },
                         }}
-                      />
+                      /> */}
+
+                      <Stack spacing={1} width="100%">
+                        <TextField
+                          label="Ссылка на документ"
+                          value={verification.documentUrl || ''}
+                          onChange={(e) =>
+                            handleVerificationChange(
+                              verification.id,
+                              'documentUrl',
+                              e.target.value
+                            )
+                          }
+                          fullWidth
+                          size="small"
+                          sx={{
+                            '& .MuiInputBase-root': {
+                              paddingTop: '2.5px',
+                              paddingBottom: '2.5px',
+                            },
+                            '& .MuiInputBase-input': {
+                              fontSize: '0.8rem',
+                              letterSpacing: '0.6px',
+                              fontWeight: 500,
+                            },
+                          }}
+                        />
+
+                        <Stack direction="row" spacing={1} width="100%">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="primary"
+                            disabled={
+                              searchingDocId === verification.id ||
+                              !verification.protocolNumber
+                            }
+                            onClick={() =>
+                              handleFindSingleUrl(
+                                verification.id,
+                                verification.protocolNumber
+                              )
+                            }
+                            startIcon={
+                              searchingDocId === verification.id ? (
+                                <CircularProgress size={14} />
+                              ) : (
+                                <FindInPage fontSize="small" />
+                              )
+                            }
+                            sx={{
+                              textTransform: 'none',
+                              fontSize: '0.75rem',
+                              height: 32,
+                              borderRadius: 1,
+                              flexGrow: 1,
+                            }}
+                          >
+                            {searchingDocId === verification.id
+                              ? 'Поиск...'
+                              : 'Найти в Аршине'}
+                          </Button>
+
+                          {verification.documentUrl && (
+                            <Button
+                              variant="contained"
+                              size="small"
+                              color="secondary"
+                              component="a"
+                              href={verification.documentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              startIcon={<OpenInNew fontSize="small" />}
+                              sx={{
+                                textTransform: 'none',
+                                fontSize: '0.75rem',
+                                height: 32,
+                                borderRadius: 1,
+                                px: 2,
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              Открыть сайт
+                            </Button>
+                          )}
+                        </Stack>
+                      </Stack>
 
                       <TextField
                         label="Комментарий"

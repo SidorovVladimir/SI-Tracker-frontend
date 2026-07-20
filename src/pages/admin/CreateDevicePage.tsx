@@ -1,7 +1,9 @@
-import { useMutation, useQuery } from '@apollo/client/react';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 import {
   CreateDeviceDocument,
+  FetchArshinVerificationsDocument,
+  FindArshinDocumentUrlDocument,
   // GetDevicesWithRelationsListDocument,
   GetEquipmentTypesListDocument,
   GetMeasurementTypesListDocument,
@@ -28,7 +30,14 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Add, Close, ExpandMore } from '@mui/icons-material';
+import {
+  Add,
+  Close,
+  CloudDownload,
+  ExpandMore,
+  FindInPage,
+  OpenInNew,
+} from '@mui/icons-material';
 import ScopeAutocomplete from '../../components/ScopeAutocomplete';
 import EquipmentTextField from '../../components/EquipmentTextField';
 import StatusTextField from '../../components/StatusTextField';
@@ -44,6 +53,20 @@ export default function CreateDevicePage(props: {
   refetchDevice: () => void;
 }) {
   const { closeDetails, refetchDevice } = props;
+
+  const [arshinCount, setArshinCount] = useState<number>(3);
+
+  const [searchingDocId, setSearchingDocId] = useState<number | null>(null);
+
+  const [fetchArshinVerifications, { loading: loadingArshinList }] =
+    useLazyQuery(FetchArshinVerificationsDocument, {
+      fetchPolicy: 'network-only',
+    });
+
+  const [findArshinDocumentUrl] = useLazyQuery(FindArshinDocumentUrlDocument, {
+    fetchPolicy: 'network-only',
+  });
+
   const { data: productionSiteData } = useQuery(
     GetProductionSitesForSelectDocument
   );
@@ -149,8 +172,137 @@ export default function CreateDevicePage(props: {
     ]);
   };
 
+  const handleFindSingleUrl = async (id: number, protocolNumber: string) => {
+    if (!protocolNumber.trim()) {
+      enqueueSnackbar('Поле "Номер свидетельства" должно быть заполнено', {
+        variant: 'warning',
+      });
+      return;
+    }
+
+    setSearchingDocId(id);
+
+    try {
+      const { data } = await findArshinDocumentUrl({
+        variables: { protocolNumber: protocolNumber.trim() },
+      });
+
+      const url = data?.findArshinDocumentUrl;
+
+      if (url) {
+        setVerifications((prev) =>
+          prev.map((v) => (v.id === id ? { ...v, documentUrl: url } : v))
+        );
+        enqueueSnackbar('Ссылка на документ успешно получена!', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar('Документ с таким номером во ФГИС Аршин не обнаружен', {
+          variant: 'info',
+        });
+      }
+    } catch (err: any) {
+      enqueueSnackbar(`Не удалось найти документ: ${err.message}`, {
+        variant: 'error',
+      });
+    } finally {
+      setSearchingDocId(null);
+    }
+  };
+
   const removeVerification = (id: number) => {
     setVerifications((prev) => prev.filter((v) => v.id !== id));
+  };
+
+  const handleLoadFromArshin = async () => {
+    if (!form.serialNumber.trim() || !form.grsiNumber.trim()) {
+      enqueueSnackbar(
+        'Сначала заполните заводской номер и номер ГРСИ прибора вверху формы',
+        { variant: 'warning' }
+      );
+      return;
+    }
+
+    try {
+      // Передаем параметры и ждем результат напрямую из промиса
+      const { data } = await fetchArshinVerifications({
+        variables: {
+          input: {
+            serialNumber: form.serialNumber.trim(),
+            grsiNumber: form.grsiNumber.trim(),
+            count: arshinCount,
+          },
+        },
+      });
+
+      const items = data?.fetchArshinVerifications || [];
+
+      if (items.length === 0) {
+        enqueueSnackbar('Поверок в архиве ФГИС Аршин не найдено', {
+          variant: 'info',
+        });
+        return;
+      }
+
+      const formatDateToInput = (
+        dateStr: string | null | undefined
+      ): string => {
+        if (!dateStr) return '';
+
+        const cleanDate = dateStr.includes('T')
+          ? dateStr.split('T')[0]
+          : dateStr;
+
+        if (cleanDate && cleanDate.includes('.')) {
+          const parts = cleanDate.split('.');
+          if (parts.length === 3) {
+            const [day, month, year] = parts;
+            return `${year}-${month}-${day}`;
+          }
+        }
+
+        return cleanDate || '';
+      };
+
+      // Автоматически мапим данные под структуру локального массива verifications
+      const imported = items.map((item: any) => {
+        const matchedOrgId =
+          verificationOrhanizationsList.find(
+            (org) =>
+              org.name.toLowerCase().trim() ===
+              item.organizationName?.toLowerCase().trim()
+          )?.id || '';
+
+        const defaultControlType =
+          metrologyControlTypeList.find(
+            (t) => t.name.toLowerCase().trim() === 'поверка'
+          )?.id || '';
+
+        return {
+          id: nextId.current++,
+          date: formatDateToInput(item.date),
+          validUntil: formatDateToInput(item.validUntil),
+          result: item.isApplicable ? 'Годен' : 'Не годен',
+          protocolNumber: item.protocolNumber,
+          organization: item.organizationName || '',
+          comment: `Автоматический импорт из ФГИС Аршин. Запись № ${item.arshinId}`,
+          documentUrl: item.documentUrl,
+          metrologyControleTypeId: defaultControlType,
+          verificationOrganizationId: matchedOrgId,
+          collapsed: false,
+          cost: '',
+        };
+      });
+
+      setVerifications((prev) => [...imported, ...prev]);
+      enqueueSnackbar(`Успешно импортировано поверок: ${imported.length}`, {
+        variant: 'success',
+      });
+    } catch (err: any) {
+      enqueueSnackbar(`Ошибка интеграции с Аршин: ${err.message}`, {
+        variant: 'error',
+      });
+    }
   };
 
   const handleVerificationChange = (
@@ -506,7 +658,7 @@ export default function CreateDevicePage(props: {
           />
 
           <Divider sx={{ my: 2 }} />
-          <Stack
+          {/* <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
@@ -520,7 +672,106 @@ export default function CreateDevicePage(props: {
                 <Add />
               </IconButton>
             </Tooltip>
-          </Stack>
+          </Stack> */}
+
+          <Box mb={3}>
+            {/* Заголовок блока */}
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 700,
+                color: 'text.primary',
+                mb: 1.5,
+                fontFamily: '"Inter", sans-serif',
+              }}
+            >
+              Данные метрологического контроля
+            </Typography>
+
+            {/* Пульт управления: выстраивается компактным флекс-рядом */}
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              justifyContent="space-between"
+              width="100%"
+            >
+              {/* Селект выбора количества */}
+              <TextField
+                select
+                label="Поверок из Аршина"
+                value={arshinCount}
+                onChange={(e) => setArshinCount(Number(e.target.value))}
+                size="small"
+                sx={{
+                  flexGrow: 1,
+                  minWidth: '100px',
+                  '& .MuiInputBase-root': { height: 40 },
+                }}
+              >
+                {[1, 2, 3, 5].map((num) => (
+                  <MenuItem key={num} value={num}>
+                    {num}{' '}
+                    {num === 1
+                      ? 'последняя'
+                      : num < 5
+                      ? 'последние'
+                      : 'последних'}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              {/* Кнопка запуска импорта */}
+              <Button
+                variant="outlined"
+                color="secondary"
+                disabled={loadingArshinList}
+                onClick={handleLoadFromArshin}
+                startIcon={
+                  loadingArshinList ? (
+                    <CircularProgress size={14} color="inherit" />
+                  ) : (
+                    <CloudDownload />
+                  )
+                }
+                sx={{
+                  height: 40,
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                  borderRadius: 1.5,
+                  px: 2,
+                }}
+              >
+                {loadingArshinList ? 'Загрузка...' : 'Заполнить'}
+              </Button>
+
+              <Divider
+                orientation="vertical"
+                flexItem
+                sx={{ height: 28, alignSelf: 'center' }}
+              />
+
+              {/* Кнопка ручного добавления */}
+              <Tooltip title="Добавить вручную">
+                <IconButton
+                  onClick={addVerification}
+                  disabled={loadingArshinList}
+                  color="primary"
+                  sx={{
+                    border: '1px solid',
+                    borderColor: 'primary.main',
+                    borderRadius: 1.5,
+                    height: 40,
+                    width: 40,
+                    p: 0,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Add />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Box>
           {verifications.length === 0 ? (
             <Typography color="textSecondary" sx={{ mb: 2 }}>
               Данные не добавлены
@@ -664,7 +915,7 @@ export default function CreateDevicePage(props: {
                         fullWidth
                       />
 
-                      <TextField
+                      {/* <TextField
                         label="Ссылка на документ"
                         value={verification.documentUrl}
                         onChange={(e) =>
@@ -676,8 +927,94 @@ export default function CreateDevicePage(props: {
                         }
                         fullWidth
                         size="small"
-                        disabled={true}
-                      />
+                      /> */}
+
+                      <Stack spacing={1} width="100%">
+                        <TextField
+                          label="Ссылка на документ"
+                          value={verification.documentUrl || ''}
+                          onChange={(e) =>
+                            handleVerificationChange(
+                              verification.id,
+                              'documentUrl',
+                              e.target.value
+                            )
+                          }
+                          fullWidth
+                          size="small"
+                          sx={{
+                            '& .MuiInputBase-root': {
+                              paddingTop: '2.5px',
+                              paddingBottom: '2.5px',
+                            },
+                            '& .MuiInputBase-input': {
+                              fontSize: '0.8rem',
+                              letterSpacing: '0.6px',
+                              fontWeight: 500,
+                            },
+                          }}
+                        />
+
+                        <Stack direction="row" spacing={1} width="100%">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="primary"
+                            disabled={
+                              searchingDocId === verification.id ||
+                              !verification.protocolNumber?.trim()
+                            }
+                            onClick={() =>
+                              handleFindSingleUrl(
+                                verification.id,
+                                verification.protocolNumber
+                              )
+                            }
+                            startIcon={
+                              searchingDocId === verification.id ? (
+                                <CircularProgress size={14} color="inherit" />
+                              ) : (
+                                <FindInPage fontSize="small" />
+                              )
+                            }
+                            sx={{
+                              textTransform: 'none',
+                              fontSize: '0.75rem',
+                              height: 32,
+                              borderRadius: 1,
+                              flexGrow: 1,
+                            }}
+                          >
+                            {searchingDocId === verification.id
+                              ? 'Поиск...'
+                              : 'Найти в Аршине'}
+                          </Button>
+
+                          {/* 2. Кнопка "Открыть" — появляется только при наличии ссылки и занимает вторую половину */}
+                          {verification.documentUrl && (
+                            <Button
+                              variant="contained"
+                              size="small"
+                              color="secondary"
+                              component="a"
+                              href={verification.documentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              startIcon={<OpenInNew fontSize="small" />}
+                              sx={{
+                                textTransform: 'none',
+                                fontSize: '0.75rem',
+                                height: 32,
+                                borderRadius: 1,
+                                flexGrow: 1,
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              Открыть сайт
+                            </Button>
+                          )}
+                        </Stack>
+                      </Stack>
 
                       <TextField
                         label="Комментарий"
@@ -757,7 +1094,7 @@ export default function CreateDevicePage(props: {
               type="submit"
               variant="contained"
               size="large"
-              disabled={creating}
+              disabled={creating || loadingArshinList}
               startIcon={creating && <CircularProgress size={16} />}
               sx={{ height: 36, borderRadius: 2 }}
             >

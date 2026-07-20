@@ -25,3 +25,19 @@ mutation SyncBatchWithArshin($batchId: ID!) {
     message # Текст "Синхронизация запущена в фоновом режиме"
   }
 }
+
+query FetchArshinVerifications($input: FetchArshinVerificationsInput!) {
+  fetchArshinVerifications(input: $input) {
+    arshinId
+    protocolNumber
+    date
+    validUntil
+    isApplicable
+    organizationName
+    documentUrl
+  }
+}
+
+query FindArshinDocumentUrl($protocolNumber: String!) {
+  findArshinDocumentUrl(protocolNumber: $protocolNumber)
+}

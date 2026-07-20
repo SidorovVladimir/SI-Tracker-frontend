@@ -63,6 +63,17 @@ export type AnomalyDevice = {
   serialNumber: Scalars['String']['output'];
 };
 
+export type ArshinFlexibleVerification = {
+  __typename: 'ArshinFlexibleVerification';
+  arshinId: Scalars['ID']['output'];
+  date: Scalars['String']['output'];
+  documentUrl: Scalars['String']['output'];
+  isApplicable: Scalars['Boolean']['output'];
+  organizationName: Scalars['String']['output'];
+  protocolNumber: Scalars['String']['output'];
+  validUntil: Maybe<Scalars['String']['output']>;
+};
+
 export type AuditAction =
   | 'assign_batch'
   | 'create'
@@ -491,6 +502,12 @@ export type EquipmentType = {
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+};
+
+export type FetchArshinVerificationsInput = {
+  count: Scalars['Int']['input'];
+  grsiNumber: Scalars['String']['input'];
+  serialNumber: Scalars['String']['input'];
 };
 
 export type FinancialAnalyticsResponse = {
@@ -1006,6 +1023,8 @@ export type Query = {
   equipmentType: EquipmentType;
   equipmentTypes: Array<EquipmentType>;
   executeRawSql: RawSqlResponse;
+  fetchArshinVerifications: Array<ArshinFlexibleVerification>;
+  findArshinDocumentUrl: Maybe<Scalars['String']['output']>;
   getAdminDashboardStats: AdminDashboardResponse;
   getBudgetMatrix: BudgetMatrixResponse;
   getBudgetPlanDistribution: Array<BudgetPlanDistributionRow>;
@@ -1088,6 +1107,14 @@ export type QueryEquipmentTypeArgs = {
 
 export type QueryExecuteRawSqlArgs = {
   sqlQuery: Scalars['String']['input'];
+};
+
+export type QueryFetchArshinVerificationsArgs = {
+  input: FetchArshinVerificationsInput;
+};
+
+export type QueryFindArshinDocumentUrlArgs = {
+  protocolNumber: Scalars['String']['input'];
 };
 
 export type QueryGetBudgetMatrixArgs = {
@@ -1591,6 +1618,31 @@ export type SyncBatchWithArshinMutation = {
     batchId: string | null;
     message: string;
   };
+};
+
+export type FetchArshinVerificationsQueryVariables = Exact<{
+  input: FetchArshinVerificationsInput;
+}>;
+
+export type FetchArshinVerificationsQuery = {
+  fetchArshinVerifications: Array<{
+    __typename: 'ArshinFlexibleVerification';
+    arshinId: string;
+    protocolNumber: string;
+    date: string;
+    validUntil: string | null;
+    isApplicable: boolean;
+    organizationName: string;
+    documentUrl: string;
+  }>;
+};
+
+export type FindArshinDocumentUrlQueryVariables = Exact<{
+  protocolNumber: Scalars['String']['input'];
+}>;
+
+export type FindArshinDocumentUrlQuery = {
+  findArshinDocumentUrl: string | null;
 };
 
 export type GetDeviceAuditLogsQueryVariables = Exact<{
@@ -3562,6 +3614,123 @@ export const SyncBatchWithArshinDocument = {
 } as unknown as DocumentNode<
   SyncBatchWithArshinMutation,
   SyncBatchWithArshinMutationVariables
+>;
+export const FetchArshinVerificationsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'FetchArshinVerifications' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'FetchArshinVerificationsInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'fetchArshinVerifications' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'arshinId' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'protocolNumber' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'validUntil' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'isApplicable' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'organizationName' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'documentUrl' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  FetchArshinVerificationsQuery,
+  FetchArshinVerificationsQueryVariables
+>;
+export const FindArshinDocumentUrlDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'FindArshinDocumentUrl' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'protocolNumber' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'findArshinDocumentUrl' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'protocolNumber' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'protocolNumber' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  FindArshinDocumentUrlQuery,
+  FindArshinDocumentUrlQueryVariables
 >;
 export const GetDeviceAuditLogsDocument = {
   kind: 'Document',
