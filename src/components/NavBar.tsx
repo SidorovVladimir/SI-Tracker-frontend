@@ -375,7 +375,7 @@ export default function NavBar() {
               {/* Системные кнопки связи и алертов */}
               <HeaderChatButton />
 
-              <HeaderNotificationsBell />
+              {user?.role !== 'user' && <HeaderNotificationsBell />}
 
               {/* Кнопка вызова пользовательского меню профиля */}
               <IconButton

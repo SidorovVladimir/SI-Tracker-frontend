@@ -77,31 +77,6 @@ const getClient = () => {
               },
             },
 
-            // getChatHistory: {
-            //   keyArgs: ['recipientId'],
-            //   merge(existing = [], incoming = []) {
-            //     const messageMap = new Map();
-
-            //     existing.forEach((msg: any) => {
-            //       if (msg && msg.__ref) {
-            //         messageMap.set(msg.__ref, msg);
-            //       } else if (msg && msg.id) {
-            //         messageMap.set(msg.id, msg);
-            //       }
-            //     });
-
-            //     incoming.forEach((msg: any) => {
-            //       if (msg && msg.__ref) {
-            //         messageMap.set(msg.__ref, msg);
-            //       } else if (msg && msg.id) {
-            //         messageMap.set(msg.id, msg);
-            //       }
-            //     });
-
-            //     return Array.from(messageMap.values());
-            //   },
-            // },
-
             getChatHistory: {
               keyArgs: ['recipientId'],
               merge(existing = [], incoming = [], { readField }) {
@@ -127,6 +102,27 @@ const getClient = () => {
 
                 // 🔥 Просто возвращаем объединенный массив! База данных уже все отсортировала за нас.
                 return Array.from(messageMap.values());
+              },
+            },
+          },
+        },
+        DeviceWithRelations: {
+          fields: {
+            verifications: {
+              keyArgs: false,
+              merge(_existing, incoming) {
+                return incoming;
+              },
+            },
+          },
+        },
+
+        DeviceInBatch: {
+          fields: {
+            verifications: {
+              keyArgs: false, // Отключаем keyArgs для массива поверок
+              merge(_existing, incoming) {
+                return incoming; // Безопасно заменяем старый список поверок на свежий
               },
             },
           },

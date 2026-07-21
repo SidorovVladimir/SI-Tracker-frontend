@@ -24,6 +24,7 @@ interface VerificationModalProps {
     validUntil: string;
     protocolNumber: string;
     result: string;
+    documentUrl: string;
     metrologyControleTypeId: string;
     verificationOrganizationId: string;
     comment: string;
@@ -49,6 +50,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   const [validUntil, setValidUntil] = useState<string>('');
   const [protocolNumber, setProtocolNumber] = useState<string>('');
   const [comment, setComment] = useState<string>('');
+  const [documentUrl, setDocumentUrl] = useState<string>('');
   const [result, setResult] = useState<string>('Годен');
   const [selectedControlType, setSelectedControlType] = useState<string>('');
   const [selectedOrg, setSelectedOrg] = useState<string>('');
@@ -75,6 +77,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
       validUntil,
       protocolNumber,
       result,
+      documentUrl,
       metrologyControleTypeId: selectedControlType,
       verificationOrganizationId: selectedOrg,
       comment,
@@ -148,6 +151,13 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
               </MenuItem>
             ))}
           </TextField>
+
+          <TextField
+            label="Ссылка на документ из ФГИС Аршин"
+            size="small"
+            value={documentUrl}
+            onChange={(e) => setDocumentUrl(e.target.value)}
+          />
 
           <TextField
             label="Стоимость (руб., без НДС)"

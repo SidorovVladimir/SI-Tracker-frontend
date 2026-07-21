@@ -5,7 +5,6 @@ import { useAuth } from '../hooks/useAuth';
 import { API_BASE_URL } from '../config';
 import { useApolloClient } from '@apollo/client/react';
 import {
-  GetChatDialogsDocument,
   GetPricelistsDocument,
   GetSystemNotificationsDocument,
   GetTotalUnreadCountDocument,
@@ -62,7 +61,7 @@ const SocketContext = createContext<SocketContextType>({
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -76,6 +75,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [runningJobs, setRunningJobs] = useState<
     Record<string, JobProgressData>
   >({});
+
+  const shouldRefetchChat = user && user.role !== 'user';
 
   const addRunningJob = (
     jobId: string,
@@ -140,16 +141,27 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     //  ГЛОБАЛЬНЫЙ СЛУШАТЕЛЬ ЧАТА (РАБОТАЕТ ВСЕГДА И ВЕЗДЕ!)
     socketInstance.on('newMessage', async () => {
-      // console.log(
-      //   '📨 Получено новое сообщение, обновляем счетчики приложения...'
-      // );
+      // 1. Собираем имена всех GraphQL-запросов, активных на экране в данную секунду
+      const activeQueryNames = Array.from(
+        client.getObservableQueries().values()
+      )
+        .map((q) => q.queryName)
+        .filter(Boolean);
 
-      // Заставляем Apollo обновить списки диалогов, если открыта страница чата
-      await client
-        .refetchQueries({
-          include: [GetChatDialogsDocument, 'GetChatHistory'],
-        })
-        .catch(() => {});
+      // 2. Формируем массив только из тех квери чата, которые реально запущены
+      // (Проверьте, что имя квери для списка диалогов у вас в схеме называется "GetChatDialogs")
+      const chatQueriesToRefetch = ['GetChatDialogs', 'GetChatHistory'].filter(
+        (name) => activeQueryNames.includes(name)
+      );
+
+      // 3. Запускаем обновление только если открыта страница чата и квери активны
+      if (chatQueriesToRefetch.length > 0) {
+        await client
+          .refetchQueries({
+            include: chatQueriesToRefetch, // Передаем строго отфильтрованный массив строк
+          })
+          .catch(() => {});
+      }
     });
 
     //  НОВЫЙ СОКЕТНЫЙ СЛУШАТЕЛЬ СЧЕТЧИКА: Принимает готовую цифру от бэкенда.
@@ -185,7 +197,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           // Принудительно заставляем Apollo перерисовать Badge на колокольчике
           await client
             .refetchQueries({
-              include: [GetUnreadNotificationsCountDocument],
+              include: shouldRefetchChat
+                ? [GetUnreadNotificationsCountDocument]
+                : [],
             })
             .catch(() => {});
         } catch (err) {
@@ -200,9 +214,24 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         setUnreadChatCount(data.count);
 
         if (data.forceRefetchDialogs) {
-          await client
-            .refetchQueries({ include: [GetChatDialogsDocument] })
-            .catch(() => {});
+          // 1. Получаем список имен всех активных в данный момент запросов на экране
+          const activeQueries = Array.from(
+            client.getObservableQueries().values()
+          )
+            .map((q) => q.queryName)
+            .filter(Boolean);
+
+          // 2. Проверяем, активен ли запрос списка диалогов чата прямо сейчас
+          // (Укажите здесь точное имя вашей квери, обычно это "GetChatDialogs")
+          const isChatDialogsActive = activeQueries.includes('GetChatDialogs');
+
+          if (isChatDialogsActive) {
+            await client
+              .refetchQueries({
+                include: ['GetChatDialogs'], // Передаем строго имя-строку
+              })
+              .catch(() => {});
+          }
         }
       }
     );
@@ -224,10 +253,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
         await client
           .refetchQueries({
-            include: [
-              GetSystemNotificationsDocument,
-              GetUnreadNotificationsCountDocument,
-            ],
+            include: shouldRefetchChat
+              ? [
+                  GetSystemNotificationsDocument,
+                  GetUnreadNotificationsCountDocument,
+                ]
+              : [],
           })
           .catch(() => {});
       }

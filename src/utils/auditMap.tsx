@@ -2,9 +2,10 @@ import { Box, Stack, Typography } from '@mui/material';
 
 export const FIELD_TRANSLATIONS: Record<string, string> = {
   name: 'Название',
-  model: 'Модель',
+  model: 'Тип',
   serialNumber: 'Серийный номер',
   releaseDate: 'Дата выпуска',
+  csmCode: 'Код СИ (прайс ЦСМ-договорной)',
   grsiNumber: 'Номер ГРСИ',
   measurementRange: 'Диапазон измерений',
   accuracy: 'Погрешность',

@@ -18,6 +18,8 @@ import {
   TextField,
   Tooltip,
   Checkbox,
+  FormControlLabel,
+  Stack,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -71,6 +73,41 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
         ? prev.filter((id) => id !== deviceId)
         : [...prev, deviceId]
     );
+  };
+
+  const handleSelectAllDevices = (devicesInBatch: any[], batchId: string) => {
+    // 1. Фильтруем приборы партии, у которых поверка пройдена (isDeviceVerified = true)
+    const selectableDeviceIds = devicesInBatch
+      .filter((link) => {
+        const currentVerification = link.device.verifications?.find(
+          (v: any) => v.batchId === batchId
+        );
+        const isBackendVerified = !!currentVerification;
+        const isLocallyVerified = locallyVerifiedIds.includes(link.device.id);
+
+        return isBackendVerified || isLocallyVerified; // Условие доступности чекбокса
+      })
+      .map((link) => link.device.id);
+
+    if (selectableDeviceIds.length === 0) return;
+
+    // 2. Проверяем, выбраны ли уже ВСЕ доступные приборы этой партии
+    const isAllChecked = selectableDeviceIds.every((id) =>
+      selectedDeviceIds.includes(id)
+    );
+
+    if (isAllChecked) {
+      // Если все уже выбраны — убираем их из общего стейта (снимаем галочки)
+      setSelectedDeviceIds((prev) =>
+        prev.filter((id) => !selectableDeviceIds.includes(id))
+      );
+    } else {
+      // Если выбраны не все — добавляем только те id, которых еще нет в стейте selectedDeviceIds
+      setSelectedDeviceIds((prev) => {
+        const uniqueIds = new Set([...prev, ...selectableDeviceIds]);
+        return Array.from(uniqueIds);
+      });
+    }
   };
 
   const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
@@ -270,6 +307,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
             : null,
           protocolNumber: formData.protocolNumber,
           result: formData.result,
+          documentUrl: formData.documentUrl ?? null,
           metrologyControleTypeId: formData.metrologyControleTypeId,
           verificationOrganizationId: formData.verificationOrganizationId,
           comment: formData.comment,
@@ -626,13 +664,86 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                   bg: 'grey.50',
                 }}
               >
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  sx={{ mb: 1 }}
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mb: 1.5 }}
                 >
-                  Приборы в этой партии:
-                </Typography>
+                  <Typography
+                    variant="subtitle2"
+                    color="text.secondary"
+                    sx={{ fontWeight: 600 }}
+                  >
+                    Приборы в этой партии:
+                  </Typography>
+
+                  {isSent &&
+                    (() => {
+                      const selectableInBatch = batch.devicesToBatches.filter(
+                        (link) => {
+                          const currentVerification =
+                            link.device.verifications?.find(
+                              (v) => v.batchId === batch.id
+                            );
+                          return (
+                            !!currentVerification ||
+                            locallyVerifiedIds.includes(link.device.id)
+                          );
+                        }
+                      );
+
+                      const selectableIds = selectableInBatch.map(
+                        (link) => link.device.id
+                      );
+
+                      // Сколько из них выделено в данный момент
+                      const checkedCount = selectableIds.filter((id) =>
+                        selectedDeviceIds.includes(id)
+                      ).length;
+
+                      const isAllChecked =
+                        selectableIds.length > 0 &&
+                        checkedCount === selectableIds.length;
+                      const isIndeterminate =
+                        checkedCount > 0 && checkedCount < selectableIds.length;
+
+                      return (
+                        <Tooltip
+                          title="Выбрать все поверенные приборы партии"
+                          placement="top"
+                          arrow
+                        >
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                size="small"
+                                checked={isAllChecked}
+                                indeterminate={isIndeterminate}
+                                disabled={selectableIds.length === 0}
+                                onChange={() =>
+                                  handleSelectAllDevices(
+                                    batch.devicesToBatches,
+                                    batch.id
+                                  )
+                                }
+                              />
+                            }
+                            label={
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ fontWeight: 500 }}
+                              >
+                                Выбрать все
+                              </Typography>
+                            }
+                            sx={{ mr: 0 }}
+                          />
+                        </Tooltip>
+                      );
+                    })()}
+                </Stack>
 
                 {/* Список приборов в партии */}
                 <List dense disablePadding sx={{ mb: 2 }}>
@@ -950,30 +1061,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                       >
                         Печать бирок ({selectedDeviceIds.length})
                       </Button>
-                      {/* <Button
-                        variant="outlined"
-                        color="warning"
-                        size="small"
-                        disabled={
-                          !!batchJobs[batch.id] || isSyncing || isBatchSyncing
-                        }
-                        // onClick={() => {
-                        //   syncBatch({ variables: { batchId: batch.id } }).catch(
-                        //     () => {}
-                        //   );
-                        // }}
-                        onClick={() => handleSync(batch.id)}
-                        sx={{
-                          textTransform: 'none',
-                          fontWeight: 'bold',
-                          width: { xs: '100%', sm: 'auto' },
-                          py: { xs: 1, sm: 0.5 },
-                        }}
-                      >
-                        {batchJobs[batch.id]
-                          ? '⏳ Синхронизация...'
-                          : '🔄 Проверить всю партию в Аршин'}
-                      </Button> */}
+
                       <Tooltip
                         title={
                           isSyncDisabled &&
@@ -982,7 +1070,6 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                             : 'Проверить наличие поверок для всех СИ партии во ФГИС Аршин'
                         }
                       >
-                        {/* Обертка в Box дублирует адаптивную ширину кнопки, чтобы Tooltip на смартфонах не ломал верстку */}
                         <Box
                           sx={{
                             width: { xs: '100%', sm: 'auto' },
@@ -997,13 +1084,14 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                               !!batchJobs[batch.id] ||
                               isSyncing ||
                               isBatchSyncing ||
-                              isSyncDisabled
+                              isSyncDisabled ||
+                              displayedBatches.length === 1
                             }
                             onClick={() => handleSync(batch.id)}
                             sx={{
                               textTransform: 'none',
                               fontWeight: 'bold',
-                              width: '100%', // Теперь кнопка занимает 100% от ширины Box-обертки
+                              width: '100%',
                               py: { xs: 1, sm: 0.5 },
                               height: 36,
                               borderRadius: 2,
