@@ -2,6 +2,7 @@ import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import { useState } from 'react';
 import {
   DeleteDeviceDocument,
+  FetchArshinVerificationsDocument,
   FindArshinDocumentUrlDocument,
   // GetDevicesWithRelationsListDocument,
   GetDeviceWithRelationDocument,
@@ -52,6 +53,7 @@ import {
 import {
   Add,
   Close,
+  CloudDownload,
   DeleteOutline,
   ExpandMore,
   FindInPage,
@@ -209,6 +211,13 @@ function UserForm({
   const [findArshinDocumentUrl] = useLazyQuery(FindArshinDocumentUrlDocument, {
     fetchPolicy: 'network-only',
   });
+
+  const [arshinCount, setArshinCount] = useState<number>(3);
+
+  const [fetchArshinVerifications, { loading: loadingArshinList }] =
+    useLazyQuery(FetchArshinVerificationsDocument, {
+      fetchPolicy: 'network-only',
+    });
 
   const [form, setForm] = useState<{
     name: string;
@@ -380,6 +389,126 @@ function UserForm({
       });
     } finally {
       setSearchingDocId(null);
+    }
+  };
+
+  const handleLoadFromArshin = async (deviceId: string) => {
+    if (!form.serialNumber.trim() || !form.grsiNumber.trim()) {
+      enqueueSnackbar(
+        'Сначала заполните заводской номер и номер ГРСИ прибора вверху формы',
+        { variant: 'warning' }
+      );
+      return;
+    }
+
+    try {
+      // Передаем параметры и ждем результат напрямую из промиса
+      const { data } = await fetchArshinVerifications({
+        variables: {
+          input: {
+            serialNumber: form.serialNumber.trim(),
+            grsiNumber: form.grsiNumber.trim(),
+            count: arshinCount,
+          },
+        },
+      });
+
+      const items = data?.fetchArshinVerifications || [];
+
+      if (items.length === 0) {
+        enqueueSnackbar('Поверок в архиве ФГИС Аршин не найдено', {
+          variant: 'info',
+        });
+        return;
+      }
+
+      const formatDateToInput = (
+        dateStr: string | null | undefined
+      ): string => {
+        if (!dateStr) return '';
+
+        const cleanDate = dateStr.includes('T')
+          ? dateStr.split('T')[0]
+          : dateStr;
+
+        if (cleanDate && cleanDate.includes('.')) {
+          const parts = cleanDate.split('.');
+          if (parts.length === 3) {
+            const [day, month, year] = parts;
+            return `${year}-${month}-${day}`;
+          }
+        }
+
+        return cleanDate || '';
+      };
+
+      const existingProtocols = new Set(
+        verifications
+          .map((v) => v.protocolNumber?.toLowerCase().trim())
+          .filter(Boolean)
+      );
+
+      const imported: typeof verifications = [];
+
+      items.forEach((item: any, idx: number) => {
+        const cleanProtocol = item.protocolNumber?.toLowerCase().trim();
+
+        if (existingProtocols.has(cleanProtocol)) {
+          return;
+        }
+
+        const matchedOrgId =
+          verificationOrhanizationsList.find(
+            (org) =>
+              org.name.toLowerCase().trim() ===
+              item.organizationName?.toLowerCase().trim()
+          )?.id || '';
+
+        const defaultControlType =
+          metrologyControlTypeList.find(
+            (t) => t.name.toLowerCase().trim() === 'поверка'
+          )?.id || '';
+
+        imported.push({
+          id: `new-${Date.now()}-${idx}-${Math.random()
+            .toString(36)
+            .slice(2, 6)}`,
+          deviceId: deviceId,
+          date: formatDateToInput(item.date),
+          validUntil: formatDateToInput(item.validUntil),
+          result: item.isApplicable ? 'Годен' : 'Не годен',
+          protocolNumber: item.protocolNumber,
+          organization: item.organizationName || '',
+          comment: `Автоматический импорт из ФГИС Аршин. Запись № ${item.arshinId}`,
+          documentUrl: item.documentUrl,
+          metrologyControleTypeId: defaultControlType,
+          verificationOrganizationId: matchedOrgId,
+          collapsed: false,
+          cost: '',
+        });
+      });
+
+      if (imported.length === 0) {
+        enqueueSnackbar(
+          'Все найденные в Аршине поверки уже добавлены в форму',
+          {
+            variant: 'info',
+          }
+        );
+        return;
+      }
+
+      setVerifications((prev) => [...imported, ...prev]);
+      enqueueSnackbar(
+        `Успешно импортировано новых поверок: ${imported.length}`,
+        {
+          variant: 'success',
+        }
+      );
+    } catch (err: any) {
+      enqueueSnackbar(`Ошибка интеграции с Аршин: ${err.message}`, {
+        variant: 'error',
+      });
     }
   };
 
@@ -1015,7 +1144,7 @@ function UserForm({
           />
 
           <Divider sx={{ my: 2 }} />
-          <Stack
+          {/* <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
@@ -1029,7 +1158,105 @@ function UserForm({
                 <Add />
               </IconButton>
             </Tooltip>
-          </Stack>
+          </Stack> */}
+          <Box mb={3}>
+            {/* Заголовок блока */}
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 700,
+                color: 'text.primary',
+                mb: 1.5,
+                fontFamily: '"Inter", sans-serif',
+              }}
+            >
+              Данные метрологического контроля
+            </Typography>
+
+            {/* Пульт управления: выстраивается компактным флекс-рядом */}
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              justifyContent="space-between"
+              width="100%"
+            >
+              {/* Селект выбора количества */}
+              <TextField
+                select
+                label="Поверок из Аршина"
+                value={arshinCount}
+                onChange={(e) => setArshinCount(Number(e.target.value))}
+                size="small"
+                sx={{
+                  flexGrow: 1,
+                  minWidth: '100px',
+                  '& .MuiInputBase-root': { height: 40 },
+                }}
+              >
+                {[1, 2, 3, 5].map((num) => (
+                  <MenuItem key={num} value={num}>
+                    {num}{' '}
+                    {num === 1
+                      ? 'последняя'
+                      : num < 5
+                      ? 'последние'
+                      : 'последних'}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              {/* Кнопка запуска импорта */}
+              <Button
+                variant="outlined"
+                color="secondary"
+                disabled={loadingArshinList}
+                onClick={() => handleLoadFromArshin(device.id)}
+                startIcon={
+                  loadingArshinList ? (
+                    <CircularProgress size={14} color="inherit" />
+                  ) : (
+                    <CloudDownload />
+                  )
+                }
+                sx={{
+                  height: 40,
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                  borderRadius: 1.5,
+                  px: 2,
+                }}
+              >
+                {loadingArshinList ? 'Загрузка...' : 'Заполнить'}
+              </Button>
+
+              <Divider
+                orientation="vertical"
+                flexItem
+                sx={{ height: 28, alignSelf: 'center' }}
+              />
+
+              {/* Кнопка ручного добавления */}
+              <Tooltip title="Добавить вручную">
+                <IconButton
+                  onClick={addVerification}
+                  disabled={loadingArshinList}
+                  color="primary"
+                  sx={{
+                    border: '1px solid',
+                    borderColor: 'primary.main',
+                    borderRadius: 1.5,
+                    height: 40,
+                    width: 40,
+                    p: 0,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Add />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Box>
           {verifications.length === 0 ? (
             <Typography color="textSecondary" sx={{ mb: 2 }}>
               Данные не добавлены

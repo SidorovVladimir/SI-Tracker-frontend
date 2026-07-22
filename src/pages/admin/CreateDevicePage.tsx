@@ -264,8 +264,24 @@ export default function CreateDevicePage(props: {
         return cleanDate || '';
       };
 
-      // Автоматически мапим данные под структуру локального массива verifications
-      const imported = items.map((item: any) => {
+      // 🔥 ШАГ 1: Собираем номера уже добавленных на экран поверок, чтобы исключить дубликаты
+      const existingProtocols = new Set(
+        verifications
+          .map((v) => v.protocolNumber?.toLowerCase().trim())
+          .filter(Boolean)
+      );
+
+      const imported: typeof verifications = [];
+
+      // 🔥 ШАГ 2: Перебираем записи и берем только уникальные
+      items.forEach((item: any) => {
+        const cleanProtocol = item.protocolNumber?.toLowerCase().trim();
+
+        // Если такая поверка уже добавлена на форму — просто пропускаем её
+        if (existingProtocols.has(cleanProtocol)) {
+          return;
+        }
+
         const matchedOrgId =
           verificationOrhanizationsList.find(
             (org) =>
@@ -278,7 +294,8 @@ export default function CreateDevicePage(props: {
             (t) => t.name.toLowerCase().trim() === 'поверка'
           )?.id || '';
 
-        return {
+        imported.push({
+          // Использован безопасный инкремент id или уникальный строковый хэш
           id: nextId.current++,
           date: formatDateToInput(item.date),
           validUntil: formatDateToInput(item.validUntil),
@@ -291,13 +308,28 @@ export default function CreateDevicePage(props: {
           verificationOrganizationId: matchedOrgId,
           collapsed: false,
           cost: '',
-        };
+        });
       });
 
+      // 🔥 ШАГ 3: Если ничего нового нет — выводим инфо-сообщение
+      if (imported.length === 0) {
+        enqueueSnackbar(
+          'Все найденные в Аршине поверки уже добавлены на форму',
+          {
+            variant: 'info',
+          }
+        );
+        return;
+      }
+
+      // Склеиваем массивы, новые уникальные записи упадут в самый верх
       setVerifications((prev) => [...imported, ...prev]);
-      enqueueSnackbar(`Успешно импортировано поверок: ${imported.length}`, {
-        variant: 'success',
-      });
+      enqueueSnackbar(
+        `Успешно импортировано новых поверок: ${imported.length}`,
+        {
+          variant: 'success',
+        }
+      );
     } catch (err: any) {
       enqueueSnackbar(`Ошибка интеграции с Аршин: ${err.message}`, {
         variant: 'error',
