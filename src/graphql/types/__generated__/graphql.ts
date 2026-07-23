@@ -1115,7 +1115,10 @@ export type QueryFetchArshinVerificationsArgs = {
 };
 
 export type QueryFindArshinDocumentUrlArgs = {
+  date?: InputMaybe<Scalars['String']['input']>;
+  grsiNumber?: InputMaybe<Scalars['String']['input']>;
   protocolNumber: Scalars['String']['input'];
+  serialNumber?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type QueryGetBudgetMatrixArgs = {
@@ -1642,6 +1645,9 @@ export type FetchArshinVerificationsQuery = {
 
 export type FindArshinDocumentUrlQueryVariables = Exact<{
   protocolNumber: Scalars['String']['input'];
+  serialNumber?: InputMaybe<Scalars['String']['input']>;
+  grsiNumber?: InputMaybe<Scalars['String']['input']>;
+  date?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type FindArshinDocumentUrlQuery = {
@@ -3710,6 +3716,27 @@ export const FindArshinDocumentUrlDocument = {
             },
           },
         },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'serialNumber' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'grsiNumber' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'date' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
       ],
       selectionSet: {
         kind: 'SelectionSet',
@@ -3724,6 +3751,30 @@ export const FindArshinDocumentUrlDocument = {
                 value: {
                   kind: 'Variable',
                   name: { kind: 'Name', value: 'protocolNumber' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'serialNumber' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'serialNumber' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'grsiNumber' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'grsiNumber' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'date' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'date' },
                 },
               },
             ],

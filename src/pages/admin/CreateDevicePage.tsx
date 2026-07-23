@@ -180,11 +180,18 @@ export default function CreateDevicePage(props: {
       return;
     }
 
+    const currentVer = verifications.find((v) => v.id === id);
+
     setSearchingDocId(id);
 
     try {
       const { data } = await findArshinDocumentUrl({
-        variables: { protocolNumber: protocolNumber.trim() },
+        variables: {
+          protocolNumber: protocolNumber.trim(),
+          serialNumber: form.serialNumber.trim() || null,
+          grsiNumber: form.grsiNumber.trim() || null,
+          date: currentVer?.date || null,
+        },
       });
 
       const url = data?.findArshinDocumentUrl;

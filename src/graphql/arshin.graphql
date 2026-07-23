@@ -38,6 +38,16 @@ query FetchArshinVerifications($input: FetchArshinVerificationsInput!) {
   }
 }
 
-query FindArshinDocumentUrl($protocolNumber: String!) {
-  findArshinDocumentUrl(protocolNumber: $protocolNumber)
+query FindArshinDocumentUrl(
+  $protocolNumber: String!
+  $serialNumber: String
+  $grsiNumber: String
+  $date: String
+) {
+  findArshinDocumentUrl(
+    protocolNumber: $protocolNumber
+    serialNumber: $serialNumber
+    grsiNumber: $grsiNumber
+    date: $date
+  )
 }
