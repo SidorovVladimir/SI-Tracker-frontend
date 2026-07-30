@@ -137,6 +137,14 @@ query GetDeviceWithRelation($id: ID!) {
     inventoryNumber
     receiptDate
     manufacturer
+    documents {
+      id
+      name
+      fileUrl
+      fileSize
+      mimeType
+      type
+    }
     verificationInterval
     archived
     nomenclature

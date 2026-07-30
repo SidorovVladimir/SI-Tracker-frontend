@@ -85,6 +85,7 @@ export default function EditDevicePage(props: {
     variables: {
       id: deviceId,
     },
+    fetchPolicy: 'network-only',
   });
 
   const { data: productionSiteData, loading: productionSiteLoading } = useQuery(

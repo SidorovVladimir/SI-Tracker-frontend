@@ -99,10 +99,7 @@ export const AdminDashboard: React.FC = () => {
     ),
   };
 
-  const handleDeviceClick = (e: React.MouseEvent<HTMLElement>, id: string) => {
-    if (e.currentTarget) {
-      e.currentTarget.blur();
-    }
+  const handleDeviceClick = (id: string) => {
     setEditingDeviceId(id);
   };
 
@@ -208,7 +205,7 @@ export const AdminDashboard: React.FC = () => {
               {visibleItems.map((dev: any) => (
                 <ListItemButton
                   key={dev.id}
-                  onClick={(e) => handleDeviceClick(e, dev.id)}
+                  onClick={() => handleDeviceClick(dev.id)}
                   sx={{
                     borderBottom: '1px solid',
                     borderColor: 'grey.200',
@@ -782,7 +779,7 @@ export const AdminDashboard: React.FC = () => {
       <Dialog
         open={Boolean(editingDeviceId)}
         onClose={() => setEditingDeviceId(null)}
-        disableEnforceFocus
+        // disableEnforceFocus
         maxWidth="sm"
         fullWidth
         slotProps={{

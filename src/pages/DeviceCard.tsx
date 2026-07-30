@@ -6,6 +6,7 @@ import {
   AccordionSummary,
   Alert,
   Box,
+  Button,
   Chip,
   CircularProgress,
   Divider,
@@ -14,12 +15,30 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { CalendarMonth, Close, Edit, ExpandMore } from '@mui/icons-material';
+import {
+  CalendarMonth,
+  Close,
+  Delete,
+  Edit,
+  ExpandMore,
+  FileUpload,
+  InsertDriveFile,
+} from '@mui/icons-material';
 
 import { GetDeviceWithRelationDocument } from '../graphql/types/__generated__/graphql';
 import { formatDate } from '../utils/date';
 import { useAuth } from '../hooks/useAuth';
 import { toCapital } from '../utils/capitalize';
+import { useState } from 'react';
+import { API_ROUTES } from '../config';
+
+const formatBytes = (bytes?: number | null) => {
+  if (!bytes) return '';
+  const k = 1024;
+  const sizes = ['Б', 'КБ', 'МБ'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
 
 const InfoRow = ({
   label,
@@ -69,10 +88,13 @@ export default function DeviceCard(props: {
 }) {
   const { deviceId, closeDetails, onEdit } = props;
   const { user } = useAuth();
+
+  const [fileUploading, setFileUploading] = useState(false);
   const {
     data: deviceData,
     loading,
     error,
+    refetch,
   } = useQuery(GetDeviceWithRelationDocument, {
     variables: {
       id: deviceId,
@@ -81,6 +103,80 @@ export default function DeviceCard(props: {
   });
 
   const isMobileRoute = window.location.pathname.startsWith('/m/');
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    docType: 'manual' | 'passport'
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file || !deviceData?.device) return;
+
+    const MAX_FILE_SIZE_MB = 20;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      alert(
+        `Файл слишком тяжелый! Максимальный размер: ${MAX_FILE_SIZE_MB} МБ. Ваш файл: ${formatBytes(
+          file.size
+        )}`
+      );
+
+      // Сбрасываем input, чтобы пользователь мог выбрать другой файл
+      event.target.value = '';
+      return;
+    }
+
+    setFileUploading(true);
+    const device = deviceData.device;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', docType);
+
+    const defaultName =
+      docType === 'manual'
+        ? `РЭ ${device.name} ${device.model}` // Для РЭ автоимя — это хорошо, оно стандартизирует инструкции
+        : file.name; // Для паспортов, фото и актов берем оригинальное имя загружаемого файла!
+
+    formData.append('name', defaultName);
+
+    if (docType === 'passport') {
+      formData.append('deviceId', device.id);
+    } else {
+      formData.append('modelName', device.model);
+      if (device.grsiNumber) formData.append('grsiNumber', device.grsiNumber);
+    }
+
+    try {
+      const response = await fetch(API_ROUTES.upload, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Не удалось загрузить файл');
+      await refetch();
+    } catch (err: any) {
+      alert(`Ошибка загрузки: ${err.message}`);
+    } finally {
+      setFileUploading(false);
+    }
+  };
+
+  // Функция удаления файла через REST API
+  const handleFileDelete = async (documentId: string) => {
+    if (!window.confirm('Вы уверены, что хотите удалить этот документ?'))
+      return;
+    try {
+      const response = await fetch(API_ROUTES.delete(documentId), {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Не удалось удалить файл');
+      await refetch();
+    } catch (err: any) {
+      alert(`Ошибка при удалении: ${err.message}`);
+    }
+  };
 
   if (loading)
     return (
@@ -341,6 +437,268 @@ export default function DeviceCard(props: {
       </Stack>
 
       <Divider sx={{ my: 2 }} />
+      <Accordion
+        variant="outlined"
+        sx={{ mb: 2, borderRadius: '8px !important', overflow: 'hidden' }}
+      >
+        <AccordionSummary expandIcon={<ExpandMore fontSize="small" />}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <InsertDriveFile fontSize="small" color="action" />
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              Документация прибора ({device.documents.length || 0})
+            </Typography>
+          </Stack>
+        </AccordionSummary>
+        <AccordionDetails sx={{ pt: 0, px: { xs: 1.5, sm: 2 }, pb: 2 }}>
+          {fileUploading && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <CircularProgress size={16} />
+              <Typography variant="caption">
+                Сохранение файла на сервере...
+              </Typography>
+            </Box>
+          )}
+
+          <Box sx={{ mb: 2.5, mt: 1 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+              sx={{ fontWeight: 600, mb: 0.5, letterSpacing: '0.3px' }}
+            >
+              РУКОВОДСТВО ПО ЭКСПЛУАТАЦИИ
+            </Typography>
+            {device.documents?.find((d: any) => d.type === 'manual') ? (
+              (() => {
+                const manual = device.documents.find(
+                  (d: any) => d.type === 'manual'
+                )!;
+                return (
+                  <Stack
+                    direction="row"
+                    alignItems="flex-start"
+                    justifyContent="space-between"
+                    spacing={1}
+                    sx={{
+                      p: 1,
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '6px',
+                      bgcolor: '#fbfbfb',
+                    }}
+                  >
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      alignItems="flex-start"
+                      sx={{ width: '100%' }}
+                    >
+                      <InsertDriveFile
+                        fontSize="small"
+                        color="primary"
+                        sx={{ mt: 0.3, flexShrink: 0 }}
+                      />
+                      <Typography
+                        variant="body2"
+                        component="a"
+                        href={manual.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          fontWeight: 500,
+                          color: 'primary.main',
+                          textDecoration: 'underline',
+                          lineHeight: 1.4,
+                          fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                          whiteSpace: 'normal',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'anywhere',
+                        }}
+                      >
+                        {manual.name}{' '}
+                        {manual.fileSize && `(${formatBytes(manual.fileSize)})`}
+                      </Typography>
+                    </Stack>
+                    {user?.role !== 'user' && (
+                      <Tooltip title="Удалить руководство">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleFileDelete(manual.id)}
+                          sx={{ p: 0.5, flexShrink: 0 }}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Stack>
+                );
+              })()
+            ) : (
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                spacing={1}
+              >
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    fontStyle: 'italic',
+                    fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                  }}
+                >
+                  Не загружено
+                </Typography>
+                {user?.role !== 'user' && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    component="label"
+                    startIcon={<FileUpload />}
+                    sx={{
+                      textTransform: 'none',
+                      fontSize: '0.75rem',
+                      py: 0.2,
+                      px: 1,
+                      flexShrink: 0,
+                    }}
+                  >
+                    Загрузить
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      hidden
+                      onChange={(e) => handleFileUpload(e, 'manual')}
+                      disabled={fileUploading}
+                    />
+                  </Button>
+                )}
+              </Stack>
+            )}
+          </Box>
+
+          <Divider sx={{ my: 1.5, borderStyle: 'dashed' }} />
+
+          <Box>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+              sx={{ fontWeight: 600, mb: 0.5, letterSpacing: '0.3px' }}
+            >
+              ДОКУМЕНТЫ, ФОТО И АКТЫ ЭКЗЕМПЛЯРА
+            </Typography>
+            <Stack spacing={1} sx={{ mb: 1.5 }}>
+              {device.documents
+                ?.filter((d: any) => d.type === 'passport')
+                .map((doc: any) => {
+                  const isImage =
+                    doc.mimeType?.startsWith('image/') ||
+                    doc.name.match(/\.(jpg|jpeg|png)$/i);
+
+                  return (
+                    <Stack
+                      key={doc.id}
+                      direction="row"
+                      alignItems="flex-start"
+                      justifyContent="space-between"
+                      spacing={1}
+                      sx={{
+                        p: 1,
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '6px',
+                        bgcolor: '#fbfbfb',
+                      }}
+                    >
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        alignItems="flex-start"
+                        sx={{ width: '100%' }}
+                      >
+                        <InsertDriveFile
+                          fontSize="small"
+                          color={isImage ? 'success' : 'action'}
+                          sx={{ mt: 0.3, flexShrink: 0 }}
+                        />
+                        <Typography
+                          variant="body2"
+                          component="a"
+                          href={doc.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{
+                            fontWeight: 500,
+                            color: 'text.primary',
+                            textDecoration: 'none',
+                            '&:hover': { textDecoration: 'underline' },
+                            lineHeight: 1.4,
+                            fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                            whiteSpace: 'normal',
+                            wordBreak: 'break-word',
+                            overflowWrap: 'anywhere',
+                          }}
+                        >
+                          {doc.name}{' '}
+                          {doc.fileSize && `(${formatBytes(doc.fileSize)})`}
+                        </Typography>
+                      </Stack>
+                      {user?.role !== 'user' && (
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleFileDelete(doc.id)}
+                          sx={{ p: 0.5, flexShrink: 0 }}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Stack>
+                  );
+                })}
+              {device.documents?.filter((d: any) => d.type === 'passport')
+                .length === 0 && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    fontStyle: 'italic',
+                    fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                  }}
+                >
+                  Файлы не загружены
+                </Typography>
+              )}
+            </Stack>
+            {user?.role !== 'user' && (
+              <Button
+                variant="outlined"
+                size="small"
+                component="label"
+                startIcon={<FileUpload />}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '0.75rem',
+                  py: 0.2,
+                  width: { xs: '100%', sm: 'auto' },
+                }}
+              >
+                Добавить документ / фото
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                  hidden
+                  onChange={(e) => handleFileUpload(e, 'passport')}
+                  disabled={fileUploading}
+                />
+              </Button>
+            )}
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+
+      <Divider sx={{ my: 2 }} />
 
       <Typography
         variant="subtitle2"
@@ -401,7 +759,6 @@ export default function DeviceCard(props: {
                 value={v.metrologyControleType?.name}
               />
               <InfoRow label="Результат" value={v.result} />
-
               {v.documentUrl && (
                 <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed #eee' }}>
                   <InfoRow

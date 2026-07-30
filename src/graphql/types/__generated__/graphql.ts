@@ -406,6 +406,16 @@ export type DeviceBatchSyncResult = {
   success: Scalars['Boolean']['output'];
 };
 
+export type DeviceDocument = {
+  __typename: 'DeviceDocument';
+  fileSize: Maybe<Scalars['Int']['output']>;
+  fileUrl: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  mimeType: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  type: DocumentType;
+};
+
 export type DeviceFilterInput = {
   archived?: InputMaybe<Scalars['Boolean']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
@@ -464,6 +474,7 @@ export type DeviceWithRelations = {
   archived: Scalars['Boolean']['output'];
   comment: Maybe<Scalars['String']['output']>;
   csmCode: Maybe<Scalars['String']['output']>;
+  documents: Array<DeviceDocument>;
   equipmentType: Maybe<EquipmentType>;
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -490,6 +501,8 @@ export type DevicesWithRelationsResponse = {
   items: Array<DeviceTableItem>;
   totalCount: Scalars['Int']['output'];
 };
+
+export type DocumentType = 'manual' | 'passport';
 
 export type DraftBatchOption = {
   __typename: 'DraftBatchOption';
@@ -2330,6 +2343,15 @@ export type GetDeviceWithRelationQuery = {
     archived: boolean;
     nomenclature: string | null;
     comment: string | null;
+    documents: Array<{
+      __typename: 'DeviceDocument';
+      id: string;
+      name: string;
+      fileUrl: string;
+      fileSize: number | null;
+      mimeType: string | null;
+      type: DocumentType;
+    }>;
     equipmentType: {
       __typename: 'EquipmentType';
       id: string;
@@ -6555,6 +6577,30 @@ export const GetDeviceWithRelationDocument = {
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'manufacturer' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'documents' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'fileUrl' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'fileSize' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'mimeType' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                    ],
+                  },
                 },
                 {
                   kind: 'Field',

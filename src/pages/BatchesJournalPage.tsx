@@ -20,6 +20,9 @@ import {
   Checkbox,
   FormControlLabel,
   Stack,
+  ListItemButton,
+  Dialog,
+  DialogContent,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -49,6 +52,7 @@ import { enqueueSnackbar } from 'notistack';
 // import { JobProgressBar } from '../components/JobProgressBar';
 import { GlobalJobWatcher } from '../components/GlobalJobWatcher';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
+import EditDevicePage from './admin/EditDevicePage';
 
 interface BatchesJournalPageProps {
   locallyVerifiedIds: string[];
@@ -60,6 +64,8 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
   setLocallyVerifiedIds,
 }) => {
   const currentYear = new Date().getFullYear();
+
+  const [editingDeviceId, setEditingDeviceId] = useState<string | null>(null);
 
   const [journalYear, setJournalYear] = useState<number>(currentYear);
   const [statusTab, setStatusTab] = useState<string>('ACTIVE'); // 'ACTIVE' | 'DRAFT' | 'SENT' | 'COMPLETED'
@@ -73,6 +79,10 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
         ? prev.filter((id) => id !== deviceId)
         : [...prev, deviceId]
     );
+  };
+
+  const handleDeviceClick = (id: string) => {
+    setEditingDeviceId(id);
   };
 
   const handleSelectAllDevices = (devicesInBatch: any[], batchId: string) => {
@@ -116,7 +126,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
     if (statusTab === 'ACTIVE') return undefined;
     return statusTab.toLowerCase();
   };
-  const { data, loading, networkStatus } = useQuery(
+  const { data, loading, networkStatus, refetch } = useQuery(
     GetVerificationBatchesDocument,
     {
       variables: {
@@ -564,6 +574,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
         displayedBatches.map((batch) => {
           const isDraft = batch.status === 'draft';
           const isSent = batch.status === 'sent';
+          const isCompleted = batch.status === 'completed';
           const isExpanded = expandedBatchId === batch.id;
           const currentJobId = batchJobs[batch.id];
 
@@ -823,15 +834,23 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                           </Tooltip>
                         )}
 
-                        <ListItemText
-                          primary={`${link.device.name} (${link.device.model})`}
-                          secondary={`Заводской номер: ${link.device.serialNumber}`}
-                          slotProps={{
-                            primary: { variant: 'body2', fontWeight: 'medium' },
-                            secondary: { variant: 'caption' },
-                          }}
-                          sx={{ m: 0 }}
-                        />
+                        <ListItemButton
+                          key={link.device.id}
+                          onClick={() => handleDeviceClick(link.device.id)}
+                        >
+                          <ListItemText
+                            primary={`${link.device.name} (${link.device.model})`}
+                            secondary={`Заводской номер: ${link.device.serialNumber}`}
+                            slotProps={{
+                              primary: {
+                                variant: 'body2',
+                                fontWeight: 'medium',
+                              },
+                              secondary: { variant: 'caption' },
+                            }}
+                            sx={{ m: 0 }}
+                          />
+                        </ListItemButton>
 
                         {/* ИНТЕРАКТИВНЫЕ ДЕЙСТВИЯ С ПРИБОРАМИ */}
                         <Box
@@ -984,6 +1003,84 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                               </Tooltip>
                             </Box>
                           )}
+
+                          {isCompleted && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5,
+                              }}
+                            >
+                              {isDeviceSuccessVerified &&
+                                !isVerificationFailed && (
+                                  <Tooltip
+                                    title="Прибор прошел контроль (Годен). Результаты сохранены в базу данных."
+                                    placement="top"
+                                    arrow
+                                  >
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 0.5,
+                                      }}
+                                    >
+                                      <CheckCircleOutline
+                                        color="success"
+                                        fontSize="small"
+                                        sx={{ cursor: 'pointer' }}
+                                      />
+                                      <Typography
+                                        variant="caption"
+                                        fontWeight="medium"
+                                        color="success.main"
+                                        sx={{
+                                          display: {
+                                            xs: 'inline',
+                                            sm: 'inline',
+                                          },
+                                        }}
+                                      >
+                                        Годен
+                                      </Typography>
+                                    </Box>
+                                  </Tooltip>
+                                )}
+
+                              {isVerificationFailed && (
+                                <Tooltip
+                                  title="Прибор не прошел контроль (Не годен). Результаты сохранены в базу данных."
+                                  placement="top"
+                                  arrow
+                                >
+                                  <Box
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 0.5,
+                                    }}
+                                  >
+                                    <Cancel
+                                      color="error"
+                                      fontSize="small"
+                                      sx={{ cursor: 'pointer' }}
+                                    />
+                                    <Typography
+                                      variant="caption"
+                                      fontWeight="medium"
+                                      color="error.main"
+                                      sx={{
+                                        display: { xs: 'inline', sm: 'inline' },
+                                      }}
+                                    >
+                                      Не годен
+                                    </Typography>
+                                  </Box>
+                                </Tooltip>
+                              )}
+                            </Box>
+                          )}
                         </Box>
                       </Paper>
                     );
@@ -1085,7 +1182,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                               isSyncing ||
                               isBatchSyncing ||
                               isSyncDisabled ||
-                              displayedBatches.length === 1
+                              deviceLinks.length === 1
                             }
                             onClick={() => handleSync(batch.id)}
                             sx={{
@@ -1149,6 +1246,32 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
         onClose={() => setIsBarcodeModalOpen(false)}
         deviceIds={selectedDeviceIds}
       />
+
+      <Dialog
+        open={Boolean(editingDeviceId)}
+        onClose={() => setEditingDeviceId(null)}
+        // disableEnforceFocus
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: { sx: { borderRadius: 4, p: { xs: 1.5, sm: 2.5 } } },
+        }}
+      >
+        <DialogContent sx={{ p: 1 }}>
+          {editingDeviceId && (
+            <EditDevicePage
+              deviceId={editingDeviceId}
+              closeDetails={() => setEditingDeviceId(null)}
+              close={() => setEditingDeviceId(null)}
+              refetchDevice={() => {
+                refetch();
+                setEditingDeviceId(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       <GlobalJobWatcher onJobClose={handleRemoveJob} />
     </Box>
   );
