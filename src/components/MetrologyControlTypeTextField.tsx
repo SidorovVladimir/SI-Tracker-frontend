@@ -19,7 +19,6 @@ export default function MetrologyControlTypeTextField({
         name="verificationOrganizationId"
         size="small"
         fullWidth
-        required
         onChange={onChange}
         value={value}
         slotProps={{
