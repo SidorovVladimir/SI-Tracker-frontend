@@ -11,6 +11,7 @@ import {
   CircularProgress,
   Divider,
   IconButton,
+  Modal,
   Stack,
   Tooltip,
   Typography,
@@ -92,6 +93,8 @@ export default function DeviceCard(props: {
   const { enqueueSnackbar } = useSnackbar();
 
   const [fileUploading, setFileUploading] = useState(false);
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const {
     data: deviceData,
     loading,
@@ -187,9 +190,38 @@ export default function DeviceCard(props: {
     }
   };
 
+  // const handleOpenDocument = async (
+  //   e: React.MouseEvent<HTMLAnchorElement>,
+  //   fileUrl: string
+  // ) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     const response = await fetch(fileUrl, {
+  //       method: 'HEAD',
+  //       credentials: 'include',
+  //     });
+
+  //     if (response.status === 404) {
+  //       enqueueSnackbar(
+  //         'Этот файл физически отсутствует на сервере. Возможно, он был удален.',
+  //         {
+  //           variant: 'warning',
+  //         }
+  //       );
+  //     } else {
+  //       window.open(fileUrl, '_blank', 'noopener,noreferrer');
+  //     }
+  //   } catch (err) {
+  //     window.open(fileUrl, '_blank', 'noopener,noreferrer');
+  //   }
+  // };
+
   const handleOpenDocument = async (
     e: React.MouseEvent<HTMLAnchorElement>,
-    fileUrl: string
+    fileUrl: string,
+    mimeType?: string | null,
+    fileName?: string
   ) => {
     e.preventDefault();
 
@@ -202,14 +234,42 @@ export default function DeviceCard(props: {
       if (response.status === 404) {
         enqueueSnackbar(
           'Этот файл физически отсутствует на сервере. Возможно, он был удален.',
-          {
-            variant: 'warning',
-          }
+          { variant: 'warning' }
         );
+        return; // Останавливаем выполнение, если файла нет
+      }
+
+      // 1. ПРОВЕРЯЕМ: Картинка это или документ?
+      // Проверяем по mimeType ИЛИ по расширению в имени файла (на случай моков)
+      const isImage =
+        mimeType?.startsWith('image/') || fileName?.match(/\.(jpg|jpeg|png)$/i);
+
+      if (isImage) {
+        // Если картинка — просто открываем её в нашей всплывающей модалке прямо в приложении!
+        setPreviewImage(fileUrl);
+        return;
+      }
+
+      // 2. ЕСЛИ ЭТО ДОКУМЕНТ (PDF/WORD) — ПРОВЕРЯЕМ РЕЖИМ ЭКРАНА «ДОМОЙ» (PWA)
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true;
+
+      if (isStandalone) {
+        // В PWA-режиме для PDF создаем скрытую ссылку, чтобы заставить смартфон скачать файл в память
+        const downloadLink = document.createElement('a');
+        downloadLink.href = fileUrl;
+        downloadLink.download = fileName || 'document';
+        downloadLink.target = '_self';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
       } else {
+        // В обычном браузере на ПК открываем PDF как обычно в новой вкладке
         window.open(fileUrl, '_blank', 'noopener,noreferrer');
       }
     } catch (err) {
+      // Резервный вариант на случай сбоя сети
       window.open(fileUrl, '_blank', 'noopener,noreferrer');
     }
   };
@@ -537,7 +597,15 @@ export default function DeviceCard(props: {
                         variant="body2"
                         component="a"
                         href="#"
-                        onClick={(e) => handleOpenDocument(e, manual.fileUrl)}
+                        // onClick={(e) => handleOpenDocument(e, manual.fileUrl)}
+                        onClick={(e) =>
+                          handleOpenDocument(
+                            e,
+                            manual.fileUrl,
+                            manual.mimeType,
+                            manual.name
+                          )
+                        }
                         sx={{
                           fontWeight: 500,
                           color: 'primary.main',
@@ -656,7 +724,15 @@ export default function DeviceCard(props: {
                           variant="body2"
                           component="a"
                           href="#"
-                          onClick={(e) => handleOpenDocument(e, doc.fileUrl)}
+                          // onClick={(e) => handleOpenDocument(e, doc.fileUrl)}
+                          onClick={(e) =>
+                            handleOpenDocument(
+                              e,
+                              doc.fileUrl,
+                              doc.mimeType,
+                              doc.name
+                            )
+                          }
                           sx={{
                             fontWeight: 500,
                             color: 'primary.main',
@@ -802,6 +878,68 @@ export default function DeviceCard(props: {
           </AccordionDetails>
         </Accordion>
       ))}
+
+      <Modal
+        open={!!previewImage}
+        onClose={() => setPreviewImage(null)}
+        closeAfterTransition
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2,
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            bgcolor: 'background.paper',
+            borderRadius: 3,
+            boxShadow: 24,
+            p: 0.5,
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {/* Кнопка быстрого закрытия фото в углу */}
+          <IconButton
+            onClick={() => setPreviewImage(null)}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              bgcolor: 'rgba(255, 255, 255, 0.8)',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' },
+              boxShadow: 1,
+              zIndex: 10,
+            }}
+            size="small"
+          >
+            <Close fontSize="small" />
+          </IconButton>
+
+          {/* Само изображение прибора или комплектности */}
+          {previewImage && (
+            <Box
+              component="img"
+              src={previewImage}
+              alt="Просмотр документа"
+              sx={{
+                width: '100%',
+                height: 'auto',
+                maxWidth: '100%',
+                maxHeight: 'calc(90vh - 8px)',
+                objectFit: 'contain', // Картинка никогда не исказится и полностью влезет в экран телефона
+                borderRadius: '10px',
+              }}
+            />
+          )}
+        </Box>
+      </Modal>
     </Box>
   );
 }
