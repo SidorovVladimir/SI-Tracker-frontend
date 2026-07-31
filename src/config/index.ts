@@ -1,8 +1,8 @@
-export const API_BASE_URL = import.meta.env.DEV ? 'http://localhost:4000' : '';
-
 export const API_ROUTES = {
-  backup: `${API_BASE_URL}/api/admin/backup`,
-  restore: `${API_BASE_URL}/api/admin/restore`,
-  upload: `${API_BASE_URL}/api/documents/upload`,
-  delete: (documentId: string) => `${API_BASE_URL}/api/documents/${documentId}`,
+  backup: '/api/admin/backup',
+  restore: '/api/admin/restore',
+  upload: '/api/documents/upload',
+  delete: (documentId: string) => `/api/documents/${documentId}`,
+  backupFiles: '/api/admin/backup-files',
+  restoreFiles: '/api/admin/restore-files',
 };

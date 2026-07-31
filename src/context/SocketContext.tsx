@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../hooks/useAuth';
 // import { enqueueSnackbar } from 'notistack'; // На будущее для всплывающих алертов
-import { API_BASE_URL } from '../config';
 import { useApolloClient } from '@apollo/client/react';
 import {
   GetPricelistsDocument,
@@ -108,8 +107,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    const socketUrl = API_BASE_URL;
-    const socketInstance = io(socketUrl, {
+    const socketInstance = io({
       withCredentials: true,
       autoConnect: true,
     });

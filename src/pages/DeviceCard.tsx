@@ -31,6 +31,7 @@ import { useAuth } from '../hooks/useAuth';
 import { toCapital } from '../utils/capitalize';
 import { useState } from 'react';
 import { API_ROUTES } from '../config';
+import { useSnackbar } from 'notistack';
 
 const formatBytes = (bytes?: number | null) => {
   if (!bytes) return '';
@@ -88,6 +89,7 @@ export default function DeviceCard(props: {
 }) {
   const { deviceId, closeDetails, onEdit } = props;
   const { user } = useAuth();
+  const { enqueueSnackbar } = useSnackbar();
 
   const [fileUploading, setFileUploading] = useState(false);
   const {
@@ -115,13 +117,12 @@ export default function DeviceCard(props: {
     const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      alert(
+      enqueueSnackbar(
         `Файл слишком тяжелый! Максимальный размер: ${MAX_FILE_SIZE_MB} МБ. Ваш файл: ${formatBytes(
           file.size
-        )}`
+        )}`,
+        { variant: 'info' }
       );
-
-      // Сбрасываем input, чтобы пользователь мог выбрать другой файл
       event.target.value = '';
       return;
     }
@@ -153,10 +154,13 @@ export default function DeviceCard(props: {
         body: formData,
         credentials: 'include',
       });
-      if (!response.ok) throw new Error('Не удалось загрузить файл');
+      if (!response.ok) {
+        enqueueSnackbar('Не удалось загрузить файл', { variant: 'error' });
+      }
+      enqueueSnackbar('Файл успешно загружен', { variant: 'success' });
       await refetch();
     } catch (err: any) {
-      alert(`Ошибка загрузки: ${err.message}`);
+      enqueueSnackbar(`Ошибка загрузки: ${err.message}`, { variant: 'error' });
     } finally {
       setFileUploading(false);
     }
@@ -171,10 +175,42 @@ export default function DeviceCard(props: {
         method: 'DELETE',
         credentials: 'include',
       });
-      if (!response.ok) throw new Error('Не удалось удалить файл');
+      if (!response.ok) {
+        enqueueSnackbar('Не удалось удалить файл', { variant: 'error' });
+      }
+      enqueueSnackbar('Файл успешно удален', { variant: 'success' });
       await refetch();
     } catch (err: any) {
-      alert(`Ошибка при удалении: ${err.message}`);
+      enqueueSnackbar(`Ошибка при удалении: ${err.message}`, {
+        variant: 'error',
+      });
+    }
+  };
+
+  const handleOpenDocument = async (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    fileUrl: string
+  ) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(fileUrl, {
+        method: 'HEAD',
+        credentials: 'include',
+      });
+
+      if (response.status === 404) {
+        enqueueSnackbar(
+          'Этот файл физически отсутствует на сервере. Возможно, он был удален.',
+          {
+            variant: 'warning',
+          }
+        );
+      } else {
+        window.open(fileUrl, '_blank', 'noopener,noreferrer');
+      }
+    } catch (err) {
+      window.open(fileUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -500,18 +536,12 @@ export default function DeviceCard(props: {
                       <Typography
                         variant="body2"
                         component="a"
-                        href={manual.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href="#"
+                        onClick={(e) => handleOpenDocument(e, manual.fileUrl)}
                         sx={{
                           fontWeight: 500,
                           color: 'primary.main',
-                          textDecoration: 'underline',
-                          lineHeight: 1.4,
-                          fontSize: { xs: '0.8rem', sm: '0.85rem' },
-                          whiteSpace: 'normal',
-                          wordBreak: 'break-word',
-                          overflowWrap: 'anywhere',
+                          cursor: 'pointer',
                         }}
                       >
                         {manual.name}{' '}
@@ -625,19 +655,12 @@ export default function DeviceCard(props: {
                         <Typography
                           variant="body2"
                           component="a"
-                          href={doc.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href="#"
+                          onClick={(e) => handleOpenDocument(e, doc.fileUrl)}
                           sx={{
                             fontWeight: 500,
-                            color: 'text.primary',
-                            textDecoration: 'none',
-                            '&:hover': { textDecoration: 'underline' },
-                            lineHeight: 1.4,
-                            fontSize: { xs: '0.8rem', sm: '0.85rem' },
-                            whiteSpace: 'normal',
-                            wordBreak: 'break-word',
-                            overflowWrap: 'anywhere',
+                            color: 'primary.main',
+                            cursor: 'pointer',
                           }}
                         >
                           {doc.name}{' '}
