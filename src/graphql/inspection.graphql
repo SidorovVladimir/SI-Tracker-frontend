@@ -1,0 +1,29 @@
+query GetInspectionPool($targetMonth: String!, $limit: Int!, $offset: Int!) {
+  getInspectionPoolByMonth(
+    targetMonth: $targetMonth
+    limit: $limit
+    offset: $offset
+  ) {
+    items {
+      id
+      name
+      model
+      serialNumber
+      lastInspectionDate
+      validUntil
+      isOverdue
+      controlType
+    }
+    totalCount
+    yearlySummary {
+      month
+      autoCount
+      manualCount
+    }
+  }
+}
+
+# 2. Мутация массовой фиксации осмотра мастером цеха
+mutation CreateBulkInspection($deviceIds: [ID!]!) {
+  createBulkInspection(deviceIds: $deviceIds)
+}

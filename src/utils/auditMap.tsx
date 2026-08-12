@@ -30,7 +30,7 @@ export const FIELD_TRANSLATIONS: Record<string, string> = {
 };
 
 const VERIFICATION_FIELD_TRANSLATIONS: Record<string, string> = {
-  date: 'Дата поверки',
+  date: 'Дата контроля',
   validUntil: 'Действительна до',
   result: 'Результат',
   protocolNumber: '№ Протокола/Свидетельства',

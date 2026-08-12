@@ -60,7 +60,7 @@ export default function CompaniesPage() {
   const [deleteCompany] = useMutation(DeleteCompanyDocument, {
     onCompleted: () => {
       refetch();
-      enqueueSnackbar('Компания успешно удалена', {
+      enqueueSnackbar('Организация успешно удалена', {
         variant: 'success',
       });
     },
@@ -107,7 +107,7 @@ export default function CompaniesPage() {
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Typography variant="h5" fontWeight="bold">
-            Компании
+            Организации
           </Typography>
 
           <Box
@@ -156,7 +156,7 @@ export default function CompaniesPage() {
         </Box>
 
         <Button
-          aria-label="Добавить компанию"
+          aria-label="Добавить организацию"
           variant="contained"
           startIcon={isMobile ? undefined : <Add />}
           sx={{
@@ -344,7 +344,7 @@ export default function CompaniesPage() {
         <DialogTitle id="delete-dialog-title">Подтвердите удаление</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Вы действительно хотите удалить эту компанию? Это действие нельзя
+            Вы действительно хотите удалить эту организацию? Это действие нельзя
             отменить.
           </DialogContentText>
         </DialogContent>

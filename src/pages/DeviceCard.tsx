@@ -291,22 +291,73 @@ export default function DeviceCard(props: {
 
   const device = deviceData.device;
 
+  const formatUserName = (
+    user: { firstName?: string; lastName?: string } | null
+  ) => {
+    if (!user) return 'Система';
+    const firstInit = user.firstName ? `${user.firstName.charAt(0)}.` : '';
+    return `${user.lastName || ''} ${firstInit}`.trim();
+  };
+
   return (
     <Box>
       <Stack
         direction="row"
         justifyContent="space-between"
-        alignItems="center"
+        // alignItems="center"
+        alignItems="flex-start"
         mb={1}
       >
-        <Typography
+        {/* <Typography
           variant="h6"
           gutterBottom
           color="primary"
           sx={{ fontWeight: 700 }}
         >
           Информация о СИ
-        </Typography>
+        </Typography> */}
+
+        <Stack spacing={0.5}>
+          <Typography
+            variant="h6"
+            color="primary"
+            sx={{ fontWeight: 700, lineHeight: 1.2 }}
+          >
+            Информация о СИ
+          </Typography>
+          <Stack
+            direction="row"
+            flexWrap="wrap"
+            gap={1}
+            rowGap={0.2}
+            sx={{ color: 'text.disabled', fontSize: '0.7rem' }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: 'inherit',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              Создан: {device.createdAt ? formatDate(device.createdAt) : '—'} (
+              {formatUserName(device.createdBy)})
+            </Typography>
+
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: 'inherit',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              Изменен: {device.updatedAt ? formatDate(device.updatedAt) : '—'} (
+              {formatUserName(device.updatedBy)})
+            </Typography>
+          </Stack>
+        </Stack>
+
         <Stack direction="row" spacing={1}>
           {user?.role !== 'user' && !isMobileRoute && (
             <Tooltip title="Редактировать">
@@ -491,6 +542,9 @@ export default function DeviceCard(props: {
           />
         </Box>
       </Stack>
+
+      <InfoRow label="Город" value={device.productionSite.city.name} />
+      <InfoRow label="Организация" value={device.productionSite.company.name} />
 
       <InfoRow label="Участок" value={device.productionSite.name} />
       <InfoRow label="Тип оборудования" value={device.equipmentType?.name} />
@@ -845,7 +899,7 @@ export default function DeviceCard(props: {
           <AccordionDetails sx={{ p: 1.5, borderTop: '1px solid #eee' }}>
             <Stack spacing={1}>
               <InfoRow
-                label="Дата поверки"
+                label="Дата контроля"
                 value={v?.date ? formatDate(v.date) : '-'}
               />
               <InfoRow label="№ Свидетельства" value={v.protocolNumber} />

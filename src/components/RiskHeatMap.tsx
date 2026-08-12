@@ -68,7 +68,7 @@ export const RiskHeatMap: React.FC<RiskHeatMapProps> = ({ data }) => {
           color="text.secondary"
           sx={{ fontWeight: 'medium' }}
         >
-          Анализ и построение карты рисков холдинга...
+          Анализ и построение карты рисков...
         </Typography>
       </Card>
     );
@@ -81,7 +81,7 @@ export const RiskHeatMap: React.FC<RiskHeatMapProps> = ({ data }) => {
     >
       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 0.5 }}>
-          🗺️ Тепловая карта метрологических рисков холдинга
+          🗺️ Тепловая карта метрологических рисков
         </Typography>
         <Typography
           variant="caption"
@@ -89,7 +89,7 @@ export const RiskHeatMap: React.FC<RiskHeatMapProps> = ({ data }) => {
           display="block"
           sx={{ mb: 2.5 }}
         >
-          Кликните на интересующий город для каскадного просмотра компаний и
+          Кликните на интересующий город для каскадного просмотра организаций и
           производственных участков
         </Typography>
 

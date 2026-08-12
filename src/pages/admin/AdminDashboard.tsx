@@ -362,7 +362,7 @@ export const AdminDashboard: React.FC = () => {
                     color: 'info.main',
                   },
                   {
-                    label: 'Юридические лица (Компании)',
+                    label: 'Юридические лица (Организации)',
                     count: stats?.companies,
                     color: 'secondary.main',
                   },

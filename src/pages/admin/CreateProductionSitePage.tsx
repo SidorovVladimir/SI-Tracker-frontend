@@ -148,7 +148,7 @@ export default function CreateProductionSitePage() {
             <TextField
               id="outlined-select-currency"
               select
-              label="Компания"
+              label="Организация"
               name="companyId"
               size="small"
               fullWidth

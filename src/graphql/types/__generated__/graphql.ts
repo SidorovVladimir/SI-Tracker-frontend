@@ -449,6 +449,7 @@ export type DeviceTableItem = {
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inventoryNumber: Maybe<Scalars['String']['output']>;
+  latestInspection: Maybe<InspectionTableItem>;
   latestVerification: Maybe<VerificationTableItem>;
   manufacturer: Maybe<Scalars['String']['output']>;
   model: Scalars['String']['output'];
@@ -473,6 +474,8 @@ export type DeviceWithRelations = {
   accuracy: Maybe<Scalars['String']['output']>;
   archived: Scalars['Boolean']['output'];
   comment: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  createdBy: Maybe<User>;
   csmCode: Maybe<Scalars['String']['output']>;
   documents: Array<DeviceDocument>;
   equipmentType: Maybe<EquipmentType>;
@@ -492,6 +495,8 @@ export type DeviceWithRelations = {
   scopes: Array<Scope>;
   serialNumber: Scalars['String']['output'];
   status: Status;
+  updatedAt: Scalars['String']['output'];
+  updatedBy: Maybe<User>;
   verificationInterval: Maybe<Scalars['Int']['output']>;
   verifications: Array<VerificationRelation>;
 };
@@ -580,6 +585,31 @@ export type ImportDeviceItemInput = {
   verificationInterval?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type InspectionPoolItem = {
+  __typename: 'InspectionPoolItem';
+  controlType: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isOverdue: Scalars['Boolean']['output'];
+  lastInspectionDate: Maybe<Scalars['String']['output']>;
+  model: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  serialNumber: Scalars['String']['output'];
+  validUntil: Scalars['String']['output'];
+};
+
+export type InspectionPoolResponse = {
+  __typename: 'InspectionPoolResponse';
+  items: Array<InspectionPoolItem>;
+  totalCount: Scalars['Int']['output'];
+  yearlySummary: Array<MonthlySummary>;
+};
+
+export type InspectionTableItem = {
+  __typename: 'InspectionTableItem';
+  date: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+};
+
 export type JobStatusResponse = {
   __typename: 'JobStatusResponse';
   failedReason: Maybe<Scalars['String']['output']>;
@@ -622,6 +652,7 @@ export type Mutation = {
   addDevicesToBatch: Scalars['Boolean']['output'];
   approveBudgetPlan: BudgetPlan;
   createBudgetPlan: BudgetPlan;
+  createBulkInspection: Scalars['Boolean']['output'];
   createCity: City;
   createCompany: Company;
   createDevice: Device;
@@ -690,6 +721,10 @@ export type MutationApproveBudgetPlanArgs = {
 
 export type MutationCreateBudgetPlanArgs = {
   input: CreateBudgetPlanInput;
+};
+
+export type MutationCreateBulkInspectionArgs = {
+  deviceIds: Array<Scalars['ID']['input']>;
 };
 
 export type MutationCreateCityArgs = {
@@ -1049,6 +1084,7 @@ export type Query = {
   getDevicesBarcodeData: Array<DeviceBarcodeData>;
   getDraftBatchesByMonth: Array<DraftBatchOption>;
   getFinancialAnalytics: FinancialAnalyticsResponse;
+  getInspectionPoolByMonth: InspectionPoolResponse;
   getJobStatus: Maybe<JobStatusResponse>;
   getPlanningPoolByMonth: PlanningPoolResponse;
   getProductionAnalytics: ProductionAnalyticsResponse;
@@ -1168,6 +1204,12 @@ export type QueryGetDraftBatchesByMonthArgs = {
 export type QueryGetFinancialAnalyticsArgs = {
   month?: InputMaybe<Scalars['Int']['input']>;
   year: Scalars['Int']['input'];
+};
+
+export type QueryGetInspectionPoolByMonthArgs = {
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+  targetMonth: Scalars['String']['input'];
 };
 
 export type QueryGetJobStatusArgs = {
@@ -2271,8 +2313,6 @@ export type GetDevicesListQuery = {
     statusId: string;
     productionSiteId: string;
     equipmentTypeId: string | null;
-    createdAt: string;
-    updatedAt: string;
   }>;
 };
 
@@ -2316,6 +2356,11 @@ export type GetDevicesWithRelationsListQuery = {
           name: string;
         } | null;
       } | null;
+      latestInspection: {
+        __typename: 'InspectionTableItem';
+        id: string;
+        date: string;
+      } | null;
     }>;
   };
 };
@@ -2339,10 +2384,26 @@ export type GetDeviceWithRelationQuery = {
     inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
+    createdAt: string;
+    updatedAt: string;
     verificationInterval: number | null;
     archived: boolean;
     nomenclature: string | null;
     comment: string | null;
+    createdBy: {
+      __typename: 'User';
+      id: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+    } | null;
+    updatedBy: {
+      __typename: 'User';
+      id: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+    } | null;
     documents: Array<{
       __typename: 'DeviceDocument';
       id: string;
@@ -2552,6 +2613,42 @@ export type DeleteEquipmentTypeMutationVariables = Exact<{
 }>;
 
 export type DeleteEquipmentTypeMutation = { deleteEquipmentType: boolean };
+
+export type GetInspectionPoolQueryVariables = Exact<{
+  targetMonth: Scalars['String']['input'];
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+}>;
+
+export type GetInspectionPoolQuery = {
+  getInspectionPoolByMonth: {
+    __typename: 'InspectionPoolResponse';
+    totalCount: number;
+    items: Array<{
+      __typename: 'InspectionPoolItem';
+      id: string;
+      name: string;
+      model: string;
+      serialNumber: string;
+      lastInspectionDate: string | null;
+      validUntil: string;
+      isOverdue: boolean;
+      controlType: string;
+    }>;
+    yearlySummary: Array<{
+      __typename: 'MonthlySummary';
+      month: string;
+      autoCount: number;
+      manualCount: number;
+    }>;
+  };
+};
+
+export type CreateBulkInspectionMutationVariables = Exact<{
+  deviceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+export type CreateBulkInspectionMutation = { createBulkInspection: boolean };
 
 export type GetMeasurementTypesListQueryVariables = Exact<{
   [key: string]: never;
@@ -6286,8 +6383,6 @@ export const GetDevicesListDocument = {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'equipmentTypeId' },
                 },
-                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
               ],
             },
           },
@@ -6503,6 +6598,23 @@ export const GetDevicesWithRelationsListDocument = {
                           ],
                         },
                       },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'latestInspection' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'date' },
+                            },
+                          ],
+                        },
+                      },
                     ],
                   },
                 },
@@ -6577,6 +6689,46 @@ export const GetDeviceWithRelationDocument = {
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'manufacturer' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'createdBy' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'firstName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastName' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'updatedBy' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'firstName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastName' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    ],
+                  },
                 },
                 {
                   kind: 'Field',
@@ -7397,6 +7549,202 @@ export const DeleteEquipmentTypeDocument = {
 } as unknown as DocumentNode<
   DeleteEquipmentTypeMutation,
   DeleteEquipmentTypeMutationVariables
+>;
+export const GetInspectionPoolDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetInspectionPool' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'targetMonth' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'offset' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getInspectionPoolByMonth' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'targetMonth' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'targetMonth' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'offset' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'offset' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'model' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'serialNumber' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastInspectionDate' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'validUntil' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'isOverdue' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'controlType' },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'yearlySummary' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'month' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'autoCount' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'manualCount' },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetInspectionPoolQuery,
+  GetInspectionPoolQueryVariables
+>;
+export const CreateBulkInspectionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateBulkInspection' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'deviceIds' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'ID' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createBulkInspection' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'deviceIds' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'deviceIds' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CreateBulkInspectionMutation,
+  CreateBulkInspectionMutationVariables
 >;
 export const GetMeasurementTypesListDocument = {
   kind: 'Document',

@@ -44,8 +44,6 @@ query GetDevicesList {
     statusId
     productionSiteId
     equipmentTypeId
-    createdAt
-    updatedAt
   }
 }
 
@@ -108,6 +106,10 @@ query GetDevicesWithRelationsList(
           name
         }
       }
+      latestInspection {
+        id
+        date
+      }
       # scopes {
       #   name
       #  }
@@ -137,6 +139,20 @@ query GetDeviceWithRelation($id: ID!) {
     inventoryNumber
     receiptDate
     manufacturer
+    createdAt
+    updatedAt
+    createdBy {
+      id
+      firstName
+      lastName
+      role
+    }
+    updatedBy {
+      id
+      firstName
+      lastName
+      role
+    }
     documents {
       id
       name

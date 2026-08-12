@@ -18,7 +18,7 @@ const SIDEBAR_WIDTH = 240;
 const menu = [
   { item: 'Пользователи', path: routes.admin.users() },
   { item: 'Города', path: routes.admin.cities() },
-  { item: 'Компании', path: routes.admin.companies() },
+  { item: 'Организации', path: routes.admin.companies() },
   { item: 'Производственные участки', path: routes.admin.productionSites() },
   { item: 'Типы оборудования', path: routes.admin.equipmentTypes() },
   { item: 'Виды измерения', path: routes.admin.measurementTypes() },

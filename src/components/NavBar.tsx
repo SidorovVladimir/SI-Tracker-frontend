@@ -28,6 +28,7 @@ import {
   CloudUpload,
   Terminal,
   AccountBalanceWallet,
+  Build,
 } from '@mui/icons-material';
 import { HeaderNotificationsBell } from './HeaderNotificationsBell';
 import { HeaderChatButton } from './HeaderChatButton';
@@ -259,6 +260,24 @@ export default function NavBar() {
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
                         📅 Планировщик поверок
+                      </ListItemText>
+                    </MenuItem>
+
+                    <MenuItem
+                      component={Link}
+                      to={routes.inspectionPlanning()}
+                      onClick={handleAdminMenuClose}
+                    >
+                      <ListItemIcon sx={{ color: 'success.main' }}>
+                        {' '}
+                        {/* Сделали иконку зеленой под стиль страницы */}
+                        <Build fontSize="small" />{' '}
+                        {/* Иконка гаечного ключа (инструмента/ТО) */}
+                      </ListItemIcon>
+                      <ListItemText
+                        slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
+                      >
+                        🛠️ Журнал ТО и Осмотров
                       </ListItemText>
                     </MenuItem>
 

@@ -435,22 +435,26 @@ export const VerificationPlanningPage: React.FC = () => {
                   label={`Все приборы (${globalTotalCount})`}
                   sx={{ textTransform: 'none', fontWeight: 'bold' }}
                 />
-                {controlTypesData?.metrologyControlTypes.map((type) => {
-                  const serverCountObj = meta?.typeCounts.find(
-                    (t) =>
-                      t.typeName.toLowerCase().trim() ===
-                      type.name.toLowerCase().trim()
-                  );
-                  const count = serverCountObj?.count ?? 0;
-                  return (
-                    <Tab
-                      key={type.id}
-                      value={type.id}
-                      label={`${formatSentenceCase(type.name)} (${count})`}
-                      sx={{ textTransform: 'none', fontWeight: 'medium' }}
-                    />
-                  );
-                })}
+                {controlTypesData?.metrologyControlTypes
+                  ?.filter(
+                    (type) => type.name.toLowerCase().trim() !== 'осмотр'
+                  )
+                  .map((type) => {
+                    const serverCountObj = meta?.typeCounts.find(
+                      (t) =>
+                        t.typeName.toLowerCase().trim() ===
+                        type.name.toLowerCase().trim()
+                    );
+                    const count = serverCountObj?.count ?? 0;
+                    return (
+                      <Tab
+                        key={type.id}
+                        value={type.id}
+                        label={`${formatSentenceCase(type.name)} (${count})`}
+                        sx={{ textTransform: 'none', fontWeight: 'medium' }}
+                      />
+                    );
+                  })}
                 <Tab
                   value="NOT_SPECIFIED"
                   label={`Другие / Без контроля (${

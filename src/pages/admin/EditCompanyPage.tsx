@@ -42,7 +42,7 @@ export default function EditCompanyPage() {
   if (error)
     return (
       <Alert severity="error" sx={{ m: 3 }}>
-        Ошибка загрузки компаний: {error.message}
+        Ошибка загрузки организаций: {error.message}
       </Alert>
     );
   if (!data?.company) return <Alert>Город не найден</Alert>;
@@ -66,7 +66,7 @@ function UserForm({
     UpdateCompanyDocument,
     {
       onCompleted: () => {
-        enqueueSnackbar('Компания успешно обновлена', {
+        enqueueSnackbar('Организация успешно обновлена', {
           variant: 'success',
         });
         navigate(routes.admin.companies());
@@ -122,7 +122,7 @@ function UserForm({
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 3, mb: 6 }}>
       <Typography variant="h5" fontWeight="bold" gutterBottom>
-        Редактирование компании
+        Редактирование организации
       </Typography>
 
       <Paper

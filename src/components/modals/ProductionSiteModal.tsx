@@ -136,7 +136,7 @@ export default function ProductionSiteModal({ open, onClose }: any) {
           <TextField
             id="outlined-select-currency"
             select
-            label="Компания"
+            label="Организация"
             name="companyId"
             size="small"
             fullWidth

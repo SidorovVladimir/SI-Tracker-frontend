@@ -1317,7 +1317,7 @@ function UserForm({
                     <Stack spacing={2}>
                       <TextField
                         type="date"
-                        label="Дата поверки"
+                        label="Дата контроля"
                         value={verification.date.split('T')[0]}
                         onChange={(e) =>
                           handleVerificationChange(

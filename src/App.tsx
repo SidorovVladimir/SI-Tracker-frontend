@@ -55,6 +55,7 @@ import { BudgetPlanDetailPage } from './pages/BudgetPlanDetailPage';
 
 import { BudgetLayoutPage } from './pages/BudgetLayoutPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { InspectionPlanningPage } from './pages/InspectionPlanningPage';
 // import { UniversalRealTimeSync } from './components/UniversalRealTimeSync';
 
 // import HelpPage from './pages/HelpPage';
@@ -127,6 +128,10 @@ function App() {
             <Route
               path={routes.planning()}
               element={<VerificationPageContainer />}
+            />
+            <Route
+              path={routes.inspectionPlanning()}
+              element={<InspectionPlanningPage />}
             />
             <Route path={routes.analytics()} element={<AnalyticsPage />} />
             <Route

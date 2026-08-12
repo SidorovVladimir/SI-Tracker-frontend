@@ -4,6 +4,7 @@ export default {
   home: () => '/',
   profile: () => '/profile',
   planning: () => '/verification-planning',
+  inspectionPlanning: () => '/inspection-planning',
   analytics: () => '/analytics',
   productionAnalytics: () => '/production-analytics',
   import: () => '/import',

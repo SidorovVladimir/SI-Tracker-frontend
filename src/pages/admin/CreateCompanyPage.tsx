@@ -36,7 +36,7 @@ export default function CreateCompanyPage() {
       refetchQueries: [{ query: GetCompaniesDocument }],
       awaitRefetchQueries: true,
       onCompleted: () => {
-        enqueueSnackbar('Компания успешно создана', {
+        enqueueSnackbar('Организация успешно добавлена', {
           variant: 'success',
         });
         navigate(routes.admin.companies());
@@ -85,7 +85,7 @@ export default function CreateCompanyPage() {
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 3, mb: 6 }}>
       <Typography variant="h5" fontWeight="bold" gutterBottom>
-        Создание компании
+        Создание организации
       </Typography>
 
       <Paper

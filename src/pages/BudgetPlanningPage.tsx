@@ -224,7 +224,7 @@ export const BudgetPlanningPage: React.FC = () => {
                   label="Группировать отчет по"
                   onChange={(e: any) => setGroupBy(e.target.value)}
                 >
-                  <MenuItem value="COMPANY">🏢 По Компаниям</MenuItem>
+                  <MenuItem value="COMPANY">🏢 По Организациям</MenuItem>
                   <MenuItem value="CITY">📍 По Городам</MenuItem>
                   <MenuItem value="SITE">🏭 По Площадкам</MenuItem>
                 </Select>
@@ -234,10 +234,10 @@ export const BudgetPlanningPage: React.FC = () => {
             {/* Фильтр: Компания */}
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <FormControl fullWidth size="small">
-                <InputLabel>Компания</InputLabel>
+                <InputLabel>Организация</InputLabel>
                 <Select
                   value={companyId}
-                  label="Компания"
+                  label="Организация"
                   onChange={(e) => setCompanyId(e.target.value)}
                   sx={{
                     '& .MuiSelect-select': {
@@ -268,7 +268,7 @@ export const BudgetPlanningPage: React.FC = () => {
                   }}
                 >
                   <MenuItem value="ALL">
-                    <em>Все компании</em>
+                    <em>Все организации</em>
                   </MenuItem>
                   {companiesList.map((c) => (
                     <MenuItem key={c.id} value={c.id}>

@@ -363,6 +363,16 @@ export default function DevicesPage() {
       valueGetter: (_, row) =>
         cleanSpaces(row?.latestVerification?.metrologyControleType?.name),
     },
+
+    {
+      field: 'lastInspection',
+      headerName: 'Последний осмотр',
+      width: 150,
+      valueGetter: (_, row) =>
+        row.latestInspection?.date
+          ? formatDate(row.latestInspection.date)
+          : 'Не проводился',
+    },
     {
       field: 'status',
       headerName: 'Состояние',
