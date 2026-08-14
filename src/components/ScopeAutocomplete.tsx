@@ -4,12 +4,53 @@ import { Box, Autocomplete, TextField } from '@mui/material';
 // import ScopeModal from './modals/ScopeModal';
 import { cleanSpaces } from '../utils/capitalize';
 
+interface ScopeAutocompleteProps {
+  value: any[];
+  onChange: (event: any, newValue: any[]) => void;
+  scopesList: any[];
+}
+
 export default function ScopeAutocomplete({
   value,
   onChange,
   scopesList,
-}: any) {
+}: ScopeAutocompleteProps) {
   // const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleInternalChange = (event: any, newValue: any[]) => {
+    // Находим последний выбранный элемент в массиве
+    const lastSelected = newValue[newValue.length - 1];
+
+    if (lastSelected) {
+      const lastSelectedName = lastSelected.name.toLowerCase().trim();
+
+      // Сценарий 1: Пользователь последним кликом выбрал "НЕ ГР"
+      if (
+        lastSelectedName === 'не гр' ||
+        lastSelectedName === 'вне сферы государственного регулирования (не гр)'
+      ) {
+        // Принудительно оставляем в массиве ТОЛЬКО эту сферу, сбрасывая все остальные
+        onChange(event, [lastSelected]);
+        return;
+      }
+
+      // Сценарий 2: Была выбрана сфера "НЕ ГР", но пользователь кликнул на любую другую
+      // Мы отфильтровываем "НЕ ГР" из массива, оставляя только регулируемые сферы
+      const filteredValue = newValue.filter((scope) => {
+        const name = scope.name.toLowerCase().trim();
+        return (
+          name !== 'не гр' &&
+          name !== 'вне сферы государственного регулирования (не гр)'
+        );
+      });
+
+      onChange(event, filteredValue);
+      return;
+    }
+
+    // Если массив очистили полностью, просто прокидываем его дальше
+    onChange(event, newValue);
+  };
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Autocomplete
@@ -30,7 +71,7 @@ export default function ScopeAutocomplete({
         options={scopesList}
         getOptionLabel={(option) => cleanSpaces(option.name)}
         value={value}
-        onChange={onChange}
+        onChange={handleInternalChange}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         slotProps={{
           paper: {

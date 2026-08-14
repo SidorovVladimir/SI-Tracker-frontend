@@ -585,6 +585,35 @@ export type ImportDeviceItemInput = {
   verificationInterval?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type InspectedDevice = {
+  __typename: 'InspectedDevice';
+  id: Scalars['ID']['output'];
+  isSuccess: Scalars['Boolean']['output'];
+  model: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  serialNumber: Scalars['String']['output'];
+};
+
+export type InspectionArchiveResponse = {
+  __typename: 'InspectionArchiveResponse';
+  items: Array<InspectionBatchItem>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type InspectionBatchItem = {
+  __typename: 'InspectionBatchItem';
+  comment: Maybe<Scalars['String']['output']>;
+  date: Scalars['String']['output'];
+  devices: Array<InspectedDevice>;
+  id: Scalars['ID']['output'];
+  number: Scalars['String']['output'];
+};
+
+export type InspectionItemInput = {
+  deviceId: Scalars['ID']['input'];
+  isSuccess: Scalars['Boolean']['input'];
+};
+
 export type InspectionPoolItem = {
   __typename: 'InspectionPoolItem';
   controlType: Scalars['String']['output'];
@@ -724,7 +753,8 @@ export type MutationCreateBudgetPlanArgs = {
 };
 
 export type MutationCreateBulkInspectionArgs = {
-  deviceIds: Array<Scalars['ID']['input']>;
+  intervalMonths: Scalars['Int']['input'];
+  items: Array<InspectionItemInput>;
 };
 
 export type MutationCreateCityArgs = {
@@ -1084,6 +1114,7 @@ export type Query = {
   getDevicesBarcodeData: Array<DeviceBarcodeData>;
   getDraftBatchesByMonth: Array<DraftBatchOption>;
   getFinancialAnalytics: FinancialAnalyticsResponse;
+  getInspectionBatchesArchive: InspectionArchiveResponse;
   getInspectionPoolByMonth: InspectionPoolResponse;
   getJobStatus: Maybe<JobStatusResponse>;
   getPlanningPoolByMonth: PlanningPoolResponse;
@@ -1204,6 +1235,11 @@ export type QueryGetDraftBatchesByMonthArgs = {
 export type QueryGetFinancialAnalyticsArgs = {
   month?: InputMaybe<Scalars['Int']['input']>;
   year: Scalars['Int']['input'];
+};
+
+export type QueryGetInspectionBatchesArchiveArgs = {
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
 };
 
 export type QueryGetInspectionPoolByMonthArgs = {
@@ -2644,8 +2680,36 @@ export type GetInspectionPoolQuery = {
   };
 };
 
+export type GetInspectionArchiveQueryVariables = Exact<{
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+}>;
+
+export type GetInspectionArchiveQuery = {
+  getInspectionBatchesArchive: {
+    __typename: 'InspectionArchiveResponse';
+    totalCount: number;
+    items: Array<{
+      __typename: 'InspectionBatchItem';
+      id: string;
+      number: string;
+      date: string;
+      comment: string | null;
+      devices: Array<{
+        __typename: 'InspectedDevice';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+        isSuccess: boolean;
+      }>;
+    }>;
+  };
+};
+
 export type CreateBulkInspectionMutationVariables = Exact<{
-  deviceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+  items: Array<InspectionItemInput> | InspectionItemInput;
+  intervalMonths: Scalars['Int']['input'];
 }>;
 
 export type CreateBulkInspectionMutation = { createBulkInspection: boolean };
@@ -7692,6 +7756,124 @@ export const GetInspectionPoolDocument = {
   GetInspectionPoolQuery,
   GetInspectionPoolQueryVariables
 >;
+export const GetInspectionArchiveDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetInspectionArchive' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'offset' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getInspectionBatchesArchive' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'offset' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'offset' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'number' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'comment' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'devices' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'isSuccess' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetInspectionArchiveQuery,
+  GetInspectionArchiveQueryVariables
+>;
 export const CreateBulkInspectionDocument = {
   kind: 'Document',
   definitions: [
@@ -7704,7 +7886,7 @@ export const CreateBulkInspectionDocument = {
           kind: 'VariableDefinition',
           variable: {
             kind: 'Variable',
-            name: { kind: 'Name', value: 'deviceIds' },
+            name: { kind: 'Name', value: 'items' },
           },
           type: {
             kind: 'NonNullType',
@@ -7714,10 +7896,21 @@ export const CreateBulkInspectionDocument = {
                 kind: 'NonNullType',
                 type: {
                   kind: 'NamedType',
-                  name: { kind: 'Name', value: 'ID' },
+                  name: { kind: 'Name', value: 'InspectionItemInput' },
                 },
               },
             },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'intervalMonths' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
           },
         },
       ],
@@ -7730,10 +7923,18 @@ export const CreateBulkInspectionDocument = {
             arguments: [
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'deviceIds' },
+                name: { kind: 'Name', value: 'items' },
                 value: {
                   kind: 'Variable',
-                  name: { kind: 'Name', value: 'deviceIds' },
+                  name: { kind: 'Name', value: 'items' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'intervalMonths' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'intervalMonths' },
                 },
               },
             ],

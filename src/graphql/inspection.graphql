@@ -23,7 +23,29 @@ query GetInspectionPool($targetMonth: String!, $limit: Int!, $offset: Int!) {
   }
 }
 
+query GetInspectionArchive($limit: Int!, $offset: Int!) {
+  getInspectionBatchesArchive(limit: $limit, offset: $offset) {
+    items {
+      id
+      number
+      date
+      comment
+      devices {
+        id
+        name
+        model
+        serialNumber
+        isSuccess
+      }
+    }
+    totalCount
+  }
+}
+
 # 2. Мутация массовой фиксации осмотра мастером цеха
-mutation CreateBulkInspection($deviceIds: [ID!]!) {
-  createBulkInspection(deviceIds: $deviceIds)
+mutation CreateBulkInspection(
+  $items: [InspectionItemInput!]!
+  $intervalMonths: Int!
+) {
+  createBulkInspection(items: $items, intervalMonths: $intervalMonths)
 }
