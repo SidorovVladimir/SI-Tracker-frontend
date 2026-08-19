@@ -585,13 +585,11 @@ export type ImportDeviceItemInput = {
   verificationInterval?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type InspectedDevice = {
-  __typename: 'InspectedDevice';
+export type InspectedDeviceLink = {
+  __typename: 'InspectedDeviceLink';
+  device: Device;
+  deviceStatus: Scalars['String']['output'];
   id: Scalars['ID']['output'];
-  isSuccess: Scalars['Boolean']['output'];
-  model: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  serialNumber: Scalars['String']['output'];
 };
 
 export type InspectionArchiveResponse = {
@@ -604,7 +602,7 @@ export type InspectionBatchItem = {
   __typename: 'InspectionBatchItem';
   comment: Maybe<Scalars['String']['output']>;
   date: Scalars['String']['output'];
-  devices: Array<InspectedDevice>;
+  devicesToBatches: Array<InspectedDeviceLink>;
   id: Scalars['ID']['output'];
   number: Scalars['String']['output'];
 };
@@ -1041,6 +1039,11 @@ export type PrimaryStandart = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type PrintBarcodesInput = {
+  deviceIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  historyLinkIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
 export type ProductionAnalyticsResponse = {
   __typename: 'ProductionAnalyticsResponse';
   byCities: Array<QuantitiveItem>;
@@ -1225,7 +1228,7 @@ export type QueryGetCsmTariffTrendArgs = {
 };
 
 export type QueryGetDevicesBarcodeDataArgs = {
-  ids: Array<Scalars['ID']['input']>;
+  input: PrintBarcodesInput;
 };
 
 export type QueryGetDraftBatchesByMonthArgs = {
@@ -1240,6 +1243,7 @@ export type QueryGetFinancialAnalyticsArgs = {
 export type QueryGetInspectionBatchesArchiveArgs = {
   limit: Scalars['Int']['input'];
   offset: Scalars['Int']['input'];
+  year: Scalars['Int']['input'];
 };
 
 export type QueryGetInspectionPoolByMonthArgs = {
@@ -2586,7 +2590,7 @@ export type ExecuteRawSqlQuery = {
 };
 
 export type GetDevicesBarcodeDataQueryVariables = Exact<{
-  ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+  input: PrintBarcodesInput;
 }>;
 
 export type GetDevicesBarcodeDataQuery = {
@@ -2683,6 +2687,7 @@ export type GetInspectionPoolQuery = {
 export type GetInspectionArchiveQueryVariables = Exact<{
   limit: Scalars['Int']['input'];
   offset: Scalars['Int']['input'];
+  year: Scalars['Int']['input'];
 }>;
 
 export type GetInspectionArchiveQuery = {
@@ -2695,13 +2700,17 @@ export type GetInspectionArchiveQuery = {
       number: string;
       date: string;
       comment: string | null;
-      devices: Array<{
-        __typename: 'InspectedDevice';
+      devicesToBatches: Array<{
+        __typename: 'InspectedDeviceLink';
         id: string;
-        name: string;
-        model: string;
-        serialNumber: string;
-        isSuccess: boolean;
+        deviceStatus: string;
+        device: {
+          __typename: 'Device';
+          id: string;
+          name: string;
+          model: string;
+          serialNumber: string;
+        };
       }>;
     }>;
   };
@@ -7377,18 +7386,15 @@ export const GetDevicesBarcodeDataDocument = {
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'ids' } },
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
           type: {
             kind: 'NonNullType',
             type: {
-              kind: 'ListType',
-              type: {
-                kind: 'NonNullType',
-                type: {
-                  kind: 'NamedType',
-                  name: { kind: 'Name', value: 'ID' },
-                },
-              },
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'PrintBarcodesInput' },
             },
           },
         },
@@ -7402,10 +7408,10 @@ export const GetDevicesBarcodeDataDocument = {
             arguments: [
               {
                 kind: 'Argument',
-                name: { kind: 'Name', value: 'ids' },
+                name: { kind: 'Name', value: 'input' },
                 value: {
                   kind: 'Variable',
-                  name: { kind: 'Name', value: 'ids' },
+                  name: { kind: 'Name', value: 'input' },
                 },
               },
             ],
@@ -7786,6 +7792,14 @@ export const GetInspectionArchiveDocument = {
             type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
           },
         },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'year' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
       ],
       selectionSet: {
         kind: 'SelectionSet',
@@ -7810,6 +7824,14 @@ export const GetInspectionArchiveDocument = {
                   name: { kind: 'Name', value: 'offset' },
                 },
               },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'year' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'year' },
+                },
+              },
             ],
             selectionSet: {
               kind: 'SelectionSet',
@@ -7832,7 +7854,7 @@ export const GetInspectionArchiveDocument = {
                       },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'devices' },
+                        name: { kind: 'Name', value: 'devicesToBatches' },
                         selectionSet: {
                           kind: 'SelectionSet',
                           selections: [
@@ -7842,19 +7864,35 @@ export const GetInspectionArchiveDocument = {
                             },
                             {
                               kind: 'Field',
-                              name: { kind: 'Name', value: 'name' },
+                              name: { kind: 'Name', value: 'deviceStatus' },
                             },
                             {
                               kind: 'Field',
-                              name: { kind: 'Name', value: 'model' },
-                            },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'serialNumber' },
-                            },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'isSuccess' },
+                              name: { kind: 'Name', value: 'device' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'id' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'name' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'model' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'serialNumber',
+                                    },
+                                  },
+                                ],
+                              },
                             },
                           ],
                         },

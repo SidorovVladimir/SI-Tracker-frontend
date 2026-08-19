@@ -4,13 +4,16 @@ import {
   CreateDeviceDocument,
   FetchArshinVerificationsDocument,
   FindArshinDocumentUrlDocument,
+  GetCompaniesDocument,
   // GetDevicesWithRelationsListDocument,
   GetEquipmentTypesListDocument,
   GetMeasurementTypesListDocument,
   GetMetrologyControlTypesListDocument,
   GetPrimaryStandartsListDocument,
-  GetProductionSitesForSelectDocument,
+  GetProductionSitesDocument,
+  // GetProductionSitesForSelectDocument,
   GetScopesListDocument,
+  GetSitiesDocument,
   GetStatusListDocument,
   GetVerificationOrganizationsListDocument,
 } from '../../graphql/types/__generated__/graphql';
@@ -67,9 +70,15 @@ export default function CreateDevicePage(props: {
     fetchPolicy: 'network-only',
   });
 
-  const { data: productionSiteData } = useQuery(
-    GetProductionSitesForSelectDocument
-  );
+  // const { data: productionSiteData } = useQuery(
+  //   GetProductionSitesForSelectDocument
+  // );
+
+  const { data: productionSiteData } = useQuery(GetProductionSitesDocument);
+  const { data: citiesData } = useQuery(GetSitiesDocument);
+
+  const { data: companiesData } = useQuery(GetCompaniesDocument);
+
   const { data: equipmentTypesData } = useQuery(GetEquipmentTypesListDocument);
   const { data: statusesData } = useQuery(GetStatusListDocument);
   const { data: measurementTypesData } = useQuery(
@@ -103,6 +112,8 @@ export default function CreateDevicePage(props: {
     nomenclature: string;
     comment: string;
     statusId: string;
+    cityId: string;
+    companyId: string;
     productionSiteId: string;
     equipmentTypeId: string;
     scopes: { id: string; name: string }[];
@@ -125,6 +136,8 @@ export default function CreateDevicePage(props: {
     nomenclature: '',
     comment: '',
     statusId: '',
+    cityId: '',
+    companyId: '',
     productionSiteId: '',
     equipmentTypeId: '',
     measurementTypes: [],
@@ -370,8 +383,14 @@ export default function CreateDevicePage(props: {
     );
   };
 
-  const productionSiteList =
-    productionSiteData?.getProductionSitesForSelect || [];
+  const citiesList = citiesData?.cities || [];
+  const companiesList = companiesData?.companies || [];
+
+  // const productionSiteList =
+  //   productionSiteData?.getProductionSitesForSelect || [];
+
+  const productionSiteList = productionSiteData?.productionSites || [];
+
   const equipmentTypesList = equipmentTypesData?.equipmentTypes || [];
   const statusesList = statusesData?.statuses || [];
   const measurementTypesList = measurementTypesData?.measurementTypes || [];
@@ -404,6 +423,23 @@ export default function CreateDevicePage(props: {
       },
     }
   );
+
+  const handleCityChange = (e: any) => {
+    setForm((prev) => ({
+      ...prev,
+      cityId: e.target.value,
+      companyId: '',
+      productionSiteId: '',
+    }));
+  };
+
+  const handleCompanyChange = (e: any) => {
+    setForm((prev) => ({
+      ...prev,
+      companyId: e.target.value,
+      productionSiteId: '',
+    }));
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -441,8 +477,10 @@ export default function CreateDevicePage(props: {
       cost: v.cost ? parseFloat(v.cost) : 0,
     }));
 
+    const { cityId, companyId, ...dataToSend } = form;
+
     const data = {
-      ...form,
+      ...dataToSend,
       grsiNumber: form.grsiNumber || null,
       releaseDate: form.releaseDate || null,
       csmCode: form.csmCode || null,
@@ -667,9 +705,19 @@ export default function CreateDevicePage(props: {
             statusesList={statusesList}
           />
 
-          <ProductionSiteTextField
+          {/* <ProductionSiteTextField
             value={form.productionSiteId}
             onChange={handleChange}
+            productionSiteList={productionSiteList}
+          /> */}
+
+          <ProductionSiteTextField
+            form={form}
+            onChange={handleChange}
+            onCityChange={handleCityChange}
+            onCompanyChange={handleCompanyChange}
+            citiesList={citiesList}
+            companiesList={companiesList}
             productionSiteList={productionSiteList}
           />
 

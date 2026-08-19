@@ -7,64 +7,40 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  // MenuItem,
   Stack,
   TextField,
 } from '@mui/material';
 import { useState } from 'react';
 import {
-  CreateProductionSiteDocument,
-  GetProductionSitesDocument,
+  CreateCompanyDocument,
+  GetCompaniesDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
 type FieldErrors = {
   name?: string;
-  companyId?: string;
-  cityId?: string;
 };
-export default function ProductionSiteModal({
-  open,
-  onChange,
-  onClose,
-  defaultCityId,
-  defaultCompanyId,
-}: {
-  open: any;
-  onClose: any;
-  onChange: any;
-  defaultCityId: string;
-  defaultCompanyId: string;
-}) {
-  // const { data: citiesData } = useQuery(GetSitiesDocument);
-  // const { data: companiesData } = useQuery(GetCompaniesDocument);
-
+export default function CompanyModal({ open, onClose, onChange }: any) {
   const [form, setForm] = useState<{
     name: string;
-    // companyId: string;
-    // cityId: string;
   }>({
     name: '',
-    // companyId: '',
-    // cityId: '',
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  // const сitiesList = citiesData?.cities || [];
-  // const companiesList = companiesData?.companies || [];
 
-  const [createProductionSite, { loading: creating }] = useMutation(
-    CreateProductionSiteDocument,
+  const [createCompany, { loading: creating }] = useMutation(
+    CreateCompanyDocument,
     {
-      refetchQueries: [{ query: GetProductionSitesDocument }],
+      refetchQueries: [{ query: GetCompaniesDocument }],
       awaitRefetchQueries: true,
       onCompleted: (data) => {
-        enqueueSnackbar('Производственный участок успешно создан', {
+        enqueueSnackbar('Организация успешно создана', {
           variant: 'success',
         });
 
         onChange({
           target: {
-            name: 'productionSiteId',
-            value: data.createProductionSite.id,
+            name: 'companyId',
+            value: data.createCompany.id,
           },
         });
         onClose(true);
@@ -77,12 +53,6 @@ export default function ProductionSiteModal({
             parsed.forEach((err) => {
               if (err.path.includes('name')) {
                 errors.name = err.message;
-              }
-              if (err.path.includes('companyId')) {
-                errors.companyId = err.message;
-              }
-              if (err.path.includes('cityId')) {
-                errors.cityId = err.message;
               }
             });
             setFieldErrors(errors);
@@ -110,15 +80,15 @@ export default function ProductionSiteModal({
     e.preventDefault();
     setFieldErrors({});
 
-    await createProductionSite({
+    await createCompany({
       variables: {
-        input: { ...form, cityId: defaultCityId, companyId: defaultCompanyId },
+        input: form,
       },
     });
   };
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Новый производственный участок</DialogTitle>
+      <DialogTitle>Новая организация</DialogTitle>
       <DialogContent>
         <Stack sx={{ mt: 2 }} spacing={3}>
           <TextField
@@ -133,44 +103,6 @@ export default function ProductionSiteModal({
             error={!!fieldErrors.name}
             helperText={fieldErrors.name}
           />
-          {/* <TextField
-            id="outlined-select-currency"
-            select
-            label="Город"
-            name="cityId"
-            size="small"
-            fullWidth
-            required
-            onChange={handleChange}
-            value={form.cityId}
-            error={!!fieldErrors.cityId}
-            helperText={fieldErrors.cityId}
-          >
-            {сitiesList.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            id="outlined-select-currency"
-            select
-            label="Организация"
-            name="companyId"
-            size="small"
-            fullWidth
-            required
-            onChange={handleChange}
-            value={form.companyId}
-            error={!!fieldErrors.companyId}
-            helperText={fieldErrors.companyId}
-          >
-            {companiesList.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </TextField> */}
           <Divider sx={{ my: 2 }} />
         </Stack>
       </DialogContent>

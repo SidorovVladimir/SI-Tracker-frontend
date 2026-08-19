@@ -71,54 +71,107 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
   const [statusTab, setStatusTab] = useState<string>('ACTIVE'); // 'ACTIVE' | 'DRAFT' | 'SENT' | 'COMPLETED'
   const [batchJobs, setBatchJobs] = useState<Record<string, string>>({});
 
-  const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
+  // const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
+  const [selectedLinkIds, setSelectedLinkIds] = useState<string[]>([]);
 
-  const handleDeviceSelect = (deviceId: string) => {
-    setSelectedDeviceIds((prev) =>
-      prev.includes(deviceId)
-        ? prev.filter((id) => id !== deviceId)
-        : [...prev, deviceId]
+  const handleLinkSelect = (linkId: string) => {
+    setSelectedLinkIds((prev) =>
+      prev.includes(linkId)
+        ? prev.filter((id) => id !== linkId)
+        : [...prev, linkId]
     );
   };
 
-  const handleDeviceClick = (id: string) => {
-    setEditingDeviceId(id);
-  };
-
-  const handleSelectAllDevices = (devicesInBatch: any[], batchId: string) => {
-    // 1. Фильтруем приборы партии, у которых поверка пройдена (isDeviceVerified = true)
-    const selectableDeviceIds = devicesInBatch
+  // 🎯 3. МАССОВЫЙ ВЫБОР: "Выбрать все" с учетом контекста (ЦСМ или Архив)
+  const handleSelectAllLinks = (
+    devicesInBatch: any[],
+    batchId: string,
+    isCompletedBatch: boolean
+  ) => {
+    // Фильтруем приборы партии, доступные для выделения
+    const selectableLinkIds = devicesInBatch
       .filter((link) => {
+        // Если партия в Архиве — доступны ВСЕ приборы без исключения
+        if (isCompletedBatch) return true;
+
+        // If партия в ЦСМ — только те, что поверены на сервере или локально
         const currentVerification = link.device.verifications?.find(
           (v: any) => v.batchId === batchId
         );
         const isBackendVerified = !!currentVerification;
         const isLocallyVerified = locallyVerifiedIds.includes(link.device.id);
 
-        return isBackendVerified || isLocallyVerified; // Условие доступности чекбокса
+        return isBackendVerified || isLocallyVerified; // Чекбокс доступен только для поверенных СИ
       })
-      .map((link) => link.device.id);
+      .map((link) => link.id); // 🎯 Сохраняем именно link.id строки связи
 
-    if (selectableDeviceIds.length === 0) return;
+    if (selectableLinkIds.length === 0) return;
 
-    // 2. Проверяем, выбраны ли уже ВСЕ доступные приборы этой партии
-    const isAllChecked = selectableDeviceIds.every((id) =>
-      selectedDeviceIds.includes(id)
+    // Проверяем, выбраны ли уже ВСЕ доступные приборы этой партии
+    const isAllChecked = selectableLinkIds.every((id) =>
+      selectedLinkIds.includes(id)
     );
 
     if (isAllChecked) {
-      // Если все уже выбраны — убираем их из общего стейта (снимаем галочки)
-      setSelectedDeviceIds((prev) =>
-        prev.filter((id) => !selectableDeviceIds.includes(id))
+      // Если все уже выбраны — снимаем галочки с этой партии
+      setSelectedLinkIds((prev) =>
+        prev.filter((id) => !selectableLinkIds.includes(id))
       );
     } else {
-      // Если выбраны не все — добавляем только те id, которых еще нет в стейте selectedDeviceIds
-      setSelectedDeviceIds((prev) => {
-        const uniqueIds = new Set([...prev, ...selectableDeviceIds]);
+      // Если выбраны не все — добавляем недостающие link.id в общий стейт
+      setSelectedLinkIds((prev) => {
+        const uniqueIds = new Set([...prev, ...selectableLinkIds]);
         return Array.from(uniqueIds);
       });
     }
   };
+
+  // const handleDeviceSelect = (deviceId: string) => {
+  //   setSelectedDeviceIds((prev) =>
+  //     prev.includes(deviceId)
+  //       ? prev.filter((id) => id !== deviceId)
+  //       : [...prev, deviceId]
+  //   );
+  // };
+
+  const handleDeviceClick = (id: string) => {
+    setEditingDeviceId(id);
+  };
+
+  // const handleSelectAllDevices = (devicesInBatch: any[], batchId: string) => {
+  //   // 1. Фильтруем приборы партии, у которых поверка пройдена (isDeviceVerified = true)
+  //   const selectableDeviceIds = devicesInBatch
+  //     .filter((link) => {
+  //       const currentVerification = link.device.verifications?.find(
+  //         (v: any) => v.batchId === batchId
+  //       );
+  //       const isBackendVerified = !!currentVerification;
+  //       const isLocallyVerified = locallyVerifiedIds.includes(link.device.id);
+
+  //       return isBackendVerified || isLocallyVerified; // Условие доступности чекбокса
+  //     })
+  //     .map((link) => link.device.id);
+
+  //   if (selectableDeviceIds.length === 0) return;
+
+  //   // 2. Проверяем, выбраны ли уже ВСЕ доступные приборы этой партии
+  //   const isAllChecked = selectableDeviceIds.every((id) =>
+  //     selectedDeviceIds.includes(id)
+  //   );
+
+  //   if (isAllChecked) {
+  //     // Если все уже выбраны — убираем их из общего стейта (снимаем галочки)
+  //     setSelectedDeviceIds((prev) =>
+  //       prev.filter((id) => !selectableDeviceIds.includes(id))
+  //     );
+  //   } else {
+  //     // Если выбраны не все — добавляем только те id, которых еще нет в стейте selectedDeviceIds
+  //     setSelectedDeviceIds((prev) => {
+  //       const uniqueIds = new Set([...prev, ...selectableDeviceIds]);
+  //       return Array.from(uniqueIds);
+  //     });
+  //   }
+  // };
 
   const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
 
@@ -474,7 +527,10 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
           {/* Вкладки под-статусов журнала */}
           <Tabs
             value={statusTab}
-            onChange={(_e, newValue) => setStatusTab(newValue)}
+            onChange={(_e, newValue) => {
+              setSelectedLinkIds([]);
+              setStatusTab(newValue);
+            }}
             variant="scrollable"
             scrollButtons="auto"
             allowScrollButtonsMobile
@@ -689,7 +745,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                     Приборы в этой партии:
                   </Typography>
 
-                  {isSent &&
+                  {/* {isSent &&
                     (() => {
                       const selectableInBatch = batch.devicesToBatches.filter(
                         (link) => {
@@ -753,6 +809,76 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                           />
                         </Tooltip>
                       );
+                    })()} */}
+
+                  {(isSent || isCompleted) &&
+                    (() => {
+                      const selectableInBatch = batch.devicesToBatches.filter(
+                        (link) => {
+                          // Если партия в Архиве — доступны ВСЕ приборы без исключения
+                          if (isCompleted) return true;
+
+                          // Если партия в ЦСМ — только те, что поверены на сервере или локально
+                          const currentVerification =
+                            link.device.verifications?.find(
+                              (v) => v.batchId === batch.id
+                            );
+                          return (
+                            !!currentVerification ||
+                            locallyVerifiedIds.includes(link.device.id)
+                          );
+                        }
+                      );
+
+                      const selectableIds = selectableInBatch.map(
+                        (link) => link.id
+                      );
+                      const checkedCount = selectableIds.filter((id) =>
+                        selectedLinkIds.includes(id)
+                      ).length;
+
+                      const isAllChecked =
+                        selectableIds.length > 0 &&
+                        checkedCount === selectableIds.length;
+                      const isIndeterminate =
+                        checkedCount > 0 && checkedCount < selectableIds.length;
+
+                      return (
+                        <Tooltip
+                          title="Выбрать приборы для печати бирок"
+                          placement="top"
+                          arrow
+                        >
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                size="small"
+                                checked={isAllChecked}
+                                indeterminate={isIndeterminate}
+                                disabled={selectableIds.length === 0}
+                                // Передаем флаг isCompleted, чтобы функция знала, какой режим фильтрации использовать
+                                onChange={() =>
+                                  handleSelectAllLinks(
+                                    batch.devicesToBatches,
+                                    batch.id,
+                                    isCompleted
+                                  )
+                                }
+                              />
+                            }
+                            label={
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ fontWeight: 500 }}
+                              >
+                                Выбрать все
+                              </Typography>
+                            }
+                            sx={{ mr: 0 }}
+                          />
+                        </Tooltip>
+                      );
                     })()}
                 </Stack>
 
@@ -788,9 +914,9 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                     const isDeviceVerified =
                       isBackendVerified || isLocallyVerified;
 
-                    const isChecked = selectedDeviceIds.includes(
-                      link.device.id
-                    );
+                    // const isChecked = selectedDeviceIds.includes(
+                    //   link.device.id
+                    // );
 
                     return (
                       <Paper
@@ -808,7 +934,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                           bgcolor: 'background.paper',
                         }}
                       >
-                        {isSent && (
+                        {/* {isSent && (
                           <Tooltip
                             title={
                               isDeviceVerified
@@ -829,6 +955,31 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                 onChange={() =>
                                   handleDeviceSelect(link.device.id)
                                 }
+                              />
+                            </Box>
+                          </Tooltip>
+                        )} */}
+
+                        {(isSent || isCompleted) && (
+                          <Tooltip
+                            title={
+                              isCompleted || isDeviceVerified
+                                ? 'Выбрать для печати бирки'
+                                : 'Печать недоступна: прибор еще не поверен'
+                            }
+                            placement="top"
+                            arrow
+                          >
+                            <Box
+                              component="span"
+                              sx={{ display: 'inline-flex', mr: 1 }}
+                            >
+                              <Checkbox
+                                size="small"
+                                checked={selectedLinkIds.includes(link.id)} // Проверка по link.id
+                                // В архиве чекбокс ВСЕГДА активен. В ЦСМ — только если прибор поверен
+                                disabled={isSent ? !isDeviceVerified : false}
+                                onChange={() => handleLinkSelect(link.id)} // В стейт летит link.id
                               />
                             </Box>
                           </Tooltip>
@@ -1147,7 +1298,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                         size="small"
                         startIcon={<QrCode />}
                         onClick={() => setIsBarcodeModalOpen(true)}
-                        disabled={selectedDeviceIds.length === 0}
+                        disabled={selectedLinkIds.length === 0}
                         sx={{
                           height: 36,
                           width: { xs: '100%', sm: 'auto' },
@@ -1156,7 +1307,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                           borderRadius: 2,
                         }}
                       >
-                        Печать бирок ({selectedDeviceIds.length})
+                        Печать бирок ({selectedLinkIds.length})
                       </Button>
 
                       <Tooltip
@@ -1225,6 +1376,26 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                       </Button>
                     </>
                   )}
+
+                  {isCompleted && (
+                    <Button
+                      variant="contained" // Сделаем её яркой акцентной в архиве
+                      color="primary"
+                      size="small"
+                      startIcon={<QrCode />}
+                      onClick={() => setIsBarcodeModalOpen(true)}
+                      disabled={selectedLinkIds.length === 0}
+                      sx={{
+                        height: 36,
+                        width: { xs: '100%', sm: 'auto' },
+                        textTransform: 'none',
+                        fontWeight: 'bold',
+                        borderRadius: 2,
+                      }}
+                    >
+                      Печать архивных бирок ({selectedLinkIds.length})
+                    </Button>
+                  )}
                 </Box>
               </AccordionDetails>
             </Accordion>
@@ -1244,7 +1415,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
       <BarcodePrintModal
         open={isBarcodeModalOpen}
         onClose={() => setIsBarcodeModalOpen(false)}
-        deviceIds={selectedDeviceIds}
+        historyLinkIds={selectedLinkIds}
       />
 
       <Dialog

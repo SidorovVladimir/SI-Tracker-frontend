@@ -339,7 +339,7 @@ export default function DevicesPage() {
     },
     {
       field: 'verificationDate',
-      headerName: 'Дата поверки',
+      headerName: 'Дата контроля',
       flex: 1,
       minWidth: 130,
       valueGetter: (_, row) =>
@@ -347,7 +347,7 @@ export default function DevicesPage() {
     },
     {
       field: 'verificationNextDate',
-      headerName: 'Дата следующей поверки',
+      headerName: 'Дата следующего контроля',
       flex: 1,
       minWidth: 150,
       valueGetter: (_, row) =>
@@ -362,6 +362,52 @@ export default function DevicesPage() {
       minWidth: 140,
       valueGetter: (_, row) =>
         cleanSpaces(row?.latestVerification?.metrologyControleType?.name),
+
+      renderCell: (params) => {
+        const typeName = params.value;
+
+        if (!typeName) {
+          return (
+            <Typography
+              variant="body2"
+              color="text.disabled"
+              sx={{ fontSize: '0.77rem' }}
+            >
+              —
+            </Typography>
+          );
+        }
+
+        const lowerName = String(typeName).toLowerCase().trim();
+
+        // Определяем цвет и стиль чипса в зависимости от вида контроля
+        let chipColor: 'primary' | 'secondary' | 'info' | 'default' = 'default';
+
+        if (lowerName === 'поверка') {
+          chipColor = 'primary'; // Синий
+        } else if (lowerName === 'калибровка') {
+          chipColor = 'secondary'; // Фиолетовый
+        } else if (lowerName === 'аттестация') {
+          chipColor = 'info'; // Голубой
+        }
+
+        return (
+          <Chip
+            label={typeName}
+            size="small"
+            color={chipColor}
+            variant="outlined"
+            sx={{
+              fontSize: '0.68rem',
+              fontWeight: 'bold',
+              height: 20,
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase', // Поддерживаем ваш общий стиль капса
+              borderRadius: '4px', // Делаем его квадратным/аккуратным под компактную сетку
+            }}
+          />
+        );
+      },
     },
 
     {

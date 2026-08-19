@@ -65,7 +65,7 @@ export const InspectionSaveModal: React.FC<InspectionSaveModalProps> = ({
             select
             fullWidth
             size="small"
-            label="Периодичность повторного обхода"
+            label="Периодичность повторного осмотра"
             value={interval}
             onChange={(e) => setInterval(parseInt(e.target.value, 10))}
           >
@@ -132,7 +132,7 @@ export const InspectionSaveModal: React.FC<InspectionSaveModalProps> = ({
           disabled={loading}
           sx={{ textTransform: 'none', fontWeight: 'bold' }}
         >
-          Сохранить акт обхода
+          Сохранить акт осмотра
         </Button>
       </DialogActions>
     </Dialog>

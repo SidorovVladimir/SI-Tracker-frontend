@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
   CreateCompanyDocument,
-  GetCompaniesDocument,
+  // GetCompaniesDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
 import routes from '../../utils/routes';
@@ -33,7 +33,7 @@ export default function CreateCompanyPage() {
   const [createCompany, { loading: creating }] = useMutation(
     CreateCompanyDocument,
     {
-      refetchQueries: [{ query: GetCompaniesDocument }],
+      // refetchQueries: [{ query: GetCompaniesDocument }],
       awaitRefetchQueries: true,
       onCompleted: () => {
         enqueueSnackbar('Организация успешно добавлена', {

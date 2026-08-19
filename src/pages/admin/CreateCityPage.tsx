@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
   CreateCityDocument,
-  GetSitiesDocument,
+  // GetSitiesDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
 import routes from '../../utils/routes';
@@ -30,7 +30,7 @@ export default function CreateCityPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const [createCity, { loading: creating }] = useMutation(CreateCityDocument, {
-    refetchQueries: [{ query: GetSitiesDocument }],
+    // refetchQueries: [{ query: GetSitiesDocument }],
     awaitRefetchQueries: true,
     onCompleted: () => {
       enqueueSnackbar('Город успешно создан', {

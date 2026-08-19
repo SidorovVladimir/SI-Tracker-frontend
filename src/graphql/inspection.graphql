@@ -23,19 +23,22 @@ query GetInspectionPool($targetMonth: String!, $limit: Int!, $offset: Int!) {
   }
 }
 
-query GetInspectionArchive($limit: Int!, $offset: Int!) {
-  getInspectionBatchesArchive(limit: $limit, offset: $offset) {
+query GetInspectionArchive($limit: Int!, $offset: Int!, $year: Int!) {
+  getInspectionBatchesArchive(limit: $limit, offset: $offset, year: $year) {
     items {
       id
       number
       date
       comment
-      devices {
+      devicesToBatches {
         id
-        name
-        model
-        serialNumber
-        isSuccess
+        deviceStatus
+        device {
+          id
+          name
+          model
+          serialNumber
+        }
       }
     }
     totalCount

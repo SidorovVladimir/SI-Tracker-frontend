@@ -55,7 +55,7 @@ export const InspectionYearlyCalendar: React.FC<
           fontSize: { xs: '1.1rem', md: '1.25rem' },
         }}
       >
-        🛠️ Осмотры {currentYear}
+        🛠️ Календарь осмотров {currentYear}
       </Typography>
 
       {loading ? (

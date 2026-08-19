@@ -4,6 +4,8 @@ import {
   DeleteDeviceDocument,
   FetchArshinVerificationsDocument,
   FindArshinDocumentUrlDocument,
+  GetCompaniesDocument,
+  GetCompaniesQuery,
   // GetDevicesWithRelationsListDocument,
   GetDeviceWithRelationDocument,
   GetDeviceWithRelationQuery,
@@ -15,10 +17,14 @@ import {
   GetMetrologyControlTypesListQuery,
   GetPrimaryStandartsListDocument,
   GetPrimaryStandartsListQuery,
-  GetProductionSitesForSelectDocument,
-  GetProductionSitesForSelectQuery,
+  GetProductionSitesDocument,
+  // GetProductionSitesForSelectDocument,
+  // GetProductionSitesForSelectQuery,
+  GetProductionSitesQuery,
   GetScopesListDocument,
   GetScopesListQuery,
+  GetSitiesDocument,
+  GetSitiesQuery,
   GetStatusListDocument,
   GetStatusListQuery,
   GetVerificationOrganizationsListDocument,
@@ -89,8 +95,14 @@ export default function EditDevicePage(props: {
   });
 
   const { data: productionSiteData, loading: productionSiteLoading } = useQuery(
-    GetProductionSitesForSelectDocument
+    GetProductionSitesDocument
   );
+
+  const { data: citiesData, loading: citiesLoading } =
+    useQuery(GetSitiesDocument);
+  const { data: companiesData, loading: companiesLoading } =
+    useQuery(GetCompaniesDocument);
+
   const { data: equipmentData, loading: equipmentLoading } = useQuery(
     GetEquipmentTypesListDocument
   );
@@ -116,6 +128,8 @@ export default function EditDevicePage(props: {
   const anyLoading =
     deviceLoading ||
     productionSiteLoading ||
+    citiesLoading ||
+    companiesLoading ||
     equipmentLoading ||
     statusesLoading ||
     measurementLoading ||
@@ -145,7 +159,9 @@ export default function EditDevicePage(props: {
     <UserForm
       key={deviceId}
       device={deviceData.device}
-      productionSiteList={productionSiteData?.getProductionSitesForSelect || []}
+      citiesList={citiesData?.cities || []}
+      companiesList={companiesData?.companies || []}
+      productionSiteList={productionSiteData?.productionSites || []}
       equipmentTypesList={equipmentData?.equipmentTypes || []}
       statusesList={statusesData?.statuses || []}
       measurementTypesList={measurementData?.measurementTypes || []}
@@ -162,9 +178,14 @@ export default function EditDevicePage(props: {
 
 interface UserFormProps {
   device: NonNullable<GetDeviceWithRelationQuery['device']>;
+  // productionSiteList: NonNullable<
+  //   GetProductionSitesForSelectQuery['getProductionSitesForSelect']
+  // >[number][];
   productionSiteList: NonNullable<
-    GetProductionSitesForSelectQuery['getProductionSitesForSelect']
+    GetProductionSitesQuery['productionSites']
   >[number][];
+  citiesList: NonNullable<GetSitiesQuery['cities']>[number][];
+  companiesList: NonNullable<GetCompaniesQuery['companies']>[number][];
   equipmentTypesList: NonNullable<
     GetEquipmentTypesListQuery['equipmentTypes']
   >[number][];
@@ -194,6 +215,8 @@ function UserForm({
   close,
   refetchDevice,
   productionSiteList,
+  citiesList,
+  companiesList,
   equipmentTypesList,
   statusesList,
   measurementTypesList,
@@ -237,6 +260,8 @@ function UserForm({
     nomenclature: string;
     comment: string;
     statusId: string;
+    cityId: string;
+    companyId: string;
     productionSiteId: string;
     equipmentTypeId: string;
     measurementTypes: { id: string; name: string }[];
@@ -273,6 +298,8 @@ function UserForm({
     nomenclature: device?.nomenclature || '',
     comment: device.comment || '',
     statusId: device.status.id || '',
+    cityId: device.productionSite.city.id || '',
+    companyId: device.productionSite.company.id || '',
     productionSiteId: device.productionSite.id || '',
     equipmentTypeId: device.equipmentType?.id || '',
     measurementTypes: device.measurementTypes,
@@ -659,8 +686,10 @@ function UserForm({
       cost: v.cost !== '' ? parseFloat(String(v.cost)) : 0,
     }));
 
+    const { cityId, companyId, ...dataToSend } = form;
+
     const data = {
-      ...form,
+      ...dataToSend,
       grsiNumber: form.grsiNumber || null,
       csmCode: form.csmCode || null,
       releaseDate: form.releaseDate || null,
@@ -709,6 +738,23 @@ function UserForm({
     const regex =
       /^https:\/\/fgis\.gost\.ru\/fundmetrology\/cm\/results\/\d+-\d+$/;
     return regex.test(url.trim());
+  };
+
+  const handleCityChange = (e: any) => {
+    setForm((prev) => ({
+      ...prev,
+      cityId: e.target.value,
+      companyId: '',
+      productionSiteId: '',
+    }));
+  };
+
+  const handleCompanyChange = (e: any) => {
+    setForm((prev) => ({
+      ...prev,
+      companyId: e.target.value,
+      productionSiteId: '',
+    }));
   };
 
   return (
@@ -1115,9 +1161,19 @@ function UserForm({
             statusesList={statusesList}
           />
 
-          <ProductionSiteTextField
+          {/* <ProductionSiteTextField
             value={form.productionSiteId || ''}
             onChange={handleChange}
+            productionSiteList={productionSiteList}
+          /> */}
+
+          <ProductionSiteTextField
+            form={form}
+            onChange={handleChange}
+            onCityChange={handleCityChange}
+            onCompanyChange={handleCompanyChange}
+            citiesList={citiesList}
+            companiesList={companiesList}
             productionSiteList={productionSiteList}
           />
 

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Box, Tabs, Tab } from '@mui/material';
-import { BatchesJournalPage } from './BatchesJournalPage';
 import { InspectionPlanningPage } from './InspectionPlanningPage';
+import { InspectionJournalPage } from './InspectionJornalPage';
 
 export const InspectionPageContainer: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [locallyVerifiedIds, setLocallyVerifiedIds] = useState<string[]>([]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -60,7 +59,7 @@ export const InspectionPageContainer: React.FC = () => {
             <Tab
               // icon={<LocalShippingIcon fontSize="small" />}
               iconPosition="start"
-              label="📦 Архив актов ТО цеха"
+              label="📦 Архив актов ТО"
               sx={{ textTransform: 'none', fontWeight: 'bold', minHeight: 48 }}
             />
           </Tabs>
@@ -79,12 +78,7 @@ export const InspectionPageContainer: React.FC = () => {
         }}
       >
         {activeTab === 0 && <InspectionPlanningPage />}
-        {activeTab === 1 && (
-          <BatchesJournalPage
-            locallyVerifiedIds={locallyVerifiedIds}
-            setLocallyVerifiedIds={setLocallyVerifiedIds}
-          />
-        )}
+        {activeTab === 1 && <InspectionJournalPage />}
       </Box>
     </Box>
   );

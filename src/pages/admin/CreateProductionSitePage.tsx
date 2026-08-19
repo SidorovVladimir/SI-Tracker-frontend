@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router';
 import {
   CreateProductionSiteDocument,
   GetCompaniesDocument,
-  GetProductionSitesForSelectDocument,
+  GetProductionSitesDocument,
+  // GetProductionSitesForSelectDocument,
   GetSitiesDocument,
 } from '../../graphql/types/__generated__/graphql';
 import { enqueueSnackbar } from 'notistack';
@@ -47,7 +48,10 @@ export default function CreateProductionSitePage() {
   const [createProductionSite, { loading: creating }] = useMutation(
     CreateProductionSiteDocument,
     {
-      refetchQueries: [{ query: GetProductionSitesForSelectDocument }],
+      refetchQueries: [
+        // { query: GetProductionSitesForSelectDocument },
+        { query: GetProductionSitesDocument },
+      ],
       awaitRefetchQueries: true,
       onCompleted: () => {
         enqueueSnackbar('Производственный участок успешно создан', {

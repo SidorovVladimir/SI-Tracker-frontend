@@ -20,16 +20,26 @@ import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 import { GetDevicesBarcodeDataDocument } from '../graphql/types/__generated__/graphql';
 import { Layers } from '@mui/icons-material';
 
+// interface BarcodePrintModalProps {
+//   open: boolean;
+//   onClose: () => void;
+//   deviceIds: string[];
+// }
+
 interface BarcodePrintModalProps {
   open: boolean;
   onClose: () => void;
-  deviceIds: string[];
+  deviceIds?: string[]; // Придет при вызове с главной страницы
+  // controlType?: 'inspection' | 'verification'; // Контекст для главной ('inspection' / 'verification')
+  historyLinkIds?: string[]; // Придет при вызове из архивов журналов
 }
 
 export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
   open,
   onClose,
-  deviceIds,
+  deviceIds = [],
+  // controlType,
+  historyLinkIds = [],
 }) => {
   const [printMode, setPrintMode] = useState<'A4' | 'ROLL'>('A4');
   // Контроль размера ленты термопринтера
@@ -37,9 +47,31 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
     '40x58' | '40x30' | '40x30_double'
   >('40x58');
 
+  // const { data, loading } = useQuery(GetDevicesBarcodeDataDocument, {
+  //   variables: {
+  //     input: {
+  //       deviceIds,
+  //       controlType,
+  //       historyLinkIds,
+  //     },
+  //   },
+  //   skip: !open || deviceIds.length === 0,
+  //   fetchPolicy: 'network-only',
+  // });
+
+  const hasIds = deviceIds.length > 0 || historyLinkIds.length > 0;
+
   const { data, loading } = useQuery(GetDevicesBarcodeDataDocument, {
-    variables: { ids: deviceIds },
-    skip: !open || deviceIds.length === 0,
+    variables: {
+      // Передаем переменные строго по новой схеме GraphQL (объект input)
+      input: {
+        deviceIds: deviceIds.length > 0 ? deviceIds : undefined,
+        // controlType,
+        historyLinkIds: historyLinkIds.length > 0 ? historyLinkIds : undefined,
+      },
+    },
+    // Проверяем условия пропуска запроса
+    skip: !open || !hasIds,
     fetchPolicy: 'network-only',
   });
 

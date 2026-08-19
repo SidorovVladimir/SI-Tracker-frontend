@@ -287,8 +287,8 @@ query ExecuteRawSql($sqlQuery: String!) {
   }
 }
 
-query GetDevicesBarcodeData($ids: [ID!]!) {
-  getDevicesBarcodeData(ids: $ids) {
+query GetDevicesBarcodeData($input: PrintBarcodesInput!) {
+  getDevicesBarcodeData(input: $input) {
     id
     name
     model
