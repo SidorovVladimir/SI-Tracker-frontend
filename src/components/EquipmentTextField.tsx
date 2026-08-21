@@ -22,6 +22,7 @@ export default function EquipmentTextField({
         fullWidth
         onChange={onChange}
         value={value}
+        required
         slotProps={{
           select: {
             MenuProps: {

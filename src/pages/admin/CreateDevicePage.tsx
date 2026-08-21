@@ -518,6 +518,28 @@ export default function CreateDevicePage(props: {
     return regex.test(url.trim());
   };
 
+  const selectedType = equipmentTypesList.find(
+    (t) => t.id === form.equipmentTypeId
+  );
+  const typeName = selectedType?.name?.toLowerCase().trim() || '';
+
+  // 2. Проверяем, является ли тип Средством Измерений (ищем вхождение "си")
+  const isSI = typeName === 'средство измерений (си)';
+
+  // 3. Проверяем, выбрана ли ХОТЯ БЫ ОДНА государственная (регулируемая) сфера
+  const hasStateScope =
+    form.scopes.length > 0 &&
+    !form.scopes.some((scope) => {
+      const name = scope.name.toLowerCase().trim();
+      return (
+        name === 'не гр' ||
+        name === 'вне сферы государственного регулирования (не гр)'
+      );
+    });
+
+  // 🎯 ГРСИ ОБЯЗАТЕЛЕН: Только если это СИ И выбрана государственная сфера
+  const isGrsiRequired = isSI && hasStateScope;
+
   return (
     <Box>
       <Stack
@@ -581,6 +603,13 @@ export default function CreateDevicePage(props: {
             fullWidth
             variant="outlined"
             size="small"
+            required={isGrsiRequired}
+            error={isGrsiRequired && !form.grsiNumber?.trim()}
+            helperText={
+              isGrsiRequired && !form.grsiNumber?.trim()
+                ? 'Для СИ в госсфере номер ГРСИ обязателен!'
+                : ''
+            }
           />
           <TextField
             label="Код СИ из прайса ЦСМ (договорной)"

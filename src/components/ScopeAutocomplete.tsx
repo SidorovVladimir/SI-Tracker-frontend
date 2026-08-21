@@ -118,6 +118,7 @@ export default function ScopeAutocomplete({
             label="Сферы применения"
             placeholder="Выберите сферы"
             size="small"
+            required
           />
         )}
       />

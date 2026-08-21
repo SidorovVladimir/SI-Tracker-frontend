@@ -130,11 +130,16 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
             value={selectedControlType}
             onChange={(e) => setSelectedControlType(e.target.value)}
           >
-            {controlTypes.map((type) => (
-              <MenuItem key={type.id} value={type.id}>
-                {type.name}
-              </MenuItem>
-            ))}
+            {controlTypes
+              .filter((type) => {
+                const name = type.name?.toLowerCase().trim() || '';
+                return !name.includes('осмотр');
+              })
+              .map((type) => (
+                <MenuItem key={type.id} value={type.id}>
+                  {type.name}
+                </MenuItem>
+              ))}
           </TextField>
 
           <TextField
