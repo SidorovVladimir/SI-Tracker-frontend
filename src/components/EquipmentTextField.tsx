@@ -51,9 +51,9 @@ export default function EquipmentTextField({
           },
         }}
       >
-        <MenuItem value="">
+        {/* <MenuItem value="">
           <em>Не выбрано</em>
-        </MenuItem>
+        </MenuItem> */}
         {equipmentTypesList.map(
           ({ id, name }: { id: string; name: string }) => (
             <MenuItem

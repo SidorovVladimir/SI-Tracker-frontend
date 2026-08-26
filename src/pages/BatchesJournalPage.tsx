@@ -53,6 +53,7 @@ import { enqueueSnackbar } from 'notistack';
 import { GlobalJobWatcher } from '../components/GlobalJobWatcher';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import EditDevicePage from './admin/EditDevicePage';
+import { cleanSpaces } from '../utils/capitalize';
 
 interface BatchesJournalPageProps {
   locallyVerifiedIds: string[];
@@ -667,61 +668,174 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                 <Box
                   sx={{
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
+                    alignItems: { xs: 'flex-start', sm: 'center' },
+                    justifyContent: 'space-between',
+                    gap: 1.5,
                     width: '100%',
-                    flexWrap: 'wrap',
+                    flexDirection: { xs: 'column', sm: 'row' },
                   }}
                 >
-                  <Typography sx={{ fontWeight: 'bold', minWidth: '150px' }}>
-                    📦 Партия {batch.number}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    План:{' '}
-                    {new Date(+batch.plannedDate).toLocaleDateString('ru-RU')}
-                  </Typography>
+                  {/* ЛЕВАЯ ЧАСТЬ: Номер, Даты, Организция, Автор */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: { xs: 'flex-start', sm: 'center' },
+                      gap: { xs: 0.5, sm: 2 },
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      width: { xs: '100%', sm: 'auto' },
+                    }}
+                  >
+                    {/* Номер партии */}
+                    <Typography
+                      sx={{
+                        fontWeight: 'bold',
+                        minWidth: { xs: 'auto', sm: '140px' },
+                        fontSize: { xs: '0.95rem', sm: '1rem' },
+                      }}
+                    >
+                      📦 {batch.number}
+                    </Typography>
 
-                  {/* Цветной статус партии */}
-                  <Chip
-                    label={
-                      batch.status === 'draft'
-                        ? 'Черновик'
-                        : batch.status === 'sent'
-                        ? 'В лаборатории'
-                        : 'Завершена'
-                    }
-                    color={
-                      batch.status === 'draft'
-                        ? 'default'
-                        : batch.status === 'sent'
-                        ? 'info'
-                        : 'success'
-                    }
-                    size="small"
-                  />
-                  {currentJobId && (
+                    {/* Метаданные (План, ЦСМ, Автор) */}
                     <Box
                       sx={{
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        ml: { xs: 0, sm: 'auto' },
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        gap: { xs: 0.5, sm: 1 },
+                        fontSize: '0.85rem',
                       }}
                     >
-                      <CircularProgress
-                        size={16}
-                        thickness={5}
-                        color="warning"
-                      />
                       <Typography
-                        variant="caption"
-                        color="warning.main"
-                        sx={{ fontWeight: 'medium' }}
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontSize: 'inherit' }}
                       >
-                        В очереди...
+                        План:{' '}
+                        {new Date(+batch.plannedDate).toLocaleDateString(
+                          'ru-RU'
+                        )}
                       </Typography>
+
+                      {/* Организация */}
+                      {batch.verificationOrganization?.name && (
+                        <Box
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                        >
+                          {/* Точка видна только на десктопе */}
+                          <Box
+                            component="span"
+                            sx={{
+                              color: 'grey.400',
+                              display: { xs: 'none', sm: 'inline' },
+                            }}
+                          >
+                            •
+                          </Box>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              fontSize: { xs: '0.75rem', sm: 'inherit' },
+                              textTransform: 'uppercase',
+                              fontWeight: 500,
+                              letterSpacing: '0.5px',
+                              bgcolor: { xs: 'grey.100', sm: 'transparent' },
+                              px: { xs: 1, sm: 0 },
+                              py: { xs: 0.25, sm: 0 },
+                              borderRadius: { xs: 1, sm: 0 },
+                            }}
+                          >
+                            🏢{' '}
+                            {cleanSpaces(batch.verificationOrganization.name)}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {/* Автор */}
+                      {batch.createdBy?.firstName &&
+                        batch.createdBy?.lastName && (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
+                          >
+                            {/* Точка видна только на десктопе */}
+                            <Box
+                              component="span"
+                              sx={{
+                                color: 'grey.400',
+                                display: { xs: 'none', sm: 'inline' },
+                              }}
+                            >
+                              •
+                            </Box>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontSize: 'inherit' }}
+                            >
+                              👤 {batch.createdBy.lastName}{' '}
+                              {batch.createdBy.firstName}
+                            </Typography>
+                          </Box>
+                        )}
                     </Box>
-                  )}
+                  </Box>
+
+                  {/* ПРАВАЯ ЧАСТЬ: Статус и Лонг-процесс */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      width: { xs: '100%', sm: 'auto' },
+                      justifyContent: { xs: 'space-between', sm: 'flex-end' },
+                      // На мобилке пушим статус чуть ниже и делаем разделительную линию сверху (опционально)
+                      borderTop: { xs: '1px solid', sm: 'none' },
+                      borderColor: 'divider',
+                      pt: { xs: 1, sm: 0 },
+                    }}
+                  >
+                    <Chip
+                      label={
+                        batch.status === 'draft'
+                          ? 'Черновик'
+                          : batch.status === 'sent'
+                          ? 'В лаборатории'
+                          : 'Завершена'
+                      }
+                      color={
+                        batch.status === 'draft'
+                          ? 'default'
+                          : batch.status === 'sent'
+                          ? 'info'
+                          : 'success'
+                      }
+                      size="small"
+                    />
+
+                    {currentJobId && (
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
+                        <CircularProgress
+                          size={14}
+                          thickness={5}
+                          color="warning"
+                        />
+                        <Typography
+                          variant="caption"
+                          color="warning.main"
+                          sx={{ fontWeight: 'medium' }}
+                        >
+                          В очереди...
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
               </AccordionSummary>
               <AccordionDetails

@@ -54,6 +54,17 @@ query GetVerificationBatches($year: Int, $status: String) {
     status
     plannedDate
     comment
+
+    verificationOrganization {
+      id
+      name
+    }
+    createdBy {
+      id
+      firstName
+      lastName
+      role
+    }
     devicesToBatches {
       id
       device {

@@ -51,11 +51,41 @@ import VerificationOrganizationTextField from '../../components/VerificationOrga
 import MetrologyControlTypeTextField from '../../components/MetrologyControlTypeTextField';
 import { toCapital } from '../../utils/capitalize';
 
-export default function CreateDevicePage(props: {
+interface CreateDevicePageProps {
   closeDetails: () => void;
   refetchDevice: () => void;
-}) {
-  const { closeDetails, refetchDevice } = props;
+  duplicateData?: {
+    name: string;
+    model: string;
+    grsiNumber: string;
+    measurementRange: string;
+    accuracy: string;
+    manufacturer: string;
+    csmCode: string;
+    verificationInterval: number | string;
+    nomenclature: string;
+    comment: string;
+    status: { id: string; name: string };
+    productionSite: {
+      id: string;
+      name: string;
+      city: { id: string; name: string };
+      company: { id: string; name: string };
+    };
+    equipmentType: { id: string; name: string };
+    scopes: { id: string; name: string }[];
+    primaryStandarts: { id: string; name: string }[];
+    measurementTypes: { id: string; name: string }[];
+  };
+}
+
+// export default function CreateDevicePage(props: {
+//   closeDetails: () => void;
+//   refetchDevice: () => void;
+// }) {
+export default function CreateDevicePage(props: CreateDevicePageProps) {
+  // const { closeDetails, refetchDevice } = props;
+  const { closeDetails, refetchDevice, duplicateData } = props;
 
   const [arshinCount, setArshinCount] = useState<number>(3);
 
@@ -95,54 +125,110 @@ export default function CreateDevicePage(props: {
     GetVerificationOrganizationsListDocument
   );
 
-  const [form, setForm] = useState<{
-    name: string;
-    model: string;
-    serialNumber: string;
-    releaseDate: string;
-    grsiNumber: string;
-    measurementRange: string;
-    accuracy: string;
-    inventoryNumber: string;
-    receiptDate: string;
-    manufacturer: string;
-    csmCode: string;
-    verificationInterval: number | string;
-    archived: boolean;
-    nomenclature: string;
-    comment: string;
-    statusId: string;
-    cityId: string;
-    companyId: string;
-    productionSiteId: string;
-    equipmentTypeId: string;
-    scopes: { id: string; name: string }[];
-    primaryStandarts: { id: string; name: string }[];
-    measurementTypes: { id: string; name: string }[];
-  }>({
-    name: '',
-    model: '',
-    serialNumber: '',
-    releaseDate: '',
-    grsiNumber: '',
-    measurementRange: '',
-    accuracy: '',
-    csmCode: '',
-    inventoryNumber: '',
-    receiptDate: '',
-    manufacturer: '',
-    verificationInterval: '',
-    archived: false,
-    nomenclature: '',
-    comment: '',
-    statusId: '',
-    cityId: '',
-    companyId: '',
-    productionSiteId: '',
-    equipmentTypeId: '',
-    measurementTypes: [],
-    scopes: [],
-    primaryStandarts: [],
+  // const [form, setForm] = useState<{
+  //   name: string;
+  //   model: string;
+  //   serialNumber: string;
+  //   releaseDate: string;
+  //   grsiNumber: string;
+  //   measurementRange: string;
+  //   accuracy: string;
+  //   inventoryNumber: string;
+  //   receiptDate: string;
+  //   manufacturer: string;
+  //   csmCode: string;
+  //   verificationInterval: number | string;
+  //   archived: boolean;
+  //   nomenclature: string;
+  //   comment: string;
+  //   statusId: string;
+  //   cityId: string;
+  //   companyId: string;
+  //   productionSiteId: string;
+  //   equipmentTypeId: string;
+  //   scopes: { id: string; name: string }[];
+  //   primaryStandarts: { id: string; name: string }[];
+  //   measurementTypes: { id: string; name: string }[];
+  // }>({
+  //   name: '',
+  //   model: '',
+  //   serialNumber: '',
+  //   releaseDate: '',
+  //   grsiNumber: '',
+  //   measurementRange: '',
+  //   accuracy: '',
+  //   csmCode: '',
+  //   inventoryNumber: '',
+  //   receiptDate: '',
+  //   manufacturer: '',
+  //   verificationInterval: '',
+  //   archived: false,
+  //   nomenclature: '',
+  //   comment: '',
+  //   statusId: '',
+  //   cityId: '',
+  //   companyId: '',
+  //   productionSiteId: '',
+  //   equipmentTypeId: '',
+  //   measurementTypes: [],
+  //   scopes: [],
+  //   primaryStandarts: [],
+  // });
+  const [form, setForm] = useState(() => {
+    // Если переданы данные для дубликата — разворачиваем их, обнуляя уникальные поля
+    if (duplicateData) {
+      return {
+        name: duplicateData.name || '',
+        model: duplicateData.model || '',
+        grsiNumber: duplicateData.grsiNumber || '',
+        measurementRange: duplicateData.measurementRange || '',
+        accuracy: duplicateData.accuracy || '',
+        manufacturer: duplicateData.manufacturer || '',
+        csmCode: duplicateData.csmCode || '',
+        verificationInterval: duplicateData.verificationInterval || '',
+        nomenclature: duplicateData.nomenclature || '',
+        comment: duplicateData.comment || '',
+        statusId: duplicateData.status.id || '',
+        cityId: duplicateData.productionSite.city.id || '',
+        companyId: duplicateData.productionSite.company.id || '',
+        productionSiteId: duplicateData.productionSite.id || '',
+        equipmentTypeId: duplicateData.equipmentType.id || '',
+        measurementTypes: duplicateData.measurementTypes || [],
+        scopes: duplicateData.scopes || [],
+        primaryStandarts: duplicateData.primaryStandarts || [],
+        serialNumber: '',
+        inventoryNumber: '',
+        releaseDate: '',
+        receiptDate: '',
+        archived: false,
+      };
+    }
+
+    return {
+      name: '',
+      model: '',
+      serialNumber: '',
+      releaseDate: '',
+      grsiNumber: '',
+      measurementRange: '',
+      accuracy: '',
+      csmCode: '',
+      inventoryNumber: '',
+      receiptDate: '',
+      manufacturer: '',
+      verificationInterval: '',
+      archived: false,
+      nomenclature: '',
+      comment: '',
+      statusId: '',
+      cityId: '',
+      companyId: '',
+      productionSiteId: '',
+      equipmentTypeId: '',
+      measurementTypes: [],
+      scopes: [],
+      primaryStandarts: [],
+    };
   });
 
   const [verifications, setVerifications] = useState<
@@ -554,8 +640,12 @@ export default function CreateDevicePage(props: {
           color="primary"
           sx={{ fontFamily: '"Inter", sans-serif', fontWeight: 700 }}
         >
-          Добавить новое СИ
+          {/* Добавить новое СИ */}
+          {duplicateData
+            ? `Копирование СИ: ${toCapital(duplicateData.name)}`
+            : 'Добавление нового СИ'}
         </Typography>
+
         <Tooltip title="Закрыть">
           <IconButton onClick={closeDetails}>
             <Close />

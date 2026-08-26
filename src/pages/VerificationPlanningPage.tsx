@@ -9,6 +9,8 @@ import {
   TablePagination,
   Tab,
   Tabs,
+  Autocomplete,
+  CircularProgress,
 } from '@mui/material';
 
 import { YearlyCalendarSummary } from '../components/YearlyCalendarSummary';
@@ -20,6 +22,7 @@ import {
   GetDraftBatchesByMonthDocument,
   GetMetrologyControlTypesListDocument,
   GetPlanningPoolDocument,
+  GetVerificationOrganizationsListDocument,
   // GetVerificationBatchesDocument,
   GetYearlySummaryDocument,
 } from '../graphql/types/__generated__/graphql';
@@ -27,7 +30,12 @@ import { enqueueSnackbar } from 'notistack';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import { QrCode } from '@mui/icons-material';
-import { formatSentenceCase } from '../utils/capitalize';
+import { cleanSpaces, formatSentenceCase } from '../utils/capitalize';
+
+interface VerificationOrganization {
+  id: string;
+  name: string;
+}
 
 export const VerificationPlanningPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'info' | 'create' | 'edit' | null>(
@@ -46,6 +54,11 @@ export const VerificationPlanningPage: React.FC = () => {
     GetMetrologyControlTypesListDocument
   );
 
+  const {
+    data: verificationOrganizationsData,
+    loading: verificationOrganizationsLoading,
+  } = useQuery(GetVerificationOrganizationsListDocument);
+
   // Локальное состояние компонента
 
   const [page, setPage] = useState<number>(0);
@@ -54,9 +67,11 @@ export const VerificationPlanningPage: React.FC = () => {
 
   const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthStr);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
+  const [selectedOrganization, setSelectedOrganization] =
+    useState<VerificationOrganization | null>(null);
 
   const [activeFilter, setActiveFilter] = useState<string>('ALL');
-  const [batchNumber, setBatchNumber] = useState<string>('');
+  // const [batchNumber, setBatchNumber] = useState<string>('');
   const [exactPlannedDate, setExactPlannedDate] = useState<string>(
     new Date().toISOString().split('T')[0]!
   );
@@ -107,7 +122,7 @@ export const VerificationPlanningPage: React.FC = () => {
         variant: 'success',
       });
 
-      setBatchNumber('');
+      // setBatchNumber('');
       setSelectedDeviceIds([]);
       setSelectedBatchOption('NEW');
       refetchPool();
@@ -137,12 +152,12 @@ export const VerificationPlanningPage: React.FC = () => {
     }
 
     // 2. Если выбран режим создания НОВОЙ партии, проверяем, заполнен ли номер
-    if (selectedBatchOption === 'NEW' && !batchNumber.trim()) {
-      enqueueSnackbar('Введите номер для новой партии!', {
-        variant: 'info',
-      });
-      return;
-    }
+    // if (selectedBatchOption === 'NEW' && !batchNumber.trim()) {
+    //   enqueueSnackbar('Введите номер для новой партии!', {
+    //     variant: 'info',
+    //   });
+    //   return;
+    // }
 
     try {
       let targetBatchId = selectedBatchOption;
@@ -157,9 +172,10 @@ export const VerificationPlanningPage: React.FC = () => {
         const { data: batchData } = await createBatch({
           variables: {
             input: {
-              number: batchNumber.trim(), // Убираем случайные пробелы по краям
+              // number: batchNumber.trim(),
               plannedDate: isoPlannedDate,
               comment: `Сформировано из панели автоматического планирования`,
+              verificationOrganizationId: selectedOrganization?.id,
             },
           },
         });
@@ -334,18 +350,26 @@ export const VerificationPlanningPage: React.FC = () => {
               ))}
             </TextField>
 
-            {selectedBatchOption === 'NEW' && (
+            {/* {selectedBatchOption === 'NEW' && (
               <TextField
                 placeholder="Номер новой партии"
                 size="small"
-                value={batchNumber}
-                onChange={(e) => setBatchNumber(e.target.value)}
+                value="АВТОМАТИЧЕСКИ"
+                // onChange={(e) => setBatchNumber(e.target.value)}
                 sx={{
-                  bgcolor: 'background.paper',
+                  // bgcolor: 'background.paper',
+                  bgcolor: 'grey.100',
                   width: { xs: '100%', sm: 180 },
+                  '& .MuiInputBase-input': {
+                    fontSize: '0.75rem',
+                    letterSpacing: '0.5px',
+                    fontWeight: 'bold',
+                    color: 'text.secondary',
+                    textAlign: 'center',
+                  },
                 }}
               />
-            )}
+            )} */}
 
             {selectedBatchOption === 'NEW' && (
               <TextField
@@ -362,14 +386,105 @@ export const VerificationPlanningPage: React.FC = () => {
               />
             )}
 
+            {selectedBatchOption === 'NEW' && (
+              <Autocomplete
+                size="small"
+                options={
+                  verificationOrganizationsData?.verificationOrganizations || []
+                }
+                getOptionLabel={(option: VerificationOrganization) =>
+                  cleanSpaces(option.name)
+                }
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                value={selectedOrganization}
+                onChange={(_, newValue) => {
+                  setSelectedOrganization(newValue);
+                }}
+                loading={verificationOrganizationsLoading}
+                // Ваши фирменные стили для инпута
+                sx={{
+                  bgcolor: 'background.paper',
+                  width: { xs: '100%', sm: 240 },
+                  minWidth: 0,
+                  '& .MuiInputBase-root': {
+                    height: '40px',
+                    paddingTop: '0px !important',
+                    paddingBottom: '0px !important',
+                  },
+                  '& .MuiInputBase-input': {
+                    textTransform: 'uppercase',
+                    fontSize: '0.8rem',
+                    letterSpacing: '0.6px',
+                    fontWeight: 500,
+                  },
+                }}
+                // Ваши ограничения высоты списка и тонкий скроллбар
+                slotProps={{
+                  paper: {
+                    sx: {
+                      maxHeight: { xs: 250, md: 500 },
+                      '& .MuiAutocomplete-listbox': {
+                        maxHeight: { xs: 250, md: 500 },
+                      },
+                      '& ::-webkit-scrollbar': {
+                        width: '4px',
+                      },
+                      '& ::-webkit-scrollbar-thumb': {
+                        backgroundColor: 'rgba(0,0,0,0.16)',
+                        borderRadius: '4px',
+                      },
+                    },
+                  },
+                }}
+                // Стилизация элементов внутри выпадающего списка
+                renderOption={(props, option) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <li
+                      key={key}
+                      {...optionProps}
+                      style={{
+                        textTransform: 'uppercase',
+                        fontSize: '0.8rem',
+                        letterSpacing: '0.6px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {cleanSpaces(option.name)}
+                    </li>
+                  );
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Поверитель (ЦСМ)"
+                    placeholder="Выберите организацию"
+                    size="small"
+                    slotProps={{
+                      input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {verificationOrganizationsLoading ? (
+                              <CircularProgress color="inherit" size={16} />
+                            ) : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
+                      },
+                    }}
+                  />
+                )}
+              />
+            )}
+
             <Button
               variant="contained"
               color={selectedBatchOption === 'NEW' ? 'primary' : 'secondary'}
               size="small"
               onClick={handleCreateAndAssignBatch}
               disabled={
-                selectedDeviceIds.length === 0 ||
-                (selectedBatchOption === 'NEW' && !batchNumber.trim())
+                selectedDeviceIds.length === 0 && selectedBatchOption === 'NEW'
               }
               sx={{
                 height: 36,

@@ -136,7 +136,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
           variant="subtitle1"
           sx={{ fontWeight: 'bold', fontSize: { xs: '1.1rem', sm: '1.25rem' } }}
         >
-          🖨️ Маркировка ({deviceIds.length} шт.)
+          🖨️ Маркировка ({deviceIds.length || historyLinkIds.length} шт.)
         </Typography>
 
         <Box

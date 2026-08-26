@@ -235,7 +235,6 @@ export type Company = {
 
 export type CreateBatchInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
-  number: Scalars['String']['input'];
   plannedDate: Scalars['String']['input'];
   verificationOrganizationId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -601,6 +600,7 @@ export type InspectionArchiveResponse = {
 export type InspectionBatchItem = {
   __typename: 'InspectionBatchItem';
   comment: Maybe<Scalars['String']['output']>;
+  createdBy: Maybe<User>;
   date: Scalars['String']['output'];
   devicesToBatches: Array<InspectedDeviceLink>;
   id: Scalars['ID']['output'];
@@ -1516,12 +1516,14 @@ export type VerificationBatch = {
   __typename: 'VerificationBatch';
   comment: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
+  createdBy: Maybe<User>;
   devicesToBatches: Array<DeviceToBatchRelation>;
   id: Scalars['ID']['output'];
   number: Scalars['String']['output'];
   plannedDate: Scalars['String']['output'];
   status: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+  verificationOrganization: Maybe<VerificationOrganization>;
   verificationOrganizationId: Maybe<Scalars['ID']['output']>;
 };
 
@@ -2700,6 +2702,13 @@ export type GetInspectionArchiveQuery = {
       number: string;
       date: string;
       comment: string | null;
+      createdBy: {
+        __typename: 'User';
+        id: string;
+        role: string;
+        firstName: string;
+        lastName: string;
+      } | null;
       devicesToBatches: Array<{
         __typename: 'InspectedDeviceLink';
         id: string;
@@ -2926,6 +2935,18 @@ export type GetVerificationBatchesQuery = {
     status: string;
     plannedDate: string;
     comment: string | null;
+    verificationOrganization: {
+      __typename: 'VerificationOrganization';
+      id: string;
+      name: string;
+    } | null;
+    createdBy: {
+      __typename: 'User';
+      id: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+    } | null;
     devicesToBatches: Array<{
       __typename: 'DeviceToBatchRelation';
       id: string;
@@ -7854,6 +7875,31 @@ export const GetInspectionArchiveDocument = {
                       },
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'createdBy' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'role' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'firstName' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'lastName' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'devicesToBatches' },
                         selectionSet: {
                           kind: 'SelectionSet',
@@ -8775,6 +8821,36 @@ export const GetVerificationBatchesDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'status' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'plannedDate' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'verificationOrganization' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'createdBy' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'firstName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastName' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    ],
+                  },
+                },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'devicesToBatches' },

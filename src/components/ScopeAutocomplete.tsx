@@ -118,7 +118,10 @@ export default function ScopeAutocomplete({
             label="Сферы применения"
             placeholder="Выберите сферы"
             size="small"
-            required
+            required={value.length === 0}
+            // Визуальное выделение красным (опционально, если нужно подсветить ошибку)
+            error={value.length === 0}
+            helperText={value.length === 0 ? 'Обязательное поле' : ''}
           />
         )}
       />

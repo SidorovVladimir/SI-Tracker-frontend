@@ -30,6 +30,12 @@ query GetInspectionArchive($limit: Int!, $offset: Int!, $year: Int!) {
       number
       date
       comment
+      createdBy {
+        id
+        role
+        firstName
+        lastName
+      }
       devicesToBatches {
         id
         deviceStatus

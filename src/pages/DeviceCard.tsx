@@ -19,6 +19,7 @@ import {
 import {
   CalendarMonth,
   Close,
+  ContentCopy,
   Delete,
   Edit,
   ExpandMore,
@@ -87,8 +88,9 @@ export default function DeviceCard(props: {
   deviceId: string;
   closeDetails: () => void;
   onEdit: () => void;
+  onDuplicate?: (device: any) => void;
 }) {
-  const { deviceId, closeDetails, onEdit } = props;
+  const { deviceId, closeDetails, onEdit, onDuplicate } = props;
   const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -359,6 +361,17 @@ export default function DeviceCard(props: {
         </Stack>
 
         <Stack direction="row" spacing={1}>
+          {user?.role !== 'user' && !isMobileRoute && onDuplicate && (
+            <Tooltip title="Создать дубликат">
+              <IconButton
+                onClick={() => onDuplicate(device)}
+                size="small"
+                color="primary"
+              >
+                <ContentCopy fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
           {user?.role !== 'user' && !isMobileRoute && (
             <Tooltip title="Редактировать">
               <IconButton onClick={onEdit} size="small" color="primary">

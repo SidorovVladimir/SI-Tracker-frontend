@@ -12,6 +12,8 @@ interface DeviceManageSidebarProps {
   selectedDeviceId: string | null;
   setSelectedDeviceId: React.Dispatch<React.SetStateAction<string | null>>;
   refetchTable: () => void;
+  duplicateData?: any | null;
+  setDuplicateData?: React.Dispatch<React.SetStateAction<any | null>>;
 }
 
 export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
@@ -20,11 +22,16 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
   selectedDeviceId,
   setSelectedDeviceId,
   refetchTable,
+  duplicateData,
+  setDuplicateData,
 }) => {
   // Функция полного закрытия панели (сброс всех стейтов)
   const closeDetails = () => {
     setViewMode(null);
     setSelectedDeviceId(null);
+    if (setDuplicateData) {
+      setDuplicateData(null);
+    }
   };
 
   if (!viewMode) return null;
@@ -76,6 +83,7 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
             <CreateDevicePage
               closeDetails={closeDetails}
               refetchDevice={refetchTable}
+              duplicateData={duplicateData || undefined}
             />
           )}
           {viewMode === 'edit' && (
@@ -91,6 +99,14 @@ export const DeviceManageSidebar: React.FC<DeviceManageSidebarProps> = ({
               deviceId={selectedDeviceId!}
               closeDetails={closeDetails}
               onEdit={() => setViewMode('edit')}
+              onDuplicate={
+                setDuplicateData
+                  ? (deviceData) => {
+                      setDuplicateData(deviceData);
+                      setViewMode('create');
+                    }
+                  : undefined
+              }
             />
           )}
         </Box>

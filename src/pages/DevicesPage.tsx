@@ -137,6 +137,8 @@ export default function DevicesPage() {
 
   const [showCheckboxes, setShowCheckboxes] = useState<boolean>(false);
 
+  const [duplicateData, setDuplicateData] = useState<any | null>(null);
+
   useEffect(() => {
     localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
   }, [filters]);
@@ -2037,6 +2039,8 @@ export default function DevicesPage() {
             selectedDeviceId={selectedDeviceId}
             setSelectedDeviceId={setSelectedDeviceId}
             refetchTable={refetch} // Ваша функция refetch от useQuery
+            duplicateData={duplicateData}
+            setDuplicateData={setDuplicateData}
           />
         )}
         <BarcodePrintModal

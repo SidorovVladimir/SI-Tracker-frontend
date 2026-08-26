@@ -277,7 +277,7 @@ export default function NavBar() {
                       <ListItemText
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
-                        🛠️ Журнал ТО и Осмотров
+                        🛠️ Журнал осмотров
                       </ListItemText>
                     </MenuItem>
 

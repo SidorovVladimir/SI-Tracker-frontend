@@ -288,29 +288,115 @@ export const InspectionJournalPage = () => {
               >
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                   <Box
+                    // sx={{
+                    //   display: 'flex',
+                    //   alignItems: 'center',
+                    //   gap: 2,
+                    //   width: '100%',
+                    //   flexWrap: 'wrap',
+                    // }}
                     sx={{
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: 2,
+                      alignItems: { xs: 'flex-start', sm: 'center' },
+                      justifyContent: 'space-between',
+                      gap: 1.5,
                       width: '100%',
-                      flexWrap: 'wrap',
+                      flexDirection: { xs: 'column', sm: 'row' },
                     }}
                   >
-                    <Typography sx={{ fontWeight: 'bold', minWidth: '140px' }}>
-                      📦 Акт № {batch.number}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        gap: { xs: 0.5, sm: 2 },
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        width: { xs: '100%', sm: 'auto' },
+                      }}
+                    >
+                      {/* <Typography sx={{ fontWeight: 'bold', minWidth: '140px' }}> */}
+                      <Typography
+                        sx={{
+                          fontWeight: 'bold',
+                          minWidth: { xs: 'auto', sm: '140px' },
+                          fontSize: { xs: '0.95rem', sm: '1rem' },
+                        }}
+                      >
+                        📦 {batch.number}
+                      </Typography>
+
+                      {/* <Typography variant="body2" color="text.secondary">
                       от{' '}
                       {batch.date
                         ? new Date(batch.date).toLocaleDateString('ru-RU')
                         : '—'}
-                    </Typography>
+                    </Typography> */}
+
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          alignItems: { xs: 'flex-start', sm: 'center' },
+                          gap: { xs: 0.5, sm: 1 },
+                          fontSize: '0.85rem',
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ fontSize: 'inherit' }}
+                        >
+                          План:{' '}
+                          {new Date(batch.date).toLocaleDateString('ru-RU')}
+                        </Typography>
+
+                        {batch.createdBy?.firstName &&
+                          batch.createdBy?.lastName && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                              }}
+                            >
+                              {/* Точка видна только на десктопе */}
+                              <Box
+                                component="span"
+                                sx={{
+                                  color: 'grey.400',
+                                  display: { xs: 'none', sm: 'inline' },
+                                }}
+                              >
+                                •
+                              </Box>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ fontSize: 'inherit' }}
+                              >
+                                👤 {batch.createdBy.lastName}{' '}
+                                {batch.createdBy.firstName}
+                              </Typography>
+                            </Box>
+                          )}
+                      </Box>
+                    </Box>
 
                     <Box
+                      // sx={{
+                      //   ml: { xs: 0, sm: 'auto' },
+                      //   display: 'flex',
+                      //   gap: 1,
+                      // }}
                       sx={{
-                        ml: { xs: 0, sm: 'auto' },
                         display: 'flex',
-                        gap: 1,
+                        alignItems: 'center',
+                        gap: 1.5,
+                        width: { xs: '100%', sm: 'auto' },
+                        justifyContent: { xs: 'space-between', sm: 'flex-end' },
+                        // На мобилке пушим статус чуть ниже и делаем разделительную линию сверху (опционально)
+                        borderTop: { xs: '1px solid', sm: 'none' },
+                        borderColor: 'divider',
+                        pt: { xs: 1, sm: 0 },
                       }}
                     >
                       <Chip
