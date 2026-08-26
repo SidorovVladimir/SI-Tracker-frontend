@@ -77,6 +77,16 @@ query GetVerificationBatches($year: Int, $status: String) {
           batchId
           result
         }
+        arshinBuffers {
+          id
+          vriId
+          orgTitle
+          docNum
+          verificationDate
+          validDate
+          applicability
+          isRecommended
+        }
       }
     }
   }
@@ -117,4 +127,8 @@ mutation UpdateBatchStatus($id: ID!, $status: String!) {
 
 mutation DeleteVerificationBatch($id: ID!) {
   deleteVerificationBatch(id: $id)
+}
+
+mutation ConfirmArshinBuffer($bufferId: String!) {
+  confirmArshinBuffer(bufferId: $bufferId)
 }

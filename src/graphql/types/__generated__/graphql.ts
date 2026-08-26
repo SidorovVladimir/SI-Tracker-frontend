@@ -74,6 +74,19 @@ export type ArshinFlexibleVerification = {
   validUntil: Maybe<Scalars['String']['output']>;
 };
 
+export type ArshinVerificationBufferItem = {
+  __typename: 'ArshinVerificationBufferItem';
+  applicability: Scalars['Boolean']['output'];
+  docNum: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isRecommended: Scalars['Boolean']['output'];
+  mitNumber: Scalars['String']['output'];
+  orgTitle: Scalars['String']['output'];
+  validDate: Maybe<Scalars['String']['output']>;
+  verificationDate: Scalars['String']['output'];
+  vriId: Scalars['String']['output'];
+};
+
 export type AuditAction =
   | 'assign_batch'
   | 'create'
@@ -435,6 +448,7 @@ export type DeviceFilterInput = {
 
 export type DeviceInBatch = {
   __typename: 'DeviceInBatch';
+  arshinBuffers: Maybe<Array<ArshinVerificationBufferItem>>;
   id: Scalars['ID']['output'];
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
@@ -678,6 +692,7 @@ export type Mutation = {
   __typename: 'Mutation';
   addDevicesToBatch: Scalars['Boolean']['output'];
   approveBudgetPlan: BudgetPlan;
+  confirmArshinBuffer: Scalars['Boolean']['output'];
   createBudgetPlan: BudgetPlan;
   createBulkInspection: Scalars['Boolean']['output'];
   createCity: City;
@@ -744,6 +759,10 @@ export type MutationAddDevicesToBatchArgs = {
 
 export type MutationApproveBudgetPlanArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type MutationConfirmArshinBufferArgs = {
+  bufferId: Scalars['String']['input'];
 };
 
 export type MutationCreateBudgetPlanArgs = {
@@ -2962,6 +2981,17 @@ export type GetVerificationBatchesQuery = {
           batchId: string | null;
           result: string | null;
         }> | null;
+        arshinBuffers: Array<{
+          __typename: 'ArshinVerificationBufferItem';
+          id: string;
+          vriId: string;
+          orgTitle: string;
+          docNum: string;
+          verificationDate: string;
+          validDate: string | null;
+          applicability: boolean;
+          isRecommended: boolean;
+        }> | null;
       };
     }>;
   }>;
@@ -3031,6 +3061,12 @@ export type DeleteVerificationBatchMutationVariables = Exact<{
 export type DeleteVerificationBatchMutation = {
   deleteVerificationBatch: boolean;
 };
+
+export type ConfirmArshinBufferMutationVariables = Exact<{
+  bufferId: Scalars['String']['input'];
+}>;
+
+export type ConfirmArshinBufferMutation = { confirmArshinBuffer: boolean };
 
 export type GetPrimaryStandartsListQueryVariables = Exact<{
   [key: string]: never;
@@ -8901,6 +8937,56 @@ export const GetVerificationBatchesDocument = {
                                 ],
                               },
                             },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'arshinBuffers' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'id' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'vriId' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'orgTitle' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'docNum' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'verificationDate',
+                                    },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'validDate' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'applicability',
+                                    },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'isRecommended',
+                                    },
+                                  },
+                                ],
+                              },
+                            },
                           ],
                         },
                       },
@@ -9290,6 +9376,54 @@ export const DeleteVerificationBatchDocument = {
 } as unknown as DocumentNode<
   DeleteVerificationBatchMutation,
   DeleteVerificationBatchMutationVariables
+>;
+export const ConfirmArshinBufferDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'ConfirmArshinBuffer' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'bufferId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'confirmArshinBuffer' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'bufferId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'bufferId' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  ConfirmArshinBufferMutation,
+  ConfirmArshinBufferMutationVariables
 >;
 export const GetPrimaryStandartsListDocument = {
   kind: 'Document',

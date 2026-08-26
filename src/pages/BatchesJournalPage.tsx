@@ -27,6 +27,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useMutation, useQuery } from '@apollo/client/react';
 import {
+  ConfirmArshinBufferDocument,
   CreateVerificationDocument,
   DeleteVerificationBatchDocument,
   GetMetrologyControlTypesListDocument,
@@ -46,6 +47,7 @@ import {
   Edit,
   QrCode,
   Sync,
+  WarningAmber,
 } from '@mui/icons-material';
 import { VerificationModal } from '../components/modals/VerificationModal';
 import { enqueueSnackbar } from 'notistack';
@@ -54,6 +56,7 @@ import { GlobalJobWatcher } from '../components/GlobalJobWatcher';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import EditDevicePage from './admin/EditDevicePage';
 import { cleanSpaces } from '../utils/capitalize';
+import { ArshinSelectDialog } from '../components/ArshinSelectDialog';
 
 interface BatchesJournalPageProps {
   locallyVerifiedIds: string[];
@@ -71,6 +74,13 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
   const [journalYear, setJournalYear] = useState<number>(currentYear);
   const [statusTab, setStatusTab] = useState<string>('ACTIVE'); // 'ACTIVE' | 'DRAFT' | 'SENT' | 'COMPLETED'
   const [batchJobs, setBatchJobs] = useState<Record<string, string>>({});
+
+  const [isBufferDialogOpen, setIsBufferDialogOpen] = useState<boolean>(false);
+  const [bufferRecords, setBufferRecords] = useState<any[]>([]);
+  // const [activeBufferContext, setActiveBufferContext] = useState<{
+  //   deviceId: string;
+  //   batchId: string;
+  // } | null>(null);
 
   // const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
   const [selectedLinkIds, setSelectedLinkIds] = useState<string[]>([]);
@@ -281,6 +291,24 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
       },
       onError: (error) => {
         enqueueSnackbar(`Не удалось синхронизировать: ${error.message}`, {
+          variant: 'error',
+        });
+      },
+    }
+  );
+
+  const [confirmBufferRecord, { loading: loadingConfirm }] = useMutation(
+    ConfirmArshinBufferDocument,
+    {
+      refetchQueries: [GetVerificationBatchesDocument],
+      onCompleted: () => {
+        enqueueSnackbar('Поверка успешно подтверждена и сохранена', {
+          variant: 'success',
+        });
+        setIsBufferDialogOpen(false);
+      },
+      onError: (error) => {
+        enqueueSnackbar(`Ошибка подтверждения: ${error.message}`, {
           variant: 'error',
         });
       },
@@ -1032,6 +1060,15 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                     //   link.device.id
                     // );
 
+                    // Проверяем, есть ли в буфере хоть какие-то записи (даже если она всего одна)
+                    const hasBufferRecords =
+                      (link.device.arshinBuffers?.length ?? 0) > 0;
+
+                    // Мягкую оранжевую подсветку включаем только если в буфере ЧТО-ТО ЕСТЬ,
+                    // но прибор еще НЕ получил официальный статус поверки в системе
+                    const showBufferWarning =
+                      hasBufferRecords && !isDeviceVerified;
+
                     return (
                       <Paper
                         key={link.id}
@@ -1045,7 +1082,13 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                           justifyContent: 'space-between',
                           alignItems: { xs: 'stretch', sm: 'center' },
                           gap: { xs: 1.5, sm: 0 },
-                          bgcolor: 'background.paper',
+                          // bgcolor: 'background.paper',
+                          borderColor: showBufferWarning
+                            ? 'amber.300'
+                            : 'divider',
+                          bgcolor: showBufferWarning
+                            ? 'amber.50/20'
+                            : 'background.paper',
                         }}
                       >
                         {/* {isSent && (
@@ -1188,7 +1231,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                 </Tooltip>
                               )}
 
-                              {!isDeviceVerified && (
+                              {/* {!isDeviceVerified && (
                                 <Tooltip
                                   title="Синхронизировать данные с ФГИС Аршин"
                                   placement="top"
@@ -1234,9 +1277,135 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                     </IconButton>
                                   </Box>
                                 </Tooltip>
+                              )} */}
+
+                              {!isDeviceVerified && (
+                                <>
+                                  {/* КЕЙС 1: В буфере есть записи -> Кнопка выбора горит ВСЕГДА */}
+                                  {hasBufferRecords && (
+                                    <Tooltip
+                                      title="Открыть найденные записи ФГИС Аршин для выбора"
+                                      placement="top"
+                                      arrow
+                                    >
+                                      <Button
+                                        size="small"
+                                        variant="outlined"
+                                        color="warning"
+                                        startIcon={
+                                          <WarningAmber fontSize="small" />
+                                        }
+                                        disabled={
+                                          !!batchJobs[batch.id] ||
+                                          isSyncing ||
+                                          isBatchSyncing
+                                        }
+                                        onClick={() => {
+                                          setBufferRecords(
+                                            link.device.arshinBuffers ?? []
+                                          );
+                                          setIsBufferDialogOpen(true);
+                                        }}
+                                        sx={{
+                                          textTransform: 'none',
+                                          borderRadius: 1.5,
+                                          py: 0.25,
+                                          px: 1,
+                                          fontWeight: 'bold',
+                                          fontSize: '0.7rem',
+                                          width: { xs: '100%', sm: 'auto' },
+                                        }}
+                                      >
+                                        Выбрать (
+                                        {link.device.arshinBuffers?.length ?? 0}
+                                        )
+                                      </Button>
+                                    </Tooltip>
+                                  )}
+
+                                  {/* КЕЙС 2: Ваша стандартная кнопка повторной синхронизации с анимацией спина */}
+                                  <Tooltip
+                                    title="Запросить/обновить данные из ФГИС Аршин"
+                                    placement="top"
+                                    arrow
+                                  >
+                                    <Box
+                                      component="span"
+                                      sx={{ display: 'inline-flex' }}
+                                    >
+                                      <IconButton
+                                        color="warning"
+                                        size="small"
+                                        disabled={
+                                          !!batchJobs[batch.id] ||
+                                          isSyncing ||
+                                          isBatchSyncing
+                                        }
+                                        onClick={() => {
+                                          syncDeviceWithArshin({
+                                            variables: {
+                                              input: {
+                                                deviceId: link.device.id,
+                                                batchId: batch.id,
+                                              },
+                                            },
+                                          }).catch(() => {});
+                                        }}
+                                      >
+                                        <Sync
+                                          fontSize="small"
+                                          sx={{
+                                            animation: isSyncing
+                                              ? 'spin 1s linear infinite'
+                                              : 'none',
+                                            '@keyframes spin': {
+                                              '0%': {
+                                                transform: 'rotate(0deg)',
+                                              },
+                                              '100%': {
+                                                transform: 'rotate(360deg)',
+                                              },
+                                            },
+                                          }}
+                                        />
+                                      </IconButton>
+                                    </Box>
+                                  </Tooltip>
+
+                                  {/* КЕЙС 3: Ваша стандартная кнопка ручного ввода (карандаш) */}
+                                  <Tooltip
+                                    title="Внести или изменить результаты поверки/калибровки вручную"
+                                    placement="top"
+                                    arrow
+                                  >
+                                    <Box
+                                      component="span"
+                                      sx={{ display: 'inline-flex' }}
+                                    >
+                                      <IconButton
+                                        color="primary"
+                                        size="small"
+                                        disabled={
+                                          !!batchJobs[batch.id] ||
+                                          isSyncing ||
+                                          isBatchSyncing
+                                        }
+                                        onClick={() =>
+                                          handleOpenVerificationModal(
+                                            link.device.id,
+                                            link.device.name,
+                                            batch.id
+                                          )
+                                        }
+                                      >
+                                        <Edit fontSize="small" />
+                                      </IconButton>
+                                    </Box>
+                                  </Tooltip>
+                                </>
                               )}
 
-                              <Tooltip
+                              {/* <Tooltip
                                 title="Внести или изменить результаты поверки/калибровки"
                                 placement="top"
                                 arrow
@@ -1265,7 +1434,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                     <Edit fontSize="small" />
                                   </IconButton>
                                 </Box>
-                              </Tooltip>
+                              </Tooltip> */}
                             </Box>
                           )}
 
@@ -1558,6 +1727,15 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
       </Dialog>
 
       <GlobalJobWatcher onJobClose={handleRemoveJob} />
+      <ArshinSelectDialog
+        open={isBufferDialogOpen}
+        onClose={() => setIsBufferDialogOpen(false)}
+        loading={loadingConfirm}
+        records={bufferRecords}
+        onSelect={async (bufferId) => {
+          await confirmBufferRecord({ variables: { bufferId } });
+        }}
+      />
     </Box>
   );
 };
