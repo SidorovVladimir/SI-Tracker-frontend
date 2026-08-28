@@ -15,6 +15,7 @@ import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import {
   GetInspectionPoolDocument,
   CreateBulkInspectionDocument,
+  GetInspectionCalendarSummaryDocument,
   // GetInspectionArchiveDocument,
 } from '../graphql/types/__generated__/graphql';
 import { InspectionSaveModal } from '../components/modals/InspectionSaveModal';
@@ -55,6 +56,14 @@ export const InspectionPlanningPage: React.FC = () => {
     fetchPolicy: 'cache-and-network',
   });
 
+  const {
+    data: summaryData,
+    loading: summaryLoading,
+    refetch: refetchSummary,
+  } = useQuery(GetInspectionCalendarSummaryDocument, {
+    fetchPolicy: 'cache-and-network',
+  });
+
   // Запрос Вкладки 2: Архив актов ТО (переиспользует общий метод без костылей LIKE)
   // const { data: archiveData, refetch: refetchArchive } = useQuery(
   //   GetInspectionArchiveDocument,
@@ -79,6 +88,7 @@ export const InspectionPlanningPage: React.FC = () => {
         setSelectedDeviceIds([]);
         setIsSubmitModalOpen(false);
         refetch();
+        refetchSummary();
         // refetchArchive()
       },
       onError: (err) => {
@@ -91,7 +101,6 @@ export const InspectionPlanningPage: React.FC = () => {
 
   const poolItems = data?.getInspectionPoolByMonth?.items ?? [];
   const totalCount = data?.getInspectionPoolByMonth?.totalCount ?? 0;
-  const yearlySummary = data?.getInspectionPoolByMonth?.yearlySummary ?? [];
 
   // const archiveItems = archiveData?.getInspectionBatchesArchive?.items ?? [];
   // const archiveTotalCount =
@@ -157,8 +166,8 @@ export const InspectionPlanningPage: React.FC = () => {
             setPage(0);
             setSelectedDeviceIds([]);
           }}
-          summaryData={yearlySummary}
-          loading={loading}
+          summaryData={summaryData?.getInspectionCalendarSummary}
+          loading={summaryLoading}
         />
       </Box>
 

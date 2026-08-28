@@ -15,11 +15,11 @@ query GetInspectionPool($targetMonth: String!, $limit: Int!, $offset: Int!) {
       controlType
     }
     totalCount
-    yearlySummary {
-      month
-      autoCount
-      manualCount
-    }
+    #yearlySummary {
+    #month
+    # autoCount
+    #manualCount
+    #}
   }
 }
 
@@ -48,6 +48,14 @@ query GetInspectionArchive($limit: Int!, $offset: Int!, $year: Int!) {
       }
     }
     totalCount
+  }
+}
+
+query GetInspectionCalendarSummary {
+  getInspectionCalendarSummary {
+    month
+    autoCount
+    manualCount
   }
 }
 

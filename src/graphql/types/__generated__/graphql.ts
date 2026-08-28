@@ -642,7 +642,6 @@ export type InspectionPoolResponse = {
   __typename: 'InspectionPoolResponse';
   items: Array<InspectionPoolItem>;
   totalCount: Scalars['Int']['output'];
-  yearlySummary: Array<MonthlySummary>;
 };
 
 export type InspectionTableItem = {
@@ -1137,6 +1136,7 @@ export type Query = {
   getDraftBatchesByMonth: Array<DraftBatchOption>;
   getFinancialAnalytics: FinancialAnalyticsResponse;
   getInspectionBatchesArchive: InspectionArchiveResponse;
+  getInspectionCalendarSummary: Array<MonthlySummary>;
   getInspectionPoolByMonth: InspectionPoolResponse;
   getJobStatus: Maybe<JobStatusResponse>;
   getPlanningPoolByMonth: PlanningPoolResponse;
@@ -2696,12 +2696,6 @@ export type GetInspectionPoolQuery = {
       isOverdue: boolean;
       controlType: string;
     }>;
-    yearlySummary: Array<{
-      __typename: 'MonthlySummary';
-      month: string;
-      autoCount: number;
-      manualCount: number;
-    }>;
   };
 };
 
@@ -2742,6 +2736,19 @@ export type GetInspectionArchiveQuery = {
       }>;
     }>;
   };
+};
+
+export type GetInspectionCalendarSummaryQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type GetInspectionCalendarSummaryQuery = {
+  getInspectionCalendarSummary: Array<{
+    __typename: 'MonthlySummary';
+    month: string;
+    autoCount: number;
+    manualCount: number;
+  }>;
 };
 
 export type CreateBulkInspectionMutationVariables = Exact<{
@@ -7790,24 +7797,6 @@ export const GetInspectionPoolDocument = {
                   },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'yearlySummary' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'Field', name: { kind: 'Name', value: 'month' } },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'autoCount' },
-                      },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'manualCount' },
-                      },
-                    ],
-                  },
-                },
               ],
             },
           },
@@ -7993,6 +7982,36 @@ export const GetInspectionArchiveDocument = {
 } as unknown as DocumentNode<
   GetInspectionArchiveQuery,
   GetInspectionArchiveQueryVariables
+>;
+export const GetInspectionCalendarSummaryDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetInspectionCalendarSummary' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getInspectionCalendarSummary' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'month' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'autoCount' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'manualCount' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetInspectionCalendarSummaryQuery,
+  GetInspectionCalendarSummaryQueryVariables
 >;
 export const CreateBulkInspectionDocument = {
   kind: 'Document',
