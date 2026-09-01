@@ -459,6 +459,7 @@ export type DeviceInBatch = {
 export type DeviceTableItem = {
   __typename: 'DeviceTableItem';
   archived: Maybe<Scalars['Boolean']['output']>;
+  cachedControl: Maybe<Scalars['String']['output']>;
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inventoryNumber: Maybe<Scalars['String']['output']>;
@@ -467,6 +468,8 @@ export type DeviceTableItem = {
   manufacturer: Maybe<Scalars['String']['output']>;
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
+  nextInspectionDate: Maybe<Scalars['String']['output']>;
+  nextVerificationDate: Maybe<Scalars['String']['output']>;
   productionSite: ProductionSiteRelation;
   receiptDate: Maybe<Scalars['String']['output']>;
   releaseDate: Maybe<Scalars['String']['output']>;
@@ -500,6 +503,7 @@ export type DeviceWithRelations = {
   measurementTypes: Array<MeasurementType>;
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
+  nextInspectionDate: Maybe<Scalars['String']['output']>;
   nomenclature: Maybe<Scalars['String']['output']>;
   primaryStandarts: Array<PrimaryStandart>;
   productionSite: ProductionSiteRelation;
@@ -1004,6 +1008,7 @@ export type PlanningPoolItem = {
   id: Scalars['ID']['output'];
   isManualPlacement: Scalars['Boolean']['output'];
   isOverdue: Scalars['Boolean']['output'];
+  lastControlDate: Maybe<Scalars['String']['output']>;
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
   serialNumber: Scalars['String']['output'];
@@ -1058,6 +1063,7 @@ export type PrimaryStandart = {
 };
 
 export type PrintBarcodesInput = {
+  controlType?: InputMaybe<Scalars['String']['input']>;
   deviceIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   historyLinkIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
@@ -2399,6 +2405,9 @@ export type GetDevicesWithRelationsListQuery = {
       receiptDate: string | null;
       manufacturer: string | null;
       archived: boolean | null;
+      cachedControl: string | null;
+      nextVerificationDate: string | null;
+      nextInspectionDate: string | null;
       status: { __typename: 'Status'; name: string };
       productionSite: {
         __typename: 'ProductionSiteRelation';
@@ -2445,6 +2454,7 @@ export type GetDeviceWithRelationQuery = {
     inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
+    nextInspectionDate: string | null;
     createdAt: string;
     updatedAt: string;
     verificationInterval: number | null;
@@ -2930,6 +2940,7 @@ export type GetPlanningPoolQuery = {
       model: string;
       serialNumber: string;
       validUntil: string | null;
+      lastControlDate: string | null;
       suggestedMonth: string;
       targetBatchId: string | null;
       isManualPlacement: boolean;
@@ -6644,6 +6655,18 @@ export const GetDevicesWithRelationsListDocument = {
                       },
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'cachedControl' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'nextVerificationDate' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'nextInspectionDate' },
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'status' },
                         selectionSet: {
                           kind: 'SelectionSet',
@@ -6826,6 +6849,10 @@ export const GetDeviceWithRelationDocument = {
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'manufacturer' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'nextInspectionDate' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
@@ -8756,6 +8783,10 @@ export const GetPlanningPoolDocument = {
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'validUntil' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastControlDate' },
                       },
                       {
                         kind: 'Field',

@@ -896,7 +896,7 @@ export default function DeviceCard(props: {
             sx={{
               minHeight: 48,
               '&.Mui-expanded': { minHeight: 48 },
-              bgcolor: v.result === 'Годен' ? '#f0fdf4' : '#fff1f2',
+              bgcolor: v.result === 'годен' ? '#f0fdf4' : '#fff1f2',
             }}
           >
             <Stack

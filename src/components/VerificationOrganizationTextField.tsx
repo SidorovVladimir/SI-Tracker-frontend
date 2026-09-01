@@ -7,6 +7,7 @@ import { cleanSpaces } from '../utils/capitalize';
 export default function VerificationOrganizationTextField({
   value,
   onChange,
+  newOrganizationName,
   verificationOrganizationsList,
 }: any) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,7 +21,7 @@ export default function VerificationOrganizationTextField({
         size="small"
         fullWidth
         onChange={onChange}
-        value={value}
+        value={value || (newOrganizationName ? 'NEW_ROW' : '')}
         slotProps={{
           select: {
             MenuProps: {
@@ -52,6 +53,14 @@ export default function VerificationOrganizationTextField({
         <MenuItem value="">
           <em>Не выбрано</em>
         </MenuItem>
+        {newOrganizationName && (
+          <MenuItem
+            value="NEW_ROW"
+            sx={{ color: 'primary.main', fontWeight: 'bold' }}
+          >
+            ✨ {cleanSpaces(newOrganizationName)} (НОВАЯ)
+          </MenuItem>
+        )}
         {verificationOrganizationsList.map(
           ({ id, name }: { id: string; name: string }) => (
             <MenuItem

@@ -347,23 +347,133 @@ export default function DevicesPage() {
       valueGetter: (_, row) =>
         row.latestVerification ? formatDate(row.latestVerification.date) : '—',
     },
+
     {
       field: 'verificationNextDate',
       headerName: 'Дата следующего контроля',
       flex: 1,
       minWidth: 150,
       valueGetter: (_, row) =>
-        row.latestVerification
-          ? formatDate(row.latestVerification.validUntil)
-          : '—',
+        row.nextVerificationDate ? formatDate(row.nextVerificationDate) : '—',
+
+      // renderCell: (params) => {
+      //   if (!params.value || params.value === '—') return '—';
+
+      //   // Сравниваем кэш-дату дедлайна с сегодняшним днём (2026-08-31)
+      //   const isOverdue =
+      //     new Date(params.row.nextVerificationDate) < new Date();
+
+      //   return (
+      //     <Typography
+      //       variant="body2"
+      //       sx={{
+      //         fontWeight: isOverdue ? 'bold' : 'normal',
+      //         color: isOverdue ? 'error.main' : 'text.primary', // Просрочен? Красный текст!
+      //       }}
+      //     >
+      //       {params.value}
+      //     </Typography>
+      //   );
+      // },
     },
+    // {
+    //   field: 'verificationNextDate',
+    //   headerName: 'Дата следующего контроля',
+    //   flex: 1,
+    //   minWidth: 150,
+    //   valueGetter: (_, row) =>
+    //     row.latestVerification
+    //       ? formatDate(row.latestVerification.validUntil)
+    //       : '—',
+    // },
+
+    // {
+    //   field: 'nextVerificationDate',
+    //   headerName: 'Дедлайн поверки/калибровки',
+    //   flex: 1,
+    //   minWidth: 180,
+    //   valueGetter: (_, row) =>
+    //     row.nextVerificationDate ? formatDate(row.nextVerificationDate) : '—',
+    //   renderCell: (params) => {
+    //     if (!params.value || params.value === '—') return '—';
+
+    //     // row.isOverdue у вас уже прилетает с бэкенда! Просто красим текст
+    //     const isOverdue = params.row.isOverdue;
+
+    //     return (
+    //       <Typography
+    //         variant="body2"
+    //         sx={{
+    //           fontWeight: isOverdue ? 'bold' : 'normal',
+    //           color: isOverdue ? 'error.main' : 'text.primary', // Если просрочен — красим в красный
+    //         }}
+    //       >
+    //         {params.value}
+    //       </Typography>
+    //     );
+    //   },
+    // },
+    // {
+    //   field: 'metrologyControlType',
+    //   headerName: 'Вид контроля',
+    //   flex: 1,
+    //   minWidth: 140,
+    //   valueGetter: (_, row) =>
+    //     cleanSpaces(row?.latestVerification?.metrologyControleType?.name),
+
+    //   renderCell: (params) => {
+    //     const typeName = params.value;
+
+    //     if (!typeName) {
+    //       return (
+    //         <Typography
+    //           variant="body2"
+    //           color="text.disabled"
+    //           sx={{ fontSize: '0.77rem' }}
+    //         >
+    //           —
+    //         </Typography>
+    //       );
+    //     }
+
+    //     const lowerName = String(typeName).toLowerCase().trim();
+
+    //     // Определяем цвет и стиль чипса в зависимости от вида контроля
+    //     let chipColor: 'primary' | 'secondary' | 'info' | 'default' = 'default';
+
+    //     if (lowerName === 'поверка') {
+    //       chipColor = 'primary'; // Синий
+    //     } else if (lowerName === 'калибровка') {
+    //       chipColor = 'secondary'; // Фиолетовый
+    //     } else if (lowerName === 'аттестация') {
+    //       chipColor = 'info'; // Голубой
+    //     }
+
+    //     return (
+    //       <Chip
+    //         label={typeName}
+    //         size="small"
+    //         color={chipColor}
+    //         variant="outlined"
+    //         sx={{
+    //           fontSize: '0.68rem',
+    //           fontWeight: 'bold',
+    //           height: 20,
+    //           letterSpacing: '0.5px',
+    //           textTransform: 'uppercase', // Поддерживаем ваш общий стиль капса
+    //           borderRadius: '4px', // Делаем его квадратным/аккуратным под компактную сетку
+    //         }}
+    //       />
+    //     );
+    //   },
+    // },
+
     {
       field: 'metrologyControlType',
       headerName: 'Вид контроля',
       flex: 1,
       minWidth: 140,
-      valueGetter: (_, row) =>
-        cleanSpaces(row?.latestVerification?.metrologyControleType?.name),
+      valueGetter: (_, row) => cleanSpaces(row?.cachedControl),
 
       renderCell: (params) => {
         const typeName = params.value;
@@ -381,17 +491,13 @@ export default function DevicesPage() {
         }
 
         const lowerName = String(typeName).toLowerCase().trim();
-
-        // Определяем цвет и стиль чипса в зависимости от вида контроля
         let chipColor: 'primary' | 'secondary' | 'info' | 'default' = 'default';
 
-        if (lowerName === 'поверка') {
-          chipColor = 'primary'; // Синий
-        } else if (lowerName === 'калибровка') {
-          chipColor = 'secondary'; // Фиолетовый
-        } else if (lowerName === 'аттестация') {
-          chipColor = 'info'; // Голубой
-        }
+        if (lowerName === 'поверка') chipColor = 'primary';
+        else if (lowerName === 'калибровка') chipColor = 'secondary';
+        else if (lowerName === 'аттестация') chipColor = 'info';
+        // Если вдруг затесался осмотр (например на общей схеме) — пусть будет дефолтным серым
+        else if (lowerName === 'осмотр') chipColor = 'default';
 
         return (
           <Chip
@@ -404,8 +510,8 @@ export default function DevicesPage() {
               fontWeight: 'bold',
               height: 20,
               letterSpacing: '0.5px',
-              textTransform: 'uppercase', // Поддерживаем ваш общий стиль капса
-              borderRadius: '4px', // Делаем его квадратным/аккуратным под компактную сетку
+              textTransform: 'uppercase',
+              borderRadius: '4px',
             }}
           />
         );
@@ -421,6 +527,33 @@ export default function DevicesPage() {
           ? formatDate(row.latestInspection.date)
           : 'Не проводился',
     },
+    {
+      field: 'nextInspectionDate',
+      headerName: 'Следующий плановый осмотр',
+      flex: 1,
+      minWidth: 180,
+      valueGetter: (_, row) =>
+        row.nextInspectionDate ? formatDate(row.nextInspectionDate) : '—',
+      // renderCell: (params) => {
+      //   if (!params.value || params.value === '—') return '—';
+
+      //   // Проверяем просрочку для осмотра прямо на клиенте (сравниваем с текущей датой)
+      //   const isOverdue = new Date(params.row.nextInspectionDate) < new Date();
+
+      //   return (
+      //     <Typography
+      //       variant="body2"
+      //       sx={{
+      //         fontWeight: isOverdue ? 'bold' : 'normal',
+      //         color: isOverdue ? 'warning.main' : 'text.primary', // Осмотры красим в желтый/оранжевый (warning)
+      //       }}
+      //     >
+      //       {params.value}
+      //     </Typography>
+      //   );
+      // },
+    },
+
     {
       field: 'status',
       headerName: 'Состояние',

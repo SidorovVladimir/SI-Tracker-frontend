@@ -662,7 +662,7 @@ export const VerificationPlanningPage: React.FC = () => {
         open={isBarcodeModalOpen}
         onClose={() => setIsBarcodeModalOpen(false)}
         deviceIds={selectedDeviceIds}
-        // controlType="verification"
+        controlType="verification"
       />
     </Box>
   );

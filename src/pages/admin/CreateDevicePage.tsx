@@ -245,6 +245,7 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
       collapsed: boolean;
       verificationOrganizationId: string;
       cost: string;
+      newOrganizationName: string;
     }>
   >([]);
 
@@ -267,6 +268,7 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
         deviceId: '',
         collapsed: false,
         cost: '',
+        newOrganizationName: '',
       },
     ]);
   };
@@ -388,12 +390,11 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
           return;
         }
 
-        const matchedOrgId =
-          verificationOrhanizationsList.find(
-            (org) =>
-              org.name.toLowerCase().trim() ===
-              item.organizationName?.toLowerCase().trim()
-          )?.id || '';
+        const matchedOrg = verificationOrhanizationsList.find(
+          (org) =>
+            org.name.toLowerCase().trim() ===
+            item.organizationName?.toLowerCase().trim()
+        );
 
         const defaultControlType =
           metrologyControlTypeList.find(
@@ -405,13 +406,14 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
           id: nextId.current++,
           date: formatDateToInput(item.date),
           validUntil: formatDateToInput(item.validUntil),
-          result: item.isApplicable ? 'Годен' : 'Не годен',
+          result: item.isApplicable ? 'годен' : 'не годен',
           protocolNumber: item.protocolNumber,
           organization: item.organizationName || '',
           comment: `Автоматический импорт из ФГИС Аршин. Запись № ${item.arshinId}`,
           documentUrl: item.documentUrl,
           metrologyControleTypeId: defaultControlType,
-          verificationOrganizationId: matchedOrgId,
+          verificationOrganizationId: matchedOrg ? matchedOrg.id : '',
+          newOrganizationName: matchedOrg ? '' : item.organizationName || '',
           collapsed: false,
           cost: '',
         });
@@ -560,6 +562,7 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
       documentUrl: v.documentUrl || null,
       metrologyControleTypeId: v.metrologyControleTypeId || null,
       verificationOrganizationId: v.verificationOrganizationId || null,
+      newOrganizationName: v.newOrganizationName || null,
       cost: v.cost ? parseFloat(v.cost) : 0,
     }));
 
@@ -1103,7 +1106,7 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
                         <MenuItem value="">
                           <em>Не выбрано</em>
                         </MenuItem>
-                        {['Годен', 'Не годен'].map((name) => (
+                        {['годен', 'не годен'].map((name) => (
                           <MenuItem key={name} value={name}>
                             {name}
                           </MenuItem>
@@ -1270,6 +1273,7 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
                         verificationOrganizationsList={
                           verificationOrhanizationsList
                         }
+                        newOrganizationName={verification.newOrganizationName}
                       />
 
                       <MetrologyControlTypeTextField

@@ -17,6 +17,8 @@ import {
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import UpdateIcon from '@mui/icons-material/Update';
 import { formatSentenceCase, formatStrictUpper } from '../utils/capitalize';
+import { Search } from '@mui/icons-material';
+import { formatDate } from '../utils/date';
 
 interface InspectionPoolTableProps {
   devices: any[];
@@ -133,12 +135,10 @@ export const InspectionPoolTable: React.FC<InspectionPoolTableProps> = ({
                   </TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>
                     {device.lastInspectionDate
-                      ? new Date(device.lastInspectionDate).toLocaleDateString(
-                          'ru-RU'
-                        )
+                      ? formatDate(device.lastInspectionDate)
                       : 'Ни разу не проводился'}
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <Chip
                       icon={
                         device.isOverdue ? (
@@ -156,6 +156,45 @@ export const InspectionPoolTable: React.FC<InspectionPoolTableProps> = ({
                         fontWeight: 'bold',
                       }}
                     />
+                  </TableCell> */}
+                  <TableCell>
+                    {device.isManualExtra ? (
+                      // 🔥 Если прибор добавлен вручную на лету — вешаем крутой синий бейдж
+                      <Chip
+                        icon={<Search style={{ fontSize: 13 }} />}
+                        label="Вне плана (СИ/СК)"
+                        size="small"
+                        color="primary"
+                        sx={{
+                          height: 22,
+                          fontSize: '0.7rem',
+                          fontWeight: 'bold',
+                          bgcolor: 'primary.light',
+                          color: 'primary.dark',
+                        }}
+                      />
+                    ) : (
+                      // Ваша стандартная плановая логика (уже написанная у вас)
+                      <Chip
+                        icon={
+                          device.isOverdue ? (
+                            <ErrorOutlineIcon style={{ fontSize: 14 }} />
+                          ) : (
+                            <UpdateIcon style={{ fontSize: 14 }} />
+                          )
+                        }
+                        label={
+                          device.isOverdue ? 'Просрочен ТО' : 'Плановое ТО'
+                        }
+                        size="small"
+                        color={device.isOverdue ? 'error' : 'success'}
+                        sx={{
+                          height: 22,
+                          fontSize: '0.7rem',
+                          fontWeight: 'bold',
+                        }}
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               );
@@ -190,7 +229,7 @@ export const InspectionPoolTable: React.FC<InspectionPoolTableProps> = ({
                   : 'success.main',
               }}
             >
-              <Box
+              {/* <Box
                 sx={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -220,6 +259,50 @@ export const InspectionPoolTable: React.FC<InspectionPoolTableProps> = ({
                   color={device.isOverdue ? 'error' : 'success'}
                   sx={{ height: 18, fontSize: '0.65rem', fontWeight: 'bold' }}
                 />
+              </Box> */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 1,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Checkbox
+                    size="medium"
+                    checked={isChecked}
+                    onChange={() => onDeviceSelect(device.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    sx={{ p: 0 }}
+                  />
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ fontFamily: 'monospace', ml: 1 }}
+                  >
+                    № {device.serialNumber}
+                  </Typography>
+                </Box>
+
+                <Chip
+                  label={
+                    device.isManualExtra
+                      ? 'Вне плана'
+                      : device.isOverdue
+                      ? 'Долг ТО'
+                      : 'План ТО'
+                  }
+                  size="small"
+                  color={
+                    device.isManualExtra
+                      ? 'primary'
+                      : device.isOverdue
+                      ? 'error'
+                      : 'success'
+                  }
+                  sx={{ height: 18, fontSize: '0.65rem', fontWeight: 'bold' }}
+                />
               </Box>
               <Typography variant="body1" sx={{ fontWeight: 'bold', mt: 0.5 }}>
                 {formatSentenceCase(device.name)}
@@ -244,9 +327,7 @@ export const InspectionPoolTable: React.FC<InspectionPoolTableProps> = ({
                 <Typography variant="caption" color="text.secondary">
                   Был осмотрен:{' '}
                   {device.lastInspectionDate
-                    ? new Date(device.lastInspectionDate).toLocaleDateString(
-                        'ru-RU'
-                      )
+                    ? formatDate(device.lastInspectionDate)
                     : '—'}
                 </Typography>
               </Box>

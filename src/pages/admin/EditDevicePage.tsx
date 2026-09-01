@@ -511,7 +511,7 @@ function UserForm({
           deviceId: deviceId,
           date: formatDateToInput(item.date),
           validUntil: formatDateToInput(item.validUntil),
-          result: item.isApplicable ? 'Годен' : 'Не годен',
+          result: item.isApplicable ? 'годен' : 'не годен',
           protocolNumber: item.protocolNumber,
           organization: item.organizationName || '',
           comment: `Автоматический импорт из ФГИС Аршин. Запись № ${item.arshinId}`,
@@ -1515,7 +1515,7 @@ function UserForm({
                         <MenuItem value="">
                           <em>Не выбрано</em>
                         </MenuItem>
-                        {['Годен', 'Не годен'].map((name) => (
+                        {['годен', 'не годен'].map((name) => (
                           <MenuItem
                             key={name}
                             value={name}

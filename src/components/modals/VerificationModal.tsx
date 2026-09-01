@@ -116,8 +116,8 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
             value={result}
             onChange={(e) => setResult(e.target.value)}
           >
-            <MenuItem value="Годен">🟢 Годен (Выдать свидетельство)</MenuItem>
-            <MenuItem value="Не годен">
+            <MenuItem value="годен">🟢 Годен (Выдать свидетельство)</MenuItem>
+            <MenuItem value="не годен">
               🔴 Не годен (Извещение о непригодности)
             </MenuItem>
           </TextField>

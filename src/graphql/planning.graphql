@@ -30,6 +30,7 @@ query GetPlanningPool(
       model
       serialNumber
       validUntil
+      lastControlDate
       suggestedMonth
       targetBatchId
       isManualPlacement

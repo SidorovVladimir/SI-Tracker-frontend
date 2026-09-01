@@ -30,7 +30,7 @@ interface BarcodePrintModalProps {
   open: boolean;
   onClose: () => void;
   deviceIds?: string[]; // Придет при вызове с главной страницы
-  // controlType?: 'inspection' | 'verification'; // Контекст для главной ('inspection' / 'verification')
+  controlType?: 'inspection' | 'verification'; // Контекст для главной ('inspection' / 'verification')
   historyLinkIds?: string[]; // Придет при вызове из архивов журналов
 }
 
@@ -38,7 +38,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
   open,
   onClose,
   deviceIds = [],
-  // controlType,
+  controlType,
   historyLinkIds = [],
 }) => {
   const [printMode, setPrintMode] = useState<'A4' | 'ROLL'>('A4');
@@ -66,7 +66,7 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
       // Передаем переменные строго по новой схеме GraphQL (объект input)
       input: {
         deviceIds: deviceIds.length > 0 ? deviceIds : undefined,
-        // controlType,
+        controlType,
         historyLinkIds: historyLinkIds.length > 0 ? historyLinkIds : undefined,
       },
     },

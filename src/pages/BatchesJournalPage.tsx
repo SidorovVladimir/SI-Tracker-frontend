@@ -1039,11 +1039,11 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                     const isBackendVerified = !!currentVerification;
 
                     const isVerificationPassed = isBackendVerified
-                      ? currentVerification?.result === 'Годен'
+                      ? currentVerification?.result === 'годен'
                       : false;
 
                     const isVerificationFailed = isBackendVerified
-                      ? currentVerification?.result === 'Не годен'
+                      ? currentVerification?.result === 'не годен'
                       : false;
 
                     const isLocallyVerified = locallyVerifiedIds.includes(
