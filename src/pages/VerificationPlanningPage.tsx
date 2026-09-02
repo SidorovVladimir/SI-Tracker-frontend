@@ -528,7 +528,7 @@ export const VerificationPlanningPage: React.FC = () => {
               mt: 2,
             }}
           >
-            {controlTypesLoading ? (
+            {/* {controlTypesLoading ? (
               <Typography variant="caption">
                 Загрузка фильтров контроля...
               </Typography>
@@ -579,6 +579,82 @@ export const VerificationPlanningPage: React.FC = () => {
                     textTransform: 'none',
                     fontWeight: 'medium',
                     color: 'text.secondary',
+                  }}
+                />
+              </Tabs>
+            )} */}
+            {controlTypesLoading ? (
+              <Typography variant="caption">
+                Загрузка фильтров контроля...
+              </Typography>
+            ) : (
+              <Tabs
+                value={activeFilter}
+                onChange={handleTabChange}
+                variant="scrollable"
+                scrollButtons="auto"
+                textColor="primary"
+                indicatorColor="primary"
+                allowScrollButtonsMobile
+                sx={{
+                  '& .MuiTabs-scrollButtons.Mui-disabled': { opacity: 0.3 },
+                }}
+              >
+                {/* 1. Вкладка "Все приборы" */}
+                <Tab
+                  value="ALL"
+                  label={`Все приборы (${globalTotalCount})`}
+                  sx={{ textTransform: 'none', fontWeight: 'bold' }}
+                />
+
+                {/* 2. Динамические вкладки видов метрологического контроля из БД */}
+                {controlTypesData?.metrologyControlTypes
+                  ?.filter(
+                    (type) => type.name.toLowerCase().trim() !== 'осмотр'
+                  )
+                  .map((type) => {
+                    const serverCountObj = meta?.typeCounts.find(
+                      (t) =>
+                        t.typeName.toLowerCase().trim() ===
+                        type.name.toLowerCase().trim()
+                    );
+                    const count = serverCountObj?.count ?? 0;
+                    return (
+                      <Tab
+                        key={type.id}
+                        value={type.id}
+                        label={`${formatSentenceCase(type.name)} (${count})`}
+                        sx={{ textTransform: 'none', fontWeight: 'medium' }}
+                      />
+                    );
+                  })}
+
+                {/* 3. Вкладка "Другие" */}
+                <Tab
+                  value="NOT_SPECIFIED"
+                  label={`Другие / Без контроля (${
+                    meta?.unassignedCount ?? 0
+                  })`}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 'medium',
+                    color: 'text.secondary',
+                  }}
+                />
+
+                {/* 🔥 4. НАША НОВАЯ ВКЛАДКА: Исключенные приборы / Резерв месяца */}
+                <Tab
+                  value="PAUSED"
+                  label={`⏸️ В резерве (${meta?.pausedTotalCount ?? 0})`}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 'bold',
+                    // Если в этом месяце на складе есть техника — мягко подсвечиваем оранжевым
+                    color:
+                      (meta?.pausedTotalCount ?? 0) > 0
+                        ? 'warning.main'
+                        : 'text.secondary',
+                    transition: 'color 0.2s',
                   }}
                 />
               </Tabs>

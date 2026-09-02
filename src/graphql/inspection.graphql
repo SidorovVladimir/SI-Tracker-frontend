@@ -59,10 +59,6 @@ query GetInspectionCalendarSummary {
   }
 }
 
-# 2. Мутация массовой фиксации осмотра мастером цеха
-mutation CreateBulkInspection(
-  $items: [InspectionItemInput!]!
-  $intervalMonths: Int!
-) {
-  createBulkInspection(items: $items, intervalMonths: $intervalMonths)
+mutation CreateBulkInspection($items: [InspectionItemInput!]!) {
+  createBulkInspection(items: $items)
 }

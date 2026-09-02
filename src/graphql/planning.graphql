@@ -36,10 +36,13 @@ query GetPlanningPool(
       isManualPlacement
       controlType
       isOverdue
+      scheduleStatus
     }
     totalCount
     meta {
       unassignedCount
+      globalTotalCount
+      pausedTotalCount
       typeCounts {
         typeName
         count

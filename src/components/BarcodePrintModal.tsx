@@ -34,6 +34,31 @@ interface BarcodePrintModalProps {
   historyLinkIds?: string[]; // Придет при вызове из архивов журналов
 }
 
+const getControlPrefix = (
+  controlName?: string | null,
+  validUntil?: string | Date | null
+) => {
+  const name = controlName?.toLowerCase() || '';
+
+  // 🔥 КЛЮЧЕВОЙ МОМЕНТ: Проверяем, есть ли дата окончания действия контроля
+  const isSingleControl = !validUntil;
+
+  if (name.includes('калибр')) {
+    return isSingleControl ? 'Калибровано от:' : 'Калибровано до:';
+  }
+
+  if (name.includes('осмотр') || name.includes('инспек')) {
+    return isSingleControl ? 'Дата осмотра:' : 'Осмотрено до:';
+  }
+
+  if (name.includes('аттест')) {
+    return isSingleControl ? 'Аттестовано от:' : 'Аттестовано до:';
+  }
+
+  // Дефолтный вариант для Государственной поверки
+  return isSingleControl ? 'Поверено от:' : 'Поверено до:';
+};
+
 export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
   open,
   onClose,
@@ -331,13 +356,13 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                     ? `${window.location.origin}/m/device/${nextDevice.id}`
                     : '';
 
-                  const getControlPrefix = (controlName?: string | null) => {
-                    const name = controlName?.toLowerCase() || '';
-                    if (name.includes('калибр')) return 'Калибровано до';
-                    if (name.includes('осмотр') || name.includes('инспек'))
-                      return 'Осмотрено до';
-                    return 'Поверено до';
-                  };
+                  // const getControlPrefix = (controlName?: string | null) => {
+                  //   const name = controlName?.toLowerCase() || '';
+                  //   if (name.includes('калибр')) return 'Калибровано до';
+                  //   if (name.includes('осмотр') || name.includes('инспек'))
+                  //     return 'Осмотрено до';
+                  //   return 'Поверено до';
+                  // };
 
                   // Базовые стили для каждой из трех бирок в пачке
                   const qrLabelStyles = {
@@ -425,8 +450,13 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                             sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
                             noWrap
                           >
-                            {getControlPrefix(device.controlType)}{' '}
-                            {formatLabelDate(device.validUntil)}
+                            {getControlPrefix(
+                              device.controlType,
+                              device.validUntil
+                            )}{' '}
+                            {device.validUntil
+                              ? formatLabelDate(device.validUntil)
+                              : formatLabelDate(device.date)}
                           </Typography>
                         </Box>
 
@@ -462,8 +492,15 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                             <Typography
                               sx={{ fontSize: '6.5pt', fontWeight: 'bold' }}
                             >
-                              {getControlPrefix(nextDevice.controlType)}{' '}
-                              {formatLabelDate(nextDevice.validUntil)}
+                              {/* {getControlPrefix(nextDevice.controlType)}{' '}
+                              {formatLabelDate(nextDevice.validUntil)} */}
+                              {getControlPrefix(
+                                nextDevice.controlType,
+                                nextDevice.validUntil
+                              )}{' '}
+                              {device.validUntil
+                                ? formatLabelDate(nextDevice.validUntil)
+                                : formatLabelDate(nextDevice.date)}
                             </Typography>
                           </Box>
                         ) : (
@@ -533,13 +570,13 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                   const currentWidth = labelSize === '40x30' ? '40mm' : '58mm';
                   const currentHeight = labelSize === '40x30' ? '30mm' : '40mm';
 
-                  const getControlPrefix = (controlName?: string | null) => {
-                    const name = controlName?.toLowerCase() || '';
-                    if (name.includes('калибр')) return 'Калибровано до';
-                    if (name.includes('осмотр') || name.includes('инспек'))
-                      return 'Осмотрено до';
-                    return 'Поверено до';
-                  };
+                  // const getControlPrefix = (controlName?: string | null) => {
+                  //   const name = controlName?.toLowerCase() || '';
+                  //   if (name.includes('калибр')) return 'Калибровано до';
+                  //   if (name.includes('осмотр') || name.includes('инспек'))
+                  //     return 'Осмотрено до';
+                  //   return 'Поверено до';
+                  // };
 
                   const getLabelContainerStyles = (
                     isSecondPartForRoll = false
@@ -640,8 +677,13 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                                   color: 'error.main',
                                 }}
                               >
-                                {getControlPrefix(device.controlType)}{' '}
-                                {formatLabelDate(device.validUntil)}
+                                {getControlPrefix(
+                                  device.controlType,
+                                  device.validUntil
+                                )}{' '}
+                                {device.validUntil
+                                  ? formatLabelDate(device.validUntil)
+                                  : formatLabelDate(device.date)}
                               </Typography>
                             </Box>
                           </Box>
@@ -741,8 +783,13 @@ export const BarcodePrintModal: React.FC<BarcodePrintModalProps> = ({
                               mt: 0.25,
                             }}
                           >
-                            {getControlPrefix(device.controlType)}{' '}
-                            {formatLabelDate(device.validUntil)}
+                            {getControlPrefix(
+                              device.controlType,
+                              device.validUntil
+                            )}{' '}
+                            {device.validUntil
+                              ? formatLabelDate(device.validUntil)
+                              : formatLabelDate(device.date)}
                           </Typography>
                         </Box>
                       </Box>

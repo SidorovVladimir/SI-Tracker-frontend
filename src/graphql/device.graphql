@@ -143,6 +143,7 @@ query GetDeviceWithRelation($id: ID!) {
     receiptDate
     manufacturer
     nextInspectionDate
+    nextVerificationDate
     createdAt
     updatedAt
     createdBy {
@@ -167,6 +168,7 @@ query GetDeviceWithRelation($id: ID!) {
     }
     verificationInterval
     archived
+    scheduleStatus
     nomenclature
     comment
     equipmentType {
@@ -244,6 +246,7 @@ mutation UpdateDevice($id: ID!, $input: UpdateDeviceInput!) {
     manufacturer
     verificationInterval
     archived
+    scheduleStatus
     nomenclature
     comment
     statusId
@@ -299,6 +302,7 @@ query GetDevicesBarcodeData($input: PrintBarcodesInput!) {
     serialNumber
     statusName
     controlType
+    date
     validUntil
   }
 }

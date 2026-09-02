@@ -49,7 +49,7 @@ import PrimaryStandartAutocomplete from '../../components/PrimaryStandartAutocom
 import MeasurementAutocomplete from '../../components/MeasurementAutocomplete';
 import VerificationOrganizationTextField from '../../components/VerificationOrganizationTextField';
 import MetrologyControlTypeTextField from '../../components/MetrologyControlTypeTextField';
-import { toCapital } from '../../utils/capitalize';
+import { cleanSpaces, toCapital } from '../../utils/capitalize';
 
 interface CreateDevicePageProps {
   closeDetails: () => void;
@@ -1102,13 +1102,38 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
                         }
                         fullWidth
                         size="small"
+                        sx={{
+                          '& .MuiInputBase-root': {
+                            paddingTop: '2.5px',
+                            paddingBottom: '2.5px',
+                          },
+                          '& .MuiInputBase-input': {
+                            textTransform: 'uppercase',
+                            fontSize: '0.8rem',
+                            letterSpacing: '0.6px',
+                            fontWeight: 500,
+                          },
+                        }}
                       >
                         <MenuItem value="">
                           <em>Не выбрано</em>
                         </MenuItem>
                         {['годен', 'не годен'].map((name) => (
-                          <MenuItem key={name} value={name}>
-                            {name}
+                          <MenuItem
+                            key={name}
+                            value={name}
+                            sx={{
+                              '& .MuiInputBase-root': {
+                                paddingTop: '2.5px',
+                                paddingBottom: '2.5px',
+                              },
+                              textTransform: 'uppercase',
+                              fontSize: '0.77rem',
+                              letterSpacing: '0.55px',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {cleanSpaces(name)}
                           </MenuItem>
                         ))}
                       </TextField>

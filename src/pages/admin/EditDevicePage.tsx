@@ -257,6 +257,7 @@ function UserForm({
     manufacturer: string;
     verificationInterval: number | string;
     archived: boolean;
+    scheduleStatus: string;
     nomenclature: string;
     comment: string;
     statusId: string;
@@ -295,6 +296,10 @@ function UserForm({
     manufacturer: device?.manufacturer || '',
     verificationInterval: device.verificationInterval || '',
     archived: device.archived,
+    scheduleStatus:
+      device?.scheduleStatus && typeof device.scheduleStatus === 'string'
+        ? device.scheduleStatus
+        : 'active',
     nomenclature: device?.nomenclature || '',
     comment: device.comment || '',
     statusId: device.status.id || '',
@@ -336,6 +341,7 @@ function UserForm({
       deviceId: verification.deviceId,
       collapsed: true,
       cost: verification.cost || '',
+      newOrganizationName: '',
     };
   });
 
@@ -354,6 +360,7 @@ function UserForm({
       verificationOrganizationId: string;
       collapsed: boolean;
       cost: number | string;
+      newOrganizationName: string;
     }>
   >(verificationsState);
 
@@ -374,6 +381,7 @@ function UserForm({
         deviceId: '',
         collapsed: false,
         cost: '',
+        newOrganizationName: '',
       },
     ]);
   };
@@ -492,12 +500,11 @@ function UserForm({
           return;
         }
 
-        const matchedOrgId =
-          verificationOrhanizationsList.find(
-            (org) =>
-              org.name.toLowerCase().trim() ===
-              item.organizationName?.toLowerCase().trim()
-          )?.id || '';
+        const matchedOrg = verificationOrhanizationsList.find(
+          (org) =>
+            org.name.toLowerCase().trim() ===
+            item.organizationName?.toLowerCase().trim()
+        );
 
         const defaultControlType =
           metrologyControlTypeList.find(
@@ -517,7 +524,8 @@ function UserForm({
           comment: `Автоматический импорт из ФГИС Аршин. Запись № ${item.arshinId}`,
           documentUrl: item.documentUrl,
           metrologyControleTypeId: defaultControlType,
-          verificationOrganizationId: matchedOrgId,
+          verificationOrganizationId: matchedOrg ? matchedOrg.id : '',
+          newOrganizationName: matchedOrg ? '' : item.organizationName || '',
           collapsed: false,
           cost: '',
         });
@@ -683,6 +691,7 @@ function UserForm({
       documentUrl: v.documentUrl || null,
       metrologyControleTypeId: v.metrologyControleTypeId || null,
       verificationOrganizationId: v.verificationOrganizationId || null,
+      newOrganizationName: v.newOrganizationName || null,
       cost: v.cost !== '' ? parseFloat(String(v.cost)) : 0,
     }));
 
@@ -776,7 +785,6 @@ function UserForm({
       );
     });
 
-  // 🎯 ГРСИ ОБЯЗАТЕЛЕН: Только если это СИ И выбрана государственная сфера
   const isGrsiRequired = isSI && hasStateScope;
 
   return (
@@ -803,45 +811,169 @@ function UserForm({
         </Tooltip>
       </Box>
 
-      {/* Вторая строка: 🎯 ТУМБЛЕР АРХИВАЦИИ СТРОГО ПОД ЗАГОЛОВКОМ ДЛЯ ВСЕХ ЭКРАНОВ */}
       <Box
+        // sx={{
+        //   display: 'flex',
+        //   alignItems: 'center',
+        //   flexWrap: 'wrap',
+        //   gap: 2,
+        //   mb: 3, // Стандартный отступ перед началом полей формы
+        //   p: 1.5, // Чуть увеличили внутренний отступ для двух элементов
+        //   bgcolor: 'grey.50', // Легкая аккуратная подложка
+        //   borderRadius: 2,
+        //   width: 'fit-content', // Плашка облегает текст и не растягивается
+        //   border: '1px solid',
+        //   borderColor: 'grey.200',
+        // }}
         sx={{
           display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          mb: 3, // Стандартный отступ перед началом полей формы
-          p: 1,
-          bgcolor: 'grey.50', // Легкая аккуратная подложка, чтобы выделить статус СИ
-          borderRadius: 1.5,
-          width: 'fit-content', // Плашка облегает текст и не растягивается на весь экран
+          flexDirection: { xs: 'column', sm: 'row' }, // В столбик на мобилке, в ряд на ПК
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 2,
+          mb: 3,
+          p: 2,
+          bgcolor: 'grey.50',
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: 'grey.200',
         }}
       >
-        <Switch
+        <TextField
+          select
           size="small"
-          checked={form.archived}
-          onChange={(e) => {
-            handleChange({
-              target: {
-                name: 'archived',
-                value: e.target.checked,
-              },
-            } as any);
-          }}
-          color="error"
-        />
-        <Typography
-          variant="caption"
+          label="Режим планирования в журналах"
+          name="scheduleStatus"
+          value={
+            typeof form.scheduleStatus === 'string' &&
+            form.scheduleStatus !== ''
+              ? form.scheduleStatus
+              : 'active'
+          }
+          onChange={handleChange}
+          disabled={form.archived} // Если списан в архив, менять режимы планирования нельзя
           sx={{
-            textTransform: 'uppercase',
-            fontSize: '0.7rem',
-            letterSpacing: '0.6px',
-            fontWeight: 700,
-            color: form.archived ? 'error.main' : 'text.secondary',
+            flexGrow: 1,
+            bgcolor: 'background.paper',
+            '& .MuiInputBase-root': { borderRadius: 1.5 },
+          }}
+          slotProps={{
+            select: {
+              MenuProps: { PaperProps: { sx: { borderRadius: 2 } } },
+            },
           }}
         >
-          {form.archived ? '📦 В архиве' : '🟢 Активен в системе'}
-        </Typography>
+          <MenuItem value="active">🟢 В плане (Полный контроль)</MenuItem>
+          <MenuItem value="paused_verification">
+            🛠️ Только ТО (Без поверок ЦСМ)
+          </MenuItem>
+          <MenuItem value="paused_all">
+            ⏸️ Плановая пауза (Контроль отключен)
+          </MenuItem>
+        </TextField>
+
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            bgcolor: form.archived ? '#ffebee' : 'background.paper',
+            p: '6px 12px',
+            borderRadius: 1.5,
+            border: '1px solid',
+            borderColor: form.archived ? 'error.light' : 'grey.300',
+            justifyContent: 'center',
+          }}
+        >
+          <Switch
+            size="small"
+            checked={form.archived}
+            onChange={(e) =>
+              handleChange({
+                target: { name: 'archived', value: e.target.checked },
+              } as any)
+            }
+            color="error"
+          />
+          <Typography
+            variant="caption"
+            sx={{
+              textTransform: 'uppercase',
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: form.archived ? 'error.main' : 'text.secondary',
+            }}
+          >
+            {form.archived ? 'Архив' : 'Действует'}
+          </Typography>
+        </Box>
       </Box>
+
+      {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Switch
+            size="small"
+            checked={form.archived}
+            onChange={(e) => {
+              handleChange({
+                target: { name: 'archived', value: e.target.checked },
+              } as any);
+            }}
+            color="error"
+          />
+          <Typography
+            variant="caption"
+            sx={{
+              textTransform: 'uppercase',
+              fontSize: '0.7rem',
+              letterSpacing: '0.6px',
+              fontWeight: 700,
+              color: form.archived ? 'error.main' : 'text.secondary',
+            }}
+          >
+            {form.archived ? '📦 В архиве' : '🟢 В системе'}
+          </Typography>
+        </Box> */}
+
+      {/* Вертикальный разделитель между кнопками управления */}
+      {/* <Divider
+          orientation="vertical"
+          flexItem
+          sx={{ mx: 0.5, display: { xs: 'none', sm: 'block' } }}
+        />
+
+        {/* 2. 🔥 НОВЫЙ ТУМБЛЕР: ПЕРЕВОД ПРИБОРА В РЕЗЕРВ (ПАУЗА ТО) */}
+      {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Switch
+            size="small"
+            checked={form.isMaintenancePaused}
+            disabled={form.archived} // Если прибор в архиве, ставить его на паузу бессмысленно
+            onChange={(e) => {
+              handleChange({
+                target: {
+                  name: 'isMaintenancePaused',
+                  value: e.target.checked,
+                },
+              } as any);
+            }}
+            color="warning" // Оранжевый предупреждающий цвет для статуса паузы/резерва
+          />
+          <Typography
+            variant="caption"
+            sx={{
+              textTransform: 'uppercase',
+              fontSize: '0.7rem',
+              letterSpacing: '0.6px',
+              fontWeight: 700,
+              color: form.isMaintenancePaused
+                ? 'warning.main'
+                : 'text.secondary',
+            }}
+          >
+            {form.isMaintenancePaused
+              ? '⏸️ На паузе (Резерв)'
+              : '📅 В плане графиков'}
+          </Typography>
+        </Box>
+      </Box> */}
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>
           <TextField
@@ -1725,6 +1857,7 @@ function UserForm({
                         verificationOrganizationsList={
                           verificationOrhanizationsList
                         }
+                        newOrganizationName={verification.newOrganizationName}
                       />
 
                       <MetrologyControlTypeTextField

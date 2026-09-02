@@ -1,15 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  TablePagination,
-  TextField,
-  InputAdornment,
-  CircularProgress,
-  Chip,
-} from '@mui/material';
-import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
+import { Box, Typography, Button, TablePagination } from '@mui/material';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { enqueueSnackbar } from 'notistack';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import QrCode from '@mui/icons-material/QrCode';
@@ -25,11 +16,12 @@ import {
   GetInspectionPoolDocument,
   CreateBulkInspectionDocument,
   GetInspectionCalendarSummaryDocument,
-  GetDevicesWithRelationsListDocument,
+
   // GetInspectionArchiveDocument,
 } from '../graphql/types/__generated__/graphql';
 import { InspectionSaveModal } from '../components/modals/InspectionSaveModal';
-import { Search } from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
+import { DeviceBulkSelectModal } from '../components/DeviceBulkSelectModal';
 
 export const InspectionPlanningPage: React.FC = () => {
   // const [activeMainTab, setActiveMainTab] = useState<number>(0); // 0 = Пул задач, 1 = Архив актов
@@ -41,7 +33,6 @@ export const InspectionPlanningPage: React.FC = () => {
   const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
 
   const [manuallyAddedDevices, setManuallyAddedDevices] = useState<any[]>([]);
-  const [searchSerial, setSearchSerial] = useState('');
 
   const currentYear = new Date().getFullYear();
   const currentMonthStr = `${currentYear}-${String(
@@ -58,6 +49,8 @@ export const InspectionPlanningPage: React.FC = () => {
 
   const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthStr);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
+
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   // Запрос Вкладки 1: Пул задач на ТО
   const { data, loading, refetch } = useQuery(GetInspectionPoolDocument, {
@@ -90,83 +83,6 @@ export const InspectionPlanningPage: React.FC = () => {
   //     fetchPolicy: 'cache-and-network',
   //   }
   // );
-
-  // 🔥 ЛЕНИВЫЙ ЗАПРОС: Ищет любой прибор в системе по серийнику при вводе
-  const [searchDevice, { loading: searchLoading }] = useLazyQuery(
-    GetDevicesWithRelationsListDocument,
-    {
-      fetchPolicy: 'network-only',
-    }
-  );
-
-  const handleSearchSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchSerial.trim()) return;
-
-    try {
-      // Запускаем ленивый запрос и ждем результат выполнения
-      const { data: resultData } = await searchDevice({
-        variables: {
-          limit: 1,
-          offset: 0,
-          filter: {
-            serialNumber: searchSerial.trim(),
-            includeArchived: false,
-          },
-        },
-      });
-
-      // Достаем первый найденный прибор (обратите внимание на GetDevicesWithRelationsListQuery из вашей ошибки)
-      // Если у вас кодогенератор назвал поле по-другому, подставьте ваше (например: getDevicesWithRelations)
-      const found = resultData?.devicesWithRelations?.items?.[0];
-
-      if (!found) {
-        enqueueSnackbar('Прибор с таким заводским номером не найден!', {
-          variant: 'warning',
-        });
-        return;
-      }
-
-      // Проверяем, нет ли его уже в таблице плановых задач или среди ранее добавленных вручную
-      const isAlreadyInPool =
-        dbPoolItems.some((d) => d.id === found.id) ||
-        manuallyAddedDevices.some((d) => d.id === found.id);
-
-      if (isAlreadyInPool) {
-        enqueueSnackbar(
-          'Этот прибор уже находится в списке на текущий месяц!',
-          { variant: 'info' }
-        );
-        setSearchSerial('');
-        return;
-      }
-
-      // Форматируем прибор под плоский контракт вашей таблицы InspectionPoolTable
-      const adaptedDevice = {
-        id: found.id,
-        name: found.name,
-        model: found.model,
-        serialNumber: found.serialNumber,
-        lastInspectionDate: found.latestInspection?.date ?? null,
-        validUntil: new Date().toISOString(),
-        isOverdue: false,
-        isManualExtra: true,
-      };
-
-      // Обновляем стейты страницы
-      setManuallyAddedDevices((prev) => [...prev, adaptedDevice]);
-      setSelectedDeviceIds((prev) => [...prev, found.id]); // Автоматически взводим галочку выбора!
-      setSearchSerial('');
-      enqueueSnackbar(
-        `Прибор ${found.name} успешно добавлен в рабочий список!`,
-        { variant: 'success' }
-      );
-    } catch (err: any) {
-      enqueueSnackbar(`Ошибка при поиске прибора: ${err.message}`, {
-        variant: 'error',
-      });
-    }
-  };
 
   // Мутация отправки результатов обхода
   const [executeBulkInspection, { loading: mutationLoading }] = useMutation(
@@ -372,174 +288,54 @@ export const InspectionPlanningPage: React.FC = () => {
           </Box>
         </Box>
 
-        {/* <Box
-          component="form"
-          onSubmit={handleSearchSubmit}
+        <Box
           sx={{
-            mb: 2,
-            p: 1.5,
-            bgcolor: 'blue.50',
-            borderRadius: 2,
+            mb: 3,
+            p: { xs: 2, md: 2.5 }, // На мобилках компактнее отступы
+            bgcolor: 'grey.50',
+            borderRadius: 3,
             border: '1px dashed',
             borderColor: 'primary.light',
             display: 'flex',
-            alignItems: 'center',
+            flexDirection: { xs: 'column', md: 'row' }, // Вертикально на мобилках, горизонтально на ПК
+            alignItems: { xs: 'stretch', md: 'center' }, // Растягиваем элементы на мобилках
+            justifyContent: 'space-between',
             gap: 2,
           }}
         >
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 'bold',
-              color: 'primary.dark',
-              minWidth: 150,
-              display: { xs: 'none', sm: 'block' },
-            }}
-          >
-            🔎 Внеплановый осмотр:
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Введи или отсканируй заводской номер прибора и нажми Enter..."
-            value={searchSerial}
-            onChange={(e) => setSearchSerial(e.target.value)}
-            disabled={searchLoading}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    {searchLoading ? (
-                      <CircularProgress size={18} />
-                    ) : (
-                      <Search color="primary" />
-                    )}
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            size="small"
-            disabled={searchLoading || !searchSerial.trim()}
-            sx={{
-              height: 36,
-              textTransform: 'none',
-              fontWeight: 'bold',
-              px: 3,
-            }}
-          >
-            Добавить
-          </Button>
-        </Box> */}
-        <Box
-          component="form"
-          onSubmit={handleSearchSubmit}
-          sx={{
-            mb: 3,
-            p: 2,
-            bgcolor: 'grey.50', // Мягкий нейтральный фон в стиле вашей страницы
-            borderRadius: 3,
-            border: '1px solid',
-            borderColor: 'primary.light',
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' }, // На мобилках в столбик, на ПК в ряд
-            alignItems: { xs: 'stretch', sm: 'flex-start' },
-            gap: 2,
-          }}
-        >
-          {/* Слева: Текстовый маркер в виде аккуратного чипса (только на ПК) */}
-          <Box sx={{ display: { xs: 'none', md: 'block' }, pt: 0.5 }}>
-            <Chip
-              icon={<Search style={{ fontSize: 14 }} />}
-              label="Внеплановый осмотр"
-              color="primary"
-              variant="outlined"
-              sx={{
-                fontWeight: 'bold',
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                height: 28,
-                borderRadius: '6px',
-              }}
-            />
-          </Box>
-
-          {/* Центр: Поле ввода с подсказками */}
-          <Box
-            sx={{
-              flexGrow: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 0.5,
-            }}
-          >
-            <TextField
-              fullWidth
-              size="small"
-              label="Заводской номер прибора"
-              placeholder="Введите серийный номер"
-              value={searchSerial}
-              onChange={(e) => setSearchSerial(e.target.value)}
-              disabled={searchLoading}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      {searchLoading ? (
-                        <CircularProgress size={18} />
-                      ) : (
-                        <Search color="action" style={{ fontSize: 20 }} />
-                      )}
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                bgcolor: 'background.paper',
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                },
-              }}
-            />
-
-            {/* Живой текст-помощник */}
+          <Box>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 'bold', color: 'primary.dark' }}
+            >
+              🔎 Внеплановое обслуживание
+            </Typography>
             <Typography
               variant="caption"
-              color={searchSerial.trim() ? 'primary.main' : 'text.secondary'}
-              sx={{
-                pl: 1,
-                fontWeight: searchSerial.trim() ? 500 : 400,
-                transition: 'color 0.2s',
-              }}
+              color="text.secondary"
+              sx={{ display: 'block', mt: 0.5 }}
             >
-              {searchSerial.trim()
-                ? '👉 Нажмите Enter или кнопку «Найти», чтобы перехватить прибор в текущий список'
-                : '💡 Кнопка «Найти» выполнит поиск по всей базе данных, включая приборы из других журналов.'}
+              Вы можете подобрать пачку любых средств измерений или средств
+              контроля из базы данных и включить их в текущий общий акт осмотра.
             </Typography>
           </Box>
 
-          {/* Справа: Кнопка действия */}
           <Button
-            type="submit"
-            variant="contained"
+            variant="outlined"
             color="primary"
-            disabled={searchLoading || !searchSerial.trim()}
+            startIcon={<Add />}
+            onClick={() => setIsSearchModalOpen(true)}
             sx={{
-              height: 40, // Идеально выравнивается с TextField с учетом label
+              height: 40,
               textTransform: 'none',
               fontWeight: 'bold',
+              px: 3,
+              bgcolor: 'background.paper',
               borderRadius: 2,
-              px: 4,
-              boxShadow: 0,
-              '&:hover': { boxShadow: 0 },
+              width: { xs: '100%', md: 'auto' }, // Кнопка во весь экран на смартфонах
             }}
           >
-            Найти
+            Подобрать приборы вне плана
           </Button>
         </Box>
         <InspectionPoolTable
@@ -623,9 +419,15 @@ export const InspectionPlanningPage: React.FC = () => {
         onClose={() => setIsSubmitModalOpen(false)}
         selectedDevices={selectedDeviceObjects}
         loading={mutationLoading}
-        onSave={(items, interval) =>
+        // onSave={(items, interval) =>
+        //   executeBulkInspection({
+        //     variables: { items, intervalMonths: interval },
+        //   })
+        onSave={(items) =>
           executeBulkInspection({
-            variables: { items, intervalMonths: interval },
+            variables: {
+              items: items,
+            },
           })
         }
       />
@@ -637,6 +439,25 @@ export const InspectionPlanningPage: React.FC = () => {
         }}
         deviceIds={selectedDeviceIds}
         controlType="inspection"
+      />
+
+      <DeviceBulkSelectModal
+        open={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        alreadyAddedIds={poolItems.map((d) => d.id)} // Передаем ID всех приборов на экране, чтобы исключить дубликаты
+        onAddDevices={(newDevices) => {
+          // Закидываем всю пачку приборов в стейт ручного буфера на экране
+          setManuallyAddedDevices((prev) => [...prev, ...newDevices]);
+          // Автоматически взводим галочки чекбоксов для всей прилетевшей пачки приборов!
+          setSelectedDeviceIds((prev) => [
+            ...prev,
+            ...newDevices.map((d) => d.id),
+          ]);
+          enqueueSnackbar(
+            `В список обхода успешно добавлено: ${newDevices.length} приборов`,
+            { variant: 'success' }
+          );
+        }}
       />
     </Box>
   );

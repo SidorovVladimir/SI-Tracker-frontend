@@ -17,20 +17,23 @@ import {
   Typography,
 } from '@mui/material';
 import {
+  AccessTime,
   CalendarMonth,
+  CheckCircleOutline,
   Close,
   ContentCopy,
   Delete,
   Edit,
   ExpandMore,
   FileUpload,
+  HighlightOff,
   InsertDriveFile,
 } from '@mui/icons-material';
 
 import { GetDeviceWithRelationDocument } from '../graphql/types/__generated__/graphql';
 import { formatDate } from '../utils/date';
 import { useAuth } from '../hooks/useAuth';
-import { toCapital } from '../utils/capitalize';
+import { formatSentenceCase, toCapital } from '../utils/capitalize';
 import { useState } from 'react';
 import { API_ROUTES } from '../config';
 import { useSnackbar } from 'notistack';
@@ -83,6 +86,59 @@ const InfoRow = ({
     </Typography>
   </Box>
 );
+// const InfoRow = ({
+//   label,
+//   value,
+//   isLink,
+// }: {
+//   label: string;
+//   value: string | null | undefined | number;
+//   isLink?: boolean;
+// }) => (
+//   <Box
+//     sx={{
+//       mb: 1,
+//       display: 'flex',
+//       flexDirection: { xs: 'column', sm: 'row' }, // На мобилках вертикально, на ПК — в одну строку
+//       alignItems: { xs: 'flex-start', sm: 'center' },
+//       justifyContent: 'space-between', // Параметр влево, значение вправо
+//       gap: { xs: 0.5, sm: 2 },
+//     }}
+//   >
+//     <Typography
+//       variant="caption"
+//       color="text.secondary"
+//       display="block"
+//       sx={{
+//         lineHeight: 1.2,
+//         flexShrink: 0,
+//       }}
+//     >
+//       {label}
+//     </Typography>
+//     <Typography
+//       variant="body2"
+//       component={isLink && value ? 'a' : 'p'}
+//       href={isLink && value ? String(value) : undefined}
+//       target={isLink ? '_blank' : undefined}
+//       rel={isLink ? 'noopener noreferrer' : undefined}
+//       sx={{
+//         fontWeight: 500, // Вернули исходную насыщенность
+//         whiteSpace: 'pre-wrap',
+//         wordBreak: 'break-word',
+//         lineHeight: 1.4,
+//         textTransform: isLink ? undefined : 'uppercase',
+//         fontSize: '0.9rem', // Вернули исходный размер шрифта
+//         color: isLink ? 'primary.main' : 'inherit',
+//         textDecoration: isLink ? 'underline' : 'none',
+//         display: 'block',
+//         textAlign: { xs: 'left', sm: 'right' }, // На ПК прижимаем текст вправо
+//       }}
+//     >
+//       {value || '-'}
+//     </Typography>
+//   </Box>
+// );
 
 export default function DeviceCard(props: {
   deviceId: string;
@@ -327,37 +383,40 @@ export default function DeviceCard(props: {
           >
             Информация о СИ
           </Typography>
-          <Stack
-            direction="row"
-            flexWrap="wrap"
-            gap={1}
-            rowGap={0.2}
-            sx={{ color: 'text.disabled', fontSize: '0.7rem' }}
-          >
-            <Typography
-              variant="caption"
-              sx={{
-                fontSize: 'inherit',
-                display: 'inline-flex',
-                alignItems: 'center',
-              }}
-            >
-              Создан: {device.createdAt ? formatDate(device.createdAt) : '—'} (
-              {formatUserName(device.createdBy)})
-            </Typography>
 
-            <Typography
-              variant="caption"
-              sx={{
-                fontSize: 'inherit',
-                display: 'inline-flex',
-                alignItems: 'center',
-              }}
+          {user?.role !== 'user' && (
+            <Stack
+              direction="row"
+              flexWrap="wrap"
+              gap={1}
+              rowGap={0.2}
+              sx={{ color: 'text.disabled', fontSize: '0.7rem' }}
             >
-              Изменен: {device.updatedAt ? formatDate(device.updatedAt) : '—'} (
-              {formatUserName(device.updatedBy)})
-            </Typography>
-          </Stack>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: 'inherit',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+              >
+                Создан: {device.createdAt ? formatDate(device.createdAt) : '—'}{' '}
+                ({formatUserName(device.createdBy)})
+              </Typography>
+
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: 'inherit',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+              >
+                Изменен: {device.updatedAt ? formatDate(device.updatedAt) : '—'}{' '}
+                ({formatUserName(device.updatedBy)})
+              </Typography>
+            </Stack>
+          )}
         </Stack>
 
         <Stack direction="row" spacing={1}>
@@ -390,7 +449,7 @@ export default function DeviceCard(props: {
         </Stack>
       </Stack>
 
-      <Box mb={2}>
+      {/* <Box mb={2}>
         <Typography
           variant="h6"
           sx={{
@@ -431,6 +490,181 @@ export default function DeviceCard(props: {
                 : 'transparent',
           }}
         />
+        
+      </Box> */}
+      <Box mb={2.5}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            lineHeight: 1.2,
+            mb: 1,
+            fontSize: { xs: '1.15rem', sm: '1.25rem' },
+          }}
+        >
+          {toCapital(device.name)}
+        </Typography>
+
+        <Stack direction="row" flexWrap="wrap" gap={1} alignItems="center">
+          <Chip
+            label={device.status.name}
+            size="small"
+            variant="outlined"
+            sx={{
+              fontWeight: 600,
+              borderColor:
+                device.status.name === 'исправен'
+                  ? 'success.main'
+                  : device.status.name === 'забракован' ||
+                    device.status.name === 'неисправен'
+                  ? 'error.main'
+                  : 'primary.main',
+              color:
+                device.status.name === 'исправен'
+                  ? 'success.dark'
+                  : device.status.name === 'забракован' ||
+                    device.status.name === 'неисправен'
+                  ? 'error.dark'
+                  : 'primary.dark',
+              bgcolor:
+                device.status.name === 'исправен'
+                  ? '#f0fdf4'
+                  : device.status.name === 'забракован' ||
+                    device.status.name === 'неисправен'
+                  ? '#fff1f2'
+                  : 'transparent',
+            }}
+          />
+
+          {user?.role !== 'user' && (
+            <Chip
+              size="small"
+              label={
+                device.scheduleStatus === 'paused_verification'
+                  ? '🛠️ Только ТО (Без поверок)'
+                  : device.scheduleStatus === 'paused_all'
+                  ? '⏸️ Плановая пауза'
+                  : '📅 В полном плане'
+              }
+              sx={{
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                bgcolor:
+                  device.scheduleStatus === 'paused_verification'
+                    ? '#fff7ed' // Мягкий оранжевый
+                    : device.scheduleStatus === 'paused_all'
+                    ? '#f3f4f6' // Нейтральный серый
+                    : '#eff6ff', // Мягкий синий
+                color:
+                  device.scheduleStatus === 'paused_verification'
+                    ? '#c2410c'
+                    : device.scheduleStatus === 'paused_all'
+                    ? '#4b5563'
+                    : '#1d4ed8',
+                border: '1px solid',
+                borderColor:
+                  device.scheduleStatus === 'paused_verification'
+                    ? '#ffedd5'
+                    : device.scheduleStatus === 'paused_all'
+                    ? '#e5e7eb'
+                    : '#dbeafe',
+              }}
+            />
+          )}
+        </Stack>
+
+        {user?.role !== 'user' && (
+          <Box
+            sx={{
+              mt: 2,
+              p: 1.5,
+              bgcolor: 'grey.50',
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'grey.200',
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: '1-fr 1fr' },
+              gap: 1.5,
+            }}
+          >
+            {/* Блок Поверки / Калибровки */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+              <CalendarMonth
+                fontSize="small"
+                color={
+                  device.scheduleStatus === 'active' ? 'primary' : 'disabled'
+                }
+                sx={{ mt: 0.2 }}
+              />
+              <Box>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: 'block', fontWeight: 500, lineHeight: 1 }}
+                >
+                  Следующая поверка / калибровка:
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    mt: 0.5,
+                    // Если прибор активен и просрочен — подсветим дату красным
+                    color:
+                      device.scheduleStatus !== 'paused_all'
+                        ? 'text.primary'
+                        : 'text.disabled',
+                  }}
+                >
+                  {device.scheduleStatus === 'active'
+                    ? device.nextVerificationDate
+                      ? formatDate(device.nextVerificationDate)
+                      : 'Не назначена'
+                    : '⏸️ Контроль отключен (Пауза)'}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Блок Цехового Осмотра (ТО) */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+              <AccessTime
+                fontSize="small"
+                color={
+                  device.scheduleStatus !== 'paused_all'
+                    ? 'success'
+                    : 'disabled'
+                }
+                sx={{ mt: 0.2 }}
+              />
+              <Box>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: 'block', fontWeight: 500, lineHeight: 1 }}
+                >
+                  Следующий цеховой осмотр (ТО):
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    mt: 0.5,
+                    color:
+                      device.scheduleStatus !== 'paused_all'
+                        ? 'text.primary'
+                        : 'text.disabled',
+                  }}
+                >
+                  {device.scheduleStatus !== 'paused_all'
+                    ? device.nextInspectionDate
+                      ? formatDate(device.nextInspectionDate)
+                      : 'Не проводился / Разовый'
+                    : '⏸️ Обходы заморожены'}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        )}
       </Box>
 
       <Divider sx={{ mb: 2 }} />
@@ -878,7 +1112,7 @@ export default function DeviceCard(props: {
         <CalendarMonth fontSize="small" /> История метрологического контроля
       </Typography>
 
-      {device.verifications.map((v) => (
+      {/* {device.verifications.map((v) => (
         <Accordion
           key={v.id}
           disableGutters
@@ -944,7 +1178,198 @@ export default function DeviceCard(props: {
             </Stack>
           </AccordionDetails>
         </Accordion>
-      ))}
+      ))} */}
+      {device.verifications.map((v: any) => {
+        const isSingleControl = !v.validUntil;
+        const controlName = v.metrologyControleType?.name || 'контроль';
+        const isSuccess = v.result === 'годен';
+
+        // Вычисляем красивый цвет для бейджа типа контроля
+        const getBadgeStyles = (name: string) => {
+          const lowerName = name.toLowerCase().trim();
+          if (lowerName.includes('осмотр') || lowerName.includes('инспек')) {
+            return {
+              bgcolor: '#eff6ff',
+              color: '#1e40af',
+              border: '1px solid #bfdbfe',
+            };
+          }
+          if (lowerName.includes('калибр')) {
+            return {
+              bgcolor: '#fef3c7',
+              color: '#92400e',
+              border: '1px solid #fde68a',
+            };
+          }
+          if (lowerName.includes('аттест')) {
+            return {
+              bgcolor: '#f3e8ff',
+              color: '#6b21a8',
+              border: '1px solid #e9d5ff',
+            };
+          }
+          return {
+            bgcolor: '#f0fdf4',
+            color: '#166534',
+            border: '1px solid #bbf7d0',
+          };
+        };
+
+        const badgeStyle = getBadgeStyles(controlName);
+
+        return (
+          <Accordion
+            key={v.id}
+            disableGutters
+            elevation={0}
+            sx={{
+              mb: 1,
+              border: '1px solid',
+              borderColor: 'grey.200',
+              borderRadius: '8px !important',
+              overflow: 'hidden',
+              '&:before': { display: 'none' },
+              borderLeft: '4px solid',
+              borderLeftColor: isSuccess ? 'success.main' : 'error.main',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+            }}
+          >
+            <AccordionSummary
+              expandIcon={
+                <ExpandMore fontSize="small" sx={{ color: 'text.secondary' }} />
+              }
+              sx={{
+                minHeight: 48,
+                '&.Mui-expanded': { minHeight: 48 },
+                bgcolor: 'background.paper',
+                px: 1.5,
+                '&:hover': { bgcolor: 'grey.50' },
+              }}
+            >
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{ width: '100%', pr: 1 }}
+              >
+                {/* Левая часть: Тип контроля + Сроки */}
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box
+                    sx={{
+                      px: 1,
+                      py: 0.3,
+                      borderRadius: '6px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      ...badgeStyle,
+                    }}
+                  >
+                    {controlName}
+                  </Box>
+
+                  {/* Текст сроков дедлайна */}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                      color: 'text.primary',
+                      fontSize: '0.82rem',
+                    }}
+                  >
+                    {isSingleControl
+                      ? `📋 Разовый от ${v?.date ? formatDate(v.date) : '—'}`
+                      : `📅 Действует до: ${formatDate(v.validUntil)}`}
+                  </Typography>
+                </Stack>
+
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  sx={{ display: { xs: 'none', sm: 'flex' } }}
+                >
+                  {isSuccess ? (
+                    <CheckCircleOutline color="success" sx={{ fontSize: 18 }} />
+                  ) : (
+                    <HighlightOff color="error" sx={{ fontSize: 18 }} />
+                  )}
+                </Stack>
+              </Stack>
+            </AccordionSummary>
+
+            <AccordionDetails
+              sx={{
+                p: 2,
+                borderTop: '1px solid',
+                borderColor: 'grey.100',
+                bgcolor: 'grey.50/30',
+              }}
+            >
+              <Stack spacing={1}>
+                <InfoRow
+                  label="Дата контроля"
+                  value={v?.date ? formatDate(v.date) : '-'}
+                />
+                <InfoRow
+                  label="№ Свидетельства / Акта"
+                  value={v.protocolNumber || '—'}
+                />
+                <InfoRow
+                  label="Организация"
+                  value={
+                    v.verificationOrganization?.name || 'Внутренняя служба'
+                  }
+                />
+                <InfoRow
+                  label="Вид контроля"
+                  value={formatSentenceCase(controlName)}
+                />
+                <InfoRow label="Результат" value={v.result} />
+
+                {v.documentUrl && (
+                  <Box
+                    sx={{
+                      mt: 1,
+                      pt: 1,
+                      borderTop: '1px dashed',
+                      borderColor: 'grey.200',
+                    }}
+                  >
+                    <InfoRow
+                      label="Ссылка на документ"
+                      value={v.documentUrl}
+                      isLink
+                    />
+                  </Box>
+                )}
+
+                <InfoRow
+                  label="Стоимость"
+                  value={
+                    parseFloat(v.cost) > 0
+                      ? `${v.cost} руб.`
+                      : 'Бесплатно (Внутреннее ТО)'
+                  }
+                />
+
+                {v.comment && (
+                  <Box
+                    sx={{
+                      mt: 1,
+                      pt: 1,
+                      borderTop: '1px dashed',
+                      borderColor: 'grey.200',
+                    }}
+                  >
+                    <InfoRow label="Комментарий" value={v.comment} />
+                  </Box>
+                )}
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+        );
+      })}
 
       <Modal
         open={!!previewImage}

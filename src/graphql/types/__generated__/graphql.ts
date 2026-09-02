@@ -394,6 +394,7 @@ export type Device = {
   productionSiteId: Scalars['ID']['output'];
   receiptDate: Maybe<Scalars['String']['output']>;
   releaseDate: Maybe<Scalars['String']['output']>;
+  scheduleStatus: Scalars['String']['output'];
   serialNumber: Scalars['String']['output'];
   statusId: Scalars['ID']['output'];
   updatedAt: Scalars['String']['output'];
@@ -403,6 +404,7 @@ export type Device = {
 export type DeviceBarcodeData = {
   __typename: 'DeviceBarcodeData';
   controlType: Maybe<Scalars['String']['output']>;
+  date: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
@@ -504,11 +506,13 @@ export type DeviceWithRelations = {
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
   nextInspectionDate: Maybe<Scalars['String']['output']>;
+  nextVerificationDate: Maybe<Scalars['String']['output']>;
   nomenclature: Maybe<Scalars['String']['output']>;
   primaryStandarts: Array<PrimaryStandart>;
   productionSite: ProductionSiteRelation;
   receiptDate: Maybe<Scalars['String']['output']>;
   releaseDate: Maybe<Scalars['String']['output']>;
+  scheduleStatus: Scalars['String']['output'];
   scopes: Array<Scope>;
   serialNumber: Scalars['String']['output'];
   status: Status;
@@ -627,6 +631,7 @@ export type InspectionBatchItem = {
 
 export type InspectionItemInput = {
   deviceId: Scalars['ID']['input'];
+  intervalMonths: Scalars['Int']['input'];
   isSuccess: Scalars['Boolean']['input'];
 };
 
@@ -773,7 +778,6 @@ export type MutationCreateBudgetPlanArgs = {
 };
 
 export type MutationCreateBulkInspectionArgs = {
-  intervalMonths: Scalars['Int']['input'];
   items: Array<InspectionItemInput>;
 };
 
@@ -1011,6 +1015,7 @@ export type PlanningPoolItem = {
   lastControlDate: Maybe<Scalars['String']['output']>;
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
+  scheduleStatus: Scalars['String']['output'];
   serialNumber: Scalars['String']['output'];
   suggestedMonth: Scalars['String']['output'];
   targetBatchId: Maybe<Scalars['ID']['output']>;
@@ -1026,6 +1031,8 @@ export type PlanningPoolResponse = {
 
 export type PoolMeta = {
   __typename: 'PoolMeta';
+  globalTotalCount: Scalars['Int']['output'];
+  pausedTotalCount: Scalars['Int']['output'];
   typeCounts: Array<PoolMetaTypeCounts>;
   unassignedCount: Scalars['Int']['output'];
 };
@@ -1460,6 +1467,7 @@ export type UpdateDeviceInput = {
   productionSiteId: Scalars['ID']['input'];
   receiptDate?: InputMaybe<Scalars['String']['input']>;
   releaseDate?: InputMaybe<Scalars['String']['input']>;
+  scheduleStatus: Scalars['String']['input'];
   scopes?: InputMaybe<Array<Scalars['ID']['input']>>;
   serialNumber: Scalars['String']['input'];
   statusId: Scalars['ID']['input'];
@@ -1559,6 +1567,7 @@ export type VerificationInput = {
   documentUrl?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   metrologyControleTypeId?: InputMaybe<Scalars['ID']['input']>;
+  newOrganizationName?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Scalars['String']['input']>;
   protocolNumber?: InputMaybe<Scalars['String']['input']>;
   result?: InputMaybe<Scalars['String']['input']>;
@@ -2455,10 +2464,12 @@ export type GetDeviceWithRelationQuery = {
     receiptDate: string | null;
     manufacturer: string | null;
     nextInspectionDate: string | null;
+    nextVerificationDate: string | null;
     createdAt: string;
     updatedAt: string;
     verificationInterval: number | null;
     archived: boolean;
+    scheduleStatus: string;
     nomenclature: string | null;
     comment: string | null;
     createdBy: {
@@ -2562,6 +2573,7 @@ export type UpdateDeviceMutation = {
     manufacturer: string | null;
     verificationInterval: number | null;
     archived: boolean;
+    scheduleStatus: string;
     nomenclature: string | null;
     comment: string | null;
     statusId: string;
@@ -2633,6 +2645,7 @@ export type GetDevicesBarcodeDataQuery = {
     serialNumber: string;
     statusName: string | null;
     controlType: string | null;
+    date: string | null;
     validUntil: string | null;
   }>;
 };
@@ -2763,7 +2776,6 @@ export type GetInspectionCalendarSummaryQuery = {
 
 export type CreateBulkInspectionMutationVariables = Exact<{
   items: Array<InspectionItemInput> | InspectionItemInput;
-  intervalMonths: Scalars['Int']['input'];
 }>;
 
 export type CreateBulkInspectionMutation = { createBulkInspection: boolean };
@@ -2946,10 +2958,13 @@ export type GetPlanningPoolQuery = {
       isManualPlacement: boolean;
       controlType: string;
       isOverdue: boolean;
+      scheduleStatus: string;
     }>;
     meta: {
       __typename: 'PoolMeta';
       unassignedCount: number;
+      globalTotalCount: number;
+      pausedTotalCount: number;
       typeCounts: Array<{
         __typename: 'PoolMetaTypeCounts';
         typeName: string;
@@ -6854,6 +6869,10 @@ export const GetDeviceWithRelationDocument = {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'nextInspectionDate' },
                 },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'nextVerificationDate' },
+                },
                 { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
                 {
@@ -6923,6 +6942,10 @@ export const GetDeviceWithRelationDocument = {
                   name: { kind: 'Name', value: 'verificationInterval' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'archived' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'scheduleStatus' },
+                },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'nomenclature' },
@@ -7247,6 +7270,10 @@ export const UpdateDeviceDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'archived' } },
                 {
                   kind: 'Field',
+                  name: { kind: 'Name', value: 'scheduleStatus' },
+                },
+                {
+                  kind: 'Field',
                   name: { kind: 'Name', value: 'nomenclature' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
@@ -7518,6 +7545,7 @@ export const GetDevicesBarcodeDataDocument = {
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'statusName' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'controlType' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'validUntil' } },
               ],
             },
@@ -8068,17 +8096,6 @@ export const CreateBulkInspectionDocument = {
             },
           },
         },
-        {
-          kind: 'VariableDefinition',
-          variable: {
-            kind: 'Variable',
-            name: { kind: 'Name', value: 'intervalMonths' },
-          },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
-          },
-        },
       ],
       selectionSet: {
         kind: 'SelectionSet',
@@ -8093,14 +8110,6 @@ export const CreateBulkInspectionDocument = {
                 value: {
                   kind: 'Variable',
                   name: { kind: 'Name', value: 'items' },
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'intervalMonths' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'intervalMonths' },
                 },
               },
             ],
@@ -8808,6 +8817,10 @@ export const GetPlanningPoolDocument = {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'isOverdue' },
                       },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'scheduleStatus' },
+                      },
                     ],
                   },
                 },
@@ -8821,6 +8834,14 @@ export const GetPlanningPoolDocument = {
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'unassignedCount' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'globalTotalCount' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'pausedTotalCount' },
                       },
                       {
                         kind: 'Field',
