@@ -8,33 +8,30 @@ interface ScopeAutocompleteProps {
   value: any[];
   onChange: (event: any, newValue: any[]) => void;
   scopesList: any[];
+  isSubmitted: boolean;
 }
 
 export default function ScopeAutocomplete({
   value,
   onChange,
   scopesList,
+  isSubmitted,
 }: ScopeAutocompleteProps) {
   // const [isModalOpen, setIsModalOpen] = useState(false);
   const handleInternalChange = (event: any, newValue: any[]) => {
-    // Находим последний выбранный элемент в массиве
     const lastSelected = newValue[newValue.length - 1];
 
     if (lastSelected) {
       const lastSelectedName = lastSelected.name.toLowerCase().trim();
 
-      // Сценарий 1: Пользователь последним кликом выбрал "НЕ ГР"
       if (
         lastSelectedName === 'не гр' ||
         lastSelectedName === 'вне сферы государственного регулирования (не гр)'
       ) {
-        // Принудительно оставляем в массиве ТОЛЬКО эту сферу, сбрасывая все остальные
         onChange(event, [lastSelected]);
         return;
       }
 
-      // Сценарий 2: Была выбрана сфера "НЕ ГР", но пользователь кликнул на любую другую
-      // Мы отфильтровываем "НЕ ГР" из массива, оставляя только регулируемые сферы
       const filteredValue = newValue.filter((scope) => {
         const name = scope.name.toLowerCase().trim();
         return (
@@ -119,9 +116,12 @@ export default function ScopeAutocomplete({
             placeholder="Выберите сферы"
             size="small"
             required={value.length === 0}
-            // Визуальное выделение красным (опционально, если нужно подсветить ошибку)
-            error={value.length === 0}
-            helperText={value.length === 0 ? 'Обязательное поле' : ''}
+            error={isSubmitted && value.length === 0}
+            helperText={
+              isSubmitted && value.length === 0
+                ? 'Обязательное поле. Выберите сферы из списка'
+                : ''
+            }
           />
         )}
       />

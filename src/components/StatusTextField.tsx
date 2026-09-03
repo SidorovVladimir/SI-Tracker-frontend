@@ -9,6 +9,7 @@ export default function StatusTextField({
   value,
   onChange,
   statusesList,
+  isSubmitted,
 }: any) {
   // const [isModalOpen, setIsModalOpen] = useState(false);
   return (
@@ -23,6 +24,10 @@ export default function StatusTextField({
         onChange={onChange}
         value={value}
         required
+        error={isSubmitted && !value}
+        helperText={
+          isSubmitted && !value ? 'Обязательное поле. Выберите из списка' : ''
+        }
         slotProps={{
           select: {
             MenuProps: {

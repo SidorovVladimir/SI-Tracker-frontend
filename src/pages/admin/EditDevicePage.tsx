@@ -229,6 +229,7 @@ function UserForm({
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [searchingDocId, setSearchingDocId] = useState<string | null>(null);
 
@@ -659,27 +660,73 @@ function UserForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    //   for (let i = 0; i < verifications.length; i++) {
-    //   const v = verifications[i];
-    //   const yearLabel = v.date ? new Date(v.date).getFullYear() : `№${i + 1}`;
+    setIsSubmitted(true);
 
-    //   if (!v.date) {
-    //     alert(`Ошибка в секции [Поверка ${yearLabel}]: Заполните обязательную дату проведения контроля!`);
-    //     return;
-    //   }
-    //   if (!v.metrologyControleTypeId) {
-    //     alert(`Ошибка в секции [Поверка ${yearLabel}]: Выберите тип метрологического контроля!`);
-    //     return;
-    //   }
-    //   if (!v.verificationOrganizationId) {
-    //     alert(`Ошибка в секции [Поверка ${yearLabel}]: Укажите организацию, проводившую контроль!`);
-    //     return;
-    //   }
-    //   if (v.cost === undefined || v.cost === null || String(v.cost).trim() === '') {
-    //     alert(`Ошибка в секции [Поверка ${yearLabel}]: Введите стоимость выполненных работ!`);
-    //     return;
-    //   }
-    // }
+    if (
+      !form.name ||
+      !form.model ||
+      !form.serialNumber ||
+      !form.statusId ||
+      !form.cityId ||
+      !form.companyId ||
+      !form.productionSiteId ||
+      !form.equipmentTypeId ||
+      form.scopes.length === 0
+    ) {
+      enqueueSnackbar('Заполните обязательные поля карточки прибора', {
+        variant: 'error',
+      });
+      return;
+    }
+
+    for (let i = 0; i < verifications.length; i++) {
+      const v = verifications[i];
+      const controlTypeObj = metrologyControlTypeList.find(
+        (t) => t.id === v.metrologyControleTypeId
+      );
+      const isInspection =
+        controlTypeObj?.name?.toLowerCase().trim() === 'осмотр';
+
+      const docLabel = v.date ? new Date(v.date).getFullYear() : `№${i + 1}`;
+      const sectionName = isInspection
+        ? `Осмотр [${docLabel}]`
+        : `Документ [${docLabel}]`;
+
+      // const yearLabel = v.date ? new Date(v.date).getFullYear() : `№${i + 1}`;
+
+      if (!v.date) {
+        enqueueSnackbar(
+          `Ошибка в секции ${sectionName}: Укажите дату проведения контроля!`,
+          { variant: 'error' }
+        );
+        return;
+      }
+
+      if (!v.result) {
+        enqueueSnackbar(
+          `Ошибка в секции ${sectionName}: Зафиксируйте результат контроля (Годен / Не годен)!`,
+          { variant: 'error' }
+        );
+        return;
+      }
+      if (!v.metrologyControleTypeId) {
+        enqueueSnackbar(
+          `Ошибка в секции ${sectionName}: Выберите тип метрологического контроля!`,
+          { variant: 'error' }
+        );
+        return;
+      }
+
+      if (!isInspection) {
+        if (!v.protocolNumber?.trim()) {
+          enqueueSnackbar(
+            `Ошибка в секции ${sectionName}: Для поверок и калибровок обязателен № Свидетельства/Протокола!`,
+            { variant: 'error' }
+          );
+          return;
+        }
+      }
+    }
     const verificationsInput = verifications.map((v) => ({
       id: v.id.startsWith('new-') ? null : v.id,
       date: v.date || null,
@@ -765,27 +812,6 @@ function UserForm({
       productionSiteId: '',
     }));
   };
-
-  const selectedType = equipmentTypesList.find(
-    (t) => t.id === form.equipmentTypeId
-  );
-  const typeName = selectedType?.name?.toLowerCase().trim() || '';
-
-  // 2. Проверяем, является ли тип Средством Измерений (ищем вхождение "си")
-  const isSI = typeName === 'средство измерений (си)';
-
-  // 3. Проверяем, выбрана ли ХОТЯ БЫ ОДНА государственная (регулируемая) сфера
-  const hasStateScope =
-    form.scopes.length > 0 &&
-    !form.scopes.some((scope) => {
-      const name = scope.name.toLowerCase().trim();
-      return (
-        name === 'не гр' ||
-        name === 'вне сферы государственного регулирования (не гр)'
-      );
-    });
-
-  const isGrsiRequired = isSI && hasStateScope;
 
   return (
     <Box>
@@ -974,13 +1000,16 @@ function UserForm({
           </Typography>
         </Box>
       </Box> */}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate autoComplete="off">
         <Stack spacing={3}>
           <TextField
             id="device-name"
             autoComplete="off"
             slotProps={{
               input: { id: 'device-name' },
+              select: {
+                MenuProps: { PaperProps: { sx: { borderRadius: 2 } } },
+              },
             }}
             label="Название"
             name="name"
@@ -990,6 +1019,8 @@ function UserForm({
             variant="outlined"
             size="small"
             required
+            error={isSubmitted && !form.name}
+            helperText={isSubmitted && !form.name ? 'Обязательное поле' : ''}
             sx={{
               '& .MuiInputBase-root': {
                 paddingTop: '2.5px',
@@ -1017,6 +1048,8 @@ function UserForm({
             variant="outlined"
             size="small"
             required
+            error={isSubmitted && !form.model}
+            helperText={isSubmitted && !form.model ? 'Обязательное поле' : ''}
             sx={{
               '& .MuiInputBase-root': {
                 paddingTop: '2.5px',
@@ -1044,6 +1077,10 @@ function UserForm({
             variant="outlined"
             size="small"
             required
+            error={isSubmitted && !form.serialNumber}
+            helperText={
+              isSubmitted && !form.serialNumber ? 'Обязательное поле' : ''
+            }
             sx={{
               '& .MuiInputBase-root': {
                 paddingTop: '2.5px',
@@ -1077,12 +1114,8 @@ function UserForm({
                 fontWeight: 500,
               },
             }}
-            required={isGrsiRequired}
-            error={isGrsiRequired && !form.grsiNumber?.trim()}
             helperText={
-              isGrsiRequired && !form.grsiNumber?.trim()
-                ? 'Для СИ в госсфере номер ГРСИ обязателен!'
-                : ''
+              'Заполните, если прибор внесен в Госреестр (например: 53950-13)'
             }
           />
 
@@ -1255,6 +1288,7 @@ function UserForm({
             onChange={handleChange}
             fullWidth
             variant="outlined"
+            helperText="Заполните в месяцах, если прибор требует регулярной поверки или калибровки для авторасчета графиков"
             size="small"
             sx={{
               '& .MuiInputBase-root': {
@@ -1320,6 +1354,7 @@ function UserForm({
             value={form.statusId}
             onChange={handleChange}
             statusesList={statusesList}
+            isSubmitted={isSubmitted}
           />
 
           {/* <ProductionSiteTextField
@@ -1336,12 +1371,14 @@ function UserForm({
             citiesList={citiesList}
             companiesList={companiesList}
             productionSiteList={productionSiteList}
+            isSubmitted={isSubmitted}
           />
 
           <EquipmentTextField
             value={form.equipmentTypeId}
             onChange={handleChange}
             equipmentTypesList={equipmentTypesList}
+            isSubmitted={isSubmitted}
           />
 
           <MeasurementAutocomplete
@@ -1358,6 +1395,7 @@ function UserForm({
               handleAutocompleteChange('scopes', val)
             }
             scopesList={scopesList}
+            isSubmitted={isSubmitted}
           />
 
           <PrimaryStandartAutocomplete
@@ -1545,6 +1583,12 @@ function UserForm({
                         }
                         fullWidth
                         required
+                        error={isSubmitted && !verification.date}
+                        helperText={
+                          isSubmitted && !verification.date
+                            ? 'Обязательное поле'
+                            : ''
+                        }
                         size="small"
                         slotProps={{
                           inputLabel: { shrink: true },
@@ -1621,6 +1665,13 @@ function UserForm({
                         label="Результат"
                         select
                         name="result"
+                        required
+                        error={isSubmitted && !verification.result}
+                        helperText={
+                          isSubmitted && !verification.result
+                            ? 'Обязательное поле'
+                            : ''
+                        }
                         value={verification.result}
                         onChange={(e) =>
                           handleVerificationChange(
@@ -1644,9 +1695,9 @@ function UserForm({
                           },
                         }}
                       >
-                        <MenuItem value="">
+                        {/* <MenuItem value="">
                           <em>Не выбрано</em>
-                        </MenuItem>
+                        </MenuItem> */}
                         {['годен', 'не годен'].map((name) => (
                           <MenuItem
                             key={name}
@@ -1862,6 +1913,7 @@ function UserForm({
 
                       <MetrologyControlTypeTextField
                         value={verification.metrologyControleTypeId}
+                        isSubmitted={isSubmitted}
                         onChange={(
                           e: React.ChangeEvent<
                             HTMLInputElement | HTMLTextAreaElement

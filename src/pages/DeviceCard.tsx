@@ -1349,7 +1349,9 @@ export default function DeviceCard(props: {
                   value={
                     parseFloat(v.cost) > 0
                       ? `${v.cost} руб.`
-                      : 'Бесплатно (Внутреннее ТО)'
+                      : controlName === 'осмотр'
+                      ? 'Бесплатно (Внутреннее ТО)'
+                      : 'Не указано'
                   }
                 />
 

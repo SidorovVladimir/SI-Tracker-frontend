@@ -8,6 +8,7 @@ export default function EquipmentTextField({
   value,
   onChange,
   equipmentTypesList,
+  isSubmitted,
 }: any) {
   // const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -23,6 +24,12 @@ export default function EquipmentTextField({
         onChange={onChange}
         value={value}
         required
+        error={isSubmitted && !value}
+        helperText={
+          isSubmitted && !value
+            ? 'Обязательное поле. Выберите тип из списка'
+            : ''
+        }
         slotProps={{
           select: {
             MenuProps: {

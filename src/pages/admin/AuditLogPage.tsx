@@ -43,6 +43,7 @@ export default function AuditLogPage() {
       fetchPolicy: 'network-only',
     }
   );
+
   const [deleteLog] = useMutation(DeleteLogDocument, {
     onCompleted: () => {
       refetch();

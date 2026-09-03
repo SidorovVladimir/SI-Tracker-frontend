@@ -8,6 +8,7 @@ export default function MetrologyControlTypeTextField({
   value,
   onChange,
   metrologyControlTypeList,
+  isSubmitted,
 }: any) {
   // const [isModalOpen, setIsModalOpen] = useState(false);
   return (
@@ -19,8 +20,11 @@ export default function MetrologyControlTypeTextField({
         name="verificationOrganizationId"
         size="small"
         fullWidth
+        required
         onChange={onChange}
         value={value}
+        error={isSubmitted && !value}
+        helperText={isSubmitted && !value ? 'Обязательное поле' : ''}
         slotProps={{
           select: {
             MenuProps: {
@@ -49,9 +53,9 @@ export default function MetrologyControlTypeTextField({
           },
         }}
       >
-        <MenuItem value="">
+        {/* <MenuItem value="">
           <em>Не выбрано</em>
-        </MenuItem>
+        </MenuItem> */}
         {metrologyControlTypeList.map(
           ({ id, name }: { id: string; name: string }) => (
             <MenuItem

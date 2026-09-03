@@ -89,6 +89,8 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
 
   const [arshinCount, setArshinCount] = useState<number>(3);
 
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const [searchingDocId, setSearchingDocId] = useState<number | null>(null);
 
   const [fetchArshinVerifications, { loading: loadingArshinList }] =
@@ -552,6 +554,74 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitted(true);
+
+    if (
+      !form.name ||
+      !form.model ||
+      !form.serialNumber ||
+      !form.statusId ||
+      !form.cityId ||
+      !form.companyId ||
+      !form.productionSiteId ||
+      !form.equipmentTypeId ||
+      form.scopes.length === 0
+    ) {
+      enqueueSnackbar('Заполните обязательные поля карточки прибора', {
+        variant: 'error',
+      });
+      return;
+    }
+
+    for (let i = 0; i < verifications.length; i++) {
+      const v = verifications[i];
+      const controlTypeObj = metrologyControlTypeList.find(
+        (t) => t.id === v.metrologyControleTypeId
+      );
+      const isInspection =
+        controlTypeObj?.name?.toLowerCase().trim() === 'осмотр';
+
+      const docLabel = v.date ? new Date(v.date).getFullYear() : `№${i + 1}`;
+      const sectionName = isInspection
+        ? `Осмотр [${docLabel}]`
+        : `Документ [${docLabel}]`;
+
+      // const yearLabel = v.date ? new Date(v.date).getFullYear() : `№${i + 1}`;
+
+      if (!v.date) {
+        enqueueSnackbar(
+          `Ошибка в секции ${sectionName}: Укажите дату проведения контроля!`,
+          { variant: 'error' }
+        );
+        return;
+      }
+
+      if (!v.result) {
+        enqueueSnackbar(
+          `Ошибка в секции ${sectionName}: Зафиксируйте результат контроля (Годен / Не годен)!`,
+          { variant: 'error' }
+        );
+        return;
+      }
+      if (!v.metrologyControleTypeId) {
+        enqueueSnackbar(
+          `Ошибка в секции ${sectionName}: Выберите тип метрологического контроля!`,
+          { variant: 'error' }
+        );
+        return;
+      }
+
+      if (!isInspection) {
+        if (!v.protocolNumber?.trim()) {
+          enqueueSnackbar(
+            `Ошибка в секции ${sectionName}: Для поверок и калибровок обязателен № Свидетельства/Протокола!`,
+            { variant: 'error' }
+          );
+          return;
+        }
+      }
+    }
+
     const verificationsInput = verifications.map((v) => ({
       date: v.date || null,
       validUntil: v.validUntil || null,
@@ -607,28 +677,6 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
     return regex.test(url.trim());
   };
 
-  const selectedType = equipmentTypesList.find(
-    (t) => t.id === form.equipmentTypeId
-  );
-  const typeName = selectedType?.name?.toLowerCase().trim() || '';
-
-  // 2. Проверяем, является ли тип Средством Измерений (ищем вхождение "си")
-  const isSI = typeName === 'средство измерений (си)';
-
-  // 3. Проверяем, выбрана ли ХОТЯ БЫ ОДНА государственная (регулируемая) сфера
-  const hasStateScope =
-    form.scopes.length > 0 &&
-    !form.scopes.some((scope) => {
-      const name = scope.name.toLowerCase().trim();
-      return (
-        name === 'не гр' ||
-        name === 'вне сферы государственного регулирования (не гр)'
-      );
-    });
-
-  // 🎯 ГРСИ ОБЯЗАТЕЛЕН: Только если это СИ И выбрана государственная сфера
-  const isGrsiRequired = isSI && hasStateScope;
-
   return (
     <Box>
       <Stack
@@ -655,7 +703,7 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
           </IconButton>
         </Tooltip>
       </Stack>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate autoComplete="off">
         <Stack spacing={3}>
           <TextField
             label="Название"
@@ -667,6 +715,8 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
             size="small"
             required
             autoFocus={true}
+            error={isSubmitted && !form.name}
+            helperText={isSubmitted && !form.name ? 'Обязательное поле' : ''}
           />
           <TextField
             label="Тип"
@@ -677,6 +727,8 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
             variant="outlined"
             size="small"
             required
+            error={isSubmitted && !form.model}
+            helperText={isSubmitted && !form.model ? 'Обязательное поле' : ''}
           />
           <TextField
             label="Заводской номер"
@@ -687,6 +739,10 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
             variant="outlined"
             size="small"
             required
+            error={isSubmitted && !form.serialNumber}
+            helperText={
+              isSubmitted && !form.serialNumber ? 'Обязательное поле' : ''
+            }
           />
           <TextField
             label="Номер ГРСИ"
@@ -696,12 +752,8 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
             fullWidth
             variant="outlined"
             size="small"
-            required={isGrsiRequired}
-            error={isGrsiRequired && !form.grsiNumber?.trim()}
             helperText={
-              isGrsiRequired && !form.grsiNumber?.trim()
-                ? 'Для СИ в госсфере номер ГРСИ обязателен!'
-                : ''
+              'Заполните, если прибор внесен в Госреестр (например: 53950-13)'
             }
           />
           <TextField
@@ -790,6 +842,7 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
             fullWidth
             variant="outlined"
             size="small"
+            helperText="Заполните в месяцах, если прибор требует регулярной поверки или калибровки для авторасчета графиков"
           />
 
           <TextField
@@ -825,6 +878,7 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
             value={form.statusId}
             onChange={handleChange}
             statusesList={statusesList}
+            isSubmitted={isSubmitted}
           />
 
           {/* <ProductionSiteTextField
@@ -841,12 +895,14 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
             citiesList={citiesList}
             companiesList={companiesList}
             productionSiteList={productionSiteList}
+            isSubmitted={isSubmitted}
           />
 
           <EquipmentTextField
             value={form.equipmentTypeId}
             onChange={handleChange}
             equipmentTypesList={equipmentTypesList}
+            isSubmitted={isSubmitted}
           />
 
           <MeasurementAutocomplete
@@ -863,6 +919,7 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
               handleAutocompleteChange('scopes', val)
             }
             scopesList={scopesList}
+            isSubmitted={isSubmitted}
           />
 
           <PrimaryStandartAutocomplete
@@ -1041,6 +1098,12 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
                       <TextField
                         type="date"
                         required
+                        error={isSubmitted && !verification.date}
+                        helperText={
+                          isSubmitted && !verification.date
+                            ? 'Обязательное поле'
+                            : ''
+                        }
                         label="Дата контроля"
                         value={verification.date}
                         onChange={(e) =>
@@ -1092,6 +1155,12 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
                         select
                         name="result"
                         required
+                        error={isSubmitted && !verification.result}
+                        helperText={
+                          isSubmitted && !verification.result
+                            ? 'Обязательное поле'
+                            : ''
+                        }
                         value={verification.result}
                         onChange={(e) =>
                           handleVerificationChange(
@@ -1115,9 +1184,9 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
                           },
                         }}
                       >
-                        <MenuItem value="">
+                        {/* <MenuItem value="">
                           <em>Не выбрано</em>
-                        </MenuItem>
+                        </MenuItem> */}
                         {['годен', 'не годен'].map((name) => (
                           <MenuItem
                             key={name}
@@ -1303,6 +1372,7 @@ export default function CreateDevicePage(props: CreateDevicePageProps) {
 
                       <MetrologyControlTypeTextField
                         value={verification.metrologyControleTypeId}
+                        isSubmitted={isSubmitted}
                         onChange={(
                           e: React.ChangeEvent<
                             HTMLInputElement | HTMLTextAreaElement

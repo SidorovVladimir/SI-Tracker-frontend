@@ -21,6 +21,7 @@ export default function ProductionSiteTextField({
   citiesList,
   companiesList,
   productionSiteList,
+  isSubmitted,
 }: any) {
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
@@ -42,6 +43,12 @@ export default function ProductionSiteTextField({
           onChange={onCityChange}
           value={form.cityId}
           required
+          error={isSubmitted && !form.cityId}
+          helperText={
+            isSubmitted && !form.cityId
+              ? 'Обязательное поле. Выберите город из списка или добавьте новый'
+              : ''
+          }
           slotProps={{
             select: {
               MenuProps: {
@@ -111,6 +118,12 @@ export default function ProductionSiteTextField({
           value={form.companyId}
           disabled={!form.cityId}
           required
+          error={isSubmitted && !form.companyId}
+          helperText={
+            isSubmitted && !form.companyId
+              ? 'Обязательное поле. Выберите организацию из списка или добавьте новую'
+              : ''
+          }
           slotProps={{
             select: {
               MenuProps: {
@@ -181,6 +194,12 @@ export default function ProductionSiteTextField({
           value={form.productionSiteId}
           disabled={!form.cityId || !form.companyId}
           required
+          error={isSubmitted && !form.productionSiteId}
+          helperText={
+            isSubmitted && !form.productionSiteId
+              ? 'Обязательное поле. Выберите участок из списка или добавьте новый'
+              : ''
+          }
           slotProps={{
             select: {
               MenuProps: {
