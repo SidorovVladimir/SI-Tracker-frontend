@@ -61,7 +61,7 @@ export default function VerificationOrganizationTextField({
             ✨ {cleanSpaces(newOrganizationName)} (НОВАЯ)
           </MenuItem>
         )}
-        {verificationOrganizationsList.map(
+        {(verificationOrganizationsList || []).map(
           ({ id, name }: { id: string; name: string }) => (
             <MenuItem
               key={id}

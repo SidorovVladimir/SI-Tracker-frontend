@@ -1231,54 +1231,6 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                 </Tooltip>
                               )}
 
-                              {/* {!isDeviceVerified && (
-                                <Tooltip
-                                  title="Синхронизировать данные с ФГИС Аршин"
-                                  placement="top"
-                                  arrow
-                                >
-                                  <Box
-                                    component="span"
-                                    sx={{ display: 'inline-flex' }}
-                                  >
-                                    <IconButton
-                                      color="warning"
-                                      size="small"
-                                      disabled={
-                                        !!batchJobs[batch.id] ||
-                                        isSyncing ||
-                                        isBatchSyncing
-                                      }
-                                      onClick={() => {
-                                        syncDeviceWithArshin({
-                                          variables: {
-                                            input: {
-                                              deviceId: link.device.id,
-                                              batchId: batch.id,
-                                            },
-                                          },
-                                        }).catch(() => {});
-                                      }}
-                                    >
-                                      <Sync
-                                        fontSize="small"
-                                        sx={{
-                                          animation: isSyncing
-                                            ? 'spin 1s linear infinite'
-                                            : 'none',
-                                          '@keyframes spin': {
-                                            '0%': { transform: 'rotate(0deg)' },
-                                            '100%': {
-                                              transform: 'rotate(360deg)',
-                                            },
-                                          },
-                                        }}
-                                      />
-                                    </IconButton>
-                                  </Box>
-                                </Tooltip>
-                              )} */}
-
                               {!isDeviceVerified && (
                                 <>
                                   {/* КЕЙС 1: В буфере есть записи -> Кнопка выбора горит ВСЕГДА */}
@@ -1402,39 +1354,31 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                                       </IconButton>
                                     </Box>
                                   </Tooltip>
+
+                                  {!hasBufferRecords && (
+                                    <Tooltip
+                                      title="Исключить это оборудование из партии отправки"
+                                      placement="top"
+                                      arrow
+                                    >
+                                      <IconButton
+                                        color="error"
+                                        size="small"
+                                        onClick={() =>
+                                          removeDevices({
+                                            variables: {
+                                              batchId: batch.id,
+                                              deviceIds: [link.device.id],
+                                            },
+                                          }).catch(() => {})
+                                        }
+                                      >
+                                        <Delete fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
                                 </>
                               )}
-
-                              {/* <Tooltip
-                                title="Внести или изменить результаты поверки/калибровки"
-                                placement="top"
-                                arrow
-                              >
-                                <Box
-                                  component="span"
-                                  sx={{ display: 'inline-flex' }}
-                                >
-                                  <IconButton
-                                    color="primary"
-                                    size="small"
-                                    disabled={
-                                      !!batchJobs[batch.id] ||
-                                      isSyncing ||
-                                      isBatchSyncing ||
-                                      isDeviceVerified
-                                    }
-                                    onClick={() =>
-                                      handleOpenVerificationModal(
-                                        link.device.id,
-                                        link.device.name,
-                                        batch.id
-                                      )
-                                    }
-                                  >
-                                    <Edit fontSize="small" />
-                                  </IconButton>
-                                </Box>
-                              </Tooltip> */}
                             </Box>
                           )}
 
@@ -1639,7 +1583,12 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                         color="success"
                         size="small"
                         disabled={
-                          !!batchJobs[batch.id] || isSyncing || isBatchSyncing
+                          !!batchJobs[batch.id] ||
+                          isSyncing ||
+                          isBatchSyncing ||
+                          isSent
+                            ? !isAllDevicesVerified
+                            : false
                         }
                         onClick={() =>
                           updateStatus({

@@ -195,7 +195,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
             onChange={(e) => setDate(e.target.value)}
           />
 
-          {result === 'Годен' && (
+          {result === 'годен' && (
             <TextField
               label="Дата окончания действия (Годен до)"
               type="date"

@@ -168,7 +168,7 @@ export default function EditDevicePage(props: {
       scopesList={scopesData?.scopes || []}
       primaryStandartsList={standardsData?.primaryStandarts || []}
       metrologyControlTypeList={metrologyData?.metrologyControlTypes || []}
-      verificationOrhanizationsList={orgsData?.verificationOrganizations || []}
+      verificationOrganizationsList={orgsData?.verificationOrganizations || []}
       closeDetails={closeDetails}
       close={close}
       refetchDevice={refetchDevice}
@@ -200,7 +200,7 @@ interface UserFormProps {
   metrologyControlTypeList: NonNullable<
     GetMetrologyControlTypesListQuery['metrologyControlTypes']
   >[number][];
-  verificationOrhanizationsList: NonNullable<
+  verificationOrganizationsList: NonNullable<
     GetVerificationOrganizationsListQuery['verificationOrganizations']
   >[number][];
 
@@ -223,7 +223,7 @@ function UserForm({
   scopesList,
   primaryStandartsList,
   metrologyControlTypeList,
-  verificationOrhanizationsList,
+  verificationOrganizationsList,
 }: UserFormProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -501,7 +501,7 @@ function UserForm({
           return;
         }
 
-        const matchedOrg = verificationOrhanizationsList.find(
+        const matchedOrg = verificationOrganizationsList.find(
           (org) =>
             org.name.toLowerCase().trim() ===
             item.organizationName?.toLowerCase().trim()
@@ -1906,7 +1906,7 @@ function UserForm({
                           )
                         }
                         verificationOrganizationsList={
-                          verificationOrhanizationsList
+                          verificationOrganizationsList
                         }
                         newOrganizationName={verification.newOrganizationName}
                       />
