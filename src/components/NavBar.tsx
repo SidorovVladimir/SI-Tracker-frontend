@@ -29,6 +29,7 @@ import {
   Terminal,
   AccountBalanceWallet,
   Build,
+  MenuBook,
 } from '@mui/icons-material';
 import { HeaderNotificationsBell } from './HeaderNotificationsBell';
 import { HeaderChatButton } from './HeaderChatButton';
@@ -185,6 +186,38 @@ export default function NavBar() {
                 ml: 'auto', // 🌟 Прижимает весь блок вправо, освобождая центр хедера!
               }}
             >
+              {/* 📖 КНОПКА «РУКОВОДСТВО ПОЛЬЗОВАТЕЛЯ» (для всех авторизованных) */}
+              <Tooltip title="Руководство пользователя" arrow>
+                <Button
+                  component={Link}
+                  to={routes.userGuide()}
+                  variant="text"
+                  color="inherit"
+                  startIcon={<MenuBook />}
+                  size="small"
+                  sx={{
+                    display: { xs: 'none', sm: 'inline-flex' },
+                    fontWeight: 'bold',
+                    textTransform: 'none',
+                    borderRadius: 2,
+                    px: 1.5,
+                    height: 36,
+                  }}
+                >
+                  Руководство
+                </Button>
+              </Tooltip>
+              <Tooltip title="Руководство пользователя" arrow>
+                <IconButton
+                  component={Link}
+                  to={routes.userGuide()}
+                  color="inherit"
+                  sx={{ display: { xs: 'flex', sm: 'none' }, p: 1 }}
+                >
+                  <MenuBook />
+                </IconButton>
+              </Tooltip>
+
               {/* 🎯 КНОПКА «УПРАВЛЕНИЕ» ДЛЯ АДМИНОВ И МЕТРОЛОГОВ */}
               {user?.role !== 'user' && (
                 <Box>

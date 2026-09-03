@@ -11,6 +11,7 @@ export default {
   sqlConsole: () => '/sql-console',
   chat: () => '/chat',
   budget: () => '/budget-planning',
+  userGuide: () => '/guide',
   // help: () => '/help',
   // about: () => '/about/licenses',
   admin: {

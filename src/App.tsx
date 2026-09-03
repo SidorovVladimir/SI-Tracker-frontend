@@ -57,6 +57,7 @@ import { BudgetLayoutPage } from './pages/BudgetLayoutPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 
 import { InspectionPageContainer } from './pages/InspectionPageContainer';
+import UserGuidePage from './pages/UserGuidePage';
 // import { UniversalRealTimeSync } from './components/UniversalRealTimeSync';
 
 // import HelpPage from './pages/HelpPage';
@@ -107,6 +108,7 @@ function App() {
           <Route path={routes.home()} element={<HomePage />} />
           <Route path={routes.profile()} element={<ProfilePage />} />
           <Route path={routes.chat()} element={<ChatPage />} />
+          <Route path={routes.userGuide()} element={<UserGuidePage />} />
 
           {/* <Route path={routes.help()} element={<HelpPage />} /> */}
           <Route path="/m/device/:id" element={<MobileDevicePage />} />
