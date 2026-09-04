@@ -108,7 +108,6 @@ function App() {
           <Route path={routes.home()} element={<HomePage />} />
           <Route path={routes.profile()} element={<ProfilePage />} />
           <Route path={routes.chat()} element={<ChatPage />} />
-          <Route path={routes.userGuide()} element={<UserGuidePage />} />
 
           {/* <Route path={routes.help()} element={<HelpPage />} /> */}
           <Route path="/m/device/:id" element={<MobileDevicePage />} />
@@ -122,6 +121,7 @@ function App() {
           <Route
             element={<ProtectedRoute allowedRoles={['admin', 'superadmin']} />}
           >
+            <Route path={routes.userGuide()} element={<UserGuidePage />} />
             <Route path="/budget/*" element={<BudgetLayoutPage />} />
             <Route
               path="/budget/plans/details/:id"

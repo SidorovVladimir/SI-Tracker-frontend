@@ -34,7 +34,7 @@ import {
 import { HeaderNotificationsBell } from './HeaderNotificationsBell';
 import { HeaderChatButton } from './HeaderChatButton';
 import { useSocketApp } from '../context/SocketContext';
-import PageHelpButton from './PageHelpButton'; // 🌟 Импортируем нашу очищенную кнопку-поповер
+import PageHelpButton from './PageHelpButton';
 
 const pulseKeyframes = {
   '0%': { transform: 'scale(1)' },
@@ -160,9 +160,6 @@ export default function NavBar() {
             </Typography>
           </Tooltip>
 
-          {/* ========================================================================= */}
-          {/* 🌟 ИДЕАЛЬНОЕ ВНЕДРЕНИЕ: Кнопка помощи изолирована в левой части хедера!   */}
-          {/* ========================================================================= */}
           {isAuthenticated && (
             <Box
               sx={{
@@ -176,49 +173,50 @@ export default function NavBar() {
             </Box>
           )}
 
-          {/* ================= ⚙️ ПРАВАЯ ЗОНА: СИСТЕМНЫЕ КНОПКИ ДЕЙСТВИЙ КИПиА ================= */}
           {isAuthenticated && (
             <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: { xs: 0.5, sm: 1.5 },
-                ml: 'auto', // 🌟 Прижимает весь блок вправо, освобождая центр хедера!
+                ml: 'auto',
               }}
             >
-              {/* 📖 КНОПКА «РУКОВОДСТВО ПОЛЬЗОВАТЕЛЯ» (для всех авторизованных) */}
-              <Tooltip title="Руководство пользователя" arrow>
-                <Button
-                  component={Link}
-                  to={routes.userGuide()}
-                  variant="text"
-                  color="inherit"
-                  startIcon={<MenuBook />}
-                  size="small"
-                  sx={{
-                    display: { xs: 'none', sm: 'inline-flex' },
-                    fontWeight: 'bold',
-                    textTransform: 'none',
-                    borderRadius: 2,
-                    px: 1.5,
-                    height: 36,
-                  }}
-                >
-                  Руководство
-                </Button>
-              </Tooltip>
-              <Tooltip title="Руководство пользователя" arrow>
-                <IconButton
-                  component={Link}
-                  to={routes.userGuide()}
-                  color="inherit"
-                  sx={{ display: { xs: 'flex', sm: 'none' }, p: 1 }}
-                >
-                  <MenuBook />
-                </IconButton>
-              </Tooltip>
+              {user?.role !== 'user' && (
+                <>
+                  <Tooltip title="Руководство пользователя" arrow>
+                    <Button
+                      component={Link}
+                      to={routes.userGuide()}
+                      variant="text"
+                      color="inherit"
+                      startIcon={<MenuBook />}
+                      size="small"
+                      sx={{
+                        display: { xs: 'none', sm: 'inline-flex' },
+                        fontWeight: 'bold',
+                        textTransform: 'none',
+                        borderRadius: 2,
+                        px: 1.5,
+                        height: 36,
+                      }}
+                    >
+                      Руководство
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Руководство пользователя" arrow>
+                    <IconButton
+                      component={Link}
+                      to={routes.userGuide()}
+                      color="inherit"
+                      sx={{ display: { xs: 'flex', sm: 'none' }, p: 1 }}
+                    >
+                      <MenuBook />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
 
-              {/* 🎯 КНОПКА «УПРАВЛЕНИЕ» ДЛЯ АДМИНОВ И МЕТРОЛОГОВ */}
               {user?.role !== 'user' && (
                 <Box>
                   <Button
@@ -424,12 +422,11 @@ export default function NavBar() {
                   </Menu>
                 </Box>
               )}
-              {/* Системные кнопки связи и алертов */}
+
               <HeaderChatButton />
 
               {user?.role !== 'user' && <HeaderNotificationsBell />}
 
-              {/* Кнопка вызова пользовательского меню профиля */}
               <IconButton
                 onClick={handleMenu}
                 sx={{
