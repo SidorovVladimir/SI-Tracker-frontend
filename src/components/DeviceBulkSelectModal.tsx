@@ -365,7 +365,7 @@ export const DeviceBulkSelectModal: React.FC<DeviceBulkSelectModalProps> = ({
           fullWidth
           size="small"
           label="Поиск прибора в СУБД"
-          placeholder="Введите заводской номер или модель..."
+          placeholder="Введите заводской номер"
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
@@ -458,7 +458,7 @@ export const DeviceBulkSelectModal: React.FC<DeviceBulkSelectModalProps> = ({
                             {cleanSpaces(device.name)}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            Модель: {device.model}
+                            Тип: {device.model}
                           </Typography>
                         </TableCell>
                         <TableCell
@@ -531,7 +531,7 @@ export const DeviceBulkSelectModal: React.FC<DeviceBulkSelectModalProps> = ({
                         color="text.secondary"
                         sx={{ display: 'block' }}
                       >
-                        Модель: {device.model}
+                        Тип: {device.model}
                       </Typography>
                       <Typography
                         variant="caption"
