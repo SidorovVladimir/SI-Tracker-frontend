@@ -14,7 +14,6 @@ mutation CreateDevice($input: CreateDeviceInput!) {
     manufacturer
     verificationInterval
     archived
-    isVoluntaryCalibration
     nomenclature
     comment
     statusId

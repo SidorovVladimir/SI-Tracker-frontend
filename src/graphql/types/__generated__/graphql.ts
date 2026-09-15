@@ -280,7 +280,6 @@ export type CreateDeviceInput = {
   equipmentTypeId?: InputMaybe<Scalars['ID']['input']>;
   grsiNumber?: InputMaybe<Scalars['String']['input']>;
   inventoryNumber?: InputMaybe<Scalars['String']['input']>;
-  isVoluntaryCalibration: Scalars['Boolean']['input'];
   manufacturer?: InputMaybe<Scalars['String']['input']>;
   measurementRange?: InputMaybe<Scalars['String']['input']>;
   measurementTypes?: InputMaybe<Array<Scalars['ID']['input']>>;
@@ -2365,7 +2364,6 @@ export type CreateDeviceMutation = {
     manufacturer: string | null;
     verificationInterval: number | null;
     archived: boolean;
-    isVoluntaryCalibration: boolean;
     nomenclature: string | null;
     comment: string | null;
     statusId: string;
@@ -6498,10 +6496,6 @@ export const CreateDeviceDocument = {
                   name: { kind: 'Name', value: 'verificationInterval' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'archived' } },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'isVoluntaryCalibration' },
-                },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'nomenclature' },
