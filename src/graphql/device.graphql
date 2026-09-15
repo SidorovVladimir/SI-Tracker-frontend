@@ -14,6 +14,7 @@ mutation CreateDevice($input: CreateDeviceInput!) {
     manufacturer
     verificationInterval
     archived
+    isVoluntaryCalibration
     nomenclature
     comment
     statusId
@@ -64,11 +65,13 @@ query GetDevicesWithRelationsList(
       # accuracy
       inventoryNumber
       receiptDate
+      scheduleStatus
       manufacturer
       # verificationInterval
       archived
       # nomenclature
       # comment
+      isVoluntaryCalibration
       cachedControl
       nextVerificationDate
       nextInspectionDate
@@ -100,6 +103,25 @@ query GetDevicesWithRelationsList(
       #   name
       # }
       #}
+
+      latestAttestation {
+        id
+        date
+        validUntil
+        protocolNumber
+        metrologyControleType {
+          name
+        }
+      }
+      latestCalibration {
+        id
+        date
+        validUntil
+        protocolNumber
+        metrologyControleType {
+          name
+        }
+      }
       latestVerification {
         id
         date
@@ -142,6 +164,7 @@ query GetDeviceWithRelation($id: ID!) {
     inventoryNumber
     receiptDate
     manufacturer
+    cachedControl
     nextInspectionDate
     nextVerificationDate
     createdAt
@@ -168,6 +191,7 @@ query GetDeviceWithRelation($id: ID!) {
     }
     verificationInterval
     archived
+    isVoluntaryCalibration
     scheduleStatus
     nomenclature
     comment
@@ -246,6 +270,7 @@ mutation UpdateDevice($id: ID!, $input: UpdateDeviceInput!) {
     manufacturer
     verificationInterval
     archived
+    isVoluntaryCalibration
     scheduleStatus
     nomenclature
     comment

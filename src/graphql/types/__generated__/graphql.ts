@@ -280,6 +280,7 @@ export type CreateDeviceInput = {
   equipmentTypeId?: InputMaybe<Scalars['ID']['input']>;
   grsiNumber?: InputMaybe<Scalars['String']['input']>;
   inventoryNumber?: InputMaybe<Scalars['String']['input']>;
+  isVoluntaryCalibration: Scalars['Boolean']['input'];
   manufacturer?: InputMaybe<Scalars['String']['input']>;
   measurementRange?: InputMaybe<Scalars['String']['input']>;
   measurementTypes?: InputMaybe<Array<Scalars['ID']['input']>>;
@@ -386,6 +387,7 @@ export type Device = {
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inventoryNumber: Maybe<Scalars['String']['output']>;
+  isVoluntaryCalibration: Scalars['Boolean']['output'];
   manufacturer: Maybe<Scalars['String']['output']>;
   measurementRange: Maybe<Scalars['String']['output']>;
   model: Scalars['String']['output'];
@@ -465,6 +467,9 @@ export type DeviceTableItem = {
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inventoryNumber: Maybe<Scalars['String']['output']>;
+  isVoluntaryCalibration: Maybe<Scalars['Boolean']['output']>;
+  latestAttestation: Maybe<VerificationTableItem>;
+  latestCalibration: Maybe<VerificationTableItem>;
   latestInspection: Maybe<InspectionTableItem>;
   latestVerification: Maybe<VerificationTableItem>;
   manufacturer: Maybe<Scalars['String']['output']>;
@@ -475,6 +480,7 @@ export type DeviceTableItem = {
   productionSite: ProductionSiteRelation;
   receiptDate: Maybe<Scalars['String']['output']>;
   releaseDate: Maybe<Scalars['String']['output']>;
+  scheduleStatus: Scalars['String']['output'];
   serialNumber: Scalars['String']['output'];
   status: Status;
   verificationInterval: Maybe<Scalars['Int']['output']>;
@@ -491,6 +497,7 @@ export type DeviceWithRelations = {
   __typename: 'DeviceWithRelations';
   accuracy: Maybe<Scalars['String']['output']>;
   archived: Scalars['Boolean']['output'];
+  cachedControl: Maybe<Scalars['String']['output']>;
   comment: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
   createdBy: Maybe<User>;
@@ -500,6 +507,7 @@ export type DeviceWithRelations = {
   grsiNumber: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inventoryNumber: Maybe<Scalars['String']['output']>;
+  isVoluntaryCalibration: Scalars['Boolean']['output'];
   manufacturer: Maybe<Scalars['String']['output']>;
   measurementRange: Maybe<Scalars['String']['output']>;
   measurementTypes: Array<MeasurementType>;
@@ -1457,6 +1465,7 @@ export type UpdateDeviceInput = {
   equipmentTypeId?: InputMaybe<Scalars['ID']['input']>;
   grsiNumber?: InputMaybe<Scalars['String']['input']>;
   inventoryNumber?: InputMaybe<Scalars['String']['input']>;
+  isVoluntaryCalibration: Scalars['Boolean']['input'];
   manufacturer?: InputMaybe<Scalars['String']['input']>;
   measurementRange?: InputMaybe<Scalars['String']['input']>;
   measurementTypes?: InputMaybe<Array<Scalars['ID']['input']>>;
@@ -2356,6 +2365,7 @@ export type CreateDeviceMutation = {
     manufacturer: string | null;
     verificationInterval: number | null;
     archived: boolean;
+    isVoluntaryCalibration: boolean;
     nomenclature: string | null;
     comment: string | null;
     statusId: string;
@@ -2412,8 +2422,10 @@ export type GetDevicesWithRelationsListQuery = {
       grsiNumber: string | null;
       inventoryNumber: string | null;
       receiptDate: string | null;
+      scheduleStatus: string;
       manufacturer: string | null;
       archived: boolean | null;
+      isVoluntaryCalibration: boolean | null;
       cachedControl: string | null;
       nextVerificationDate: string | null;
       nextInspectionDate: string | null;
@@ -2424,6 +2436,28 @@ export type GetDevicesWithRelationsListQuery = {
         city: { __typename: 'City'; name: string };
         company: { __typename: 'Company'; name: string };
       };
+      latestAttestation: {
+        __typename: 'VerificationTableItem';
+        id: string;
+        date: string | null;
+        validUntil: string | null;
+        protocolNumber: string | null;
+        metrologyControleType: {
+          __typename: 'MetrologyControlType';
+          name: string;
+        } | null;
+      } | null;
+      latestCalibration: {
+        __typename: 'VerificationTableItem';
+        id: string;
+        date: string | null;
+        validUntil: string | null;
+        protocolNumber: string | null;
+        metrologyControleType: {
+          __typename: 'MetrologyControlType';
+          name: string;
+        } | null;
+      } | null;
       latestVerification: {
         __typename: 'VerificationTableItem';
         id: string;
@@ -2463,12 +2497,14 @@ export type GetDeviceWithRelationQuery = {
     inventoryNumber: string | null;
     receiptDate: string | null;
     manufacturer: string | null;
+    cachedControl: string | null;
     nextInspectionDate: string | null;
     nextVerificationDate: string | null;
     createdAt: string;
     updatedAt: string;
     verificationInterval: number | null;
     archived: boolean;
+    isVoluntaryCalibration: boolean;
     scheduleStatus: string;
     nomenclature: string | null;
     comment: string | null;
@@ -2573,6 +2609,7 @@ export type UpdateDeviceMutation = {
     manufacturer: string | null;
     verificationInterval: number | null;
     archived: boolean;
+    isVoluntaryCalibration: boolean;
     scheduleStatus: string;
     nomenclature: string | null;
     comment: string | null;
@@ -6463,6 +6500,10 @@ export const CreateDeviceDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'archived' } },
                 {
                   kind: 'Field',
+                  name: { kind: 'Name', value: 'isVoluntaryCalibration' },
+                },
+                {
+                  kind: 'Field',
                   name: { kind: 'Name', value: 'nomenclature' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
@@ -6662,11 +6703,19 @@ export const GetDevicesWithRelationsListDocument = {
                       },
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'scheduleStatus' },
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'manufacturer' },
                       },
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'archived' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'isVoluntaryCalibration' },
                       },
                       {
                         kind: 'Field',
@@ -6719,6 +6768,88 @@ export const GetDevicesWithRelationsListDocument = {
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'company' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'name' },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'latestAttestation' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'date' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'validUntil' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'protocolNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: {
+                                kind: 'Name',
+                                value: 'metrologyControleType',
+                              },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'name' },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'latestCalibration' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'date' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'validUntil' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'protocolNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: {
+                                kind: 'Name',
+                                value: 'metrologyControleType',
+                              },
                               selectionSet: {
                                 kind: 'SelectionSet',
                                 selections: [
@@ -6867,6 +6998,10 @@ export const GetDeviceWithRelationDocument = {
                 },
                 {
                   kind: 'Field',
+                  name: { kind: 'Name', value: 'cachedControl' },
+                },
+                {
+                  kind: 'Field',
                   name: { kind: 'Name', value: 'nextInspectionDate' },
                 },
                 {
@@ -6942,6 +7077,10 @@ export const GetDeviceWithRelationDocument = {
                   name: { kind: 'Name', value: 'verificationInterval' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'archived' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'isVoluntaryCalibration' },
+                },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'scheduleStatus' },
@@ -7268,6 +7407,10 @@ export const UpdateDeviceDocument = {
                   name: { kind: 'Name', value: 'verificationInterval' },
                 },
                 { kind: 'Field', name: { kind: 'Name', value: 'archived' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'isVoluntaryCalibration' },
+                },
                 {
                   kind: 'Field',
                   name: { kind: 'Name', value: 'scheduleStatus' },

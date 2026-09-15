@@ -258,10 +258,12 @@ function UserForm({
     manufacturer: string;
     verificationInterval: number | string;
     archived: boolean;
+    isVoluntaryCalibration: boolean;
     scheduleStatus: string;
     nomenclature: string;
     comment: string;
     statusId: string;
+    cachedControl: string;
     cityId: string;
     companyId: string;
     productionSiteId: string;
@@ -297,6 +299,7 @@ function UserForm({
     manufacturer: device?.manufacturer || '',
     verificationInterval: device.verificationInterval || '',
     archived: device.archived,
+    isVoluntaryCalibration: device.isVoluntaryCalibration,
     scheduleStatus:
       device?.scheduleStatus && typeof device.scheduleStatus === 'string'
         ? device.scheduleStatus
@@ -304,6 +307,7 @@ function UserForm({
     nomenclature: device?.nomenclature || '',
     comment: device.comment || '',
     statusId: device.status.id || '',
+    cachedControl: device.cachedControl || '',
     cityId: device.productionSite.city.id || '',
     companyId: device.productionSite.company.id || '',
     productionSiteId: device.productionSite.id || '',
@@ -742,10 +746,28 @@ function UserForm({
       cost: v.cost !== '' ? parseFloat(String(v.cost)) : 0,
     }));
 
-    const { cityId, companyId, ...dataToSend } = form;
+    const shouldResetCalibration =
+      form.grsiNumber &&
+      !(
+        form.scopes.some(
+          (scope) =>
+            scope.name === 'вне сферы государственного регулирования (не гр)'
+        ) && form.isVoluntaryCalibration
+      );
+
+    const finalIsVoluntaryCalibration = shouldResetCalibration
+      ? false
+      : form.isVoluntaryCalibration;
+
+    if (shouldResetCalibration) {
+      setForm((prev) => ({ ...prev, isVoluntaryCalibration: false }));
+    }
+
+    const { cityId, companyId, cachedControl, ...dataToSend } = form;
 
     const data = {
       ...dataToSend,
+      isVoluntaryCalibration: finalIsVoluntaryCalibration,
       grsiNumber: form.grsiNumber || null,
       csmCode: form.csmCode || null,
       releaseDate: form.releaseDate || null,
@@ -813,6 +835,10 @@ function UserForm({
     }));
   };
 
+  const currentEquipmentName = equipmentTypesList.find(
+    ({ id }) => id === device?.equipmentType?.id
+  );
+
   return (
     <Box>
       <Box
@@ -853,9 +879,9 @@ function UserForm({
         // }}
         sx={{
           display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' }, // В столбик на мобилке, в ряд на ПК
-          alignItems: { xs: 'stretch', sm: 'center' },
-          gap: 2,
+          flexDirection: 'column',
+          alignItems: 'stretch',
+          gap: 1.5,
           mb: 3,
           p: 2,
           bgcolor: 'grey.50',
@@ -897,19 +923,81 @@ function UserForm({
           </MenuItem>
         </TextField>
 
+        {(currentEquipmentName?.name === 'средство измерений (си)' ||
+          currentEquipmentName?.name === 'средство контроля (ск)') &&
+          (form.cachedControl === 'осмотр' ||
+            form.cachedControl === 'калибровка') && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between', // 🌟 Разносим тумблер влево, текст вправо (или наоборот)
+                bgcolor: 'background.paper',
+                p: '8px 12px',
+                borderRadius: 1.5,
+                border: '1px solid',
+                borderColor: form.isVoluntaryCalibration
+                  ? 'primary.light'
+                  : 'grey.300',
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  textTransform: 'uppercase',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: form.isVoluntaryCalibration
+                    ? 'primary.main'
+                    : 'text.secondary',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {form.isVoluntaryCalibration
+                  ? '🟣 Калибровка (Добровольная)'
+                  : '⚪ Осмотр (По умолчанию)'}
+              </Typography>
+              <Switch
+                size="small"
+                name="isVoluntaryCalibration"
+                checked={!!form.isVoluntaryCalibration}
+                disabled={form.archived}
+                onChange={(e) =>
+                  handleChange({
+                    target: {
+                      name: 'isVoluntaryCalibration',
+                      value: e.target.checked,
+                    },
+                  } as any)
+                }
+                color="primary"
+              />
+            </Box>
+          )}
+
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: 1,
+            justifyContent: 'space-between', // 🌟 Единообразно с тумблером калибровки
             bgcolor: form.archived ? '#ffebee' : 'background.paper',
-            p: '6px 12px',
+            p: '8px 12px',
             borderRadius: 1.5,
             border: '1px solid',
             borderColor: form.archived ? 'error.light' : 'grey.300',
-            justifyContent: 'center',
           }}
         >
+          <Typography
+            variant="caption"
+            sx={{
+              textTransform: 'uppercase',
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: form.archived ? 'error.main' : 'text.secondary',
+            }}
+          >
+            {form.archived ? 'Статус: Архив' : 'Статус: Действует'}
+          </Typography>
           <Switch
             size="small"
             checked={form.archived}
@@ -920,17 +1008,6 @@ function UserForm({
             }
             color="error"
           />
-          <Typography
-            variant="caption"
-            sx={{
-              textTransform: 'uppercase',
-              fontSize: '0.68rem',
-              fontWeight: 700,
-              color: form.archived ? 'error.main' : 'text.secondary',
-            }}
-          >
-            {form.archived ? 'Архив' : 'Действует'}
-          </Typography>
         </Box>
       </Box>
 

@@ -42,11 +42,12 @@ import {
   QrCode,
   ChevronLeft,
   ChevronRight,
+  Star,
 } from '@mui/icons-material';
 import React from 'react';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
-import { cleanSpaces, toCapital } from '../utils/capitalize';
+import { cleanSpaces } from '../utils/capitalize';
 
 type Device =
   GetDevicesWithRelationsListQuery['devicesWithRelations']['items'][0];
@@ -339,87 +340,29 @@ export default function DevicesPage() {
       minWidth: 130,
       valueGetter: (_, row) => cleanSpaces(row?.inventoryNumber),
     },
-    {
-      field: 'verificationDate',
-      headerName: 'Дата контроля',
-      flex: 1,
-      minWidth: 130,
-      valueGetter: (_, row) =>
-        row.latestVerification ? formatDate(row.latestVerification.date) : '—',
-    },
+    // {
+    //   field: 'verificationDate',
+    //   headerName: 'Дата контроля',
+    //   flex: 1,
+    //   minWidth: 130,
+    //   valueGetter: (_, row) =>
+    //     row.latestVerification ? formatDate(row.latestVerification.date) : '—',
+    // },
 
-    {
-      field: 'verificationNextDate',
-      headerName: 'Дата следующего контроля',
-      flex: 1,
-      minWidth: 150,
-      valueGetter: (_, row) =>
-        row.nextVerificationDate ? formatDate(row.nextVerificationDate) : '—',
-
-      // renderCell: (params) => {
-      //   if (!params.value || params.value === '—') return '—';
-
-      //   // Сравниваем кэш-дату дедлайна с сегодняшним днём (2026-08-31)
-      //   const isOverdue =
-      //     new Date(params.row.nextVerificationDate) < new Date();
-
-      //   return (
-      //     <Typography
-      //       variant="body2"
-      //       sx={{
-      //         fontWeight: isOverdue ? 'bold' : 'normal',
-      //         color: isOverdue ? 'error.main' : 'text.primary', // Просрочен? Красный текст!
-      //       }}
-      //     >
-      //       {params.value}
-      //     </Typography>
-      //   );
-      // },
-    },
     // {
     //   field: 'verificationNextDate',
     //   headerName: 'Дата следующего контроля',
     //   flex: 1,
     //   minWidth: 150,
     //   valueGetter: (_, row) =>
-    //     row.latestVerification
-    //       ? formatDate(row.latestVerification.validUntil)
-    //       : '—',
-    // },
-
-    // {
-    //   field: 'nextVerificationDate',
-    //   headerName: 'Дедлайн поверки/калибровки',
-    //   flex: 1,
-    //   minWidth: 180,
-    //   valueGetter: (_, row) =>
     //     row.nextVerificationDate ? formatDate(row.nextVerificationDate) : '—',
-    //   renderCell: (params) => {
-    //     if (!params.value || params.value === '—') return '—';
 
-    //     // row.isOverdue у вас уже прилетает с бэкенда! Просто красим текст
-    //     const isOverdue = params.row.isOverdue;
-
-    //     return (
-    //       <Typography
-    //         variant="body2"
-    //         sx={{
-    //           fontWeight: isOverdue ? 'bold' : 'normal',
-    //           color: isOverdue ? 'error.main' : 'text.primary', // Если просрочен — красим в красный
-    //         }}
-    //       >
-    //         {params.value}
-    //       </Typography>
-    //     );
-    //   },
-    // },
     // {
     //   field: 'metrologyControlType',
     //   headerName: 'Вид контроля',
     //   flex: 1,
     //   minWidth: 140,
-    //   valueGetter: (_, row) =>
-    //     cleanSpaces(row?.latestVerification?.metrologyControleType?.name),
+    //   valueGetter: (_, row) => cleanSpaces(row?.cachedControl),
 
     //   renderCell: (params) => {
     //     const typeName = params.value;
@@ -437,17 +380,13 @@ export default function DevicesPage() {
     //     }
 
     //     const lowerName = String(typeName).toLowerCase().trim();
-
-    //     // Определяем цвет и стиль чипса в зависимости от вида контроля
     //     let chipColor: 'primary' | 'secondary' | 'info' | 'default' = 'default';
 
-    //     if (lowerName === 'поверка') {
-    //       chipColor = 'primary'; // Синий
-    //     } else if (lowerName === 'калибровка') {
-    //       chipColor = 'secondary'; // Фиолетовый
-    //     } else if (lowerName === 'аттестация') {
-    //       chipColor = 'info'; // Голубой
-    //     }
+    //     if (lowerName === 'поверка') chipColor = 'primary';
+    //     else if (lowerName === 'калибровка') chipColor = 'secondary';
+    //     else if (lowerName === 'аттестация') chipColor = 'info';
+    //     // Если вдруг затесался осмотр (например на общей схеме) — пусть будет дефолтным серым
+    //     else if (lowerName === 'осмотр') chipColor = 'default';
 
     //     return (
     //       <Chip
@@ -460,21 +399,130 @@ export default function DevicesPage() {
     //           fontWeight: 'bold',
     //           height: 20,
     //           letterSpacing: '0.5px',
-    //           textTransform: 'uppercase', // Поддерживаем ваш общий стиль капса
-    //           borderRadius: '4px', // Делаем его квадратным/аккуратным под компактную сетку
+    //           textTransform: 'uppercase',
+    //           borderRadius: '4px',
     //         }}
     //       />
     //     );
     //   },
     // },
 
+    // {
+    //   field: 'lastInspection',
+    //   headerName: 'Последний осмотр',
+    //   width: 150,
+    //   valueGetter: (_, row) =>
+    //     row.latestInspection?.date
+    //       ? formatDate(row.latestInspection.date)
+    //       : 'Не проводился',
+    // },
+    // {
+    //   field: 'nextInspectionDate',
+    //   headerName: 'Следующий плановый осмотр',
+    //   flex: 1,
+    //   minWidth: 180,
+    //   valueGetter: (_, row) =>
+    //     row.nextInspectionDate ? formatDate(row.nextInspectionDate) : '—',
+    // },
+    {
+      field: 'verificationDate',
+      headerName: 'Дата контроля',
+      flex: 1,
+      minWidth: 130,
+      valueGetter: (_, row) => {
+        const mainDoc =
+          row.cachedControl === 'аттестация'
+            ? row.latestAttestation
+            : row.cachedControl === 'калибровка'
+            ? row.latestCalibration
+            : row.latestVerification;
+
+        return mainDoc ? formatDate(mainDoc.date) : '—';
+      },
+    },
+
+    // {
+    //   field: 'verificationNextDate',
+    //   headerName: 'Дата следующего контроля',
+    //   flex: 1,
+    //   minWidth: 150,
+    //   valueGetter: (_, row) =>
+    //     row.nextVerificationDate ? formatDate(row.nextVerificationDate) : '—',
+    // },
+    {
+      field: 'verificationNextDate',
+      headerName: 'Дата следующего контроля',
+      flex: 1,
+      minWidth: 170,
+      valueGetter: (_, row) =>
+        row.nextVerificationDate ? formatDate(row.nextVerificationDate) : '—',
+      renderCell: (params) => {
+        const dateValue = params.value;
+        if (!dateValue || dateValue === '—') return '—';
+
+        const status = params.row.scheduleStatus;
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75,
+              height: '100%',
+              justifyContent: 'flex-start',
+
+              opacity: status === 'paused_all' ? 0.4 : 1,
+            }}
+          >
+            {status === 'paused_verification' && (
+              <Tooltip
+                title="Режим: Только технический осмотр (Без поверок ЦСМ)"
+                arrow
+                placement="top"
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    display: 'inline-flex',
+                    fontSize: '0.85rem',
+                    cursor: 'help',
+                  }}
+                >
+                  🛠️
+                </Box>
+              </Tooltip>
+            )}
+
+            {status === 'paused_all' && (
+              <Tooltip
+                title="Режим: Плановая пауза (контроль отключен)"
+                arrow
+                placement="top"
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    display: 'inline-flex',
+                    fontSize: '0.85rem',
+                    cursor: 'help',
+                  }}
+                >
+                  ⏸️
+                </Box>
+              </Tooltip>
+            )}
+
+            {dateValue}
+          </Box>
+        );
+      },
+    },
     {
       field: 'metrologyControlType',
       headerName: 'Вид контроля',
       flex: 1,
       minWidth: 140,
       valueGetter: (_, row) => cleanSpaces(row?.cachedControl),
-
       renderCell: (params) => {
         const typeName = params.value;
 
@@ -496,15 +544,27 @@ export default function DevicesPage() {
         if (lowerName === 'поверка') chipColor = 'primary';
         else if (lowerName === 'калибровка') chipColor = 'secondary';
         else if (lowerName === 'аттестация') chipColor = 'info';
-        // Если вдруг затесался осмотр (например на общей схеме) — пусть будет дефолтным серым
+        // 🌟 Теперь, когда СИ без ГРСИ улетают в «осмотр», чип тоже будет красиво рендериться
+        // как дефолтный (серый), визуально отделяя его от строгих гос-процедур.
         else if (lowerName === 'осмотр') chipColor = 'default';
 
-        return (
+        const isVoluntary = params.row.isVoluntaryCalibration;
+        const isCalib = lowerName === 'калибровка' && isVoluntary;
+        const chipEl = (
           <Chip
             label={typeName}
             size="small"
             color={chipColor}
             variant="outlined"
+            icon={
+              isCalib ? (
+                <Star
+                  sx={{
+                    '&&': { fontSize: '0.75rem', color: 'secondary.main' },
+                  }}
+                />
+              ) : undefined
+            }
             sx={{
               fontSize: '0.68rem',
               fontWeight: 'bold',
@@ -512,12 +572,41 @@ export default function DevicesPage() {
               letterSpacing: '0.5px',
               textTransform: 'uppercase',
               borderRadius: '4px',
+              pl: isCalib ? 0.5 : 0,
+              cursor: isCalib ? 'help' : 'default',
             }}
           />
         );
+
+        // 🌟 Оборачиваем в контейнер, который принудительно центрирует контент в ячейке DataGrid
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center', // Выравнивание строго по вертикали
+              justifyContent: 'flex-start', // Или 'center', если хотите чип по центру колонки
+              height: '100%', // Занимаем всю высоту ячейки для корректного выравнивания
+              width: '100%',
+            }}
+          >
+            {isCalib ? (
+              <Tooltip
+                title="Включен маркер добровольной калибровки в карточке прибора. Прибор выведен из Журнала осмотров."
+                arrow
+                placement="top"
+              >
+                {/* Внутренний инлайн-флекс для корректного перехвата событий мыши тултипом */}
+                <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                  {chipEl}
+                </Box>
+              </Tooltip>
+            ) : (
+              chipEl
+            )}
+          </Box>
+        );
       },
     },
-
     {
       field: 'lastInspection',
       headerName: 'Последний осмотр',
@@ -534,55 +623,173 @@ export default function DevicesPage() {
       minWidth: 180,
       valueGetter: (_, row) =>
         row.nextInspectionDate ? formatDate(row.nextInspectionDate) : '—',
-      // renderCell: (params) => {
-      //   if (!params.value || params.value === '—') return '—';
-
-      //   // Проверяем просрочку для осмотра прямо на клиенте (сравниваем с текущей датой)
-      //   const isOverdue = new Date(params.row.nextInspectionDate) < new Date();
-
-      //   return (
-      //     <Typography
-      //       variant="body2"
-      //       sx={{
-      //         fontWeight: isOverdue ? 'bold' : 'normal',
-      //         color: isOverdue ? 'warning.main' : 'text.primary', // Осмотры красим в желтый/оранжевый (warning)
-      //       }}
-      //     >
-      //       {params.value}
-      //     </Typography>
-      //   );
-      // },
     },
 
+    // {
+    //   field: 'status',
+    //   headerName: 'Состояние',
+    //   flex: 1,
+    //   minWidth: 120,
+    //   valueGetter: (_, row) => cleanSpaces(row?.status?.name),
+    // },
     {
       field: 'status',
       headerName: 'Состояние',
       flex: 1,
-      minWidth: 120,
+      minWidth: 150, // Немного увеличили ширину для размещения значков
       valueGetter: (_, row) => cleanSpaces(row?.status?.name),
+      renderCell: (params) => {
+        const statusText = params.value;
+        if (!statusText || statusText === '—') return '—';
+
+        const lowerStatus = String(statusText).toLowerCase().trim();
+
+        // 🌟 Подбираем компактный значок под каждый статус системы
+        let statusIcon = '⚪'; // Дефолтный значок
+
+        if (lowerStatus === 'исправен') {
+          statusIcon = '🟢'; // Всё отлично, прибор в работе
+        } else if (lowerStatus === 'неисправен') {
+          statusIcon = '🔴'; // Критическая поломка, требует внимания
+        } else if (lowerStatus === 'забракован') {
+          statusIcon = '❌'; // Юридически непригоден к измерениям
+        } else if (lowerStatus === 'на поверке (в цсм)') {
+          statusIcon = '🚚'; // Находится в пути или в сторонней лаборатории
+        } else if (lowerStatus === 'длительное хранение') {
+          statusIcon = '📦'; // Законсервирован на складе
+        } else if (lowerStatus === 'утерян') {
+          statusIcon = '🔍'; // В розыске / ЧП
+        }
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75, // Идентичный отступ, как в ГРСИ и Датах
+              height: '100%',
+              justifyContent: 'flex-start',
+            }}
+          >
+            {/* 🌟 Значок статуса рендерится СЛЕВА от текста */}
+            <Box
+              component="span"
+              sx={{ display: 'inline-flex', fontSize: '0.85rem' }}
+            >
+              {statusIcon}
+            </Box>
+
+            {/* 🌟 Оригинальный текст статуса с родным шрифтом таблицы */}
+            {statusText}
+          </Box>
+        );
+      },
     },
+    // {
+    //   field: 'grsiNumber',
+    //   headerName: 'Госреестр',
+    //   flex: 1,
+    //   minWidth: 130,
+    //   valueGetter: (_, row) => cleanSpaces(row?.grsiNumber),
+    // },
     {
       field: 'grsiNumber',
       headerName: 'Госреестр',
       flex: 1,
       minWidth: 130,
       valueGetter: (_, row) => cleanSpaces(row?.grsiNumber),
+      renderCell: (params) => {
+        const grsi = params.value;
+        if (!grsi || grsi === '—') return '—';
+
+        // Регулярное выражение для проверки стандартного формата ГРСИ (например, XXXXX-XX)
+        const grsiRegex = /^\d+-\d{2}$/;
+        const isValidFormat = grsiRegex.test(grsi.trim());
+
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75, // Комфортный отступ между значком и номером
+              height: '100%',
+              justifyContent: 'flex-start',
+            }}
+          >
+            {/* 🌟 Значок верификации маски теперь рендерится СЛЕВА от номера */}
+            {isValidFormat ? (
+              <Tooltip
+                title="Номер соответствует государственному стандарту маски ГРСИ"
+                arrow
+                placement="top"
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    display: 'inline-flex',
+                    fontSize: '0.85rem',
+                    cursor: 'help',
+                  }}
+                >
+                  🛡️
+                </Box>
+              </Tooltip>
+            ) : (
+              <Tooltip
+                title="Внимание: Нестандартный формат номера! Проверьте карточку прибора."
+                arrow
+                placement="top"
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    display: 'inline-flex',
+                    fontSize: '0.85rem',
+                    cursor: 'help',
+                  }}
+                >
+                  ⚠️
+                </Box>
+              </Tooltip>
+            )}
+
+            {/* 🌟 Выводим строку напрямую, чтобы сохранить оригинальный стиль ячейки таблицы */}
+            {grsi}
+          </Box>
+        );
+      },
     },
+    // {
+    //   field: 'certificate',
+    //   headerName: 'Свидетельство',
+    //   flex: 1,
+    //   minWidth: 130,
+    //   valueGetter: (_, row) =>
+    //     cleanSpaces(row?.latestVerification?.protocolNumber),
+    // },
     {
       field: 'certificate',
       headerName: 'Свидетельство',
       flex: 1,
-      minWidth: 130,
-      valueGetter: (_, row) =>
-        cleanSpaces(row?.latestVerification?.protocolNumber),
+      minWidth: 140,
+      valueGetter: (_, row) => {
+        const mainDoc =
+          row.cachedControl === 'аттестация'
+            ? row.latestAttestation
+            : row.cachedControl === 'калибровка'
+            ? row.latestCalibration
+            : row.latestVerification;
+
+        return mainDoc ? cleanSpaces(mainDoc.protocolNumber) : '—';
+      },
     },
     {
-      field: 'releaseDate',
-      headerName: 'Дата производства',
+      field: 'receiptDate',
+      headerName: 'Дата ввода',
       flex: 1,
       minWidth: 130,
       valueGetter: (_, row) =>
-        row?.releaseDate ? formatDate(row.releaseDate) : '—',
+        row?.receiptDate ? formatDate(row.receiptDate) : '—',
     },
     {
       field: 'manufacturer',
@@ -1825,10 +2032,45 @@ export default function DevicesPage() {
                       const statusColor =
                         STATUS_COLOR_MAP[statusName] || 'default';
 
-                      const isOverdue = device.latestVerification?.validUntil
-                        ? new Date(device.latestVerification.validUntil) <
-                          new Date()
+                      // const isOverdue = device.latestVerification?.validUntil
+                      //   ? new Date(device.latestVerification.validUntil) <
+                      //     new Date()
+                      //   : false;
+
+                      let statusIcon = '⚪';
+                      if (statusName === 'исправен') statusIcon = '🟢';
+                      else if (statusName === 'неисправен') statusIcon = '🔴';
+                      else if (statusName === 'забракован') statusIcon = '❌';
+                      else if (statusName === 'на поверке (в цсм)')
+                        statusIcon = '🚚';
+                      else if (statusName === 'длительное хранение')
+                        statusIcon = '📦';
+                      else if (statusName === 'утерян') statusIcon = '🔍';
+
+                      // 🌟 2. ПРОВЕРКА МАСКИ ГРСИ (Строго 2 цифры года в конце)
+                      const grsi = device.grsiNumber
+                        ? String(device.grsiNumber).trim()
+                        : '';
+                      const grsiRegex = /^\d+-\d{2}$/;
+                      const isValidGrsi = grsi !== '' && grsiRegex.test(grsi);
+
+                      // const isChecked = selectedDeviceIds.includes(device.id);
+                      const isInspection = device.cachedControl === 'осмотр';
+                      const targetDeadlineDate = isInspection
+                        ? device.nextInspectionDate
+                        : device.nextVerificationDate;
+
+                      // Проверяем просрочку по целевой дате
+                      const isOverdue = targetDeadlineDate
+                        ? new Date(targetDeadlineDate) < new Date()
                         : false;
+
+                      const scheduleStatus = device.scheduleStatus; // Статус планирования
+                      let scheduleIcon = '';
+                      if (scheduleStatus === 'paused_verification')
+                        scheduleIcon = '🛠️ ';
+                      else if (scheduleStatus === 'paused_all')
+                        scheduleIcon = '⏸️ ';
 
                       const isChecked = selectedDeviceIds.includes(device.id);
 
@@ -1896,21 +2138,48 @@ export default function DevicesPage() {
                                   gap: 1,
                                 }}
                               >
-                                <Typography
-                                  variant="body2"
+                                <Box
                                   sx={{
-                                    fontWeight: 700,
-                                    fontSize: '0.8rem',
-                                    lineHeight: 1.3,
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 0.5,
+                                    minWidth: 0,
                                   }}
                                 >
-                                  {device.name?.toUpperCase() || '—'}
-                                </Typography>
+                                  {grsi && (
+                                    <span style={{ fontSize: '0.75rem' }}>
+                                      {isValidGrsi ? '🛡️' : '⚠️'}
+                                    </span>
+                                  )}
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      fontWeight: 700,
+                                      fontSize: '0.8rem',
+                                      lineHeight: 1.3,
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
+                                    }}
+                                  >
+                                    {device.name?.toUpperCase() || '—'}
+                                  </Typography>
+                                  {/* 🌟 ДОБАВЛЕНО: Микро-звездочка для добровольной калибровки на мобилках */}
+                                  {device.cachedControl === 'калибровка' &&
+                                    device.isVoluntaryCalibration && (
+                                      <Star
+                                        sx={{
+                                          fontSize: '0.8rem',
+                                          color: 'secondary.main',
+                                          flexShrink: 0,
+                                        }}
+                                      />
+                                    )}
+                                </Box>
                                 <Chip
-                                  label={device?.status?.name || '—'}
+                                  label={`${statusIcon} ${
+                                    device?.status?.name || '—'
+                                  }`}
                                   size="small"
                                   color={statusColor}
                                   variant="outlined"
@@ -1930,6 +2199,8 @@ export default function DevicesPage() {
                                   justifyContent: 'space-between',
                                   alignItems: 'center',
                                   mt: 0.25,
+                                  opacity:
+                                    scheduleStatus === 'paused_all' ? 0.5 : 1,
                                 }}
                               >
                                 <Typography
@@ -1966,33 +2237,22 @@ export default function DevicesPage() {
                                     textAlign: 'right',
                                   }}
                                 >
-                                  {device.latestVerification?.validUntil
+                                  {/* 🌟 ИЗМЕНЕНО: Реактивный и строгий вывод плановой даты контроля */}
+                                  {targetDeadlineDate
                                     ? (() => {
-                                        const typeName =
-                                          device.latestVerification
-                                            ?.metrologyControleType?.name || '';
-                                        const dateStr = formatDate(
-                                          device.latestVerification.validUntil
-                                        );
+                                        const controlType =
+                                          device.cachedControl || 'контроль';
+                                        const dateStr =
+                                          formatDate(targetDeadlineDate);
                                         const prefix = isOverdue ? '❗ ' : '';
-                                        // Если есть тип контроля — используем его как подпись
-                                        if (
-                                          typeName
-                                            .toLowerCase()
-                                            .includes('поверк')
-                                        )
-                                          return `${prefix}Поверка: до ${dateStr}`;
-                                        if (
-                                          typeName
-                                            .toLowerCase()
-                                            .includes('осмотр')
-                                        )
-                                          return `${prefix}Осмотр: до ${dateStr}`;
-                                        if (typeName)
-                                          return `${prefix}${toCapital(
-                                            typeName
-                                          )}: до ${dateStr}`;
-                                        return `${prefix}до ${dateStr}`;
+
+                                        // Красиво форматируем название типа контроля с большой буквы
+                                        const formattedType =
+                                          controlType.charAt(0).toUpperCase() +
+                                          controlType.slice(1);
+
+                                        // return `${prefix}${formattedType}: до ${dateStr}`;
+                                        return `${prefix}${scheduleIcon}${formattedType}: до ${dateStr}`;
                                       })()
                                     : '—'}
                                 </Typography>
