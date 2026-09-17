@@ -104,7 +104,21 @@ const getClient = () => {
                 return Array.from(messageMap.values());
               },
             },
+            getRepairDraftBatches: {
+              merge: false,
+            },
+            // То же самое полезно сделать для пула ремонта, чтобы он не спамил в консоль
+            getRepairPlanningPool: {
+              merge: false,
+            },
+            // И для списка ведомостей
+            getRepairBatches: {
+              merge: false,
+            },
           },
+        },
+        DraftBatchOption: {
+          keyFields: ['id'], // Помогает Apollo правильно кэшировать элементы выпадающего списка
         },
         DeviceWithRelations: {
           fields: {

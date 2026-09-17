@@ -314,6 +314,21 @@ export default function NavBar() {
 
                     <MenuItem
                       component={Link}
+                      to={routes.repairPlanning()}
+                      onClick={handleAdminMenuClose}
+                    >
+                      <ListItemIcon sx={{ color: 'warning.main' }}>
+                        <Build fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText
+                        slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
+                      >
+                        🔧 Журнал ремонтов
+                      </ListItemText>
+                    </MenuItem>
+
+                    <MenuItem
+                      component={Link}
                       to={routes.analytics()}
                       onClick={handleAdminMenuClose}
                     >

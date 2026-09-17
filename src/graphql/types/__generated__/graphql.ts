@@ -352,10 +352,10 @@ export type CreateVerificationInput = {
   deviceId: Scalars['ID']['input'];
   documentUrl?: InputMaybe<Scalars['String']['input']>;
   metrologyControleTypeId: Scalars['ID']['input'];
-  protocolNumber: Scalars['String']['input'];
+  protocolNumber?: InputMaybe<Scalars['String']['input']>;
   result: Scalars['String']['input'];
   validUntil?: InputMaybe<Scalars['String']['input']>;
-  verificationOrganizationId: Scalars['ID']['input'];
+  verificationOrganizationId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type CreateVerificationOrganizationInput = {
@@ -457,6 +457,18 @@ export type DeviceInBatch = {
   name: Scalars['String']['output'];
   serialNumber: Scalars['String']['output'];
   verifications: Maybe<Array<ShortVerification>>;
+};
+
+export type DeviceRepairHistoryNode = {
+  __typename: 'DeviceRepairHistoryNode';
+  batchId: Scalars['ID']['output'];
+  batchNumber: Scalars['String']['output'];
+  closingDocType: Scalars['String']['output'];
+  comment: Scalars['String']['output'];
+  dateIn: Scalars['String']['output'];
+  dateOut: Scalars['String']['output'];
+  master: Scalars['String']['output'];
+  result: Scalars['String']['output'];
 };
 
 export type DeviceTableItem = {
@@ -706,7 +718,9 @@ export type MonthlySummary = {
 export type Mutation = {
   __typename: 'Mutation';
   addDevicesToBatch: Scalars['Boolean']['output'];
+  addDevicesToRepairBatch: Scalars['Boolean']['output'];
   approveBudgetPlan: BudgetPlan;
+  bulkScrapDevices: Scalars['Boolean']['output'];
   confirmArshinBuffer: Scalars['Boolean']['output'];
   createBudgetPlan: BudgetPlan;
   createBulkInspection: Scalars['Boolean']['output'];
@@ -719,6 +733,7 @@ export type Mutation = {
   createPricelist: QueuedJobResponse;
   createPrimaryStandart: PrimaryStandart;
   createProductionSite: ProductionSite;
+  createRepairBatch: VerificationBatch;
   createScope: Scope;
   createStatus: Status;
   createUser: User;
@@ -736,6 +751,7 @@ export type Mutation = {
   deletePricelist: Scalars['Boolean']['output'];
   deletePrimaryStandart: Scalars['Boolean']['output'];
   deleteProductionSite: Scalars['Boolean']['output'];
+  deleteRepairBatch: Scalars['Boolean']['output'];
   deleteScope: Scalars['Boolean']['output'];
   deleteStatus: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
@@ -749,6 +765,7 @@ export type Mutation = {
   markNotificationAsRead: Scalars['Boolean']['output'];
   register: AuthPayload;
   removeDevicesFromBatch: Scalars['Boolean']['output'];
+  removeDevicesFromRepairBatch: Scalars['Boolean']['output'];
   syncBatchWithArshin: QueuedJobResponse;
   syncDeviceWithArshin: Device;
   updateBatchStatus: VerificationBatch;
@@ -761,6 +778,7 @@ export type Mutation = {
   updateMetrologyControlType: MetrologyControlType;
   updatePrimaryStandart: PrimaryStandart;
   updateProductionSite: ProductionSite;
+  updateRepairBatchStatus: VerificationBatch;
   updateScope: Scope;
   updateStatus: Status;
   updateUser: User;
@@ -772,8 +790,17 @@ export type MutationAddDevicesToBatchArgs = {
   deviceIds: Array<Scalars['ID']['input']>;
 };
 
+export type MutationAddDevicesToRepairBatchArgs = {
+  batchId: Scalars['ID']['input'];
+  deviceIds: Array<Scalars['ID']['input']>;
+};
+
 export type MutationApproveBudgetPlanArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type MutationBulkScrapDevicesArgs = {
+  deviceIds: Array<Scalars['ID']['input']>;
 };
 
 export type MutationConfirmArshinBufferArgs = {
@@ -822,6 +849,10 @@ export type MutationCreatePrimaryStandartArgs = {
 
 export type MutationCreateProductionSiteArgs = {
   input: CreateProductionSiteInput;
+};
+
+export type MutationCreateRepairBatchArgs = {
+  input: CreateBatchInput;
 };
 
 export type MutationCreateScopeArgs = {
@@ -892,6 +923,10 @@ export type MutationDeleteProductionSiteArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type MutationDeleteRepairBatchArgs = {
+  id: Scalars['ID']['input'];
+};
+
 export type MutationDeleteScopeArgs = {
   id: Scalars['ID']['input'];
 };
@@ -933,6 +968,11 @@ export type MutationRegisterArgs = {
 };
 
 export type MutationRemoveDevicesFromBatchArgs = {
+  batchId: Scalars['ID']['input'];
+  deviceIds: Array<Scalars['ID']['input']>;
+};
+
+export type MutationRemoveDevicesFromRepairBatchArgs = {
   batchId: Scalars['ID']['input'];
   deviceIds: Array<Scalars['ID']['input']>;
 };
@@ -991,6 +1031,11 @@ export type MutationUpdatePrimaryStandartArgs = {
 
 export type MutationUpdateProductionSiteArgs = {
   input: UpdateProductionSiteInput;
+};
+
+export type MutationUpdateRepairBatchStatusArgs = {
+  id: Scalars['ID']['input'];
+  status: Scalars['String']['input'];
 };
 
 export type MutationUpdateScopeArgs = {
@@ -1152,6 +1197,7 @@ export type Query = {
   getChatHistory: Array<ChatMessage>;
   getChatUsers: Array<User>;
   getCsmTariffTrend: CsmTariffTrendResponse;
+  getDeviceRepairHistory: Array<DeviceRepairHistoryNode>;
   getDevicesBarcodeData: Array<DeviceBarcodeData>;
   getDraftBatchesByMonth: Array<DraftBatchOption>;
   getFinancialAnalytics: FinancialAnalyticsResponse;
@@ -1162,6 +1208,9 @@ export type Query = {
   getPlanningPoolByMonth: PlanningPoolResponse;
   getProductionAnalytics: ProductionAnalyticsResponse;
   getProductionSitesForSelect: Array<ProductionSite>;
+  getRepairBatches: Array<VerificationBatch>;
+  getRepairDraftBatches: Array<DraftBatchOption>;
+  getRepairPlanningPool: RepairPlanningPoolResponse;
   getSystemNotifications: Array<SystemNotification>;
   getTotalUnreadCount: Scalars['Int']['output'];
   getUnreadNotificationsCount: Scalars['Int']['output'];
@@ -1266,6 +1315,10 @@ export type QueryGetCsmTariffTrendArgs = {
   siteId: Scalars['String']['input'];
 };
 
+export type QueryGetDeviceRepairHistoryArgs = {
+  deviceId: Scalars['ID']['input'];
+};
+
 export type QueryGetDevicesBarcodeDataArgs = {
   input: PrintBarcodesInput;
 };
@@ -1306,6 +1359,16 @@ export type QueryGetPlanningPoolByMonthArgs = {
 export type QueryGetProductionAnalyticsArgs = {
   month?: InputMaybe<Scalars['Int']['input']>;
   year: Scalars['Int']['input'];
+};
+
+export type QueryGetRepairBatchesArgs = {
+  status?: InputMaybe<Scalars['String']['input']>;
+  year?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QueryGetRepairPlanningPoolArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type QueryGetVerificationBatchesArgs = {
@@ -1369,6 +1432,12 @@ export type RawSqlResponse = {
   errorMessage: Maybe<Scalars['String']['output']>;
   rows: Array<Scalars['JSON']['output']>;
   success: Scalars['Boolean']['output'];
+};
+
+export type RepairPlanningPoolResponse = {
+  __typename: 'RepairPlanningPoolResponse';
+  items: Array<PlanningPoolItem>;
+  totalCount: Scalars['Int']['output'];
 };
 
 export type RiskCityData = {
@@ -1594,11 +1663,11 @@ export type VerificationModal = {
   documentUrl: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   metrologyControleTypeId: Scalars['ID']['output'];
-  protocolNumber: Scalars['String']['output'];
+  protocolNumber: Maybe<Scalars['String']['output']>;
   result: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
   validUntil: Maybe<Scalars['String']['output']>;
-  verificationOrganizationId: Scalars['ID']['output'];
+  verificationOrganizationId: Maybe<Scalars['ID']['output']>;
 };
 
 export type VerificationOrganization = {
@@ -2628,13 +2697,13 @@ export type CreateVerificationMutation = {
     __typename: 'VerificationModal';
     id: string;
     deviceId: string;
-    protocolNumber: string;
+    protocolNumber: string | null;
     result: string;
     date: string;
     validUntil: string | null;
     cost: number | null;
     metrologyControleTypeId: string;
-    verificationOrganizationId: string;
+    verificationOrganizationId: string | null;
     comment: string | null;
   };
 };
@@ -3135,6 +3204,160 @@ export type ConfirmArshinBufferMutationVariables = Exact<{
 }>;
 
 export type ConfirmArshinBufferMutation = { confirmArshinBuffer: boolean };
+
+export type GetRepairPlanningPoolQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+export type GetRepairPlanningPoolQuery = {
+  getRepairPlanningPool: {
+    __typename: 'RepairPlanningPoolResponse';
+    totalCount: number;
+    items: Array<{
+      __typename: 'PlanningPoolItem';
+      id: string;
+      name: string;
+      model: string;
+      serialNumber: string;
+      validUntil: string | null;
+      lastControlDate: string | null;
+      scheduleStatus: string;
+      controlType: string;
+      targetBatchId: string | null;
+      isManualPlacement: boolean;
+    }>;
+  };
+};
+
+export type GetRepairBatchesQueryVariables = Exact<{
+  year?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type GetRepairBatchesQuery = {
+  getRepairBatches: Array<{
+    __typename: 'VerificationBatch';
+    id: string;
+    number: string;
+    status: string;
+    plannedDate: string;
+    comment: string | null;
+    createdBy: {
+      __typename: 'User';
+      id: string;
+      firstName: string;
+      lastName: string;
+    } | null;
+    devicesToBatches: Array<{
+      __typename: 'DeviceToBatchRelation';
+      id: string;
+      deviceStatus: string;
+      device: {
+        __typename: 'DeviceInBatch';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+        verifications: Array<{
+          __typename: 'ShortVerification';
+          id: string;
+          batchId: string | null;
+          result: string | null;
+        }> | null;
+      };
+    }>;
+  }>;
+};
+
+export type GetRepairDraftBatchesQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type GetRepairDraftBatchesQuery = {
+  getRepairDraftBatches: Array<{
+    __typename: 'DraftBatchOption';
+    id: string;
+    number: string;
+  }>;
+};
+
+export type CreateRepairBatchMutationVariables = Exact<{
+  input: CreateBatchInput;
+}>;
+
+export type CreateRepairBatchMutation = {
+  createRepairBatch: {
+    __typename: 'VerificationBatch';
+    id: string;
+    number: string;
+    status: string;
+    plannedDate: string;
+  };
+};
+
+export type AddDevicesToRepairBatchMutationVariables = Exact<{
+  batchId: Scalars['ID']['input'];
+  deviceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+export type AddDevicesToRepairBatchMutation = {
+  addDevicesToRepairBatch: boolean;
+};
+
+export type RemoveDevicesFromRepairBatchMutationVariables = Exact<{
+  batchId: Scalars['ID']['input'];
+  deviceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+export type RemoveDevicesFromRepairBatchMutation = {
+  removeDevicesFromRepairBatch: boolean;
+};
+
+export type UpdateRepairBatchStatusMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  status: Scalars['String']['input'];
+}>;
+
+export type UpdateRepairBatchStatusMutation = {
+  updateRepairBatchStatus: {
+    __typename: 'VerificationBatch';
+    id: string;
+    number: string;
+    status: string;
+    updatedAt: string;
+  };
+};
+
+export type DeleteRepairBatchMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type DeleteRepairBatchMutation = { deleteRepairBatch: boolean };
+
+export type GetDeviceRepairHistoryQueryVariables = Exact<{
+  deviceId: Scalars['ID']['input'];
+}>;
+
+export type GetDeviceRepairHistoryQuery = {
+  getDeviceRepairHistory: Array<{
+    __typename: 'DeviceRepairHistoryNode';
+    batchId: string;
+    batchNumber: string;
+    dateIn: string;
+    dateOut: string;
+    master: string;
+    result: string;
+    closingDocType: string;
+    comment: string;
+  }>;
+};
+
+export type BulkScrapDevicesMutationVariables = Exact<{
+  deviceIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+export type BulkScrapDevicesMutation = { bulkScrapDevices: boolean };
 
 export type GetPrimaryStandartsListQueryVariables = Exact<{
   [key: string]: never;
@@ -9632,6 +9855,715 @@ export const ConfirmArshinBufferDocument = {
 } as unknown as DocumentNode<
   ConfirmArshinBufferMutation,
   ConfirmArshinBufferMutationVariables
+>;
+export const GetRepairPlanningPoolDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetRepairPlanningPool' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'offset' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getRepairPlanningPool' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'offset' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'offset' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'model' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'serialNumber' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'validUntil' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastControlDate' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'scheduleStatus' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'controlType' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'targetBatchId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'isManualPlacement' },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetRepairPlanningPoolQuery,
+  GetRepairPlanningPoolQueryVariables
+>;
+export const GetRepairBatchesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetRepairBatches' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'year' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'status' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getRepairBatches' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'year' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'year' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'status' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'status' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'plannedDate' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'createdBy' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'firstName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastName' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'devicesToBatches' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deviceStatus' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'device' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'verifications' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'id' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'batchId' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'result' },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetRepairBatchesQuery,
+  GetRepairBatchesQueryVariables
+>;
+export const GetRepairDraftBatchesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetRepairDraftBatches' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getRepairDraftBatches' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetRepairDraftBatchesQuery,
+  GetRepairDraftBatchesQueryVariables
+>;
+export const CreateRepairBatchDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateRepairBatch' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'CreateBatchInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createRepairBatch' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'plannedDate' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CreateRepairBatchMutation,
+  CreateRepairBatchMutationVariables
+>;
+export const AddDevicesToRepairBatchDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'AddDevicesToRepairBatch' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'batchId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'deviceIds' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'ID' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'addDevicesToRepairBatch' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'batchId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'batchId' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'deviceIds' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'deviceIds' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  AddDevicesToRepairBatchMutation,
+  AddDevicesToRepairBatchMutationVariables
+>;
+export const RemoveDevicesFromRepairBatchDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'RemoveDevicesFromRepairBatch' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'batchId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'deviceIds' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'ID' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'removeDevicesFromRepairBatch' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'batchId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'batchId' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'deviceIds' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'deviceIds' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  RemoveDevicesFromRepairBatchMutation,
+  RemoveDevicesFromRepairBatchMutationVariables
+>;
+export const UpdateRepairBatchStatusDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateRepairBatchStatus' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'status' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateRepairBatchStatus' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'status' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'status' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  UpdateRepairBatchStatusMutation,
+  UpdateRepairBatchStatusMutationVariables
+>;
+export const DeleteRepairBatchDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteRepairBatch' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteRepairBatch' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  DeleteRepairBatchMutation,
+  DeleteRepairBatchMutationVariables
+>;
+export const GetDeviceRepairHistoryDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetDeviceRepairHistory' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'deviceId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getDeviceRepairHistory' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'deviceId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'deviceId' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'batchId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'batchNumber' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dateIn' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'dateOut' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'master' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'closingDocType' },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetDeviceRepairHistoryQuery,
+  GetDeviceRepairHistoryQueryVariables
+>;
+export const BulkScrapDevicesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'BulkScrapDevices' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'deviceIds' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'ID' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'bulkScrapDevices' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'deviceIds' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'deviceIds' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  BulkScrapDevicesMutation,
+  BulkScrapDevicesMutationVariables
 >;
 export const GetPrimaryStandartsListDocument = {
   kind: 'Document',

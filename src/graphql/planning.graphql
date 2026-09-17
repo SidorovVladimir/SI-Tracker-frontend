@@ -136,3 +136,108 @@ mutation DeleteVerificationBatch($id: ID!) {
 mutation ConfirmArshinBuffer($bufferId: String!) {
   confirmArshinBuffer(bufferId: $bufferId)
 }
+
+query GetRepairPlanningPool($limit: Int, $offset: Int) {
+  getRepairPlanningPool(limit: $limit, offset: $offset) {
+    items {
+      id
+      name
+      model
+      serialNumber
+      validUntil
+      lastControlDate
+      scheduleStatus
+      controlType
+      targetBatchId
+      isManualPlacement
+    }
+    totalCount
+  }
+}
+
+query GetRepairBatches($year: Int, $status: String) {
+  getRepairBatches(year: $year, status: $status) {
+    id
+    number
+    status
+    plannedDate
+    comment
+    createdBy {
+      id
+      firstName
+      lastName
+    }
+    devicesToBatches {
+      id
+      deviceStatus
+      device {
+        id
+        name
+        model
+        serialNumber
+        verifications {
+          id
+          batchId
+          result
+        }
+      }
+    }
+  }
+}
+
+# 🌟 Запрос черновиков ремонтных накладных для выпадающего списка
+query GetRepairDraftBatches {
+  getRepairDraftBatches {
+    id
+    number
+  }
+}
+
+# 🌟 Мутации управления жизненным циклом ремонтов КИПиА
+mutation CreateRepairBatch($input: CreateBatchInput!) {
+  createRepairBatch(input: $input) {
+    id
+    number
+    status
+    plannedDate
+  }
+}
+
+mutation AddDevicesToRepairBatch($batchId: ID!, $deviceIds: [ID!]!) {
+  addDevicesToRepairBatch(batchId: $batchId, deviceIds: $deviceIds)
+}
+
+mutation RemoveDevicesFromRepairBatch($batchId: ID!, $deviceIds: [ID!]!) {
+  removeDevicesFromRepairBatch(batchId: $batchId, deviceIds: $deviceIds)
+}
+
+mutation UpdateRepairBatchStatus($id: ID!, $status: String!) {
+  updateRepairBatchStatus(id: $id, status: $status) {
+    id
+    number
+    status
+    updatedAt
+  }
+}
+
+mutation DeleteRepairBatch($id: ID!) {
+  deleteRepairBatch(id: $id)
+}
+
+query GetDeviceRepairHistory($deviceId: ID!) {
+  getDeviceRepairHistory(deviceId: $deviceId) {
+    batchId
+    batchNumber
+    dateIn
+    dateOut
+    master
+    result
+    closingDocType
+    comment
+  }
+}
+
+# Мутация массового списания для кнопкок общего реестра
+mutation BulkScrapDevices($deviceIds: [ID!]!) {
+  bulkScrapDevices(deviceIds: $deviceIds)
+}

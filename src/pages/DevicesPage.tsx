@@ -90,14 +90,23 @@ const loadFilters = (): FilterState => {
   return saved ? JSON.parse(saved) : initialFilters;
 };
 
-type StatusColor = 'error' | 'warning' | 'success' | 'info' | 'default';
+type StatusColor =
+  | 'primary'
+  | 'error'
+  | 'warning'
+  | 'info'
+  | 'default'
+  | 'success';
 
 const STATUS_COLOR_MAP: Record<string, StatusColor> = {
   исправен: 'success',
-  'длительное хранение': 'info',
   неисправен: 'error',
   забракован: 'error',
-  утерян: 'error',
+  'на поверке (в цсм)': 'info',
+  'длительное хранение': 'default',
+  утерян: 'default',
+  'в ремонте': 'warning',
+  списан: 'default',
 };
 
 export default function DevicesPage() {
@@ -651,6 +660,8 @@ export default function DevicesPage() {
           statusIcon = '🟢'; // Всё отлично, прибор в работе
         } else if (lowerStatus === 'неисправен') {
           statusIcon = '🔴'; // Критическая поломка, требует внимания
+        } else if (lowerStatus === 'списан') {
+          statusIcon = '⚫';
         } else if (lowerStatus === 'забракован') {
           statusIcon = '❌'; // Юридически непригоден к измерениям
         } else if (lowerStatus === 'на поверке (в цсм)') {
@@ -659,6 +670,8 @@ export default function DevicesPage() {
           statusIcon = '📦'; // Законсервирован на складе
         } else if (lowerStatus === 'утерян') {
           statusIcon = '🔍'; // В розыске / ЧП
+        } else if (lowerStatus === 'в ремонте') {
+          statusIcon = '🛠️';
         }
 
         return (
@@ -2041,11 +2054,13 @@ export default function DevicesPage() {
                       if (statusName === 'исправен') statusIcon = '🟢';
                       else if (statusName === 'неисправен') statusIcon = '🔴';
                       else if (statusName === 'забракован') statusIcon = '❌';
+                      else if (statusName === 'списан') statusIcon = '⚫';
                       else if (statusName === 'на поверке (в цсм)')
                         statusIcon = '🚚';
                       else if (statusName === 'длительное хранение')
                         statusIcon = '📦';
                       else if (statusName === 'утерян') statusIcon = '🔍';
+                      else if (statusName === 'в ремонте') statusIcon = '🛠️';
 
                       // 🌟 2. ПРОВЕРКА МАСКИ ГРСИ (Строго 2 цифры года в конце)
                       const grsi = device.grsiNumber

@@ -30,13 +30,17 @@ import {
   InsertDriveFile,
 } from '@mui/icons-material';
 
-import { GetDeviceWithRelationDocument } from '../graphql/types/__generated__/graphql';
+import {
+  GetDeviceRepairHistoryDocument,
+  GetDeviceWithRelationDocument,
+} from '../graphql/types/__generated__/graphql';
 import { formatDate } from '../utils/date';
 import { useAuth } from '../hooks/useAuth';
 import { formatSentenceCase, toCapital } from '../utils/capitalize';
 import { useState } from 'react';
 import { API_ROUTES } from '../config';
 import { useSnackbar } from 'notistack';
+import { DeviceRepairHistoryAccordion } from '../components/DeviceRepairHistoryAccordion';
 
 const formatBytes = (bytes?: number | null) => {
   if (!bytes) return '';
@@ -164,6 +168,14 @@ export default function DeviceCard(props: {
     },
     fetchPolicy: 'network-only',
   });
+
+  const { data: repairHistoryData, loading: repairHistoryLoading } = useQuery(
+    GetDeviceRepairHistoryDocument,
+    {
+      variables: { deviceId },
+      fetchPolicy: 'network-only',
+    }
+  );
 
   const isMobileRoute = window.location.pathname.startsWith('/m/');
 
@@ -346,6 +358,8 @@ export default function DeviceCard(props: {
       </Alert>
     );
   if (!deviceData?.device) return <Alert>СИ не найдено</Alert>;
+
+  const repairHistory = repairHistoryData?.getDeviceRepairHistory ?? [];
 
   const device = deviceData.device;
 
@@ -1097,6 +1111,19 @@ export default function DeviceCard(props: {
           </Box>
         </AccordionDetails>
       </Accordion>
+
+      <Divider sx={{ my: 2.5 }} />
+
+      <Box sx={{ mt: 2, mb: 1.5 }}>
+        {repairHistoryLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+            <CircularProgress size={20} color="warning" />
+          </Box>
+        ) : (
+          /* Рендерим новый красивый аккордеон */
+          <DeviceRepairHistoryAccordion history={repairHistory} />
+        )}
+      </Box>
 
       <Divider sx={{ my: 2 }} />
 

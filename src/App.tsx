@@ -58,6 +58,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 
 import { InspectionPageContainer } from './pages/InspectionPageContainer';
 import UserGuidePage from './pages/UserGuidePage';
+import { RepairPageContainer } from './pages/RepairPageContainer';
 // import { UniversalRealTimeSync } from './components/UniversalRealTimeSync';
 
 // import HelpPage from './pages/HelpPage';
@@ -136,6 +137,11 @@ function App() {
               path={routes.inspectionPlanning()}
               element={<InspectionPageContainer />}
             />
+            <Route
+              path={routes.repairPlanning()}
+              element={<RepairPageContainer />}
+            />
+
             <Route path={routes.analytics()} element={<AnalyticsPage />} />
             <Route
               path={routes.productionAnalytics()}
