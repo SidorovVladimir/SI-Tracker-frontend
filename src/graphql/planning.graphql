@@ -15,6 +15,7 @@ query GetPlanningPool(
   $limit: Int
   $offset: Int
   $controlTypeId: String
+  $filter: DeviceFilterInput
 ) {
   getPlanningPoolByMonth(
     targetMonth: $targetMonth
@@ -22,6 +23,7 @@ query GetPlanningPool(
     limit: $limit
     offset: $offset
     controlTypeId: $controlTypeId
+    filter: $filter
   ) {
     items {
       # Запрашиваем внутренний массив приборов
@@ -137,8 +139,12 @@ mutation ConfirmArshinBuffer($bufferId: String!) {
   confirmArshinBuffer(bufferId: $bufferId)
 }
 
-query GetRepairPlanningPool($limit: Int, $offset: Int) {
-  getRepairPlanningPool(limit: $limit, offset: $offset) {
+query GetRepairPlanningPool(
+  $limit: Int
+  $offset: Int
+  $filter: DeviceFilterInput
+) {
+  getRepairPlanningPool(limit: $limit, offset: $offset, filter: $filter) {
     items {
       id
       name

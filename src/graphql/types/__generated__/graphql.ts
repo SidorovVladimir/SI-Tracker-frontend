@@ -1339,6 +1339,7 @@ export type QueryGetInspectionBatchesArchiveArgs = {
 };
 
 export type QueryGetInspectionPoolByMonthArgs = {
+  filter?: InputMaybe<DeviceFilterInput>;
   limit: Scalars['Int']['input'];
   offset: Scalars['Int']['input'];
   targetMonth: Scalars['String']['input'];
@@ -1351,6 +1352,7 @@ export type QueryGetJobStatusArgs = {
 export type QueryGetPlanningPoolByMonthArgs = {
   companyDefaultLeadTime?: InputMaybe<Scalars['Int']['input']>;
   controlTypeId?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<DeviceFilterInput>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   targetMonth: Scalars['String']['input'];
@@ -1367,6 +1369,7 @@ export type QueryGetRepairBatchesArgs = {
 };
 
 export type QueryGetRepairPlanningPoolArgs = {
+  filter?: InputMaybe<DeviceFilterInput>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -2806,6 +2809,7 @@ export type GetInspectionPoolQueryVariables = Exact<{
   targetMonth: Scalars['String']['input'];
   limit: Scalars['Int']['input'];
   offset: Scalars['Int']['input'];
+  filter?: InputMaybe<DeviceFilterInput>;
 }>;
 
 export type GetInspectionPoolQuery = {
@@ -3043,6 +3047,7 @@ export type GetPlanningPoolQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   controlTypeId?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<DeviceFilterInput>;
 }>;
 
 export type GetPlanningPoolQuery = {
@@ -3208,6 +3213,7 @@ export type ConfirmArshinBufferMutation = { confirmArshinBuffer: boolean };
 export type GetRepairPlanningPoolQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+  filter?: InputMaybe<DeviceFilterInput>;
 }>;
 
 export type GetRepairPlanningPoolQuery = {
@@ -8143,6 +8149,17 @@ export const GetInspectionPoolDocument = {
             type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
           },
         },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'filter' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'DeviceFilterInput' },
+          },
+        },
       ],
       selectionSet: {
         kind: 'SelectionSet',
@@ -8173,6 +8190,14 @@ export const GetInspectionPoolDocument = {
                 value: {
                   kind: 'Variable',
                   name: { kind: 'Name', value: 'offset' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'filter' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'filter' },
                 },
               },
             ],
@@ -9084,6 +9109,17 @@ export const GetPlanningPoolDocument = {
           },
           type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
         },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'filter' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'DeviceFilterInput' },
+          },
+        },
       ],
       selectionSet: {
         kind: 'SelectionSet',
@@ -9130,6 +9166,14 @@ export const GetPlanningPoolDocument = {
                 value: {
                   kind: 'Variable',
                   name: { kind: 'Name', value: 'controlTypeId' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'filter' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'filter' },
                 },
               },
             ],
@@ -9880,6 +9924,17 @@ export const GetRepairPlanningPoolDocument = {
           },
           type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
         },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'filter' },
+          },
+          type: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'DeviceFilterInput' },
+          },
+        },
       ],
       selectionSet: {
         kind: 'SelectionSet',
@@ -9902,6 +9957,14 @@ export const GetRepairPlanningPoolDocument = {
                 value: {
                   kind: 'Variable',
                   name: { kind: 'Name', value: 'offset' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'filter' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'filter' },
                 },
               },
             ],

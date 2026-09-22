@@ -11,6 +11,7 @@ import {
   Tabs,
   Autocomplete,
   CircularProgress,
+  InputAdornment,
 } from '@mui/material';
 
 import { YearlyCalendarSummary } from '../components/YearlyCalendarSummary';
@@ -29,7 +30,7 @@ import {
 import { enqueueSnackbar } from 'notistack';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
-import { QrCode } from '@mui/icons-material';
+import { QrCode, Search } from '@mui/icons-material';
 import { cleanSpaces, formatSentenceCase } from '../utils/capitalize';
 
 interface VerificationOrganization {
@@ -64,6 +65,8 @@ export const VerificationPlanningPage: React.FC = () => {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(20);
   const currentOffset = page * rowsPerPage;
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthStr);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
@@ -109,6 +112,9 @@ export const VerificationPlanningPage: React.FC = () => {
       limit: rowsPerPage,
       offset: currentOffset,
       controlTypeId: activeFilter,
+      filter: {
+        serialNumber: searchQuery.trim() || undefined,
+      },
     },
     // fetchPolicy: 'network-only',
     fetchPolicy: 'cache-and-network',
@@ -660,6 +666,30 @@ export const VerificationPlanningPage: React.FC = () => {
               </Tabs>
             )}
           </Box>
+          <TextField
+            fullWidth
+            size="small"
+            label="Поиск прибора"
+            placeholder="Введите заводской номер"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(0);
+            }}
+            sx={{
+              // width: { xs: '100%', sm: 'auto' },
+              mb: 1.5,
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="action" />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
         </Box>
 
         {/* Таблица оборудования на MUI */}

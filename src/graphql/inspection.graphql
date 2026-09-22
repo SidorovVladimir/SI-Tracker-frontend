@@ -1,8 +1,14 @@
-query GetInspectionPool($targetMonth: String!, $limit: Int!, $offset: Int!) {
+query GetInspectionPool(
+  $targetMonth: String!
+  $limit: Int!
+  $offset: Int!
+  $filter: DeviceFilterInput
+) {
   getInspectionPoolByMonth(
     targetMonth: $targetMonth
     limit: $limit
     offset: $offset
+    filter: $filter
   ) {
     items {
       id

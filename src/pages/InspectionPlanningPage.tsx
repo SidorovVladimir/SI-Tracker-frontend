@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, TablePagination } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  TablePagination,
+  TextField,
+  InputAdornment,
+} from '@mui/material';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { enqueueSnackbar } from 'notistack';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -20,7 +27,7 @@ import {
   // GetInspectionArchiveDocument,
 } from '../graphql/types/__generated__/graphql';
 import { InspectionSaveModal } from '../components/modals/InspectionSaveModal';
-import { Add } from '@mui/icons-material';
+import { Add, Search } from '@mui/icons-material';
 import { DeviceBulkSelectModal } from '../components/DeviceBulkSelectModal';
 
 export const InspectionPlanningPage: React.FC = () => {
@@ -43,6 +50,8 @@ export const InspectionPlanningPage: React.FC = () => {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(20);
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Пагинация Вкладки 2 (Архив актов)
   // const [archivePage, setArchivePage] = useState<number>(0);
   // const [archiveRowsPerPage, setArchiveRowsPerPage] = useState<number>(10);
@@ -58,6 +67,9 @@ export const InspectionPlanningPage: React.FC = () => {
       targetMonth: selectedMonth,
       limit: rowsPerPage,
       offset: page * rowsPerPage,
+      filter: {
+        serialNumber: searchQuery.trim() || undefined,
+      },
     },
     // skip: activeMainTab !== 0,
     fetchPolicy: 'cache-and-network',
@@ -338,6 +350,31 @@ export const InspectionPlanningPage: React.FC = () => {
             Подобрать приборы вне плана
           </Button>
         </Box>
+
+        <TextField
+          fullWidth
+          size="small"
+          label="Поиск прибора"
+          placeholder="Введите заводской номер"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setPage(0);
+          }}
+          sx={{
+            // width: { xs: '100%', sm: 'auto' },
+            mb: 1.5,
+          }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search color="action" />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
         <InspectionPoolTable
           devices={poolItems}
           loading={loading}

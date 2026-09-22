@@ -7,6 +7,7 @@ import {
   MenuItem,
   TablePagination,
   Divider,
+  InputAdornment,
 } from '@mui/material';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { enqueueSnackbar } from 'notistack';
@@ -21,6 +22,7 @@ import {
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 import { RepairPlanningPoolTable } from '../components/RepairPlanningPoolTable';
 import { ConfirmationDialog } from '../components/modals/ConfirmationDialog';
+import { Search } from '@mui/icons-material';
 
 export const RepairPlanningPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'info' | 'create' | 'edit' | null>(
@@ -33,6 +35,8 @@ export const RepairPlanningPage: React.FC = () => {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(20);
   const currentOffset = page * rowsPerPage;
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
   const [exactPlannedDate, setExactPlannedDate] = useState<string>(
@@ -53,7 +57,13 @@ export const RepairPlanningPage: React.FC = () => {
     loading: poolLoading,
     refetch: refetchPool,
   } = useQuery(GetRepairPlanningPoolDocument, {
-    variables: { limit: rowsPerPage, offset: currentOffset },
+    variables: {
+      limit: rowsPerPage,
+      offset: currentOffset,
+      filter: {
+        serialNumber: searchQuery.trim() || undefined,
+      },
+    },
     // fetchPolicy: 'cache-and-network',
     fetchPolicy: 'network-only',
   });
@@ -308,6 +318,31 @@ export const RepairPlanningPage: React.FC = () => {
             </Button>
           </Box>
         </Box>
+
+        <TextField
+          fullWidth
+          size="small"
+          label="Поиск прибора"
+          placeholder="Введите заводской номер"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setPage(0);
+          }}
+          sx={{
+            // width: { xs: '100%', sm: 'auto' },
+            mb: 1.5,
+          }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search color="action" />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
 
         <RepairPlanningPoolTable
           devices={filteredDevices}
