@@ -386,6 +386,31 @@ export const RepairBatchesJournalPage = () => {
           const isCompleted = batch.status === 'completed';
           const deviceLinks = batch?.devicesToBatches ?? [];
 
+          const selectableInBatch = batch.devicesToBatches.filter((link) => {
+            // Если партия в Архиве — доступны ВСЕ приборы без исключения
+            if (isCompleted) return true;
+
+            // Если партия в ЦСМ — только те, что поверены на сервере или локально
+            const currentVerification = link.device.verifications?.find(
+              (v) => v.batchId === batch.id
+            );
+            return (
+              !!currentVerification ||
+              locallySuccessIds.includes(link.device.id) ||
+              locallyFailedIds.includes(link.device.id)
+            );
+          });
+
+          const selectableIds = selectableInBatch.map((link) => link.id);
+          const checkedCount = selectableIds.filter((id) =>
+            selectedLinkIds.includes(id)
+          ).length;
+
+          const isAllChecked =
+            selectableIds.length > 0 && checkedCount === selectableIds.length;
+          const isIndeterminate =
+            checkedCount > 0 && checkedCount < selectableIds.length;
+
           return (
             <Accordion
               key={batch.id}
@@ -521,6 +546,9 @@ export const RepairBatchesJournalPage = () => {
                     <FormControlLabel
                       control={
                         <Checkbox
+                          checked={isAllChecked}
+                          indeterminate={isIndeterminate}
+                          disabled={selectableIds.length === 0}
                           size="small"
                           onChange={() =>
                             handleSelectAllLinks(

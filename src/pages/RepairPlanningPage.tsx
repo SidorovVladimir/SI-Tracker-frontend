@@ -94,6 +94,7 @@ export const RepairPlanningPage: React.FC = () => {
           `Выбранное оборудование успешно списано и убрано из очереди ремонта`,
           { variant: 'warning' } // Оранжевое уведомление
         );
+        setApproveDialogOpen(false);
         setSelectedDeviceIds([]); // Сбрасываем выделенные галочки
       },
       onError: (error) => {
@@ -382,7 +383,7 @@ export const RepairPlanningPage: React.FC = () => {
       <ConfirmationDialog
         open={approveDialogOpen}
         title="Списание"
-        description={`ВНИМАНИЕ!\nВы уверены, что хотите ПОЛНОСТЬЮ СПИСАТЬ выбранные приборы (${selectedDeviceIds.length} шт.)?\n\nОни будут безвозвратно выведены из эксплуатации и навсегда исчезнут из Журнала ремонтов.`}
+        description={`ВНИМАНИЕ!\nВы уверены, что хотите ПОЛНОСТЬЮ СПИСАТЬ выбранные приборы (${selectedDeviceIds.length} шт.)?\n\nОни будут выведены из эксплуатации, помещены в архив и навсегда исчезнут из Журнала ремонтов.`}
         confirmLabel="Списать"
         onClose={() => setApproveDialogOpen(false)}
         onConfirm={handleBulkScrap}
