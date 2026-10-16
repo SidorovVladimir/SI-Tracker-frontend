@@ -661,6 +661,90 @@ function UserForm({
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // 1. Эталонное состояние формы (собираем точно так же, как исходный useState(form))
+  const initialFormState = JSON.stringify({
+    name: device?.name || '',
+    model: device?.model || '',
+    serialNumber: device?.serialNumber || '',
+    releaseDate: device.releaseDate
+      ? new Date(
+          Number(device.releaseDate) - new Date().getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .split('T')[0]
+      : '',
+    grsiNumber: device.grsiNumber || '',
+    csmCode: device.csmCode || '',
+    measurementRange: device?.measurementRange || '',
+    accuracy: device?.accuracy?.toUpperCase() ?? '',
+    inventoryNumber: device?.inventoryNumber || '',
+    receiptDate: device.receiptDate
+      ? new Date(
+          Number(device.receiptDate) - new Date().getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .split('T')[0]
+      : '',
+    manufacturer: device?.manufacturer || '',
+    verificationInterval: device.verificationInterval || '',
+    archived: device.archived,
+    isVoluntaryCalibration: device.isVoluntaryCalibration,
+    scheduleStatus:
+      device?.scheduleStatus && typeof device.scheduleStatus === 'string'
+        ? device.scheduleStatus
+        : 'active',
+    nomenclature: device?.nomenclature || '',
+    comment: device.comment || '',
+    statusId: device.status.id || '',
+    cachedControl: device.cachedControl || '',
+    cityId: device.productionSite.city.id || '',
+    companyId: device.productionSite.company.id || '',
+    productionSiteId: device.productionSite.id || '',
+    equipmentTypeId: device.equipmentType?.id || '',
+    // Сравниваем только ID внутри массивов, чтобы избежать проблем со ссылками на объекты
+    measurementTypes: (device.measurementTypes || []).map((t) => t.id).sort(),
+    scopes: (device.scopes || []).map((s) => s.id).sort(),
+    primaryStandarts: (device.primaryStandarts || []).map((p) => p.id).sort(),
+  });
+
+  // 2. Текущее состояние формы, приведенное к аналогичному плоскому виду
+  const currentFormState = JSON.stringify({
+    ...form,
+    measurementTypes: (form.measurementTypes || []).map((t) => t.id).sort(),
+    scopes: (form.scopes || []).map((s) => s.id).sort(),
+    primaryStandarts: (form.primaryStandarts || []).map((p) => p.id).sort(),
+  });
+
+  // 3. Функция очистки массивов верификаций от UI-свойств (коллекторы collapsed, пустые строки цен)
+  const prepareVerificationsForCompare = (list: typeof verifications) =>
+    list.map((v) => ({
+      id: v.id.startsWith('new-') ? null : v.id,
+      date: v.date || null,
+      validUntil: v.validUntil || null,
+      result: v.result || null,
+      protocolNumber: v.protocolNumber || null,
+      organization: v.organization || null,
+      comment: v.comment || null,
+      documentUrl: v.documentUrl || null,
+      metrologyControleTypeId: v.metrologyControleTypeId || null,
+      verificationOrganizationId: v.verificationOrganizationId || null,
+      newOrganizationName: v.newOrganizationName || null,
+      cost: v.cost !== '' ? parseFloat(String(v.cost)) : 0,
+    }));
+
+  const initialVerifsCompare = JSON.stringify(
+    prepareVerificationsForCompare(verificationsState)
+  );
+  const currentVerifsCompare = JSON.stringify(
+    prepareVerificationsForCompare(verifications)
+  );
+
+  // 4. Главный флаг: изменилось ли что-то в карточке или в списке верификаций
+  const hasChanges =
+    initialFormState !== currentFormState ||
+    initialVerifsCompare !== currentVerifsCompare;
+  const isSaveDisabled = !hasChanges;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -2063,7 +2147,8 @@ function UserForm({
                 type="submit"
                 variant="contained"
                 size="large"
-                disabled={updating}
+                // disabled={updating}
+                disabled={isSaveDisabled || updating}
                 startIcon={updating && <CircularProgress size={16} />}
                 sx={{ height: 36, borderRadius: 2 }}
               >

@@ -367,7 +367,10 @@ export const RepairPlanningPage: React.FC = () => {
             setPage(0);
           }}
           rowsPerPageOptions={[10, 20, 50, 100]}
-          labelRowsPerPage="Строк:"
+          labelRowsPerPage="Строк на странице:"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}–${to} из ${count}`
+          }
           sx={{ borderTop: 1, borderColor: 'divider', mt: 'auto' }}
         />
       </Box>

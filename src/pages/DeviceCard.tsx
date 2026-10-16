@@ -367,8 +367,10 @@ export default function DeviceCard(props: {
     user: { firstName?: string; lastName?: string } | null
   ) => {
     if (!user) return 'Система';
-    const firstInit = user.firstName ? `${user.firstName.charAt(0)}.` : '';
-    return `${user.lastName || ''} ${firstInit}`.trim();
+    const firstInit = user.firstName
+      ? `${user.firstName.charAt(0).toUpperCase()}.`
+      : '';
+    return `${toCapital(user.lastName)} ${firstInit}`.trim();
   };
 
   return (

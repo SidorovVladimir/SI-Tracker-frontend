@@ -400,7 +400,10 @@ export const InspectionPlanningPage: React.FC = () => {
             setPage(0);
           }}
           rowsPerPageOptions={[10, 20, 50]}
-          labelRowsPerPage="Строк:"
+          labelRowsPerPage="Строк на странице:"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}–${to} из ${count}`
+          }
           sx={{
             borderTop: 1,
             borderColor: 'divider',

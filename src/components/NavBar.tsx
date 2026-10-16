@@ -27,9 +27,11 @@ import {
   Assessment,
   CloudUpload,
   Terminal,
-  AccountBalanceWallet,
   Build,
   MenuBook,
+  FactCheck,
+  GridOn,
+  PriceCheck,
 } from '@mui/icons-material';
 import { HeaderNotificationsBell } from './HeaderNotificationsBell';
 import { HeaderChatButton } from './HeaderChatButton';
@@ -290,7 +292,7 @@ export default function NavBar() {
                       <ListItemText
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
-                        📅 Планировщик поверок
+                        Планировщик поверок
                       </ListItemText>
                     </MenuItem>
 
@@ -302,13 +304,13 @@ export default function NavBar() {
                       <ListItemIcon sx={{ color: 'success.main' }}>
                         {' '}
                         {/* Сделали иконку зеленой под стиль страницы */}
-                        <Build fontSize="small" />{' '}
+                        <FactCheck fontSize="small" />{' '}
                         {/* Иконка гаечного ключа (инструмента/ТО) */}
                       </ListItemIcon>
                       <ListItemText
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
-                        🛠️ Журнал осмотров
+                        Журнал осмотров
                       </ListItemText>
                     </MenuItem>
 
@@ -323,7 +325,7 @@ export default function NavBar() {
                       <ListItemText
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
-                        🔧 Журнал ремонтов
+                        Журнал ремонтов
                       </ListItemText>
                     </MenuItem>
 
@@ -338,7 +340,7 @@ export default function NavBar() {
                       <ListItemText
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
-                        📊 Аналитика и бюджет затрат
+                        Аналитика и бюджет затрат
                       </ListItemText>
                     </MenuItem>
                     <MenuItem
@@ -347,12 +349,12 @@ export default function NavBar() {
                       onClick={handleAdminMenuClose}
                     >
                       <ListItemIcon sx={{ color: 'primary.main' }}>
-                        <AccountBalanceWallet fontSize="small" />
+                        <GridOn fontSize="small" />
                       </ListItemIcon>
                       <ListItemText
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
-                        📊 Матрица затрат и планирование СИ
+                        Матрица затрат и планирование СИ
                       </ListItemText>
                     </MenuItem>
 
@@ -362,12 +364,12 @@ export default function NavBar() {
                       onClick={handleAdminMenuClose}
                     >
                       <ListItemIcon sx={{ color: 'primary.main' }}>
-                        <AccountBalanceWallet fontSize="small" />
+                        <PriceCheck fontSize="small" />
                       </ListItemIcon>
                       <ListItemText
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
-                        💰 Планирование бюджета поверок
+                        Планирование бюджета поверок
                       </ListItemText>
                     </MenuItem>
 
@@ -382,7 +384,7 @@ export default function NavBar() {
                       <ListItemText
                         slotProps={{ primary: { sx: { fontWeight: 'bold' } } }}
                       >
-                        📋 Объемы СИ и мониторинг
+                        Объемы СИ и мониторинг
                       </ListItemText>
                     </MenuItem>
 
@@ -410,7 +412,7 @@ export default function NavBar() {
                             primary: { sx: { fontWeight: 'bold' } },
                           }}
                         >
-                          📥 Импорт данных Excel
+                          Импорт данных Excel
                         </ListItemText>
                       </MenuItem>,
 
@@ -430,7 +432,7 @@ export default function NavBar() {
                             },
                           }}
                         >
-                          💻 SQL Консоль (Сырая база)
+                          SQL Консоль (Сырая база)
                         </ListItemText>
                       </MenuItem>,
                     ]}

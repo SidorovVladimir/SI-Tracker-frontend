@@ -55,7 +55,7 @@ import { enqueueSnackbar } from 'notistack';
 import { GlobalJobWatcher } from '../components/GlobalJobWatcher';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import EditDevicePage from './admin/EditDevicePage';
-import { cleanSpaces } from '../utils/capitalize';
+import { cleanSpaces, toCapital } from '../utils/capitalize';
 import { ArshinSelectDialog } from '../components/ArshinSelectDialog';
 
 interface BatchesJournalPageProps {
@@ -805,8 +805,8 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                               color="text.secondary"
                               sx={{ fontSize: 'inherit' }}
                             >
-                              👤 {batch.createdBy.lastName}{' '}
-                              {batch.createdBy.firstName}
+                              👤 {toCapital(batch.createdBy.lastName)}{' '}
+                              {toCapital(batch.createdBy.firstName)}
                             </Typography>
                           </Box>
                         )}

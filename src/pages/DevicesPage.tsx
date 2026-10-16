@@ -2387,6 +2387,8 @@ export default function DevicesPage() {
                   columnMenuManageColumns: 'Управлять колонками',
                   noRowsLabel: 'Нет средств измерения',
                   paginationRowsPerPage: 'Кол-во СИ на странице:',
+                  paginationDisplayedRows: ({ from, to, count }) =>
+                    `${from}–${to} из ${count}`,
                 }}
                 getRowId={(row) => row.id}
                 sx={{

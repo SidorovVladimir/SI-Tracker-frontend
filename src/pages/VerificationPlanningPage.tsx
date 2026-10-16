@@ -714,6 +714,9 @@ export const VerificationPlanningPage: React.FC = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
           rowsPerPageOptions={[10, 20, 50, 100]}
           labelRowsPerPage="Строк на странице:"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}–${to} из ${count}`
+          }
           sx={{
             borderTop: 1,
             borderColor: 'divider',

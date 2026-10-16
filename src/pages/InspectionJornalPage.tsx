@@ -31,6 +31,7 @@ import { GetInspectionArchiveDocument } from '../graphql/types/__generated__/gra
 import { Cancel, CheckCircleOutline, QrCode } from '@mui/icons-material';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import EditDevicePage from './admin/EditDevicePage';
+import { toCapital } from '../utils/capitalize';
 
 export const InspectionJournalPage = () => {
   const theme = useTheme();
@@ -373,8 +374,8 @@ export const InspectionJournalPage = () => {
                                 color="text.secondary"
                                 sx={{ fontSize: 'inherit' }}
                               >
-                                👤 {batch.createdBy.lastName}{' '}
-                                {batch.createdBy.firstName}
+                                👤 {toCapital(batch.createdBy.lastName)}{' '}
+                                {toCapital(batch.createdBy.firstName)}
                               </Typography>
                             </Box>
                           )}
@@ -607,6 +608,9 @@ export const InspectionJournalPage = () => {
         }}
         rowsPerPageOptions={[10, 25, 50]}
         labelRowsPerPage={isMobile ? 'Строк:' : 'Строк архива:'}
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}–${to} из ${count}`
+        }
         sx={{
           mt: 2,
           borderTop: '1px solid',

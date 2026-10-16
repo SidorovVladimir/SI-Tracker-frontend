@@ -197,7 +197,10 @@ export default function AuditLogPage() {
               setPage(0);
             }}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            labelRowsPerPage="Строк:"
+            labelRowsPerPage="Строк на странице:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}–${to} из ${count}`
+            }
             sx={{
               // Компактный вид пагинации для маленьких экранов мобильных устройств
               '& .MuiTablePagination-toolbar': { px: { xs: 0.5, sm: 2 } },

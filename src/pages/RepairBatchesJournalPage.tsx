@@ -47,6 +47,7 @@ import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import EditDevicePage from './admin/EditDevicePage';
 import { RepairModal } from '../components/modals/RepairModal';
 import { ConfirmationDialog } from '../components/modals/ConfirmationDialog';
+import { toCapital } from '../utils/capitalize';
 // import { cleanSpaces } from '../utils/capitalize';
 
 // interface BatchesJournalPageProps {
@@ -487,8 +488,9 @@ export const RepairBatchesJournalPage = () => {
                             color="text.secondary"
                             sx={{ fontSize: 'inherit' }}
                           >
-                            👤 Исполнитель: {batch.createdBy.lastName}{' '}
-                            {batch.createdBy.firstName}
+                            👤 Исполнитель:{' '}
+                            {toCapital(batch.createdBy.lastName)}{' '}
+                            {toCapital(batch.createdBy.firstName)}
                           </Typography>
                         </Box>
                       )}
