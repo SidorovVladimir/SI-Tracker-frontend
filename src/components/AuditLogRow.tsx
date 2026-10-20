@@ -26,17 +26,23 @@ export function AuditLogRow({ log, onDelete }: any) {
   //   delete: { color: 'error' as const, label: 'Удаление' },
   // };
   const actionConfig: Record<
-    'create' | 'update' | 'delete' | 'assign_batch' | 'remove_batch' | 'verify',
+    | 'create'
+    | 'update'
+    | 'delete'
+    | 'assign_batch'
+    | 'remove_batch'
+    | 'verify'
+    | 'create_batch',
     {
       color: 'success' | 'info' | 'error' | 'secondary' | 'warning' | 'primary';
       label: string;
     }
   > = {
-    create: { color: 'success' as const, label: 'Создание' },
-    update: { color: 'info' as const, label: 'Изменение' },
-    delete: { color: 'error' as const, label: 'Удаление' },
+    create: { color: 'success' as const, label: '📦 Создание' },
+    update: { color: 'info' as const, label: '📝 Изменение' },
+    delete: { color: 'error' as const, label: '🗑️ Удаление' },
+    create_batch: { color: 'success' as const, label: '📋 Создание партии' },
 
-    // 🎯 НОВЫЕ ЦВЕТА И МЕТКИ ДЛЯ ПЛАНИРОВЩИКА ПОВЕРОК:
     assign_batch: { color: 'secondary' as const, label: '📦 В партию' },
     remove_batch: { color: 'warning' as const, label: '↩️ Из партии' },
     verify: { color: 'primary' as const, label: '✅ Поверен' },
