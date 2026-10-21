@@ -13,6 +13,7 @@ export default {
   chat: () => '/chat',
   budget: () => '/budget-planning',
   userGuide: () => '/guide',
+  notifications: () => '/notifications',
   // help: () => '/help',
   // about: () => '/about/licenses',
   admin: {

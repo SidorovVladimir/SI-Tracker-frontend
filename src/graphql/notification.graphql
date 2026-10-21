@@ -1,13 +1,15 @@
-# 1. Получить последние 20 уведомлений
-query GetSystemNotifications {
-  getSystemNotifications {
-    id
-    userId
-    title
-    message
-    type
-    isRead
-    createdAt
+query GetSystemNotifications($limit: Int, $offset: Int) {
+  getSystemNotifications(limit: $limit, offset: $offset) {
+    items {
+      id
+      userId
+      title
+      message
+      type
+      isRead
+      createdAt
+    }
+    totalCount
   }
 }
 

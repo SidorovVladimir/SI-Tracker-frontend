@@ -88,10 +88,20 @@ export type ArshinVerificationBufferItem = {
 };
 
 export type AuditAction =
-  | 'assign_batch'
+  | 'assign_device_to_batch'
+  | 'assign_device_to_repair_batch'
+  | 'assign_repair_batch'
   | 'create'
+  | 'create_batch'
+  | 'create_repair_batch'
   | 'delete'
-  | 'remove_batch'
+  | 'delete_batch'
+  | 'delete_repair_batch'
+  | 'device_scrap'
+  | 'inspection_batch_create'
+  | 'inspection_doc_save'
+  | 'remove_device_to_batch'
+  | 'remove_device_to_repair_batch'
   | 'update'
   | 'verify';
 
@@ -100,7 +110,7 @@ export type AuditLog = {
   action: AuditAction;
   createdAt: Scalars['String']['output'];
   description: Scalars['String']['output'];
-  deviceId: Scalars['ID']['output'];
+  deviceId: Maybe<Scalars['ID']['output']>;
   id: Scalars['ID']['output'];
   newData: Maybe<Scalars['String']['output']>;
   oldData: Maybe<Scalars['String']['output']>;
@@ -1211,7 +1221,7 @@ export type Query = {
   getRepairBatches: Array<VerificationBatch>;
   getRepairDraftBatches: Array<DraftBatchOption>;
   getRepairPlanningPool: RepairPlanningPoolResponse;
-  getSystemNotifications: Array<SystemNotification>;
+  getSystemNotifications: SystemNotificationsResponse;
   getTotalUnreadCount: Scalars['Int']['output'];
   getUnreadNotificationsCount: Scalars['Int']['output'];
   getVerificationBatches: Array<VerificationBatch>;
@@ -1374,6 +1384,11 @@ export type QueryGetRepairPlanningPoolArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type QueryGetSystemNotificationsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type QueryGetVerificationBatchesArgs = {
   status?: InputMaybe<Scalars['String']['input']>;
   year?: InputMaybe<Scalars['Int']['input']>;
@@ -1512,6 +1527,12 @@ export type SystemNotification = {
   title: Scalars['String']['output'];
   type: Scalars['String']['output'];
   userId: Maybe<Scalars['ID']['output']>;
+};
+
+export type SystemNotificationsResponse = {
+  __typename: 'SystemNotificationsResponse';
+  items: Array<SystemNotification>;
+  totalCount: Scalars['Int']['output'];
 };
 
 export type UpdateBudgetPlanItemPriceInput = {
@@ -1878,7 +1899,7 @@ export type GetDeviceAuditLogsQuery = {
     items: Array<{
       __typename: 'AuditLog';
       id: string;
-      deviceId: string;
+      deviceId: string | null;
       action: AuditAction;
       description: string;
       oldData: string | null;
@@ -2987,20 +3008,25 @@ export type DeleteMetrologyControlTypeMutation = {
 };
 
 export type GetSystemNotificationsQueryVariables = Exact<{
-  [key: string]: never;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 export type GetSystemNotificationsQuery = {
-  getSystemNotifications: Array<{
-    __typename: 'SystemNotification';
-    id: string;
-    userId: string | null;
-    title: string;
-    message: string;
-    type: string;
-    isRead: boolean;
-    createdAt: string;
-  }>;
+  getSystemNotifications: {
+    __typename: 'SystemNotificationsResponse';
+    totalCount: number;
+    items: Array<{
+      __typename: 'SystemNotification';
+      id: string;
+      userId: string | null;
+      title: string;
+      message: string;
+      type: string;
+      isRead: boolean;
+      createdAt: string;
+    }>;
+  };
 };
 
 export type GetUnreadNotificationsCountQueryVariables = Exact<{
@@ -8876,22 +8902,80 @@ export const GetSystemNotificationsDocument = {
       kind: 'OperationDefinition',
       operation: 'query',
       name: { kind: 'Name', value: 'GetSystemNotifications' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'limit' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'offset' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+      ],
       selectionSet: {
         kind: 'SelectionSet',
         selections: [
           {
             kind: 'Field',
             name: { kind: 'Name', value: 'getSystemNotifications' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'limit' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'offset' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'offset' },
+                },
+              },
+            ],
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'userId' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'title' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'isRead' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userId' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'message' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'isRead' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createdAt' },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
               ],
             },
           },
