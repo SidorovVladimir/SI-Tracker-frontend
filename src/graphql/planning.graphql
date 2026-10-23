@@ -98,6 +98,51 @@ query GetVerificationBatches($year: Int, $status: String) {
   }
 }
 
+query GetVerificationBatchByNumber($batchNumber: String!) {
+  getVerificationBatchByNumber(batchNumber: $batchNumber) {
+    id
+    number
+    status
+    plannedDate
+    comment
+
+    verificationOrganization {
+      id
+      name
+    }
+    createdBy {
+      id
+      firstName
+      lastName
+      role
+    }
+    devicesToBatches {
+      id
+      device {
+        id
+        name
+        model
+        serialNumber
+        verifications {
+          id
+          batchId
+          result
+        }
+        arshinBuffers {
+          id
+          vriId
+          orgTitle
+          docNum
+          verificationDate
+          validDate
+          applicability
+          isRecommended
+        }
+      }
+    }
+  }
+}
+
 query GetDraftBatchesByMonth($plannedMonth: String!) {
   getDraftBatchesByMonth(plannedMonth: $plannedMonth) {
     id

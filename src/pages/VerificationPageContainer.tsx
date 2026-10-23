@@ -1,17 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Tabs, Tab } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 import { VerificationPlanningPage } from './VerificationPlanningPage';
 import { BatchesJournalPage } from './BatchesJournalPage';
+import { useLocation } from 'react-router';
 
 export const VerificationPageContainer: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const location = useLocation();
+  const initialTab = location.state?.activeTab ?? 0;
+  const [activeTab, setActiveTab] = useState<number>(initialTab);
   const [locallyVerifiedIds, setLocallyVerifiedIds] = useState<string[]>([]);
+
+  const [targetBatchNumber, setTargetBatchNumber] = useState<string | null>(
+    location.state?.openAccordionId ?? null
+  );
+
+  useEffect(() => {
+    if (location.state) {
+      if (location.state.activeTab !== undefined) {
+        setActiveTab(location.state.activeTab);
+      }
+
+      if (location.state.openAccordionId !== undefined) {
+        setTargetBatchNumber(location.state.openAccordionId);
+      }
+    }
+  }, [location.state]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+    if (newValue !== 1) {
+      setTargetBatchNumber(null);
+    }
   };
 
   return (
@@ -84,6 +106,7 @@ export const VerificationPageContainer: React.FC = () => {
         {activeTab === 0 && <VerificationPlanningPage />}
         {activeTab === 1 && (
           <BatchesJournalPage
+            initialOpenBatchNumber={targetBatchNumber}
             locallyVerifiedIds={locallyVerifiedIds}
             setLocallyVerifiedIds={setLocallyVerifiedIds}
           />

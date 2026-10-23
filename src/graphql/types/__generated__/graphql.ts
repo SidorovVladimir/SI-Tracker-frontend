@@ -1211,6 +1211,7 @@ export type Query = {
   getDevicesBarcodeData: Array<DeviceBarcodeData>;
   getDraftBatchesByMonth: Array<DraftBatchOption>;
   getFinancialAnalytics: FinancialAnalyticsResponse;
+  getInspectionBatchByNumber: Maybe<InspectionBatchItem>;
   getInspectionBatchesArchive: InspectionArchiveResponse;
   getInspectionCalendarSummary: Array<MonthlySummary>;
   getInspectionPoolByMonth: InspectionPoolResponse;
@@ -1224,6 +1225,7 @@ export type Query = {
   getSystemNotifications: SystemNotificationsResponse;
   getTotalUnreadCount: Scalars['Int']['output'];
   getUnreadNotificationsCount: Scalars['Int']['output'];
+  getVerificationBatchByNumber: Maybe<VerificationBatch>;
   getVerificationBatches: Array<VerificationBatch>;
   getVerificationRisks: VerificationRisksResponse;
   getYearlyCalendarSummary: Array<MonthlySummary>;
@@ -1342,6 +1344,10 @@ export type QueryGetFinancialAnalyticsArgs = {
   year: Scalars['Int']['input'];
 };
 
+export type QueryGetInspectionBatchByNumberArgs = {
+  batchNumber: Scalars['String']['input'];
+};
+
 export type QueryGetInspectionBatchesArchiveArgs = {
   limit: Scalars['Int']['input'];
   offset: Scalars['Int']['input'];
@@ -1387,6 +1393,10 @@ export type QueryGetRepairPlanningPoolArgs = {
 export type QueryGetSystemNotificationsArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QueryGetVerificationBatchByNumberArgs = {
+  batchNumber: Scalars['String']['input'];
 };
 
 export type QueryGetVerificationBatchesArgs = {
@@ -1524,6 +1534,7 @@ export type SystemNotification = {
   id: Scalars['ID']['output'];
   isRead: Scalars['Boolean']['output'];
   message: Scalars['String']['output'];
+  meta: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
   type: Scalars['String']['output'];
   userId: Maybe<Scalars['ID']['output']>;
@@ -2890,6 +2901,39 @@ export type GetInspectionArchiveQuery = {
   };
 };
 
+export type GetSingleInspectionBatchQueryVariables = Exact<{
+  batchNumber: Scalars['String']['input'];
+}>;
+
+export type GetSingleInspectionBatchQuery = {
+  getInspectionBatchByNumber: {
+    __typename: 'InspectionBatchItem';
+    id: string;
+    number: string;
+    date: string;
+    comment: string | null;
+    createdBy: {
+      __typename: 'User';
+      id: string;
+      role: string;
+      firstName: string;
+      lastName: string;
+    } | null;
+    devicesToBatches: Array<{
+      __typename: 'InspectedDeviceLink';
+      id: string;
+      deviceStatus: string;
+      device: {
+        __typename: 'Device';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+      };
+    }>;
+  } | null;
+};
+
 export type GetInspectionCalendarSummaryQueryVariables = Exact<{
   [key: string]: never;
 }>;
@@ -3023,6 +3067,7 @@ export type GetSystemNotificationsQuery = {
       title: string;
       message: string;
       type: string;
+      meta: string | null;
       isRead: boolean;
       createdAt: string;
     }>;
@@ -3163,6 +3208,61 @@ export type GetVerificationBatchesQuery = {
       };
     }>;
   }>;
+};
+
+export type GetVerificationBatchByNumberQueryVariables = Exact<{
+  batchNumber: Scalars['String']['input'];
+}>;
+
+export type GetVerificationBatchByNumberQuery = {
+  getVerificationBatchByNumber: {
+    __typename: 'VerificationBatch';
+    id: string;
+    number: string;
+    status: string;
+    plannedDate: string;
+    comment: string | null;
+    verificationOrganization: {
+      __typename: 'VerificationOrganization';
+      id: string;
+      name: string;
+    } | null;
+    createdBy: {
+      __typename: 'User';
+      id: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+    } | null;
+    devicesToBatches: Array<{
+      __typename: 'DeviceToBatchRelation';
+      id: string;
+      device: {
+        __typename: 'DeviceInBatch';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+        verifications: Array<{
+          __typename: 'ShortVerification';
+          id: string;
+          batchId: string | null;
+          result: string | null;
+        }> | null;
+        arshinBuffers: Array<{
+          __typename: 'ArshinVerificationBufferItem';
+          id: string;
+          vriId: string;
+          orgTitle: string;
+          docNum: string;
+          verificationDate: string;
+          validDate: string | null;
+          applicability: boolean;
+          isRecommended: boolean;
+        }> | null;
+      };
+    }>;
+  } | null;
 };
 
 export type GetDraftBatchesByMonthQueryVariables = Exact<{
@@ -8449,6 +8549,121 @@ export const GetInspectionArchiveDocument = {
   GetInspectionArchiveQuery,
   GetInspectionArchiveQueryVariables
 >;
+export const GetSingleInspectionBatchDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetSingleInspectionBatch' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'batchNumber' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getInspectionBatchByNumber' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'batchNumber' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'batchNumber' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'createdBy' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'firstName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastName' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'devicesToBatches' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deviceStatus' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'device' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetSingleInspectionBatchQuery,
+  GetSingleInspectionBatchQueryVariables
+>;
 export const GetInspectionCalendarSummaryDocument = {
   kind: 'Document',
   definitions: [
@@ -8964,6 +9179,7 @@ export const GetSystemNotificationsDocument = {
                         name: { kind: 'Name', value: 'message' },
                       },
                       { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'meta' } },
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'isRead' },
@@ -9562,6 +9778,200 @@ export const GetVerificationBatchesDocument = {
 } as unknown as DocumentNode<
   GetVerificationBatchesQuery,
   GetVerificationBatchesQueryVariables
+>;
+export const GetVerificationBatchByNumberDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetVerificationBatchByNumber' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'batchNumber' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getVerificationBatchByNumber' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'batchNumber' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'batchNumber' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'plannedDate' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'verificationOrganization' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'createdBy' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'firstName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastName' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'devicesToBatches' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'device' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'verifications' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'id' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'batchId' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'result' },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'arshinBuffers' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'id' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'vriId' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'orgTitle' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'docNum' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'verificationDate',
+                                    },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'validDate' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'applicability',
+                                    },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'isRecommended',
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetVerificationBatchByNumberQuery,
+  GetVerificationBatchByNumberQueryVariables
 >;
 export const GetDraftBatchesByMonthDocument = {
   kind: 'Document',

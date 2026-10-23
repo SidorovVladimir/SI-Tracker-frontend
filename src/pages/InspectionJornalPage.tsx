@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -26,14 +26,22 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useQuery } from '@apollo/client/react';
-// Не забудьте обновить GraphQL фрагмент/запрос в .graphql файле фронтенда перед кодогенерацией!
-import { GetInspectionArchiveDocument } from '../graphql/types/__generated__/graphql';
+import {
+  GetInspectionArchiveDocument,
+  GetSingleInspectionBatchDocument,
+} from '../graphql/types/__generated__/graphql';
 import { Cancel, CheckCircleOutline, QrCode } from '@mui/icons-material';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import EditDevicePage from './admin/EditDevicePage';
 import { toCapital } from '../utils/capitalize';
 
-export const InspectionJournalPage = () => {
+interface InspectionJournalPageProps {
+  initialOpenBatchNumber?: string | null;
+}
+
+export const InspectionJournalPage: React.FC<InspectionJournalPageProps> = ({
+  initialOpenBatchNumber,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -42,8 +50,27 @@ export const InspectionJournalPage = () => {
   const [editingDeviceId, setEditingDeviceId] = useState<string | null>(null);
   // const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
 
+  const [highlightedBatch, setHighlightedBatch] = useState<any | null>(null);
+
   const [selectedLinkIds, setSelectedLinkIds] = useState<string[]>([]);
-  const [expandedBatchId, setExpandedBatchId] = useState<string | false>(false);
+  const [expandedBatchId, setExpandedBatchId] = useState<string | false>(
+    initialOpenBatchNumber ?? false
+  );
+
+  const { data: singleData } = useQuery(GetSingleInspectionBatchDocument, {
+    variables: { batchNumber: initialOpenBatchNumber as string },
+    skip: !Boolean(initialOpenBatchNumber),
+    // fetchPolicy: 'cache-first',
+    fetchPolicy: 'cache-and-network',
+  });
+
+  useEffect(() => {
+    if (singleData?.getInspectionBatchByNumber) {
+      setHighlightedBatch(singleData.getInspectionBatchByNumber);
+      setExpandedBatchId(singleData.getInspectionBatchByNumber.id || false);
+    }
+  }, [singleData]);
+
   const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
   const [journalYear, setJournalYear] = useState<number>(currentYear);
 
@@ -63,37 +90,10 @@ export const InspectionJournalPage = () => {
     }
   );
 
-  const archiveItems = data?.getInspectionBatchesArchive?.items ?? [];
+  const archiveItems = (data?.getInspectionBatchesArchive?.items ?? []).filter(
+    (batch: any) => batch.number !== initialOpenBatchNumber
+  );
   const archiveTotalCount = data?.getInspectionBatchesArchive?.totalCount ?? 0;
-
-  // const handleDeviceSelect = (deviceId: string) => {
-  //   setSelectedDeviceIds((prev) =>
-  //     prev.includes(deviceId)
-  //       ? prev.filter((id) => id !== deviceId)
-  //       : [...prev, deviceId]
-  //   );
-  // };
-
-  // const handleSelectAllDevices = (linksInBatch: any[]) => {
-  //   const deviceIds = (linksInBatch ?? [])
-  //     .filter((l) => l?.device?.id)
-  //     .map((l) => l.device.id);
-  //   if (deviceIds.length === 0) return;
-
-  //   const isAllChecked = deviceIds.every((id) =>
-  //     selectedDeviceIds.includes(id)
-  //   );
-
-  //   if (isAllChecked) {
-  //     setSelectedDeviceIds((prev) =>
-  //       prev.filter((id) => !deviceIds.includes(id))
-  //     );
-  //   } else {
-  //     setSelectedDeviceIds((prev) =>
-  //       Array.from(new Set([...prev, ...deviceIds]))
-  //     );
-  //   }
-  // };
 
   const handleLinkSelect = (linkId: string) => {
     setSelectedLinkIds((prev) =>
@@ -229,7 +229,41 @@ export const InspectionJournalPage = () => {
       </Box>
       {/* СПИСОК АКТОВ ИЗ АРХИВА */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-        {archiveItems.length === 0 ? (
+        {highlightedBatch && (
+          <Box
+            sx={{
+              border: '2px solid',
+              borderColor: 'primary.main',
+              borderRadius: 2,
+              p: 0.5,
+              bgcolor: '#f0f9ff',
+              mb: 1,
+            }}
+          >
+            <Typography
+              variant="caption"
+              color="primary.main"
+              sx={{ fontWeight: 700, px: 1, pb: 0.5, display: 'block' }}
+            >
+              📌 Уведомление: запрашиваемый документ
+            </Typography>
+            <RenderBatchAccordion
+              batch={highlightedBatch}
+              isExpanded={
+                expandedBatchId === highlightedBatch.id ||
+                expandedBatchId === highlightedBatch.number
+              }
+              onChange={handleAccordionChange}
+              selectedLinkIds={selectedLinkIds}
+              handleLinkSelect={handleLinkSelect}
+              handleSelectAllLinks={handleSelectAllLinks}
+              setEditingDeviceId={setEditingDeviceId}
+            />
+          </Box>
+        )}
+
+        {/* 📋 2. СТАНДАРТНЫЙ ПОСТРАНИЧНЫЙ СПИСОК АРХИВА */}
+        {archiveItems.length === 0 && !highlightedBatch ? (
           <Typography
             variant="body2"
             color="text.secondary"
@@ -245,354 +279,18 @@ export const InspectionJournalPage = () => {
             Архивных записей не найдено.
           </Typography>
         ) : (
-          archiveItems.map((batch) => {
-            const isExpanded = expandedBatchId === batch.id;
-            const links = batch?.devicesToBatches ?? [];
-
-            // Расчеты для чекбоксов
-            // const deviceIds = links
-            //   .filter((l: any) => l?.device?.id)
-            //   .map((l: any) => l.device.id);
-            // const checkedCount = deviceIds.filter((id) =>
-            //   selectedDeviceIds.includes(id)
-            // ).length;
-
-            // const isAllChecked =
-            //   deviceIds.length > 0 && checkedCount === deviceIds.length;
-            // const isIndeterminate =
-            //   checkedCount > 0 && checkedCount < deviceIds.length;
-
-            const linkIds = links
-              .filter((l: any) => l?.id)
-              .map((l: any) => l.id);
-            const checkedCount = linkIds.filter((id) =>
-              selectedLinkIds.includes(id)
-            ).length;
-
-            const isAllChecked =
-              linkIds.length > 0 && checkedCount === linkIds.length;
-            const isIndeterminate =
-              checkedCount > 0 && checkedCount < linkIds.length;
-            // Считаем брак по статусу строки 'dismantled'
-            const failedCount = links.filter(
-              (l: any) => l.deviceStatus === 'dismantled'
-            ).length;
-
-            return (
-              <Accordion
-                key={batch.id}
-                expanded={isExpanded}
-                onChange={handleAccordionChange(batch.id)}
-                sx={{ borderRadius: 2, '&:before': { display: 'none' } }}
-                component={Paper}
-                variant="outlined"
-              >
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Box
-                    // sx={{
-                    //   display: 'flex',
-                    //   alignItems: 'center',
-                    //   gap: 2,
-                    //   width: '100%',
-                    //   flexWrap: 'wrap',
-                    // }}
-                    sx={{
-                      display: 'flex',
-                      alignItems: { xs: 'flex-start', sm: 'center' },
-                      justifyContent: 'space-between',
-                      gap: 1.5,
-                      width: '100%',
-                      flexDirection: { xs: 'column', sm: 'row' },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: { xs: 'flex-start', sm: 'center' },
-                        gap: { xs: 0.5, sm: 2 },
-                        flexDirection: { xs: 'column', sm: 'row' },
-                        width: { xs: '100%', sm: 'auto' },
-                      }}
-                    >
-                      {/* <Typography sx={{ fontWeight: 'bold', minWidth: '140px' }}> */}
-                      <Typography
-                        sx={{
-                          fontWeight: 'bold',
-                          minWidth: { xs: 'auto', sm: '140px' },
-                          fontSize: { xs: '0.95rem', sm: '1rem' },
-                        }}
-                      >
-                        📦 {batch.number}
-                      </Typography>
-
-                      {/* <Typography variant="body2" color="text.secondary">
-                      от{' '}
-                      {batch.date
-                        ? new Date(batch.date).toLocaleDateString('ru-RU')
-                        : '—'}
-                    </Typography> */}
-
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: { xs: 'column', sm: 'row' },
-                          alignItems: { xs: 'flex-start', sm: 'center' },
-                          gap: { xs: 0.5, sm: 1 },
-                          fontSize: '0.85rem',
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ fontSize: 'inherit' }}
-                        >
-                          План:{' '}
-                          {new Date(batch.date).toLocaleDateString('ru-RU')}
-                        </Typography>
-
-                        {batch.createdBy?.firstName &&
-                          batch.createdBy?.lastName && (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                              }}
-                            >
-                              {/* Точка видна только на десктопе */}
-                              <Box
-                                component="span"
-                                sx={{
-                                  color: 'grey.400',
-                                  display: { xs: 'none', sm: 'inline' },
-                                }}
-                              >
-                                •
-                              </Box>
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{ fontSize: 'inherit' }}
-                              >
-                                👤 {toCapital(batch.createdBy.lastName)}{' '}
-                                {toCapital(batch.createdBy.firstName)}
-                              </Typography>
-                            </Box>
-                          )}
-                      </Box>
-                    </Box>
-
-                    <Box
-                      // sx={{
-                      //   ml: { xs: 0, sm: 'auto' },
-                      //   display: 'flex',
-                      //   gap: 1,
-                      // }}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1.5,
-                        width: { xs: '100%', sm: 'auto' },
-                        justifyContent: { xs: 'space-between', sm: 'flex-end' },
-                        // На мобилке пушим статус чуть ниже и делаем разделительную линию сверху (опционально)
-                        borderTop: { xs: '1px solid', sm: 'none' },
-                        borderColor: 'divider',
-                        pt: { xs: 1, sm: 0 },
-                      }}
-                    >
-                      <Chip
-                        label={`Приборов: ${links.length}`}
-                        size="small"
-                        variant="outlined"
-                        sx={{ fontSize: '0.75rem' }}
-                      />
-                      {failedCount > 0 && (
-                        <Chip
-                          label={`Брак: ${failedCount}`}
-                          size="small"
-                          color="error"
-                          sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}
-                        />
-                      )}
-                    </Box>
-                  </Box>
-                </AccordionSummary>
-
-                <AccordionDetails
-                  sx={{
-                    borderTop: '1px solid',
-                    borderColor: 'divider',
-                    bgcolor: 'grey.50',
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    sx={{ mb: 1.5 }}
-                  >
-                    <Typography
-                      variant="subtitle2"
-                      color="text.secondary"
-                      sx={{ fontWeight: 600 }}
-                    >
-                      Список приборов в акте:
-                    </Typography>
-
-                    <Tooltip
-                      title="Выбрать все приборы этого акта"
-                      placement="top"
-                      arrow
-                    >
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            size="small"
-                            checked={isAllChecked}
-                            indeterminate={isIndeterminate}
-                            // disabled={deviceIds.length === 0}
-                            // onChange={() => handleSelectAllDevices(links)}
-                            disabled={linkIds.length === 0}
-                            onChange={() => handleSelectAllLinks(links)}
-                          />
-                        }
-                        label={
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ fontWeight: 500 }}
-                          >
-                            Выбрать все
-                          </Typography>
-                        }
-                        sx={{ mr: 0 }}
-                      />
-                    </Tooltip>
-                  </Stack>
-
-                  <List dense disablePadding>
-                    {links.map((link: any) => {
-                      if (!link?.device) return null;
-                      const { device, deviceStatus } = link;
-                      // const isChecked = selectedDeviceIds.includes(device.id);
-                      const isSuccess = deviceStatus === 'returned';
-
-                      const isChecked = selectedLinkIds.includes(link.id); // Проверяем стейт по ID связи
-
-                      return (
-                        <Paper
-                          key={link.id} // Кэш Apollo нормализуется по id связи! Затирание исключено.
-                          variant="outlined"
-                          sx={{
-                            mb: 1,
-                            p: 1.5,
-                            display: 'flex',
-                            flexDirection: { xs: 'column', sm: 'row' },
-                            justifyContent: 'space-between',
-                            alignItems: { xs: 'stretch', sm: 'center' },
-                            gap: { xs: 1.5, sm: 0 },
-                            bgcolor: 'background.paper',
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 0.5,
-                              flexGrow: 1,
-                            }}
-                          >
-                            <Checkbox
-                              size="small"
-                              checked={isChecked}
-                              // onChange={() => handleDeviceSelect(device.id)} // В стейт летит чистый UUID прибора
-                              onChange={() => handleLinkSelect(link.id)}
-                              sx={{ mr: 1 }}
-                            />
-
-                            <ListItemButton
-                              onClick={() => setEditingDeviceId(device.id)} // Откроет карточку по честному UUID прибора
-                              sx={{ p: 0, textAlign: 'left', borderRadius: 1 }}
-                            >
-                              <ListItemText
-                                primary={`${device.name} (${device.model})`}
-                                secondary={`Заводской номер: ${device.serialNumber}`}
-                                slotProps={{
-                                  primary: {
-                                    variant: 'body2',
-                                    fontWeight: 500,
-                                  },
-                                  secondary: { variant: 'caption' },
-                                }}
-                                sx={{ m: 0 }}
-                              />
-                            </ListItemButton>
-                          </Box>
-
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: { xs: 'end', sm: 'center' },
-                            }}
-                          >
-                            {isSuccess ? (
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 0.5,
-                                }}
-                              >
-                                <CheckCircleOutline
-                                  color="success"
-                                  fontSize="small"
-                                />
-                                <Typography
-                                  variant="caption"
-                                  fontWeight="medium"
-                                  color="success.main"
-                                >
-                                  Годен
-                                </Typography>
-                              </Box>
-                            ) : (
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 0.5,
-                                }}
-                              >
-                                <Cancel color="error" fontSize="small" />
-                                <Typography
-                                  variant="caption"
-                                  fontWeight="medium"
-                                  color="error.main"
-                                >
-                                  Не годен
-                                </Typography>
-                              </Box>
-                            )}
-                          </Box>
-                        </Paper>
-                      );
-                    })}
-                  </List>
-
-                  {batch.comment && (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: 'block', mt: 1, px: 0.5 }}
-                    >
-                      <b>Комментарий к акту:</b> {batch.comment}
-                    </Typography>
-                  )}
-                </AccordionDetails>
-              </Accordion>
-            );
-          })
+          archiveItems.map((batch: any) => (
+            <RenderBatchAccordion
+              key={batch.id}
+              batch={batch}
+              isExpanded={expandedBatchId === batch.id}
+              onChange={handleAccordionChange}
+              selectedLinkIds={selectedLinkIds}
+              handleLinkSelect={handleLinkSelect}
+              handleSelectAllLinks={handleSelectAllLinks}
+              setEditingDeviceId={setEditingDeviceId}
+            />
+          ))
         )}
       </Box>
 
@@ -650,5 +348,303 @@ export const InspectionJournalPage = () => {
         </DialogContent>
       </Dialog>
     </Box>
+  );
+};
+
+interface RenderBatchAccordionProps {
+  batch: any;
+  isExpanded: boolean;
+  onChange: (
+    batchId: string
+  ) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
+  selectedLinkIds: string[];
+  handleLinkSelect: (linkId: string) => void;
+  handleSelectAllLinks: (linksInBatch: any[]) => void;
+  setEditingDeviceId: (id: string | null) => void;
+}
+
+const RenderBatchAccordion: React.FC<RenderBatchAccordionProps> = ({
+  batch,
+  isExpanded,
+  onChange,
+  selectedLinkIds,
+  handleLinkSelect,
+  handleSelectAllLinks,
+  setEditingDeviceId,
+}) => {
+  const links = batch?.devicesToBatches ?? [];
+
+  const linkIds = links
+    .filter((l: any) => l?.id)
+    .map((l: any) => l.id as string);
+  const checkedCount = linkIds.filter((id: string) =>
+    selectedLinkIds.includes(id)
+  ).length;
+
+  const isAllChecked = linkIds.length > 0 && checkedCount === linkIds.length;
+  const isIndeterminate = checkedCount > 0 && checkedCount < linkIds.length;
+  const failedCount = links.filter(
+    (l: any) => l.deviceStatus === 'dismantled'
+  ).length;
+
+  return (
+    <Accordion
+      id={`accordion-batch-${batch.number}`}
+      expanded={isExpanded}
+      onChange={onChange(batch.id)}
+      sx={{ borderRadius: 2, '&:before': { display: 'none' }, mb: 0.5 }}
+      component={Paper}
+      variant="outlined"
+    >
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            justifyContent: 'space-between',
+            gap: 1.5,
+            width: '100%',
+            flexDirection: { xs: 'column', sm: 'row' },
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: { xs: 0.5, sm: 2 },
+              flexDirection: { xs: 'column', sm: 'row' },
+              width: { xs: '100%', sm: 'auto' },
+            }}
+          >
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+                minWidth: { xs: 'auto', sm: '140px' },
+                fontSize: { xs: '0.95rem', sm: '1rem' },
+              }}
+            >
+              📦 {batch.number}
+            </Typography>
+
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                gap: { xs: 0.5, sm: 1 },
+                fontSize: '0.85rem',
+              }}
+            >
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontSize: 'inherit' }}
+              >
+                План:{' '}
+                {batch.date
+                  ? new Date(batch.date).toLocaleDateString('ru-RU')
+                  : new Date(batch.plannedDate).toLocaleDateString('ru-RU')}
+              </Typography>
+
+              {batch.createdBy?.firstName && batch.createdBy?.lastName && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    component="span"
+                    sx={{
+                      color: 'grey.400',
+                      display: { xs: 'none', sm: 'inline' },
+                    }}
+                  >
+                    •
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontSize: 'inherit' }}
+                  >
+                    👤 {toCapital(batch.createdBy.lastName)}{' '}
+                    {toCapital(batch.createdBy.firstName)}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          </Box>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              width: { xs: '100%', sm: 'auto' },
+              justifyContent: { xs: 'space-between', sm: 'flex-end' },
+            }}
+          >
+            <Chip
+              label={`Приборов: ${links.length}`}
+              size="small"
+              variant="outlined"
+              sx={{ fontSize: '0.75rem' }}
+            />
+            {failedCount > 0 && (
+              <Chip
+                label={`Брак: ${failedCount}`}
+                size="small"
+                color="error"
+                sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}
+              />
+            )}
+          </Box>
+        </Box>
+      </AccordionSummary>
+
+      <AccordionDetails
+        sx={{
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'grey.50',
+        }}
+      >
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ mb: 1.5 }}
+        >
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            sx={{ fontWeight: 600 }}
+          >
+            Список приборов в акте:
+          </Typography>
+
+          <Tooltip title="Выбрать все приборы этого акта" placement="top" arrow>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={isAllChecked}
+                  indeterminate={isIndeterminate}
+                  disabled={linkIds.length === 0}
+                  onChange={() => handleSelectAllLinks(links)}
+                />
+              }
+              label={
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ fontWeight: 500 }}
+                >
+                  Выбрать все
+                </Typography>
+              }
+              sx={{ mr: 0 }}
+            />
+          </Tooltip>
+        </Stack>
+
+        <List dense disablePadding>
+          {links.map((link: any) => {
+            if (!link?.device) return null;
+            const { device, deviceStatus } = link;
+            const isSuccess = deviceStatus === 'returned';
+            const isChecked = selectedLinkIds.includes(link.id);
+
+            return (
+              <Paper
+                key={link.id}
+                variant="outlined"
+                sx={{
+                  mb: 1,
+                  p: 1.5,
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  justifyContent: 'space-between',
+                  alignItems: { xs: 'stretch', sm: 'center' },
+                  gap: { xs: 1.5, sm: 0 },
+                  bgcolor: 'background.paper',
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    flexGrow: 1,
+                  }}
+                >
+                  <Checkbox
+                    size="small"
+                    checked={isChecked}
+                    onChange={() => handleLinkSelect(link.id)}
+                    sx={{ mr: 1 }}
+                  />
+                  <ListItemButton
+                    onClick={() => setEditingDeviceId(device.id)}
+                    sx={{ p: 0, textAlign: 'left', borderRadius: 1 }}
+                  >
+                    <ListItemText
+                      primary={`${device.name} (${device.model})`}
+                      secondary={`Заводской номер: ${device.serialNumber}`}
+                      slotProps={{
+                        primary: { variant: 'body2', fontWeight: 500 },
+                        secondary: { variant: 'caption' },
+                      }}
+                      sx={{ m: 0 }}
+                    />
+                  </ListItemButton>
+                </Box>
+
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: { xs: 'end', sm: 'center' },
+                  }}
+                >
+                  {isSuccess ? (
+                    <Box
+                      sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                    >
+                      <CheckCircleOutline color="success" fontSize="small" />
+                      <Typography
+                        variant="caption"
+                        fontWeight="medium"
+                        color="success.main"
+                      >
+                        Годен
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box
+                      sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                    >
+                      <Cancel color="error" fontSize="small" />
+                      <Typography
+                        variant="caption"
+                        fontWeight="medium"
+                        color="error.main"
+                      >
+                        Не годен
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Paper>
+            );
+          })}
+        </List>
+
+        {batch.comment && (
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: 'block', mt: 1, px: 0.5 }}
+          >
+            <b>Комментарий к акту:</b> {batch.comment}
+          </Typography>
+        )}
+      </AccordionDetails>
+    </Accordion>
   );
 };

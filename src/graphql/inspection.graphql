@@ -57,6 +57,31 @@ query GetInspectionArchive($limit: Int!, $offset: Int!, $year: Int!) {
   }
 }
 
+query GetSingleInspectionBatch($batchNumber: String!) {
+  getInspectionBatchByNumber(batchNumber: $batchNumber) {
+    id
+    number
+    date
+    comment
+    createdBy {
+      id
+      role
+      firstName
+      lastName
+    }
+    devicesToBatches {
+      id
+      deviceStatus
+      device {
+        id
+        name
+        model
+        serialNumber
+      }
+    }
+  }
+}
+
 query GetInspectionCalendarSummary {
   getInspectionCalendarSummary {
     month

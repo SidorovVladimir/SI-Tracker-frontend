@@ -1,13 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Tabs, Tab } from '@mui/material';
 import { InspectionPlanningPage } from './InspectionPlanningPage';
 import { InspectionJournalPage } from './InspectionJornalPage';
+import { useLocation } from 'react-router';
 
 export const InspectionPageContainer: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const location = useLocation();
+  const initialTab = location.state?.activeTab ?? 0;
+  const [activeTab, setActiveTab] = useState<number>(initialTab);
+
+  const [targetBatchNumber, setTargetBatchNumber] = useState<string | null>(
+    location.state?.openAccordionId ?? null
+  );
+
+  useEffect(() => {
+    if (location.state) {
+      if (location.state.activeTab !== undefined) {
+        setActiveTab(location.state.activeTab);
+      }
+
+      if (location.state.openAccordionId !== undefined) {
+        setTargetBatchNumber(location.state.openAccordionId);
+      }
+    }
+  }, [location.state]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+    if (newValue !== 1) {
+      setTargetBatchNumber(null);
+    }
   };
 
   return (
@@ -78,7 +100,9 @@ export const InspectionPageContainer: React.FC = () => {
         }}
       >
         {activeTab === 0 && <InspectionPlanningPage />}
-        {activeTab === 1 && <InspectionJournalPage />}
+        {activeTab === 1 && (
+          <InspectionJournalPage initialOpenBatchNumber={targetBatchNumber} />
+        )}
       </Box>
     </Box>
   );
