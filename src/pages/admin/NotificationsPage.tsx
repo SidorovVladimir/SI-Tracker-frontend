@@ -81,8 +81,10 @@ export default function NotificationsPage() {
 
     if (lowerTitle.includes('ремонт') || lowerTitle.includes('мастерск')) {
       navigate('/repair-journal');
-    } else if (lowerTitle.includes('партия') || lowerTitle.includes('поверк')) {
-      navigate('/verification-planning');
+    } else if (metaObj?.action === 'create_batch') {
+      navigate(routes.planning(), {
+        state: { activeTab: 1, openAccordionId: metaObj.batchNumber },
+      });
     } else if (metaObj?.action === 'inspection_batch_create') {
       navigate(routes.inspectionPlanning(), {
         state: { activeTab: 1, openAccordionId: metaObj.batchNumber },

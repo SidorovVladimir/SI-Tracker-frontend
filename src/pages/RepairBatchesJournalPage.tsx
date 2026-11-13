@@ -1,36 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Button,
-  Chip,
-  List,
-  ListItemText,
-  Paper,
   CircularProgress,
-  IconButton,
   MenuItem,
   Tab,
   Tabs,
   TextField,
-  Tooltip,
-  Checkbox,
-  FormControlLabel,
-  Stack,
-  ListItemButton,
   Dialog,
   DialogContent,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-  Cancel,
-  CheckCircleOutline,
-  Delete,
-  QrCode,
-} from '@mui/icons-material';
+
 import { useMutation, useQuery } from '@apollo/client/react';
 import { enqueueSnackbar } from 'notistack';
 
@@ -41,27 +21,35 @@ import {
   CreateVerificationDocument,
   DeleteRepairBatchDocument,
   GetMetrologyControlTypesListDocument,
+  GetRepairBatchByNumberDocument,
+  ConfirmArshinBufferDocument,
+  SyncDeviceWithArshinDocument,
 } from '../graphql/types/__generated__/graphql';
 
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import EditDevicePage from './admin/EditDevicePage';
 import { RepairModal } from '../components/modals/RepairModal';
 import { ConfirmationDialog } from '../components/modals/ConfirmationDialog';
-import { toCapital } from '../utils/capitalize';
-// import { cleanSpaces } from '../utils/capitalize';
 
-// interface BatchesJournalPageProps {
-//   locallyVerifiedIds: string[];
-//   setLocallyVerifiedIds: React.Dispatch<React.SetStateAction<string[]>>;
-// }
+import { RenderRepairBatchAccordion } from '../components/RenderRepairBatchAccordion';
+import { ArshinSelectDialog } from '../components/ArshinSelectDialog';
 
-export const RepairBatchesJournalPage = () => {
+interface RepairJournalPageProps {
+  initialOpenBatchNumber?: string | null;
+}
+
+export const RepairBatchesJournalPage: React.FC<RepairJournalPageProps> = ({
+  initialOpenBatchNumber,
+}) => {
   const currentYear = new Date().getFullYear();
+
+  const hasAutoFocused = useRef<boolean>(false);
+  const hasAlertedDeleted = useRef<boolean>(false);
+
   const [editingDeviceId, setEditingDeviceId] = useState<string | null>(null);
   const [journalYear, setJournalYear] = useState<number>(currentYear);
   const [statusTab, setStatusTab] = useState<string>('ACTIVE'); // 'ACTIVE' | 'DRAFT' | 'SENT' | 'COMPLETED'
   const [selectedLinkIds, setSelectedLinkIds] = useState<string[]>([]);
-  const [expandedBatchId, setExpandedBatchId] = useState<string | false>(false);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
 
@@ -76,34 +64,181 @@ export const RepairBatchesJournalPage = () => {
   const [selectedDeviceData, setSelectedDeviceData] = useState<{
     id: string;
     name: string;
+    cachedControl: string;
     currentBatchId: string;
   } | null>(null);
+
+  const [highlightedBatch, setHighlightedBatch] = useState<any | null>(null);
+  const [searchBatchNumber, setSearchBatchNumber] = useState<string | null>(
+    initialOpenBatchNumber ?? null
+  );
+  const [expandedBatchId, setExpandedBatchId] = useState<string | false>(
+    searchBatchNumber ?? false
+  );
+
+  const [isBufferDialogOpen, setIsBufferDialogOpen] = useState<boolean>(false);
+
+  const [bufferRecords, setBufferRecords] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (initialOpenBatchNumber) {
+      setHighlightedBatch(null);
+      setSearchBatchNumber(initialOpenBatchNumber);
+      setExpandedBatchId(initialOpenBatchNumber);
+      hasAutoFocused.current = false;
+      hasAlertedDeleted.current = false;
+    }
+  }, [initialOpenBatchNumber]);
+
+  const { data: singleData, loading: isSingleLoading } = useQuery(
+    GetRepairBatchByNumberDocument,
+    {
+      variables: { batchNumber: searchBatchNumber as string },
+      skip: !Boolean(searchBatchNumber),
+      // fetchPolicy: 'cache-and-network',
+      fetchPolicy: 'network-only',
+    }
+  );
+
+  useEffect(() => {
+    if (singleData?.getRepairBatchByNumber) {
+      const batch = singleData.getRepairBatchByNumber;
+
+      setHighlightedBatch(batch);
+      setExpandedBatchId(batch.id || batch.number);
+
+      if (batch.status && !hasAutoFocused.current) {
+        setStatusTab(batch.status.toUpperCase());
+        hasAutoFocused.current = true;
+        window.history.replaceState({}, document.title);
+      }
+    } else if (
+      singleData &&
+      !singleData.getRepairBatchByNumber &&
+      searchBatchNumber &&
+      !isSingleLoading
+    ) {
+      if (!hasAlertedDeleted.current) {
+        enqueueSnackbar(
+          'Запрашиваемая ремонтная ведомость не найдена. Возможно, она была удалена.',
+          {
+            variant: 'warning',
+            preventDuplicate: true,
+          }
+        );
+        hasAlertedDeleted.current = true;
+      }
+
+      setHighlightedBatch(null);
+      setSearchBatchNumber(null);
+      window.history.replaceState({}, document.title);
+    }
+  }, [singleData, isSingleLoading, searchBatchNumber, enqueueSnackbar]);
+
+  const handleSubTabChange = (
+    _event: React.SyntheticEvent,
+    newValue: string
+  ) => {
+    setSelectedLinkIds([]);
+    setStatusTab(newValue);
+    // setArchivePage(0); // Сбрасываем страницу
+
+    if (searchBatchNumber) {
+      setHighlightedBatch(null);
+      setSearchBatchNumber(null);
+      hasAlertedDeleted.current = false;
+      hasAutoFocused.current = false;
+
+      window.history.replaceState({}, document.title);
+    }
+  };
 
   const { data: controlTypesData } = useQuery(
     GetMetrologyControlTypesListDocument
   );
 
-  // 🌟 ПОТОК 1: Запрашиваем ремонтные ведомости с типом 'repair'
+  // ПОТОК 1: Запрашиваем ремонтные ведомости с типом 'repair'
   const { data, loading, refetch } = useQuery(GetRepairBatchesDocument, {
     variables: {
       year: journalYear,
       status: statusTab === 'ACTIVE' ? undefined : statusTab.toLowerCase(),
     },
     fetchPolicy: 'cache-and-network',
+    skip: Boolean(initialOpenBatchNumber) && isSingleLoading,
   });
 
   const allBatches = data?.getRepairBatches ?? [];
-  const displayedBatches = allBatches.filter((b) =>
+
+  const archiveItems = allBatches.filter(
+    (batch: any) => batch.number !== searchBatchNumber
+  );
+  const displayedBatches = archiveItems.filter((b) =>
     statusTab === 'ACTIVE' ? b.status === 'draft' || b.status === 'sent' : true
   );
 
   const [updateStatus] = useMutation(UpdateRepairBatchStatusDocument, {
     refetchQueries: [GetRepairBatchesDocument],
-    onCompleted: () =>
+    onCompleted: (_data, options) => {
       enqueueSnackbar('Статус ремонтной ведомости обновлен', {
         variant: 'success',
-      }),
+      });
+      const updatedStatus = options?.variables?.status;
+      const batchId = options?.variables?.id;
+
+      if (updatedStatus === 'sent' && statusTab === 'DRAFT') {
+        setStatusTab('SENT');
+        if (batchId) setExpandedBatchId(batchId);
+      } else if (updatedStatus === 'completed' && statusTab === 'SENT') {
+        setStatusTab('COMPLETED');
+        if (batchId) setExpandedBatchId(batchId);
+      }
+    },
+
+    onError: (error) => {
+      enqueueSnackbar(`Ошибка обновления статуса: ${error.message}`, {
+        variant: 'error',
+      });
+    },
   });
+
+  const [syncDeviceWithArshin, { loading: isSyncing }] = useMutation(
+    SyncDeviceWithArshinDocument,
+    {
+      refetchQueries: [
+        // GetYearlySummaryDocument,
+        // GetPlanningPoolDocument,
+        GetRepairBatchesDocument,
+      ],
+      onCompleted: () => {
+        enqueueSnackbar('Данные успешно импортированы из ФГИС Аршин!', {
+          variant: 'success',
+        });
+      },
+      onError: (error) => {
+        enqueueSnackbar(`Не удалось синхронизировать: ${error.message}`, {
+          variant: 'error',
+        });
+      },
+    }
+  );
+
+  const [confirmBufferRecord, { loading: loadingConfirm }] = useMutation(
+    ConfirmArshinBufferDocument,
+    {
+      refetchQueries: [GetRepairBatchesDocument],
+      onCompleted: () => {
+        enqueueSnackbar('Поверка успешно подтверждена и сохранена', {
+          variant: 'success',
+        });
+        setIsBufferDialogOpen(false);
+      },
+      onError: (error) => {
+        enqueueSnackbar(`Ошибка подтверждения: ${error.message}`, {
+          variant: 'error',
+        });
+      },
+    }
+  );
 
   const [removeDevices] = useMutation(RemoveDevicesFromRepairBatchDocument, {
     refetchQueries: [GetRepairBatchesDocument],
@@ -112,6 +247,11 @@ export const RepairBatchesJournalPage = () => {
         'Оборудование извлечено из ремонта, дефект восстановлен',
         { variant: 'success' }
       ),
+    onError: (error) => {
+      enqueueSnackbar(`Ошибка удаления: ${error.message}`, {
+        variant: 'error',
+      });
+    },
   });
 
   const [deleteBatch] = useMutation(DeleteRepairBatchDocument, {
@@ -215,6 +355,12 @@ export const RepairBatchesJournalPage = () => {
     } catch (error) {}
   };
 
+  const handleAccordionChange =
+    (batchId: string) =>
+    (_event: React.SyntheticEvent, isExpanded: boolean) => {
+      setExpandedBatchId(isExpanded ? batchId : false);
+    };
+
   if (loading && !data) {
     return (
       <Box
@@ -288,10 +434,11 @@ export const RepairBatchesJournalPage = () => {
 
           <Tabs
             value={statusTab}
-            onChange={(_e, val) => {
-              setSelectedLinkIds([]);
-              setStatusTab(val);
-            }}
+            // onChange={(_e, val) => {
+            //   setSelectedLinkIds([]);
+            //   setStatusTab(val);
+            // }}
+            onChange={handleSubTabChange}
             variant="scrollable"
             scrollButtons="auto"
             allowScrollButtonsMobile
@@ -365,541 +512,133 @@ export const RepairBatchesJournalPage = () => {
         </Box>
       </Box>
 
-      {displayedBatches.length === 0 ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            p: 4,
-            textAlign: 'center',
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            border: '1px dashed',
-            borderColor: 'divider',
-          }}
-        >
-          В этом разделе пока нет созданных ремонтных ведомостей.
-        </Typography>
-      ) : (
-        displayedBatches.map((batch) => {
-          const isDraft = batch.status === 'draft';
-          const isSent = batch.status === 'sent';
-          const isCompleted = batch.status === 'completed';
-          const deviceLinks = batch?.devicesToBatches ?? [];
-
-          const selectableInBatch = batch.devicesToBatches.filter((link) => {
-            // Если партия в Архиве — доступны ВСЕ приборы без исключения
-            if (isCompleted) return true;
-
-            // Если партия в ЦСМ — только те, что поверены на сервере или локально
-            const currentVerification = link.device.verifications?.find(
-              (v) => v.batchId === batch.id
-            );
-            return (
-              !!currentVerification ||
-              locallySuccessIds.includes(link.device.id) ||
-              locallyFailedIds.includes(link.device.id)
-            );
-          });
-
-          const selectableIds = selectableInBatch.map((link) => link.id);
-          const checkedCount = selectableIds.filter((id) =>
-            selectedLinkIds.includes(id)
-          ).length;
-
-          const isAllChecked =
-            selectableIds.length > 0 && checkedCount === selectableIds.length;
-          const isIndeterminate =
-            checkedCount > 0 && checkedCount < selectableIds.length;
-
-          return (
-            <Accordion
-              key={batch.id}
-              expanded={expandedBatchId === batch.id}
-              onChange={(_e, exp) => setExpandedBatchId(exp ? batch.id : false)}
-              sx={{ mb: 2, borderRadius: 2, '&:before': { display: 'none' } }}
-              component={Paper}
-              variant="outlined"
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2 }}>
+        {/* 🌟 1. ПОДСВЕЧЕННЫЙ ТОП-АККОРДЕОН ИЗ УВЕДОМЛЕНИЯ */}
+        {highlightedBatch &&
+          highlightedBatch.status?.toUpperCase() === statusTab && (
+            <Box
+              sx={{
+                border: '2px solid',
+                borderColor: 'primary.main',
+                borderRadius: 2,
+                p: 0.5,
+                bgcolor: '#f0f9ff',
+                mb: 1,
+              }}
             >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: { xs: 'flex-start', sm: 'center' },
-                    justifyContent: 'space-between',
-                    gap: 1.5,
-                    width: '100%',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: { xs: 'flex-start', sm: 'center' },
-                      gap: { xs: 0.5, sm: 2 },
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      width: { xs: '100%', sm: 'auto' },
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontWeight: 'bold',
-                        minWidth: { xs: 'auto', sm: '140px' },
-                        fontSize: { xs: '0.95rem', sm: '1rem' },
-                      }}
-                    >
-                      🛠️ {batch.number}
-                    </Typography>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: { xs: 'column', sm: 'row' },
-                        alignItems: 'flex-start',
-                        sm: 'center',
-                        gap: { xs: 0.5, sm: 1 },
-                        fontSize: '0.85rem',
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ fontSize: 'inherit' }}
-                      >
-                        Выведена:{' '}
-                        {new Date(+batch.plannedDate).toLocaleDateString(
-                          'ru-RU'
-                        )}
-                      </Typography>
-                      {batch.createdBy?.lastName && (
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
-                          <Box
-                            component="span"
-                            sx={{
-                              color: 'grey.400',
-                              display: { xs: 'none', sm: 'inline' },
-                            }}
-                          >
-                            •
-                          </Box>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontSize: 'inherit' }}
-                          >
-                            👤 Исполнитель:{' '}
-                            {toCapital(batch.createdBy.lastName)}{' '}
-                            {toCapital(batch.createdBy.firstName)}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.5,
-                      width: { xs: '100%', sm: 'auto' },
-                      justifyContent: { xs: 'space-between', sm: 'flex-end' },
-                      borderTop: { xs: '1px solid', sm: 'none' },
-                      borderColor: 'divider',
-                      pt: { xs: 1, sm: 0 },
-                    }}
-                  >
-                    <Chip
-                      label={
-                        isDraft
-                          ? 'Черновик'
-                          : isSent
-                          ? 'В мастерской'
-                          : 'Ремонт закрыт'
-                      }
-                      color={
-                        isDraft ? 'default' : isSent ? 'warning' : 'success'
-                      }
-                      size="small"
-                    />
-                  </Box>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails
-                sx={{
-                  borderTop: '1px solid',
-                  borderColor: 'divider',
-                  bg: 'grey.50',
-                }}
+              <Typography
+                variant="caption"
+                color="primary.main"
+                sx={{ fontWeight: 700, px: 1, pb: 0.5, display: 'block' }}
               >
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  sx={{ mb: 1.5 }}
-                >
-                  <Typography
-                    variant="subtitle2"
-                    color="text.secondary"
-                    sx={{ fontWeight: 600 }}
-                  >
-                    Оборудование на ремонте:
-                  </Typography>
-                  {(isSent || isCompleted) && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={isAllChecked}
-                          indeterminate={isIndeterminate}
-                          disabled={selectableIds.length === 0}
-                          size="small"
-                          onChange={() =>
-                            handleSelectAllLinks(
-                              batch.devicesToBatches,
-                              batch.id,
-                              isCompleted
-                            )
-                          }
-                        />
-                      }
-                      label={
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ fontWeight: 500 }}
-                        >
-                          Выбрать все
-                        </Typography>
-                      }
-                    />
-                  )}
-                </Stack>
+                📌 Уведомление: запрашиваемая партия
+              </Typography>
+              <RenderRepairBatchAccordion
+                locallySuccessIds={locallySuccessIds}
+                locallyFailedIds={locallyFailedIds}
+                selectedLinkIds={selectedLinkIds}
+                onChange={handleAccordionChange}
+                handleSelectAllLinks={handleSelectAllLinks}
+                handleLinkSelect={handleLinkSelect}
+                setIsBarcodeModalOpen={setIsBarcodeModalOpen}
+                updateStatus={updateStatus}
+                deleteBatch={deleteBatch}
+                setRemoveDialogOpen={setRemoveDialogOpen}
+                setDeviceToRemove={setDeviceToRemove}
+                setModalOpen={setModalOpen}
+                setSelectedDeviceData={setSelectedDeviceData}
+                setEditingDeviceId={setEditingDeviceId}
+                batch={highlightedBatch}
+                isExpanded={
+                  expandedBatchId === highlightedBatch.id ||
+                  expandedBatchId === highlightedBatch.number
+                }
+                setBufferRecords={setBufferRecords}
+                setIsBufferDialogOpen={setIsBufferDialogOpen}
+                syncDeviceWithArshin={syncDeviceWithArshin}
+                isSyncing={isSyncing}
+                // // onChange={(id) => () =>
+                // //   setExpandedBatchId(expandedBatchId === id ? false : id)}
+                // onChange={handleAccordionChange}
+                // batchJobs={batchJobs}
+                // locallyVerifiedIds={locallyVerifiedIds}
+                // selectedLinkIds={selectedLinkIds}
+                // handleLinkSelect={handleLinkSelect}
+                // handleSelectAllLinks={handleSelectAllLinks}
+                // handleDeviceClick={handleDeviceClick}
+                // removeDevices={removeDevices}
+                // handleOpenVerificationModal={handleOpenVerificationModal}
+                // deleteBatch={deleteBatch}
+                // updateStatus={updateStatus}
+                // setIsBarcodeModalOpen={setIsBarcodeModalOpen}
+                // handleSync={handleSync}
+                // cleanSpaces={cleanSpaces}
+                // toCapital={toCapital}
+                // isBatchSyncing={isBatchSyncing}
+              />
+            </Box>
+          )}
 
-                {/* Список приборов внутри ремонтной ведомости */}
-                <List dense disablePadding sx={{ mb: 2 }}>
-                  {deviceLinks.map((link) => {
-                    // const currentVerification = link.device.verifications?.find(
-                    //   (v: any) => v.batchId === batch.id
-                    // );
-                    // const isDeviceVerified =
-                    //   !!currentVerification ||
-                    //   locallyVerifiedIds.includes(link.device.id);
-                    // const isSuccess =
-                    //   currentVerification?.result === 'годен' ||
-                    //   locallyVerifiedIds.includes(link.device.id);
-                    // const isFailed = currentVerification?.result === 'не годен';
-                    const currentVerification = link.device.verifications?.find(
-                      (v: any) => v.batchId === batch.id
-                    );
-                    const docResult =
-                      currentVerification?.result?.trim().toLowerCase() || '';
-
-                    // 🌟 СТРОГОЕ РАЗДЕЛЕНИЕ: Проверяем результат и по базе данных, и по локальным массивам
-                    const isSuccess =
-                      docResult === 'годен' ||
-                      locallySuccessIds.includes(link.device.id);
-
-                    const isFailed =
-                      docResult === 'не годен' ||
-                      locallyFailedIds.includes(link.device.id);
-
-                    // Прибор считается проверенным, если по нему есть либо успех, либо брак
-                    const isDeviceVerified = isSuccess || isFailed;
-
-                    return (
-                      <Paper
-                        key={link.id}
-                        variant="outlined"
-                        sx={{
-                          mb: 1,
-                          p: 1.5,
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          {(isSent || isCompleted) && (
-                            <Checkbox
-                              size="small"
-                              checked={selectedLinkIds.includes(link.id)}
-                              // 🌟 ВОЗВРАЩАЕМ ВАШУ ЛОГИКУ: в статусе "В мастерской" чекбокс заблокирован, пока прибор не отремонтирован!
-                              disabled={isSent ? !isDeviceVerified : false}
-                              onChange={() => handleLinkSelect(link.id)}
-                              sx={{ mr: 1 }}
-                            />
-                          )}
-                          <ListItemButton
-                            onClick={() => setEditingDeviceId(link.device.id)}
-                          >
-                            <ListItemText
-                              primary={`${link.device.name} (${link.device.model})`}
-                              secondary={`Заводской номер: ${link.device.serialNumber}`}
-                            />
-                          </ListItemButton>
-                        </Box>
-
-                        {/* 🌟 ИНТЕРАКТИВНЫЕ КНОПКИ ДЕЙСТВИЙ */}
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
-                          {/* Кейс 1: Ведомость в статусе Черновика (Удаление доступно всегда) */}
-                          {isDraft && (
-                            <Tooltip
-                              title="Исключить это оборудование из ведомости ремонта"
-                              placement="top"
-                              arrow
-                            >
-                              <IconButton
-                                color="error"
-                                size="small"
-                                onClick={() => {
-                                  setDeviceToRemove({
-                                    batchId: batch.id,
-                                    deviceId: link.device.id,
-                                  });
-                                  setRemoveDialogOpen(true);
-                                }}
-                              >
-                                <Delete fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-
-                          {/* Кейс 2: Ведомость в статусе "В мастерской" (Идет ремонт) */}
-                          {isSent && (
-                            <>
-                              {isDeviceVerified && isSuccess && (
-                                <Tooltip
-                                  title="Прибор успешно отремонтирован и прошел контроль."
-                                  placement="top"
-                                  arrow
-                                >
-                                  <CheckCircleOutline
-                                    color="success"
-                                    fontSize="small"
-                                  />
-                                </Tooltip>
-                              )}
-
-                              {isDeviceVerified && isFailed && (
-                                <Tooltip
-                                  title="Прибор признан негодным / неремонтопригодным."
-                                  placement="top"
-                                  arrow
-                                >
-                                  <Cancel color="error" fontSize="small" />
-                                </Tooltip>
-                              )}
-
-                              {/* Если результаты контроля по прибору еще НЕ внесены */}
-                              {!isDeviceVerified && (
-                                <Box
-                                  sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 0.5,
-                                  }}
-                                >
-                                  {/* ✏️ Кнопка фиксации контроля */}
-                                  <Button
-                                    size="small"
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => {
-                                      // 1. Сначала безопасно записываем данные прибора в стейт
-                                      setSelectedDeviceData({
-                                        id: link.device.id,
-                                        name: link.device.name,
-                                        currentBatchId: batch.id,
-                                      });
-
-                                      // 2. Затем открываем изолированное модальное окно ремонта
-                                      setModalOpen(true);
-                                    }}
-                                    sx={{
-                                      textTransform: 'none',
-                                      borderRadius: 1.5,
-                                      py: 0.25,
-                                      px: 1.5,
-                                      fontWeight: 'bold',
-                                      fontSize: '0.7rem',
-                                    }}
-                                  >
-                                    Внести контроль
-                                  </Button>
-
-                                  {/* 🗑️ НОВАЯ КНОПКА: Исключить из ремонта прямо из мастерской с откатом статуса брака */}
-                                  <Tooltip
-                                    title="Отменить ремонт и вернуть прибор обратно в Очередь как дефектный"
-                                    placement="top"
-                                    arrow
-                                  >
-                                    <IconButton
-                                      color="error"
-                                      size="small"
-                                      onClick={() => {
-                                        setDeviceToRemove({
-                                          batchId: batch.id,
-                                          deviceId: link.device.id,
-                                        });
-                                        setRemoveDialogOpen(true);
-                                      }}
-                                    >
-                                      <Delete fontSize="small" />
-                                    </IconButton>
-                                  </Tooltip>
-                                </Box>
-                              )}
-                            </>
-                          )}
-
-                          {/* Кейс 3: Ведомость закрыта в Архив */}
-                          {isCompleted && (
-                            <Chip
-                              label={isSuccess ? 'Отремонтирован' : 'Брак'}
-                              color={isSuccess ? 'success' : 'error'}
-                              size="small"
-                              variant="outlined"
-                              sx={{
-                                fontSize: '0.68rem',
-                                fontWeight: 'bold',
-                                height: 20,
-                              }}
-                            />
-                          )}
-                        </Box>
-                      </Paper>
-                    );
-                  })}
-                </List>
-
-                {/* Управление ведомостью */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    gap: 1.5,
-                    justifyContent: 'end',
-                    width: '100%',
-                    mt: 2,
-                  }}
-                >
-                  {isDraft && (
-                    <>
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        size="small"
-                        onClick={() =>
-                          deleteBatch({ variables: { id: batch.id } })
-                        }
-                        sx={{
-                          textTransform: 'none',
-                          height: 36,
-                          borderRadius: 2,
-                        }}
-                      >
-                        🗑️ Удалить ведомость
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="warning"
-                        size="small"
-                        onClick={() =>
-                          updateStatus({
-                            variables: { id: batch.id, status: 'sent' },
-                          })
-                        }
-                        sx={{
-                          textTransform: 'none',
-                          fontWeight: 'bold',
-                          height: 36,
-                          borderRadius: 2,
-                        }}
-                      >
-                        🚀 Отправить в мастерскую
-                      </Button>
-                    </>
-                  )}
-                  {isSent && (
-                    <>
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="small"
-                        startIcon={<QrCode />}
-                        onClick={() => setIsBarcodeModalOpen(true)}
-                        disabled={selectedLinkIds.length === 0}
-                        sx={{
-                          height: 36,
-                          borderRadius: 2,
-                          textTransform: 'none',
-                          fontWeight: 'bold',
-                        }}
-                      >
-                        Печать бирок ({selectedLinkIds.length})
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="success"
-                        size="small"
-                        disabled={
-                          deviceLinks.length === 0 ||
-                          !deviceLinks.every(
-                            (l) =>
-                              !!l.device.verifications?.some(
-                                (v) => v.batchId === batch.id
-                              ) ||
-                              locallySuccessIds.includes(l.device.id) ||
-                              locallyFailedIds.includes(l.device.id)
-                          )
-                        }
-                        onClick={() =>
-                          updateStatus({
-                            variables: { id: batch.id, status: 'completed' },
-                          })
-                        }
-                        sx={{
-                          textTransform: 'none',
-                          fontWeight: 'bold',
-                          height: 36,
-                          borderRadius: 2,
-                        }}
-                      >
-                        ✅ Закрыть ремонтную ведомость
-                      </Button>
-                    </>
-                  )}
-                  {isCompleted && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      startIcon={<QrCode />}
-                      onClick={() => setIsBarcodeModalOpen(true)}
-                      disabled={selectedLinkIds.length === 0}
-                      sx={{
-                        height: 36,
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Печать архивных бирок ({selectedLinkIds.length})
-                    </Button>
-                  )}
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          );
-        })
-      )}
+        {/* 📋 2. СТАНДАРТНЫЙ ПОСТРАНИЧНЫЙ СПИСОК ЖУРНАЛА */}
+        {displayedBatches.length === 0 &&
+        (!highlightedBatch ||
+          highlightedBatch.status?.toUpperCase() !== statusTab) ? (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              p: 4,
+              textAlign: 'center',
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              border: '1px dashed',
+              borderColor: 'divider',
+            }}
+          >
+            В этом разделе журнала пока нет созданных партий.
+          </Typography>
+        ) : (
+          displayedBatches.map((batch: any) => (
+            <RenderRepairBatchAccordion
+              key={batch.id}
+              batch={batch}
+              locallySuccessIds={locallySuccessIds}
+              locallyFailedIds={locallyFailedIds}
+              selectedLinkIds={selectedLinkIds}
+              isExpanded={expandedBatchId === batch.id}
+              onChange={handleAccordionChange}
+              handleSelectAllLinks={handleSelectAllLinks}
+              handleLinkSelect={handleLinkSelect}
+              setIsBarcodeModalOpen={setIsBarcodeModalOpen}
+              updateStatus={updateStatus}
+              deleteBatch={deleteBatch}
+              setRemoveDialogOpen={setRemoveDialogOpen}
+              setDeviceToRemove={setDeviceToRemove}
+              setModalOpen={setModalOpen}
+              setSelectedDeviceData={setSelectedDeviceData}
+              setEditingDeviceId={setEditingDeviceId}
+              setBufferRecords={setBufferRecords}
+              setIsBufferDialogOpen={setIsBufferDialogOpen}
+              syncDeviceWithArshin={syncDeviceWithArshin}
+              isSyncing={isSyncing}
+              // batchJobs={batchJobs}
+              // locallyVerifiedIds={locallyVerifiedIds}
+              // handleDeviceClick={handleDeviceClick}
+              // removeDevices={removeDevices}
+              // handleOpenVerificationModal={handleOpenVerificationModal}
+              // handleSync={handleSync}
+              // isBatchSyncing={isBatchSyncing}
+            />
+          ))
+        )}
+      </Box>
 
       {selectedDeviceData && (
         <RepairModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           deviceName={selectedDeviceData.name}
+          deviceCachedControl={selectedDeviceData.cachedControl}
           controlTypes={controlTypesData?.metrologyControlTypes ?? []}
           onSubmit={handleSaveVerification}
         />
@@ -948,6 +687,16 @@ export const RepairBatchesJournalPage = () => {
               deviceToRemove.deviceId,
             ]);
           }
+        }}
+      />
+
+      <ArshinSelectDialog
+        open={isBufferDialogOpen}
+        onClose={() => setIsBufferDialogOpen(false)}
+        loading={loadingConfirm}
+        records={bufferRecords}
+        onSelect={async (bufferId) => {
+          await confirmBufferRecord({ variables: { bufferId } });
         }}
       />
     </Box>

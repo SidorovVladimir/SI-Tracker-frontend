@@ -28,6 +28,7 @@ import {
   Edit,
   QrCode,
 } from '@mui/icons-material';
+import { cleanSpaces, toCapital } from '../utils/capitalize';
 
 interface RenderVerificationBatchAccordionProps {
   batch: any;
@@ -56,8 +57,6 @@ interface RenderVerificationBatchAccordionProps {
   updateStatus: (options: any) => Promise<any>;
   setIsBarcodeModalOpen: (open: boolean) => void;
   handleSync: (batchId: string) => void;
-  cleanSpaces: (str: string) => string;
-  toCapital: (str: string) => string;
   isSyncing: boolean;
   isBatchSyncing: boolean;
   setBufferRecords: (records: any[]) => void;
@@ -83,8 +82,6 @@ export const RenderVerificationBatchAccordion: React.FC<
   updateStatus,
   setIsBarcodeModalOpen,
   handleSync,
-  cleanSpaces,
-  toCapital,
   isSyncing,
   isBatchSyncing,
   setBufferRecords,
@@ -423,7 +420,7 @@ export const RenderVerificationBatchAccordion: React.FC<
                           size="small"
                           checked={selectedLinkIds.includes(link.id)}
                           disabled={isSent ? !isDeviceVerified : false}
-                          onChange={() => handleLinkSelect(link.id)}
+                          onChange={() => handleLinkSelect(link.device.id)} // - добавить device (link.device.id) тогда будет корректно куар кд отображаться. щас передается айди партии а не прибора
                         />
                       </Box>
                     </Tooltip>
@@ -591,7 +588,7 @@ export const RenderVerificationBatchAccordion: React.FC<
                           </Tooltip>
 
                           <Tooltip
-                            title="Внести или изменить результаты поверки вручную"
+                            title="Внести результаты контроля вручную"
                             placement="top"
                             arrow
                           >
@@ -629,6 +626,7 @@ export const RenderVerificationBatchAccordion: React.FC<
                               <IconButton
                                 color="error"
                                 size="small"
+                                disabled={isSyncing}
                                 onClick={() =>
                                   removeDevices({
                                     variables: {

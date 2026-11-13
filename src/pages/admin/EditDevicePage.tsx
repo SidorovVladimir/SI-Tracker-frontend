@@ -923,6 +923,15 @@ function UserForm({
     ({ id }) => id === device?.equipmentType?.id
   );
 
+  const currentStatus = device.status?.name?.toLowerCase().trim() || '';
+
+  const isBlockedByProcess =
+    currentStatus === 'в ремонте' || currentStatus === 'на поверке (в цсм)';
+
+  const tooltipMessage = isBlockedByProcess
+    ? `Прибор в статусе "${currentStatus}". Регистрация новых результатов контроля и синхронизация с ФГИС Аршин доступны только через Журнал ремонтов/поверок.`
+    : '';
+
   return (
     <Box>
       <Box
@@ -1568,21 +1577,7 @@ function UserForm({
           />
 
           <Divider sx={{ my: 2 }} />
-          {/* <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={3}
-          >
-            <Typography variant="h6" gutterBottom>
-              Добавить данные метрологического контроля
-            </Typography>
-            <Tooltip title="Добавить">
-              <IconButton onClick={addVerification} color="primary">
-                <Add />
-              </IconButton>
-            </Tooltip>
-          </Stack> */}
+
           <Box mb={3}>
             {/* Заголовок блока */}
             <Typography
@@ -1598,88 +1593,118 @@ function UserForm({
             </Typography>
 
             {/* Пульт управления: выстраивается компактным флекс-рядом */}
-            <Stack
-              direction="row"
-              spacing={1}
-              alignItems="center"
-              justifyContent="space-between"
-              width="100%"
-            >
-              {/* Селект выбора количества */}
-              <TextField
-                select
-                label="Поверок из Аршина"
-                value={arshinCount}
-                onChange={(e) => setArshinCount(Number(e.target.value))}
-                size="small"
-                sx={{
-                  flexGrow: 1,
-                  minWidth: '100px',
-                  '& .MuiInputBase-root': { height: 40 },
-                }}
-              >
-                {[1, 2, 3, 5].map((num) => (
-                  <MenuItem key={num} value={num}>
-                    {num}{' '}
-                    {num === 1
-                      ? 'последняя'
-                      : num < 5
-                      ? 'последние'
-                      : 'последних'}
-                  </MenuItem>
-                ))}
-              </TextField>
 
-              {/* Кнопка запуска импорта */}
-              <Button
-                variant="outlined"
-                color="secondary"
-                disabled={loadingArshinList}
-                onClick={() => handleLoadFromArshin(device.id)}
-                startIcon={
-                  loadingArshinList ? (
-                    <CircularProgress size={14} color="inherit" />
-                  ) : (
-                    <CloudDownload />
-                  )
-                }
+            {isBlockedByProcess && isMobile && (
+              <Alert
+                severity="warning"
                 sx={{
-                  height: 40,
-                  textTransform: 'none',
-                  whiteSpace: 'nowrap',
+                  mb: 2,
                   borderRadius: 1.5,
-                  px: 2,
+                  fontSize: '0.875rem',
                 }}
               >
-                {loadingArshinList ? 'Загрузка...' : 'Заполнить'}
-              </Button>
+                Прибор в статусе "{currentStatus}". Регистрация новых
+                результатов контроля и синхронизация с ФГИС Аршин доступны
+                только через Журнал ремонтов/поверок.
+              </Alert>
+            )}
 
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={{ height: 28, alignSelf: 'center' }}
-              />
-
-              {/* Кнопка ручного добавления */}
-              <Tooltip title="Добавить вручную">
-                <IconButton
-                  onClick={addVerification}
-                  disabled={loadingArshinList}
-                  color="primary"
+            <Tooltip
+              title={tooltipMessage}
+              arrow
+              disableHoverListener={!isBlockedByProcess || isMobile}
+            >
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                justifyContent="space-between"
+                width="100%"
+                sx={{
+                  opacity: isBlockedByProcess ? 0.6 : 1, // Визуально приглушаем блок, если он заблокирован
+                  pointerEvents: 'auto', // Позволяет Tooltip ловить наведение мыши даже на заблокированных элементах
+                }}
+              >
+                {/* Селект выбора количества */}
+                <TextField
+                  select
+                  label="Поверок из Аршина"
+                  value={arshinCount}
+                  onChange={(e) => setArshinCount(Number(e.target.value))}
+                  size="small"
+                  disabled={isBlockedByProcess}
                   sx={{
-                    border: '1px solid',
-                    borderColor: 'primary.main',
-                    borderRadius: 1.5,
-                    height: 40,
-                    width: 40,
-                    p: 0,
-                    flexShrink: 0,
+                    flexGrow: 1,
+                    minWidth: '100px',
+                    '& .MuiInputBase-root': { height: 40 },
                   }}
                 >
-                  <Add />
-                </IconButton>
-              </Tooltip>
-            </Stack>
+                  {[1, 2, 3, 5].map((num) => (
+                    <MenuItem key={num} value={num}>
+                      {num}{' '}
+                      {num === 1
+                        ? 'последняя'
+                        : num < 5
+                        ? 'последние'
+                        : 'последних'}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                {/* Кнопка запуска импорта */}
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  disabled={loadingArshinList || isBlockedByProcess}
+                  onClick={() => handleLoadFromArshin(device.id)}
+                  startIcon={
+                    loadingArshinList ? (
+                      <CircularProgress size={14} color="inherit" />
+                    ) : (
+                      <CloudDownload />
+                    )
+                  }
+                  sx={{
+                    height: 40,
+                    textTransform: 'none',
+                    whiteSpace: 'nowrap',
+                    borderRadius: 1.5,
+                    px: 2,
+                  }}
+                >
+                  {loadingArshinList ? 'Загрузка...' : 'Заполнить'}
+                </Button>
+
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  sx={{ height: 28, alignSelf: 'center' }}
+                />
+
+                {/* Кнопка ручного добавления */}
+                <Tooltip title="Добавить вручную">
+                  <IconButton
+                    onClick={addVerification}
+                    disabled={loadingArshinList || isBlockedByProcess}
+                    color="primary"
+                    sx={{
+                      border: '1px solid',
+                      // borderColor: 'primary.main',
+                      borderRadius: 1.5,
+                      borderColor: isBlockedByProcess
+                        ? 'action.disabled'
+                        : 'primary.main',
+                      height: 40,
+                      width: 40,
+                      p: 0,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Add />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            </Tooltip>
           </Box>
           {verifications.length === 0 ? (
             <Typography color="textSecondary" sx={{ mb: 2 }}>

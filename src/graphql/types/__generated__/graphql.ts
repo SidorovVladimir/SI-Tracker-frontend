@@ -462,6 +462,7 @@ export type DeviceFilterInput = {
 export type DeviceInBatch = {
   __typename: 'DeviceInBatch';
   arshinBuffers: Maybe<Array<ArshinVerificationBufferItem>>;
+  cachedControl: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   model: Scalars['String']['output'];
   name: Scalars['String']['output'];
@@ -1219,6 +1220,7 @@ export type Query = {
   getPlanningPoolByMonth: PlanningPoolResponse;
   getProductionAnalytics: ProductionAnalyticsResponse;
   getProductionSitesForSelect: Array<ProductionSite>;
+  getRepairBatchByNumber: Maybe<VerificationBatch>;
   getRepairBatches: Array<VerificationBatch>;
   getRepairDraftBatches: Array<DraftBatchOption>;
   getRepairPlanningPool: RepairPlanningPoolResponse;
@@ -1377,6 +1379,10 @@ export type QueryGetPlanningPoolByMonthArgs = {
 export type QueryGetProductionAnalyticsArgs = {
   month?: InputMaybe<Scalars['Int']['input']>;
   year: Scalars['Int']['input'];
+};
+
+export type QueryGetRepairBatchByNumberArgs = {
+  batchNumber: Scalars['String']['input'];
 };
 
 export type QueryGetRepairBatchesArgs = {
@@ -3265,6 +3271,56 @@ export type GetVerificationBatchByNumberQuery = {
   } | null;
 };
 
+export type GetRepairBatchByNumberQueryVariables = Exact<{
+  batchNumber: Scalars['String']['input'];
+}>;
+
+export type GetRepairBatchByNumberQuery = {
+  getRepairBatchByNumber: {
+    __typename: 'VerificationBatch';
+    id: string;
+    number: string;
+    status: string;
+    plannedDate: string;
+    comment: string | null;
+    createdBy: {
+      __typename: 'User';
+      id: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+    } | null;
+    devicesToBatches: Array<{
+      __typename: 'DeviceToBatchRelation';
+      id: string;
+      device: {
+        __typename: 'DeviceInBatch';
+        id: string;
+        name: string;
+        model: string;
+        serialNumber: string;
+        verifications: Array<{
+          __typename: 'ShortVerification';
+          id: string;
+          batchId: string | null;
+          result: string | null;
+        }> | null;
+        arshinBuffers: Array<{
+          __typename: 'ArshinVerificationBufferItem';
+          id: string;
+          vriId: string;
+          orgTitle: string;
+          docNum: string;
+          verificationDate: string;
+          validDate: string | null;
+          applicability: boolean;
+          isRecommended: boolean;
+        }> | null;
+      };
+    }>;
+  } | null;
+};
+
 export type GetDraftBatchesByMonthQueryVariables = Exact<{
   plannedMonth: Scalars['String']['input'];
 }>;
@@ -3391,6 +3447,7 @@ export type GetRepairBatchesQuery = {
         name: string;
         model: string;
         serialNumber: string;
+        cachedControl: string;
         verifications: Array<{
           __typename: 'ShortVerification';
           id: string;
@@ -9973,6 +10030,189 @@ export const GetVerificationBatchByNumberDocument = {
   GetVerificationBatchByNumberQuery,
   GetVerificationBatchByNumberQueryVariables
 >;
+export const GetRepairBatchByNumberDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetRepairBatchByNumber' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'batchNumber' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'getRepairBatchByNumber' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'batchNumber' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'batchNumber' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'number' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'plannedDate' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'createdBy' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'firstName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastName' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'devicesToBatches' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'device' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'model' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'verifications' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'id' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'batchId' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'result' },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'arshinBuffers' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'id' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'vriId' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'orgTitle' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'docNum' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'verificationDate',
+                                    },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'validDate' },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'applicability',
+                                    },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: {
+                                      kind: 'Name',
+                                      value: 'isRecommended',
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GetRepairBatchByNumberQuery,
+  GetRepairBatchByNumberQueryVariables
+>;
 export const GetDraftBatchesByMonthDocument = {
   kind: 'Document',
   definitions: [
@@ -10621,6 +10861,10 @@ export const GetRepairBatchesDocument = {
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'cachedControl' },
                             },
                             {
                               kind: 'Field',

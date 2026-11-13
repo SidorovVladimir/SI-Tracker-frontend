@@ -143,6 +143,47 @@ query GetVerificationBatchByNumber($batchNumber: String!) {
   }
 }
 
+query GetRepairBatchByNumber($batchNumber: String!) {
+  getRepairBatchByNumber(batchNumber: $batchNumber) {
+    id
+    number
+    status
+    plannedDate
+    comment
+
+    createdBy {
+      id
+      firstName
+      lastName
+      role
+    }
+    devicesToBatches {
+      id
+      device {
+        id
+        name
+        model
+        serialNumber
+        verifications {
+          id
+          batchId
+          result
+        }
+        arshinBuffers {
+          id
+          vriId
+          orgTitle
+          docNum
+          verificationDate
+          validDate
+          applicability
+          isRecommended
+        }
+      }
+    }
+  }
+}
+
 query GetDraftBatchesByMonth($plannedMonth: String!) {
   getDraftBatchesByMonth(plannedMonth: $plannedMonth) {
     id
@@ -226,6 +267,7 @@ query GetRepairBatches($year: Int, $status: String) {
         name
         model
         serialNumber
+        cachedControl
         verifications {
           id
           batchId

@@ -34,7 +34,7 @@ import { enqueueSnackbar } from 'notistack';
 import { GlobalJobWatcher } from '../components/GlobalJobWatcher';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import EditDevicePage from './admin/EditDevicePage';
-import { cleanSpaces, toCapital } from '../utils/capitalize';
+
 import { ArshinSelectDialog } from '../components/ArshinSelectDialog';
 import { RenderVerificationBatchAccordion } from '../components/RenderVerificationBatchAccordion';
 
@@ -117,7 +117,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
             preventDuplicate: true,
           }
         );
-        hasAlertedDeleted.current = true; // Закрываем замок на замок
+        hasAlertedDeleted.current = true;
       }
 
       setHighlightedBatch(null);
@@ -305,7 +305,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
       });
     },
     onError: (error) => {
-      enqueueSnackbar(`Ошибка создания: ${error.message}`, {
+      enqueueSnackbar(`Ошибка удаления: ${error.message}`, {
         variant: 'error',
       });
     },
@@ -666,12 +666,10 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
                 updateStatus={updateStatus}
                 setIsBarcodeModalOpen={setIsBarcodeModalOpen}
                 handleSync={handleSync}
-                cleanSpaces={cleanSpaces}
-                toCapital={toCapital}
                 isSyncing={isSyncing}
                 isBatchSyncing={isBatchSyncing}
-                setBufferRecords={setBufferRecords} // 🌟 Передаем сюда стейт
-                setIsBufferDialogOpen={setIsBufferDialogOpen} // 🌟 Передаем сюда стейт
+                setBufferRecords={setBufferRecords}
+                setIsBufferDialogOpen={setIsBufferDialogOpen}
               />
             </Box>
           )}
@@ -692,7 +690,7 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
               borderColor: 'divider',
             }}
           >
-            Партий со статусом {statusTab} не найдено.
+            В этом разделе журнала пока нет созданных партий.
           </Typography>
         ) : (
           displayedBatches.map((batch: any) => (
@@ -716,8 +714,6 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
               updateStatus={updateStatus}
               setIsBarcodeModalOpen={setIsBarcodeModalOpen}
               handleSync={handleSync}
-              cleanSpaces={cleanSpaces}
-              toCapital={toCapital}
               isSyncing={isSyncing}
               isBatchSyncing={isBatchSyncing}
               setBufferRecords={setBufferRecords} // 🌟 Передаем сюда стейт

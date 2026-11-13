@@ -11,6 +11,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
+import { toCapital } from '../../utils/capitalize';
 
 interface CatalogItem {
   id: string;
@@ -29,6 +30,7 @@ interface RepairModalProps {
     comment: string;
   }) => void;
   deviceName: string;
+  deviceCachedControl: string;
   controlTypes: CatalogItem[];
 }
 
@@ -38,6 +40,7 @@ export const RepairModal: React.FC<RepairModalProps> = ({
   onSubmit,
   deviceName,
   controlTypes,
+  deviceCachedControl,
 }) => {
   const [date, setDate] = useState<string>(
     new Date().toISOString().split('T')[0]!
@@ -106,11 +109,14 @@ export const RepairModal: React.FC<RepairModalProps> = ({
       comment,
     });
   };
+  const currentControlType = controlTypes.find(
+    (type) => type.name === deviceCachedControl
+  );
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle sx={{ fontWeight: 'bold', pb: 1 }}>
-        🔧 Фиксация ремонта и контроля
+        📝 Внесение результатов контроля
       </DialogTitle>
       <DialogContent dividers sx={{ pt: 2 }}>
         <Typography
@@ -125,21 +131,26 @@ export const RepairModal: React.FC<RepairModalProps> = ({
           <TextField
             select
             required
-            label="Вид закрывающего контроля"
+            label="Тип метрологического контроля"
             size="small"
             value={selectedControlType}
             onChange={(e) => setSelectedControlType(e.target.value)}
           >
-            {controlTypes.map((type) => (
+            {/* {controlTypes.map((type) => (
               <MenuItem key={type.id} value={type.id}>
                 {type.name}
               </MenuItem>
-            ))}
+            ))} */}
+            <MenuItem
+              key={currentControlType?.id}
+              value={currentControlType?.id}
+            >
+              {toCapital(currentControlType?.name)}
+            </MenuItem>
           </TextField>
 
           <TextField
-            // 🌟 Номер скрывает звёздочку «required», если выбран Осмотр
-            label="Номер акта / протокола"
+            label="Номер свидетельства / извещения"
             size="small"
             required={!isInspection}
             value={protocolNumber}
@@ -148,17 +159,17 @@ export const RepairModal: React.FC<RepairModalProps> = ({
 
           <TextField
             select
-            label="Результат ремонта"
+            label="Результат"
             size="small"
             value={result}
             onChange={(e) => setResult(e.target.value)}
           >
-            <MenuItem value="годен">🟢 Отремонтирован (Исправен)</MenuItem>
-            <MenuItem value="не годен">🔴 Брак (Неремонтопригоден)</MenuItem>
+            <MenuItem value="годен">🟢 Годен</MenuItem>
+            <MenuItem value="не годен">🔴 Не годен</MenuItem>
           </TextField>
 
           <TextField
-            label="Дата проведения ремонта"
+            label="Дата проведения контроля"
             type="date"
             size="small"
             required
@@ -169,7 +180,7 @@ export const RepairModal: React.FC<RepairModalProps> = ({
 
           {result === 'годен' && (
             <TextField
-              label="Срок действия контроля до"
+              label="Дата окончания действия (Годен до)"
               type="date"
               size="small"
               required
@@ -180,13 +191,12 @@ export const RepairModal: React.FC<RepairModalProps> = ({
           )}
 
           <TextField
-            label="Что было сделано (Примечание)"
+            label="Примечание"
             size="small"
             multiline
             rows={3}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Замена прокладок, калибровка нуля, чистка контактов..."
           />
         </Box>
       </DialogContent>
@@ -204,7 +214,7 @@ export const RepairModal: React.FC<RepairModalProps> = ({
           color="warning"
           sx={{ textTransform: 'none', fontWeight: 'bold' }}
         >
-          Подтвердить ремонт
+          Сохранить в паспорт
         </Button>
       </DialogActions>
     </Dialog>

@@ -1,15 +1,37 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Tabs, Tab } from '@mui/material';
 import BuildIcon from '@mui/icons-material/Build';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { RepairPlanningPage } from './RepairPlanningPage';
 import { RepairBatchesJournalPage } from './RepairBatchesJournalPage';
+import { useLocation } from 'react-router';
 
 export const RepairPageContainer: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const location = useLocation();
+  const initialTab = location.state?.activeTab ?? 0;
+  const [activeTab, setActiveTab] = useState<number>(initialTab);
+
+  const [targetBatchNumber, setTargetBatchNumber] = useState<string | null>(
+    location.state?.openAccordionId ?? null
+  );
+
+  useEffect(() => {
+    if (location.state) {
+      if (location.state.activeTab !== undefined) {
+        setActiveTab(location.state.activeTab);
+      }
+
+      if (location.state.openAccordionId !== undefined) {
+        setTargetBatchNumber(location.state.openAccordionId);
+      }
+    }
+  }, [location.state]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+    if (newValue !== 1) {
+      setTargetBatchNumber(null);
+    }
   };
 
   return (
@@ -76,7 +98,11 @@ export const RepairPageContainer: React.FC = () => {
         }}
       >
         {activeTab === 0 && <RepairPlanningPage />}
-        {activeTab === 1 && <RepairBatchesJournalPage />}
+        {activeTab === 1 && (
+          <RepairBatchesJournalPage
+            initialOpenBatchNumber={targetBatchNumber}
+          />
+        )}
       </Box>
     </Box>
   );

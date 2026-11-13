@@ -77,12 +77,7 @@ export const HeaderNotificationsBell: React.FC = () => {
     if (anchorEl) refetchList();
   };
 
-  const handleItemClick = async (
-    id: string,
-    isRead: boolean,
-    title: string,
-    meta: string
-  ) => {
+  const handleItemClick = async (id: string, isRead: boolean, meta: string) => {
     if (!isRead) {
       await markAsRead({ variables: { id } });
       refetchCount();
@@ -99,10 +94,10 @@ export const HeaderNotificationsBell: React.FC = () => {
       }
     }
 
-    const lowerTitle = title.toLowerCase();
-
-    if (lowerTitle.includes('ремонт') || lowerTitle.includes('мастерск')) {
-      navigate('/repairs'); // Переводим инженера в Журнал ремонтов/КИПиА
+    if (metaObj?.action === 'create_repair_batch') {
+      navigate(routes.repairPlanning(), {
+        state: { activeTab: 1, openAccordionId: metaObj.batchNumber },
+      });
     } else if (metaObj?.action === 'create_batch') {
       navigate(routes.planning(), {
         state: { activeTab: 1, openAccordionId: metaObj.batchNumber },
@@ -112,7 +107,7 @@ export const HeaderNotificationsBell: React.FC = () => {
         state: { activeTab: 1, openAccordionId: metaObj.batchNumber },
       });
     } else {
-      navigate('/devices');
+      navigate('/');
     }
   };
 
@@ -224,7 +219,7 @@ export const HeaderNotificationsBell: React.FC = () => {
                 <ListItem
                   key={item.id}
                   onClick={() =>
-                    handleItemClick(item.id, item.isRead, item.title, item.meta)
+                    handleItemClick(item.id, item.isRead, item.meta)
                   }
                   sx={{
                     alignItems: 'start',
