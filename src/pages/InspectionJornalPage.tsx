@@ -576,7 +576,7 @@ const RenderBatchAccordion: React.FC<RenderBatchAccordionProps> = ({
                   <Checkbox
                     size="small"
                     checked={isChecked}
-                    onChange={() => handleLinkSelect(device.id)} // было link.id
+                    onChange={() => handleLinkSelect(link.id)}
                     sx={{ mr: 1 }}
                   />
                   <ListItemButton

@@ -420,7 +420,7 @@ export const RenderVerificationBatchAccordion: React.FC<
                           size="small"
                           checked={selectedLinkIds.includes(link.id)}
                           disabled={isSent ? !isDeviceVerified : false}
-                          onChange={() => handleLinkSelect(link.device.id)} // - добавить device (link.device.id) тогда будет корректно куар кд отображаться. щас передается айди партии а не прибора
+                          onChange={() => handleLinkSelect(link.id)}
                         />
                       </Box>
                     </Tooltip>

@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import BuildIcon from '@mui/icons-material/Build';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+// import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonIcon from '@mui/icons-material/Person';
 import CommentIcon from '@mui/icons-material/Comment';
 
@@ -18,10 +18,10 @@ interface RepairHistoryRow {
   batchId: string;
   batchNumber: string;
   dateIn: string; // Дата дефекта (проведения "плохого" контроля)
-  dateOut: string; // Дата выполнения ремонта (или дата списания)
+  // dateOut: string; // Дата выполнения ремонта (или дата списания)
   master: string;
   result: string;
-  closingDocType: string;
+  // closingDocType: string;
   comment: string;
 }
 
@@ -199,7 +199,7 @@ export const DeviceRepairHistoryAccordion: React.FC<
                       }
                       sx={{ color: 'text.secondary' }}
                     >
-                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                      {/* <Stack direction="row" alignItems="center" spacing={0.5}>
                         <CalendarMonthIcon
                           sx={{ fontSize: 13, color: 'action.active' }}
                         />
@@ -209,7 +209,7 @@ export const DeviceRepairHistoryAccordion: React.FC<
                         >
                           Дата ремонта: <strong>{row.dateOut}</strong>
                         </Typography>
-                      </Stack>
+                      </Stack> */}
 
                       <Stack direction="row" alignItems="center" spacing={0.5}>
                         <PersonIcon
@@ -219,7 +219,7 @@ export const DeviceRepairHistoryAccordion: React.FC<
                           variant="caption"
                           sx={{ fontSize: '0.75rem' }}
                         >
-                          Исполнитель: <strong>{row.master}</strong>
+                          Ответственный: <strong>{row.master}</strong>
                         </Typography>
                       </Stack>
                     </Stack>

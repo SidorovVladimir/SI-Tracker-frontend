@@ -348,7 +348,7 @@ export const RenderRepairBatchAccordion: React.FC<
                       checked={selectedLinkIds.includes(link.id)}
                       //  ВОЗВРАЩАЕМ ВАШУ ЛОГИКУ: в статусе "В мастерской" чекбокс заблокирован, пока прибор не отремонтирован!
                       disabled={isSent ? !isDeviceVerified : false}
-                      onChange={() => handleLinkSelect(link.device.id)}
+                      onChange={() => handleLinkSelect(link.id)}
                       sx={{ mr: 1 }}
                     />
                   )}

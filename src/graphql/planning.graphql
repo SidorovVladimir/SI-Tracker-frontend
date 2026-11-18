@@ -322,10 +322,8 @@ query GetDeviceRepairHistory($deviceId: ID!) {
     batchId
     batchNumber
     dateIn
-    dateOut
     master
     result
-    closingDocType
     comment
   }
 }

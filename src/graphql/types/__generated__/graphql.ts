@@ -474,10 +474,8 @@ export type DeviceRepairHistoryNode = {
   __typename: 'DeviceRepairHistoryNode';
   batchId: Scalars['ID']['output'];
   batchNumber: Scalars['String']['output'];
-  closingDocType: Scalars['String']['output'];
   comment: Scalars['String']['output'];
   dateIn: Scalars['String']['output'];
-  dateOut: Scalars['String']['output'];
   master: Scalars['String']['output'];
   result: Scalars['String']['output'];
 };
@@ -3534,10 +3532,8 @@ export type GetDeviceRepairHistoryQuery = {
     batchId: string;
     batchNumber: string;
     dateIn: string;
-    dateOut: string;
     master: string;
     result: string;
-    closingDocType: string;
     comment: string;
   }>;
 };
@@ -11293,13 +11289,8 @@ export const GetDeviceRepairHistoryDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'batchId' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'batchNumber' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'dateIn' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'dateOut' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'master' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'result' } },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'closingDocType' },
-                },
                 { kind: 'Field', name: { kind: 'Name', value: 'comment' } },
               ],
             },
