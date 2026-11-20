@@ -144,7 +144,7 @@ export const DeviceRepairHistoryAccordion: React.FC<
                         variant="body2"
                         sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}
                       >
-                        🛠️ {row.batchNumber}
+                        {row.batchNumber}
                       </Typography>
                       <Typography
                         variant="caption"

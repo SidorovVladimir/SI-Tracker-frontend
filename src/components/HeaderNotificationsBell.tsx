@@ -107,7 +107,7 @@ export const HeaderNotificationsBell: React.FC = () => {
         state: { activeTab: 1, openAccordionId: metaObj.batchNumber },
       });
     } else {
-      navigate('/');
+      // navigate('/');
     }
   };
 

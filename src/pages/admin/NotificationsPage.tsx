@@ -77,10 +77,10 @@ export default function NotificationsPage() {
       }
     }
 
-    const lowerTitle = item.title.toLowerCase();
-
-    if (lowerTitle.includes('ремонт') || lowerTitle.includes('мастерск')) {
-      navigate('/repair-journal');
+    if (metaObj?.action === 'create_repair_batch') {
+      navigate(routes.repairPlanning(), {
+        state: { activeTab: 1, openAccordionId: metaObj.batchNumber },
+      });
     } else if (metaObj?.action === 'create_batch') {
       navigate(routes.planning(), {
         state: { activeTab: 1, openAccordionId: metaObj.batchNumber },
@@ -90,7 +90,7 @@ export default function NotificationsPage() {
         state: { activeTab: 1, openAccordionId: metaObj.batchNumber },
       });
     } else {
-      navigate('/');
+      // navigate('/');
     }
   };
 
