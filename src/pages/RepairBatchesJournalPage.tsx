@@ -242,11 +242,15 @@ export const RepairBatchesJournalPage: React.FC<RepairJournalPageProps> = ({
 
   const [removeDevices] = useMutation(RemoveDevicesFromRepairBatchDocument, {
     refetchQueries: [GetRepairBatchesDocument],
-    onCompleted: () =>
+
+    onCompleted: () => {
       enqueueSnackbar(
-        'Оборудование извлечено из ремонта, дефект восстановлен',
+        'Оборудование извлечено из ведомости, дефект восстановлен',
         { variant: 'success' }
-      ),
+      );
+      setHighlightedBatch(null);
+      setSearchBatchNumber(null);
+    },
     onError: (error) => {
       enqueueSnackbar(`Ошибка удаления: ${error.message}`, {
         variant: 'error',
@@ -256,8 +260,11 @@ export const RepairBatchesJournalPage: React.FC<RepairJournalPageProps> = ({
 
   const [deleteBatch] = useMutation(DeleteRepairBatchDocument, {
     refetchQueries: [GetRepairBatchesDocument],
-    onCompleted: () =>
-      enqueueSnackbar('Ремонтная ведомость удалена', { variant: 'success' }),
+    onCompleted: () => {
+      enqueueSnackbar('Ремонтная ведомость удалена', { variant: 'success' });
+      setHighlightedBatch(null);
+      setSearchBatchNumber(null);
+    },
   });
 
   const [createVerification] = useMutation(CreateVerificationDocument, {

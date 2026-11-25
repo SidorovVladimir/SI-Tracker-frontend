@@ -3297,6 +3297,7 @@ export type GetRepairBatchByNumberQuery = {
         name: string;
         model: string;
         serialNumber: string;
+        cachedControl: string;
         verifications: Array<{
           __typename: 'ShortVerification';
           id: string;
@@ -10120,6 +10121,10 @@ export const GetRepairBatchByNumberDocument = {
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'serialNumber' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'cachedControl' },
                             },
                             {
                               kind: 'Field',

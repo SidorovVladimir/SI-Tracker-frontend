@@ -164,6 +164,7 @@ query GetRepairBatchByNumber($batchNumber: String!) {
         name
         model
         serialNumber
+        cachedControl
         verifications {
           id
           batchId

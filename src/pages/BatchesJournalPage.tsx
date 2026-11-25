@@ -271,6 +271,8 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
       enqueueSnackbar('Прибор удален из партии!', {
         variant: 'success',
       });
+      setHighlightedBatch(null);
+      setSearchBatchNumber(null);
     },
     onError: (error) => {
       enqueueSnackbar(`Ошибка удаления: ${error.message}`, {
@@ -303,6 +305,8 @@ export const BatchesJournalPage: React.FC<BatchesJournalPageProps> = ({
       enqueueSnackbar('Партия успешно удалена', {
         variant: 'success',
       });
+      setHighlightedBatch(null);
+      setSearchBatchNumber(null);
     },
     onError: (error) => {
       enqueueSnackbar(`Ошибка удаления: ${error.message}`, {

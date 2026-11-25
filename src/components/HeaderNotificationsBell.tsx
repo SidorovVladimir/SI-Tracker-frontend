@@ -106,6 +106,13 @@ export const HeaderNotificationsBell: React.FC = () => {
       navigate(routes.inspectionPlanning(), {
         state: { activeTab: 1, openAccordionId: metaObj.batchNumber },
       });
+    } else if (
+      metaObj?.action === 'device_scrap' ||
+      metaObj?.action === 'verify'
+    ) {
+      navigate(routes.home(), {
+        state: { viewMode: 'info', deviceId: metaObj.deviceId },
+      });
     } else {
       // navigate('/');
     }

@@ -48,6 +48,7 @@ import React from 'react';
 import { DeviceManageSidebar } from '../components/DeviceManageSidebar';
 import { BarcodePrintModal } from '../components/BarcodePrintModal';
 import { cleanSpaces } from '../utils/capitalize';
+import { useLocation, useNavigate } from 'react-router';
 
 type Device =
   GetDevicesWithRelationsListQuery['devicesWithRelations']['items'][0];
@@ -119,6 +120,18 @@ export default function DevicesPage() {
       return JSON.parse(saved);
     }
   });
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.viewMode === 'info') {
+      setViewMode(location.state.viewMode);
+
+      setSelectedDeviceId(location.state.deviceId);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.state, location.pathname, navigate]);
 
   const theme = useTheme();
 
