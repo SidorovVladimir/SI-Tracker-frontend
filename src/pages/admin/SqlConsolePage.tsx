@@ -143,7 +143,6 @@ export const SqlConsolePage: React.FC = () => {
           Accept: 'application/json',
         },
       });
-      console.log(response);
 
       if (response.ok || response.status === 202) {
         const data = await response.json();

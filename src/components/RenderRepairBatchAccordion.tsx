@@ -118,7 +118,6 @@ export const RenderRepairBatchAccordion: React.FC<
 
   // isBatchSyncing,
 }) => {
-  console.log(batch);
   const isDraft = batch.status === 'draft';
   const isSent = batch.status === 'sent';
   const isCompleted = batch.status === 'completed';

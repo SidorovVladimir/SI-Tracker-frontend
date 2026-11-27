@@ -147,7 +147,7 @@ export type BudgetGroupBy = 'CITY' | 'COMPANY' | 'SITE';
 
 export type BudgetMatrixResponse = {
   __typename: 'BudgetMatrixResponse';
-  grandTotal: Scalars['Int']['output'];
+  grandTotal: Scalars['Float']['output'];
   rows: Array<BudgetRow>;
   targetYear: Scalars['Int']['output'];
 };
@@ -155,7 +155,7 @@ export type BudgetMatrixResponse = {
 export type BudgetMonthData = {
   __typename: 'BudgetMonthData';
   month: Scalars['Int']['output'];
-  totalCost: Scalars['Int']['output'];
+  totalCost: Scalars['Float']['output'];
 };
 
 export type BudgetPlan = {
@@ -216,7 +216,7 @@ export type BudgetRow = {
   months: Array<BudgetMonthData>;
   rowId: Scalars['ID']['output'];
   rowName: Scalars['String']['output'];
-  totalYearCost: Scalars['Int']['output'];
+  totalYearCost: Scalars['Float']['output'];
 };
 
 export type ChatDialog = {
